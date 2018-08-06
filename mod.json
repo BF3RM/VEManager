@@ -1,0 +1,9 @@
+{
+	"Name": "VEManager",
+	"Authors": ["Powback"],
+	"Description": "Handles VE",
+	"URL": "",
+	"Version": "0",
+	"HasWebUI": false,
+	"HasVeniceEXT": true
+}
