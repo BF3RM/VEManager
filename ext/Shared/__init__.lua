@@ -1,7 +1,7 @@
 class 'VEManagerClient'
 json = require "__shared/json"
-ve_base = require "__shared/ve_base"
-ve_preset = require "__shared/ve_preset"
+--ve_base = require "__shared/ve_base"
+easing = require "__shared/easing"
 
 function VEManagerClient:__init()
 	print("Initializing VEManagerClient")
@@ -13,9 +13,7 @@ end
 function VEManagerClient:RegisterVars()
 	-- We don't have proper .json file support, so we need to include a whole new lua file.
 	self.m_RawPresets = {}
-	--self.m_RawPresets["preset"] = json.decode(ve_preset:GetPreset())
 	self.m_RawPresets["base"] = json.decode(ve_base:GetPreset())
-
 	self.m_SupportedTypes = {"Vec2", "Vec3", "Vec4", "Float32", "Boolean", "Int"}
 	self.m_SupportedClasses = {
 		"CameraParams",
@@ -39,23 +37,103 @@ function VEManagerClient:RegisterVars()
 		"Vignette",
 		"Wind"}
 	self.m_Presets = {}
+	self.m_Lerping = {}
 	self.m_Instances = {}
 end
 
 
 function VEManagerClient:RegisterEvents()
-	Hooks:Install('ClientEntityFactory:Create',999, self, self.OnEntityCreate)
-	Hooks:Install("ServerEntityFactory:Create", 999, self, self.OnEntityCreate)
-	--self.m_OnLoadedEvent = Events:Subscribe('ExtensionLoaded', self, self.OnLoaded)
+
 	self.m_OnUpdateInputEvent = Events:Subscribe('Client:UpdateInput', self, self.OnUpdateInput)
-    Events:Subscribe('Level:LoadResources', self, self.OnLoadResources)
     Events:Subscribe('Client:LevelLoaded', self, self.OnClientLevelLoaded)
+
+    Events:Subscribe('VEManager:RegisterPreset', self, self.RegisterPreset)
+    Events:Subscribe('VEManager:EnablePreset', self, self.EnablePreset)
+    Events:Subscribe('VEManager:DisablePreset', self, self.DisablePreset)
+    Events:Subscribe('VEManager:SetVisibility', self, self.SetVisibility)
+    Events:Subscribe('VEManager:FadeIn', self, self.FadeIn)
+    Events:Subscribe('VEManager:FadeOut', self, self.FadeOut)
+    Events:Subscribe('VEManager:Lerp', self, self.Lerp)
 end
 
 
-function VEManagerClient:OnLoadResources()
-	self:LoadPresets()
+
+--[[
+
+	User Functions
+
+]]
+function VEManagerClient:RegisterPreset(id, preset)
+	self.m_RawPresets[id] = json.decode(preset)
 end
+
+function VEManagerClient:EnablePreset(id)
+	self.m_Presets[id]["data"].visibility = 1
+
+	self:Reload(id)
+end
+function VEManagerClient:DisablePreset(id)
+	self.m_Presets[id]["data"].visibility = 0
+	self:Reload(id)
+end
+
+function VEManagerClient:SetVisibility(id, visibility)
+	self.m_Presets[id]["data"].visibility = visibility
+	self:Reload(id)
+end
+
+function VEManagerClient:FadeIn(id, time)
+	self.m_Presets[id]['time'] = time
+	self.m_Presets[id]['startTime'] = SharedUtils:GetTimeMS()
+	self.m_Presets[id]['startValue'] = self.m_Presets[id]["data"].visibility
+	self.m_Presets[id]['EndValue'] = 1
+	self.m_Lerping[#self.m_Lerping +1] = id
+end
+
+function VEManagerClient:FadeOut(id, time)
+	self.m_Presets[id]['time'] = time
+	self.m_Presets[id]['startTime'] = SharedUtils:GetTimeMS()
+	self.m_Presets[id]['startValue'] = self.m_Presets[id]["data"].visibility
+	self.m_Presets[id]['EndValue'] = 0
+
+	self.m_Lerping[#self.m_Lerping +1] = id
+end
+
+function VEManagerClient:Lerp(id, value, time)
+	self.m_Presets[id]['time'] = time
+	self.m_Presets[id]['startTime'] = SharedUtils:GetTimeMS()
+	self.m_Presets[id]['startValue'] = self.m_Presets[id]["data"].visibility
+	self.m_Presets[id]['EndValue'] = value
+
+	self.m_Lerping[#self.m_Lerping +1] = id
+end
+
+--[[
+
+	Internal functions
+
+]]
+
+function VEManagerClient:InitializePresets()
+	for i, s_Preset in pairs(self.m_Presets) do
+		s_Preset["entity"] = EntityManager:CreateClientEntity(s_Preset["data"], LinearTransform())
+
+		if s_Preset["entity"] == nil then
+			print("Could not spawn preset.")
+			return
+		end
+		s_Preset["entity"]:Init(Realm.Realm_Client, true)
+		s_Preset["entity"]:FireEvent("Enable")
+		VisualEnvironmentManager.dirty = true
+	end
+end
+
+function VEManagerClient:Reload(id)
+	self.m_Presets[id].entity:FireEvent("Disable")
+	self.m_Presets[id].entity:FireEvent("Enable")
+end
+
+
 
 function VEManagerClient:LoadPresets()
 
@@ -73,6 +151,7 @@ function VEManagerClient:LoadPresets()
 		s_LVEED.visibility = 1
 
 		local s_VEB = self:CreateEntity("VisualEnvironmentBlueprint")
+		s_VEB.name = s_Preset.Name
 		s_LVEED.visualEnvironment = s_VEB
 
 		local s_VE = self:CreateEntity("VisualEnvironmentEntityData")
@@ -113,14 +192,15 @@ function VEManagerClient:LoadPresets()
 			end
 		end
 		s_VE.runtimeComponentCount = componentCount
-		s_VE.visibility = 1 
+		s_VE.visibility = 1
 		s_VE.priority = 100
-		s_VE.enabled = true
+		s_VE.enabled =  true
 	end
+	self:InitializePresets()
 end
 
 function VEManagerClient:OnClientLevelLoaded()
-
+	self:LoadPresets()
 end
 
 -- This one is a little dirty.
@@ -130,58 +210,87 @@ function VEManagerClient:CreateEntity(p_Class, p_Guid)
 
 	if(p_Guid == nil) then
 		-- Clone the instance and return the clone with a randomly generated Guid
-		return _G[p_Class](s_Entity:Clone(self:GenerateGuid()))
+		return _G[p_Class](s_Entity:Clone(GenerateGuid()))
 	else 
 		return _G[p_Class](s_Entity:Clone(p_Guid))
 	end
 end
 
-function VEManagerClient:OnEntityCreate(p_Hook, p_Data, p_Transform)
-	print(p_Data.typeInfo.name .. " - " .. tostring(p_Data.instanceGuid))
-	local x = p_Hook:Call()
-	print(tostring(x.typeName))
-		if(p_Data.typeInfo.name == "VisualEnvironmentEntityData") then
-		
-	end
-end
+function VEManagerClient:UpdateLerp(percentage)
+	for i,preset in pairs(self.m_Lerping) do
 
+		local TimeSinceStarted = SharedUtils:GetTimeMS() - self.m_Presets[preset].startTime
+		local PercentageComplete = TimeSinceStarted / self.m_Presets[preset].time
+		--local lerpValue = self.m_Presets[preset].startValue + (self.m_Presets[preset].EndValue - self.m_Presets[preset].startValue) * PercentageComplete
+
+	-- t = elapsed time
+	-- b = begin
+	-- c = change == ending - beginning
+	-- d = duration (total time)
+		local t = TimeSinceStarted
+		local b = self.m_Presets[preset].startValue
+		local c = self.m_Presets[preset].EndValue - self.m_Presets[preset].startValue
+		local d = self.m_Presets[preset].time
+
+		local transition = "linear"
+		if(self.m_Presets[preset].transition ~= nil) then
+			transition = self.m_Presets[preset].transition
+		end
+		
+		local lerpValue = easing[transition](t,b,c,d)
+
+		if(PercentageComplete >= 1 or PercentageComplete < 0) then
+			self:SetVisibility(preset, self.m_Presets[preset].EndValue)
+			self.m_Lerping[i] = nil
+		else
+			self:SetVisibility(preset, lerpValue)
+		end
+	end
+
+end
 function VEManagerClient:OnUpdateInput(p_Delta, p_SimulationDelta)
 
+	--[[
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F1) then
-		if(#self.m_Presets == 0) then
-			self:LoadPresets()
-		end
-
-		for i, s_Preset in pairs(self.m_Presets) do
-			s_Preset["entity"] = EntityManager:CreateClientEntity(s_Preset["data"], LinearTransform())
-			print("so far so good")
-
-			if s_Preset["entity"] == nil then
-				print("Could not spawn explosion")
-				return
-			end
-			s_Preset["entity"]:Init(Realm.Realm_Client, true)
-			s_Preset["entity"]:FireEvent("Enable")
-			VisualEnvironmentManager.dirty = true
-		end
+		self:LoadPresets()
 	end
 
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F2) then
-		for i, s_Preset in pairs(self.m_Presets) do
-			s_Preset["data"].visibility = s_Preset["data"].visibility - 0.1
-			s_Preset["entity"]:FireEvent("Disable")
-			s_Preset["entity"]:FireEvent("Enable")
-		end
+		self:EnablePreset("ve_base")
 	end
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F3) then
-		for i, s_Preset in pairs(self.m_Presets) do
-			s_Preset["data"].visibility = s_Preset["data"].visibility + 0.1
-			s_Preset["entity"]:FireEvent("Disable")
-			s_Preset["entity"]:FireEvent("Enable")
-		end
+		self:DisablePreset("ve_base")
+		
+	end
+	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F4) then
+		self:SetVisibility("ve_base", 0.5)
+	end
+
+	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F5) then
+		print("oy")
+		self:FadeIn("ve_base", 10000)
+	end
+	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F6) then
+		self:FadeOut("ve_base", 10000)
+	end
+
+	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F7) then
+		self:Lerp("ve_base", 0.5, 1000)
+	end
+	--]]
+	if(#self.m_Lerping > 0 ) then
+		self:UpdateLerp(p_Delta)
 	end
 end
 
+
+
+
+--[[
+
+	Utils
+
+]]
 
 function VEManagerClient:ParseValue(p_Type, p_Value)
 	-- This seperates Vectors. Let's just do it to everything, who cares?
@@ -214,11 +323,13 @@ function VEManagerClient:ParseValue(p_Type, p_Value)
 	end
 end
 
+
 function h() 
     local vars = {"A","B","C","D","E","F","0","1","2","3","4","5","6","7","8","9"}
     return vars[math.floor(SharedUtils:GetRandom(1,16))]..vars[math.floor(SharedUtils:GetRandom(1,16))]
 end
-function VEManagerClient:GenerateGuid() 
+
+function GenerateGuid() 
     return Guid(h()..h()..h()..h().."-"..h()..h().."-"..h()..h().."-"..h()..h().."-"..h()..h()..h()..h()..h()..h(), "D")
 end
 
