@@ -192,8 +192,7 @@ function VEManagerClient:LoadPresets()
 			end
 		end
 		s_VE.runtimeComponentCount = componentCount
-		s_VE.visibility = 1
-		s_VE.priority = 100
+		s_VE.visibility = 0
 		s_VE.enabled =  true
 	end
 	self:InitializePresets()
