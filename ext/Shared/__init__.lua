@@ -1,6 +1,6 @@
 class 'VEManagerClient'
 json = require "__shared/json"
---ve_base = require "__shared/ve_base"
+ve_base = require "__shared/ve_base"
 easing = require "__shared/easing"
 
 function VEManagerClient:__init()
@@ -68,21 +68,41 @@ function VEManagerClient:RegisterPreset(id, preset)
 end
 
 function VEManagerClient:EnablePreset(id)
+	if self.m_Presets[id] == nil then
+		error("There isn't a preset with this id or it hasn't been parsed yet. Id: "..id)
+		return
+	end
+
 	self.m_Presets[id]["data"].visibility = 1
 
 	self:Reload(id)
 end
 function VEManagerClient:DisablePreset(id)
+	if self.m_Presets[id] == nil then
+		error("There isn't a preset with this id or it hasn't been parsed yet. Id: "..id)
+		return
+	end
+
 	self.m_Presets[id]["data"].visibility = 0
 	self:Reload(id)
 end
 
 function VEManagerClient:SetVisibility(id, visibility)
+	if self.m_Presets[id] == nil then
+		error("There isn't a preset with this id or it hasn't been parsed yet. Id: "..id)
+		return
+	end
+
 	self.m_Presets[id]["data"].visibility = visibility
 	self:Reload(id)
 end
 
 function VEManagerClient:FadeIn(id, time)
+	if self.m_Presets[id] == nil then
+		error("There isn't a preset with this id or it hasn't been parsed yet. Id: "..id)
+		return
+	end
+
 	self.m_Presets[id]['time'] = time
 	self.m_Presets[id]['startTime'] = SharedUtils:GetTimeMS()
 	self.m_Presets[id]['startValue'] = self.m_Presets[id]["data"].visibility
@@ -91,6 +111,11 @@ function VEManagerClient:FadeIn(id, time)
 end
 
 function VEManagerClient:FadeOut(id, time)
+	if self.m_Presets[id] == nil then
+		error("There isn't a preset with this id or it hasn't been parsed yet. Id: "..id)
+		return
+	end
+
 	self.m_Presets[id]['time'] = time
 	self.m_Presets[id]['startTime'] = SharedUtils:GetTimeMS()
 	self.m_Presets[id]['startValue'] = self.m_Presets[id]["data"].visibility
@@ -100,6 +125,10 @@ function VEManagerClient:FadeOut(id, time)
 end
 
 function VEManagerClient:Lerp(id, value, time)
+	if self.m_Presets[id] == nil then
+		error("There isn't a preset with this id or it hasn't been parsed yet. Id: "..id)
+		return
+	end
 	self.m_Presets[id]['time'] = time
 	self.m_Presets[id]['startTime'] = SharedUtils:GetTimeMS()
 	self.m_Presets[id]['startValue'] = self.m_Presets[id]["data"].visibility
@@ -139,7 +168,7 @@ function VEManagerClient:LoadPresets()
 
 	print("Loading presets....")
 	--Foreach preset
-	print(self.m_RawPresets)
+	-- print(self.m_RawPresets)
 	for i, s_Preset in pairs(self.m_RawPresets) do
 		
 		-- Generate our Logical VE and the blueprint
