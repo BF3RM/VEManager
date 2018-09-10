@@ -1,6 +1,6 @@
 class 'VEManagerClient'
 json = require "__shared/json"
-ve_base = require "__shared/ve_base"
+-- ve_base = require "__shared/ve_base"
 easing = require "__shared/easing"
 
 function VEManagerClient:__init()
@@ -13,7 +13,7 @@ end
 function VEManagerClient:RegisterVars()
 	-- We don't have proper .json file support, so we need to include a whole new lua file.
 	self.m_RawPresets = {}
-	self.m_RawPresets["base"] = json.decode(ve_base:GetPreset())
+	-- self.m_RawPresets["base"] = json.decode(ve_base:GetPreset())
 	self.m_SupportedTypes = {"Vec2", "Vec3", "Vec4", "Float32", "Boolean", "Int"}
 	self.m_SupportedClasses = {
 		"CameraParams",
