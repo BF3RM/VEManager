@@ -354,7 +354,7 @@ end
 
 function h() 
     local vars = {"A","B","C","D","E","F","0","1","2","3","4","5","6","7","8","9"}
-    return vars[math.floor(SharedUtils:GetRandom(1,16))]..vars[math.floor(SharedUtils:GetRandom(1,16))]
+    return vars[math.floor(MathUtils:GetRandomInt(1,16))]..vars[math.floor(MathUtils:GetRandomInt(1,16))]
 end
 
 function GenerateGuid() 
