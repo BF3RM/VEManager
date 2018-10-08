@@ -72,7 +72,7 @@ function VEManagerClient:EnablePreset(id)
 		error("There isn't a preset with this id or it hasn't been parsed yet. Id: "..id)
 		return
 	end
-
+	print("Enabling preset: " .. tostring(id))
 	self.m_Presets[id]["data"].visibility = 1
 
 	self:Reload(id)
@@ -82,6 +82,7 @@ function VEManagerClient:DisablePreset(id)
 		error("There isn't a preset with this id or it hasn't been parsed yet. Id: "..id)
 		return
 	end
+	print("Disabling preset: " .. tostring(id))
 
 	self.m_Presets[id]["data"].visibility = 0
 	self:Reload(id)
@@ -145,7 +146,7 @@ end
 
 function VEManagerClient:InitializePresets()
 	for i, s_Preset in pairs(self.m_Presets) do
-		s_Preset["entity"] = EntityManager:CreateClientEntity(s_Preset["data"], LinearTransform())
+		s_Preset["entity"] = EntityManager:CreateEntity(s_Preset["data"], LinearTransform())
 
 		if s_Preset["entity"] == nil then
 			print("Could not spawn preset.")
@@ -153,7 +154,7 @@ function VEManagerClient:InitializePresets()
 		end
 		s_Preset["entity"]:Init(Realm.Realm_Client, true)
 		s_Preset["entity"]:FireEvent("Enable")
-		VisualEnvironmentManager.dirty = true
+		VisualEnvironmentManager:SetDirty(true)
 	end
 end
 
@@ -215,6 +216,13 @@ function VEManagerClient:LoadPresets()
 						local s_Value = self:ParseValue(s_Type, s_Preset[l_Class][s_Field])
 						if(s_Value ~= nil) then
 							s_Class[firstToLower(s_Field)] = s_Value
+						else 
+							local s_Value = self:GetDefaultValue(l_Class, s_Field)
+							if(s_Value == nil) then
+								print("Failed to fetch original value: " .. tostring(l_Class) .. " | " .. tostring(s_Field))
+							else
+								s_Class[firstToLower(s_Field)] = s_Value
+							end
 						end
 					end 
 				end
@@ -231,6 +239,27 @@ function VEManagerClient:OnClientLevelLoaded()
 	self:LoadPresets()
 end
 
+function VEManagerClient:GetDefaultValue(p_Class, p_Field )
+	if(p_Field == "Realm") then
+		return Realm.Realm_Client
+	end
+	local s_States = VisualEnvironmentManager:GetStates()
+
+	for i, s_State in ipairs(s_States) do
+		if(s_State.entityName == "Levels/Web_Loading/Lighting/Web_Loading_VE") then
+			goto continue
+		end
+		if s_State.entityName ~= 'EffectEntity' then
+			local s_Class = s_State[firstToLower(p_Class)] --colorCorrection
+			if (s_Class == nil) then
+				goto continue
+			end
+			print("Sending default value: " .. tostring(p_Class) .. " | " .. tostring(p_Field) .. " | " .. tostring(s_Class[firstToLower(p_Field)]))
+			return s_Class[firstToLower(p_Field)] --colorCorrection Contrast
+		end
+		::continue::
+	end
+end
 -- This one is a little dirty.
 function VEManagerClient:CreateEntity(p_Class, p_Guid)
 	-- Create the instance
@@ -347,7 +376,7 @@ function VEManagerClient:ParseValue(p_Type, p_Value)
 		return Vec4(tonumber(s_Vec[1]), tonumber(s_Vec[2]), tonumber(s_Vec[3]), tonumber(s_Vec[4]))
 	else 
 		print("Unhandled type: " .. p_Type)
-		return
+		return nil
 	end
 end
 
