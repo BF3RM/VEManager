@@ -46,6 +46,7 @@ function VEManagerClient:RegisterEvents()
 
 	self.m_OnUpdateInputEvent = Events:Subscribe('Client:UpdateInput', self, self.OnUpdateInput)
     Events:Subscribe('Client:LevelLoaded', self, self.OnClientLevelLoaded)
+	Events:Subscribe('Level:Destroy', self, self.RegisterVars)
 
     Events:Subscribe('VEManager:RegisterPreset', self, self.RegisterPreset)
     Events:Subscribe('VEManager:EnablePreset', self, self.EnablePreset)
@@ -73,9 +74,9 @@ function VEManagerClient:EnablePreset(id)
 		return
 	end
 	print("Enabling preset: " .. tostring(id))
-	self.m_Presets[id]["data"].visibility = 1
-
-	self:Reload(id)
+	self.m_Presets[id]["logic"].visibility = 1
+	self.m_Presets[id]["ve"].enabled = true
+	self.m_Presets[id].entity:FireEvent("Enable")
 end
 function VEManagerClient:DisablePreset(id)
 	if self.m_Presets[id] == nil then
@@ -84,8 +85,9 @@ function VEManagerClient:DisablePreset(id)
 	end
 	print("Disabling preset: " .. tostring(id))
 
-	self.m_Presets[id]["data"].visibility = 0
-	self:Reload(id)
+	self.m_Presets[id]["logic"].visibility = 0
+	self.m_Presets[id]["ve"].enabled = false
+	self.m_Presets[id].entity:FireEvent("Disable")
 end
 
 function VEManagerClient:SetVisibility(id, visibility)
@@ -94,7 +96,7 @@ function VEManagerClient:SetVisibility(id, visibility)
 		return
 	end
 
-	self.m_Presets[id]["data"].visibility = visibility
+	self.m_Presets[id]["logic"].visibility = visibility
 	self:Reload(id)
 end
 
@@ -106,7 +108,7 @@ function VEManagerClient:FadeIn(id, time)
 
 	self.m_Presets[id]['time'] = time
 	self.m_Presets[id]['startTime'] = SharedUtils:GetTimeMS()
-	self.m_Presets[id]['startValue'] = self.m_Presets[id]["data"].visibility
+	self.m_Presets[id]['startValue'] = self.m_Presets[id]["logic"].visibility
 	self.m_Presets[id]['EndValue'] = 1
 	self.m_Lerping[#self.m_Lerping +1] = id
 end
@@ -119,7 +121,7 @@ function VEManagerClient:FadeOut(id, time)
 
 	self.m_Presets[id]['time'] = time
 	self.m_Presets[id]['startTime'] = SharedUtils:GetTimeMS()
-	self.m_Presets[id]['startValue'] = self.m_Presets[id]["data"].visibility
+	self.m_Presets[id]['startValue'] = self.m_Presets[id]["logic"].visibility
 	self.m_Presets[id]['EndValue'] = 0
 
 	self.m_Lerping[#self.m_Lerping +1] = id
@@ -132,7 +134,7 @@ function VEManagerClient:Lerp(id, value, time)
 	end
 	self.m_Presets[id]['time'] = time
 	self.m_Presets[id]['startTime'] = SharedUtils:GetTimeMS()
-	self.m_Presets[id]['startValue'] = self.m_Presets[id]["data"].visibility
+	self.m_Presets[id]['startValue'] = self.m_Presets[id]["logic"].visibility
 	self.m_Presets[id]['EndValue'] = value
 
 	self.m_Lerping[#self.m_Lerping +1] = id
@@ -146,14 +148,13 @@ end
 
 function VEManagerClient:InitializePresets()
 	for i, s_Preset in pairs(self.m_Presets) do
-		s_Preset["entity"] = EntityManager:CreateEntity(s_Preset["data"], LinearTransform())
+		s_Preset["entity"] = EntityManager:CreateEntity(s_Preset["logic"], LinearTransform())
 
 		if s_Preset["entity"] == nil then
 			print("Could not spawn preset.")
 			return
 		end
 		s_Preset["entity"]:Init(Realm.Realm_Client, true)
-		s_Preset["entity"]:FireEvent("Enable")
 		VisualEnvironmentManager:SetDirty(true)
 	end
 end
@@ -177,15 +178,17 @@ function VEManagerClient:LoadPresets()
 		-- Not sure if we need the LogicelVEEntity, but :shrug:
 		local s_LVEED = self:CreateEntity("LogicVisualEnvironmentEntityData")
 		self.m_Presets[s_Preset.Name] = {}
-		self.m_Presets[s_Preset.Name]["data"] = s_LVEED
+		self.m_Presets[s_Preset.Name]["logic"] = s_LVEED
 		s_LVEED.visibility = 1
 
 		local s_VEB = self:CreateEntity("VisualEnvironmentBlueprint")
 		s_VEB.name = s_Preset.Name
 		s_LVEED.visualEnvironment = s_VEB
+		self.m_Presets[s_Preset.Name]["blueprint"] = s_VEB
 
 		local s_VE = self:CreateEntity("VisualEnvironmentEntityData")
 		s_VEB.object = s_VE
+		self.m_Presets[s_Preset.Name]["ve"] = s_VE
 
 		s_VE.priority = s_Preset.Priority
 		
@@ -198,6 +201,13 @@ function VEManagerClient:LoadPresets()
 				-- Create class and add it to the VE entity.
 				local s_Class =  _G[l_Class.."ComponentData"]()
 				s_VE.components:add(s_Class)
+				print(l_Class)
+				print(s_Class)
+				s_Class.excluded = false
+				s_Class.isEventConnectionTarget = 3
+				s_Class.isPropertyConnectionTarget = 3
+				s_Class.indexInBlueprint = componentCount
+				s_Class.transform = LinearTransform()
 
 		
 				-- Foreach field in class
@@ -230,7 +240,7 @@ function VEManagerClient:LoadPresets()
 		end
 		s_VE.runtimeComponentCount = componentCount
 		s_VE.visibility = 0
-		s_VE.enabled =  true
+		s_VE.enabled = false
 	end
 	self:InitializePresets()
 end

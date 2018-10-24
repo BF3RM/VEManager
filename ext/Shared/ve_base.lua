@@ -1,32 +1,34 @@
 class "ve_base"
 local table = [[
 {
-    "Name": "ve_base",
-    "Priority": "1",
-    "Visibility": "1",
-    "OutdoorLight": {
-        "Realm": "nil",
+    "LensScope": {
         "Enable": "true",
-        "SunRotationX": "90.57800292969",
-        "SunRotationY": "46.397998809814",
-        "SunColor": "(3.000000, 2.756000, 1.896000)",
-        "SkyColor": "(0.153000, 0.235000, 0.415000)",
-        "GroundColor": "(0.135000, 0.154000, 0.121000)",
-        "SkyLightAngleFactor": "0.0",
-        "SunSpecularScale": "1.0",
-        "SkyEnvmapShadowScale": "1.0",
-        "SunShadowHeightScale": "0.5",
-        "CloudShadowEnable": "true",
-        "CloudShadowTexture": "sol.sol::detail::unique_usertype<VeniceEXT::Classes::Shared::DataContainer>: 40E32890",
-        "CloudShadowSpeed": "(0.000000, 0.000000)",
-        "CloudShadowSize": "35000.0",
-        "CloudShadowCoverage": "1.0",
-        "CloudShadowExponent": "1.0",
-        "TranslucencyAmbient": "0.0",
-        "TranslucencyScale": "0.0",
-        "TranslucencyPower": "8.0",
-        "TranslucencyDistortion": "0.10000000149012"
-    }
+        "BlurScale": "1",
+        "BlurCenter": "0.5:0.5:",
+        "ChromaticAberrationColor1": "0.01:0.73:0.73:",
+        "ChromaticAberrationColor2": "0.72:0.02:0.73:",
+        "ChromaticAberrationStrengths": "0.24:0.23:",
+        "ChromaticAberrationDisplacement1": "0.03:0.01:",
+        "ChromaticAberrationDisplacement2": "0.02:0.01:",
+        "RadialBlendDistanceCoefficients": "4.16:-0.44:"
+    },
+    "Vignette": {
+        "Enable": "false",
+        "Scale": "2:2:",
+        "Exponent": "0.47",
+        "Opacity": "1",
+        "Color": "0.74:0.74:0.73:"
+    },
+    "ColorCorrection": {
+        "Brightness": "(0.000000, 1.000000, 1.000000)"
+    },
+    "Sky": {
+        "SunSize": "1",
+        "SunScale": "200"
+    },
+    "Name": "ve_base",
+    "Priority": "500",
+    "Visibility": "1"
 }
 ]]
 
@@ -35,4 +37,4 @@ function ve_base:GetPreset()
   return table
 end
 
-return ve_base
+return ve_base  
