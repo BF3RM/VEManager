@@ -1,5 +1,4 @@
 class 'VEManagerClient'
-json = require "__shared/json"
 -- ve_base = require "__shared/ve_base"
 easing = require "__shared/easing"
 
