@@ -10,7 +10,6 @@ end
 
 
 function VEManagerClient:RegisterVars()
-	-- We don't have proper .json file support, so we need to include a whole new lua file.
 	self.m_RawPresets = {}
 	-- self.m_RawPresets["base"] = json.decode(ve_base:GetPreset())
 	self.m_SupportedTypes = {"Vec2", "Vec3", "Vec4", "Float32", "Boolean", "Int"}
@@ -242,9 +241,11 @@ function VEManagerClient:LoadPresets()
 		s_VE.enabled = false
 	end
 	self:InitializePresets()
+
+	Events:Dispatch("VEManager:PresetsLoaded")
 end
 
-function VEManagerClient:OnClientLevelLoaded()
+function VEManagerClient:OnClientLevelLoaded(p_MapPath, p_GameModeName)
 	self:LoadPresets()
 end
 
