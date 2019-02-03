@@ -68,7 +68,7 @@ end
 
 function VEManagerClient:EnablePreset(id)
 	if self.m_Presets[id] == nil then
-		error("There isn't a preset with this id or it hasn't been parsed yet. Id: "..id)
+		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(id))
 		return
 	end
 	print("Enabling preset: " .. tostring(id))
@@ -78,7 +78,7 @@ function VEManagerClient:EnablePreset(id)
 end
 function VEManagerClient:DisablePreset(id)
 	if self.m_Presets[id] == nil then
-		error("There isn't a preset with this id or it hasn't been parsed yet. Id: "..id)
+		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(id))
 		return
 	end
 	print("Disabling preset: " .. tostring(id))
@@ -90,7 +90,7 @@ end
 
 function VEManagerClient:SetVisibility(id, visibility)
 	if self.m_Presets[id] == nil then
-		error("There isn't a preset with this id or it hasn't been parsed yet. Id: "..id)
+		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(id))
 		return
 	end
 
@@ -100,7 +100,7 @@ end
 
 function VEManagerClient:FadeIn(id, time)
 	if self.m_Presets[id] == nil then
-		error("There isn't a preset with this id or it hasn't been parsed yet. Id: "..id)
+		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(id))
 		return
 	end
 
@@ -113,7 +113,7 @@ end
 
 function VEManagerClient:FadeOut(id, time)
 	if self.m_Presets[id] == nil then
-		error("There isn't a preset with this id or it hasn't been parsed yet. Id: "..id)
+		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(id))
 		return
 	end
 
@@ -127,7 +127,7 @@ end
 
 function VEManagerClient:Lerp(id, value, time)
 	if self.m_Presets[id] == nil then
-		error("There isn't a preset with this id or it hasn't been parsed yet. Id: "..id)
+		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(id))
 		return
 	end
 	self.m_Presets[id]['time'] = time
@@ -172,6 +172,8 @@ function VEManagerClient:LoadPresets()
 	for i, s_Preset in pairs(self.m_RawPresets) do
 		
 		-- Generate our Logical VE and the blueprint
+		local s_IsBasePreset = s_Preset.Priority == 1
+		print("IsBasePreset: " .. tostring(s_IsBasePreset))
 
 		-- Not sure if we need the LogicelVEEntity, but :shrug:
 		local s_LVEED = self:CreateEntity("LogicVisualEnvironmentEntityData")
@@ -182,7 +184,7 @@ function VEManagerClient:LoadPresets()
 		local s_VEB = self:CreateEntity("VisualEnvironmentBlueprint")
 		s_VEB.name = s_Preset.Name
 		s_LVEED.visualEnvironment = s_VEB
-		self.m_Presets[s_Preset.Name]["blueprint"] = s_VEB
+		self.m_Presets[s_Preset.Name]["blueprint"] = s_VEB -- not needed anywhere
 
 		local s_VE = self:CreateEntity("VisualEnvironmentEntityData")
 		s_VEB.object = s_VE
@@ -199,40 +201,53 @@ function VEManagerClient:LoadPresets()
 				-- Create class and add it to the VE entity.
 				local s_Class =  _G[l_Class.."ComponentData"]()
 				s_VE.components:add(s_Class)
+				print("")
+				print("CLASS:")
 				print(l_Class)
-				print(s_Class)
+				print("")
 				s_Class.excluded = false
 				s_Class.isEventConnectionTarget = 3
 				s_Class.isPropertyConnectionTarget = 3
 				s_Class.indexInBlueprint = componentCount
 				s_Class.transform = LinearTransform()
 
-		
 				-- Foreach field in class
 				for _, l_Field in ipairs(s_Class.typeInfo.fields) do
 
 					-- Fix lua types
-					local s_Field = l_Field.name
-					if(s_Field == "End") then
-						s_Field = "EndValue"
+					local s_FieldName = l_Field.name
+					if(s_FieldName == "End") then
+						s_FieldName = "EndValue"
 					end
 
 					-- Get type
 					local s_Type = l_Field.typeInfo.name --Boolean, Int32, Vec3 etc.
+					print("Field: " .. tostring(s_FieldName) .. " | " .. " Type: " .. tostring(s_Type))
+
 					-- If the preset contains that field
-					if s_Preset[l_Class][s_Field] ~= nil then
-						local s_Value = self:ParseValue(s_Type, s_Preset[l_Class][s_Field])
+					if s_Preset[l_Class][s_FieldName] ~= nil then
+						local s_Value = self:ParseValue(s_Type, s_Preset[l_Class][s_FieldName])
 						if(s_Value ~= nil) then
-							s_Class[firstToLower(s_Field)] = s_Value
+							s_Class[firstToLower(s_FieldName)] = s_Value
 						else 
-							local s_Value = self:GetDefaultValue(l_Class, s_Field)
+
+
+							local s_Value = self:GetDefaultValue(l_Class, s_FieldName)
 							if(s_Value == nil) then
-								print("Failed to fetch original value: " .. tostring(l_Class) .. " | " .. tostring(s_Field))
+								print("Failed to fetch original value: " .. tostring(l_Class) .. " | " .. tostring(s_FieldName))
 							else
-								s_Class[firstToLower(s_Field)] = s_Value
+								s_Class[firstToLower(s_FieldName)] = s_Value
 							end
 						end
-					end 
+					elseif s_IsBasePreset == true then
+						local s_Value = self:GetDefaultValue(l_Class, s_FieldName)
+						if(s_Value == nil) then
+							print("Failed to fetch original value: " .. tostring(l_Class) .. " | " .. tostring(s_FieldName))
+						else
+							print("Setting default value for field " .. s_FieldName .. " of class " .. l_Class)
+							s_Class[firstToLower(s_FieldName)] = s_Value
+						end
+					end
 				end
 			end
 		end
@@ -249,13 +264,17 @@ function VEManagerClient:OnClientLevelLoaded(p_MapPath, p_GameModeName)
 	self:LoadPresets()
 end
 
-function VEManagerClient:GetDefaultValue(p_Class, p_Field )
+function VEManagerClient:GetDefaultValue(p_Class, p_Field)
 	if(p_Field == "Realm") then
 		return Realm.Realm_Client
 	end
+
 	local s_States = VisualEnvironmentManager:GetStates()
 
 	for i, s_State in ipairs(s_States) do
+		print(">>>>>> state:")
+		print(s_State.entityName)
+
 		if(s_State.entityName == "Levels/Web_Loading/Lighting/Web_Loading_VE") then
 			goto continue
 		end
@@ -267,6 +286,7 @@ function VEManagerClient:GetDefaultValue(p_Class, p_Field )
 			print("Sending default value: " .. tostring(p_Class) .. " | " .. tostring(p_Field) .. " | " .. tostring(s_Class[firstToLower(p_Field)]))
 			return s_Class[firstToLower(p_Field)] --colorCorrection Contrast
 		end
+
 		::continue::
 	end
 end
