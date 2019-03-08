@@ -239,7 +239,7 @@ function VEManagerClient:LoadPresets()
 								s_Class[firstToLower(s_FieldName)] = s_Value
 							end
 						end
-					elseif s_IsBasePreset == true then
+					else
 						local s_Value = self:GetDefaultValue(l_Class, s_FieldName)
 						if(s_Value == nil) then
 							print("Failed to fetch original value: " .. tostring(l_Class) .. " | " .. tostring(s_FieldName))
