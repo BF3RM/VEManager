@@ -229,7 +229,7 @@ function VEManagerClient:LoadPresets()
 						local s_Value = self:ParseValue(s_Type, s_Preset[l_Class][s_FieldName])
 						if(s_Value ~= nil) then
 							s_Class[firstToLower(s_FieldName)] = s_Value
-						else 
+						else
 
 
 							local s_Value = self:GetDefaultValue(l_Class, s_FieldName)
@@ -244,9 +244,13 @@ function VEManagerClient:LoadPresets()
 						if(s_Value == nil) then
 							print("Failed to fetch original value: " .. tostring(l_Class) .. " | " .. tostring(s_FieldName))
 						else
-							print("Setting default value for field " .. s_FieldName .. " of class " .. l_Class)
-							s_Class[firstToLower(s_FieldName)] = s_Value
-						end
+							print("Setting default value for field " .. s_FieldName .. " of class " .. l_Class .. " | " ..  tostring(s_Value))
+                            if(s_Type == "TextureAsset") then
+                                s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
+                            else
+                                s_Class[firstToLower(s_FieldName)] = s_Value
+                            end
+                        end
 					end
 				end
 			end
