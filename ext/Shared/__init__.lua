@@ -173,7 +173,7 @@ function VEManagerClient:LoadPresets()
 		
 		-- Generate our Logical VE and the blueprint
 		local s_IsBasePreset = s_Preset.Priority == 1
-		print("IsBasePreset: " .. tostring(s_IsBasePreset))
+		-- print("IsBasePreset: " .. tostring(s_IsBasePreset))
 
 		-- Not sure if we need the LogicelVEEntity, but :shrug:
 		local s_LVEED = self:CreateEntity("LogicVisualEnvironmentEntityData")
@@ -201,10 +201,10 @@ function VEManagerClient:LoadPresets()
 				-- Create class and add it to the VE entity.
 				local s_Class =  _G[l_Class.."ComponentData"]()
 				s_VE.components:add(s_Class)
-				print("")
-				print("CLASS:")
-				print(l_Class)
-				print("")
+				-- print("")
+				-- print("CLASS:")
+				-- print(l_Class)
+				-- print("")
 				s_Class.excluded = false
 				s_Class.isEventConnectionTarget = 3
 				s_Class.isPropertyConnectionTarget = 3
@@ -222,7 +222,7 @@ function VEManagerClient:LoadPresets()
 
 					-- Get type
 					local s_Type = l_Field.typeInfo.name --Boolean, Int32, Vec3 etc.
-					print("Field: " .. tostring(s_FieldName) .. " | " .. " Type: " .. tostring(s_Type))
+					-- print("Field: " .. tostring(s_FieldName) .. " | " .. " Type: " .. tostring(s_Type))
 
 					-- If the preset contains that field
 					if s_Preset[l_Class][s_FieldName] ~= nil then
@@ -244,7 +244,7 @@ function VEManagerClient:LoadPresets()
 						if(s_Value == nil) then
 							print("Failed to fetch original value: " .. tostring(l_Class) .. " | " .. tostring(s_FieldName))
 						else
-							print("Setting default value for field " .. s_FieldName .. " of class " .. l_Class .. " | " ..  tostring(s_Value))
+							-- print("Setting default value for field " .. s_FieldName .. " of class " .. l_Class .. " | " ..  tostring(s_Value))
                             if(s_Type == "TextureAsset") then
                                 s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
                             else
@@ -276,8 +276,8 @@ function VEManagerClient:GetDefaultValue(p_Class, p_Field)
 	local s_States = VisualEnvironmentManager:GetStates()
 
 	for i, s_State in ipairs(s_States) do
-		print(">>>>>> state:")
-		print(s_State.entityName)
+		-- print(">>>>>> state:")
+		-- print(s_State.entityName)
 
 		if(s_State.entityName == "Levels/Web_Loading/Lighting/Web_Loading_VE") then
 			goto continue
@@ -287,7 +287,7 @@ function VEManagerClient:GetDefaultValue(p_Class, p_Field)
 			if (s_Class == nil) then
 				goto continue
 			end
-			print("Sending default value: " .. tostring(p_Class) .. " | " .. tostring(p_Field) .. " | " .. tostring(s_Class[firstToLower(p_Field)]))
+			-- print("Sending default value: " .. tostring(p_Class) .. " | " .. tostring(p_Field) .. " | " .. tostring(s_Class[firstToLower(p_Field)]))
 			return s_Class[firstToLower(p_Field)] --colorCorrection Contrast
 		end
 
