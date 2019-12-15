@@ -190,7 +190,7 @@ function VEManagerClient:LoadPresets()
 		s_VEB.object = s_VE
 		self.m_Presets[s_Preset.Name]["ve"] = s_VE
 
-		s_VE.priority = s_Preset.Priority
+		s_VE.priority = tonumber(s_Preset.Priority)
 		
 		--Foreach class
 		local componentCount = 0
@@ -226,31 +226,61 @@ function VEManagerClient:LoadPresets()
 
 					-- If the preset contains that field
 					if s_Preset[l_Class][s_FieldName] ~= nil then
-						local s_Value = self:ParseValue(s_Type, s_Preset[l_Class][s_FieldName])
-						if(s_Value ~= nil) then
+						local s_Value
+						if IsBasicType(s_Type) then
+							s_Value = self:ParseValue(s_Type, s_Preset[l_Class][s_FieldName])
+						elseif l_Field.typeInfo.enum then
+							s_Value = tonumber(s_Preset[l_Class][s_FieldName])
+						elseif l_Field.typeInfo.array then
+							error("Found unexpected array")
+							return
+						else
+							error("Found unexpected DataContainer")
+							return
+						end
+
+						if (s_Value ~= nil) then
 							s_Class[firstToLower(s_FieldName)] = s_Value
 						else
-
-
-							local s_Value = self:GetDefaultValue(l_Class, s_FieldName)
-							if(s_Value == nil) then
+							local s_Value = self:GetDefaultValue(l_Class, l_Field)
+							if (s_Value == nil) then
 								print("Failed to fetch original value: " .. tostring(l_Class) .. " | " .. tostring(s_FieldName))
 							else
-								s_Class[firstToLower(s_FieldName)] = s_Value
+								-- print("Setting default value for field " .. s_FieldName .. " of class " .. l_Class .. " | " ..  tostring(s_Value))
+								if (IsBasicType(s_Type)) then
+									s_Class[firstToLower(s_FieldName)] = self:ParseValue(s_Type, s_Value)
+								elseif (l_Field.typeInfo.enum) then
+									s_Class[firstToLower(s_FieldName)] = tonumber(s_Value)
+								elseif (s_Type == "TextureAsset") then
+									s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
+								elseif l_Field.typeInfo.array then
+									print("Found unexpected array, ignoring")
+								else
+									-- Its a DataContainer
+									s_Class[firstToLower(s_FieldName)] = _G[s_Type](s_Value)
+								end
 							end
 						end
 					else
-						local s_Value = self:GetDefaultValue(l_Class, s_FieldName)
-						if(s_Value == nil) then
+						local s_Value = self:GetDefaultValue(l_Class, l_Field)
+						if (s_Value == nil) then
 							print("Failed to fetch original value: " .. tostring(l_Class) .. " | " .. tostring(s_FieldName))
 						else
 							-- print("Setting default value for field " .. s_FieldName .. " of class " .. l_Class .. " | " ..  tostring(s_Value))
-                            if(s_Type == "TextureAsset") then
-                                s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
-                            else
-                                s_Class[firstToLower(s_FieldName)] = s_Value
-                            end
-                        end
+							if (IsBasicType(s_Type)) then
+								s_Class[firstToLower(s_FieldName)] = s_Value
+							elseif (l_Field.typeInfo.enum) then
+								
+								s_Class[firstToLower(s_FieldName)] = tonumber(s_Value)
+							elseif (s_Type == "TextureAsset") then
+								s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
+							elseif l_Field.typeInfo.array then
+								print("Found unexpected array, ignoring")
+							else
+								-- Its a DataContainer
+								s_Class[firstToLower(s_FieldName)] = _G[s_Type](s_Value)
+							end
+						end
 					end
 				end
 			end
@@ -269,8 +299,13 @@ function VEManagerClient:OnClientLevelLoaded(p_MapPath, p_GameModeName)
 end
 
 function VEManagerClient:GetDefaultValue(p_Class, p_Field)
-	if(p_Field == "Realm") then
-		return Realm.Realm_Client
+	if (p_Field.typeInfo.enum) then
+		if (p_Field.typeInfo.name == "Realm") then
+			return Realm.Realm_Client
+		else
+			print("Found unhandled enum, "..p_Field.typeInfo.name)
+			return
+		end
 	end
 
 	local s_States = VisualEnvironmentManager:GetStates()
@@ -287,8 +322,8 @@ function VEManagerClient:GetDefaultValue(p_Class, p_Field)
 			if (s_Class == nil) then
 				goto continue
 			end
-			-- print("Sending default value: " .. tostring(p_Class) .. " | " .. tostring(p_Field) .. " | " .. tostring(s_Class[firstToLower(p_Field)]))
-			return s_Class[firstToLower(p_Field)] --colorCorrection Contrast
+			-- print("Sending default value: " .. tostring(p_Class) .. " | " .. tostring(p_Field.typeInfo.name) .. " | " .. tostring(s_Class[firstToLower(p_Field.typeInfo.name)]))
+			return s_Class[firstToLower(p_Field.name)] --colorCorrection Contrast
 		end
 
 		::continue::
@@ -385,27 +420,38 @@ end
 
 function VEManagerClient:ParseValue(p_Type, p_Value)
 	-- This seperates Vectors. Let's just do it to everything, who cares?
-	if(p_Type == "Boolean") then
+	if (p_Type == "Boolean") then
 		if(p_Value == "true") then
 			return true
 		else
 			return false
 		end
-	elseif(p_Type == "Enum") then -- Enum
+	elseif p_Type == "CString" then
+		return tostring(p_Value)
+
+	elseif  p_Type == "Float8" or
+			p_Type == "Float16" or
+			p_Type == "Float32" or
+			p_Type == "Float64" or
+			p_Type == "Int8" or
+			p_Type == "Int16" or
+			p_Type == "Int32" or
+			p_Type == "Int64" or
+			p_Type == "Uint8" or
+			p_Type == "Uint16" or
+			p_Type == "Uint32" or
+			p_Type == "Uint64" then
 		return tonumber(p_Value)
 
-	elseif(p_Type == "Float32") then
-		return tonumber(p_Value)
-
-	elseif(p_Type == "Vec2") then -- Vec2
+	elseif (p_Type == "Vec2") then -- Vec2
 		local s_Vec = HandleVec(p_Value)
 		return Vec2(tonumber(s_Vec[1]), tonumber(s_Vec[2]))
 
-	elseif(p_Type == "Vec3") then -- Vec3
+	elseif (p_Type == "Vec3") then -- Vec3
 		local s_Vec = HandleVec(p_Value)
 		return Vec3(tonumber(s_Vec[1]), tonumber(s_Vec[2]), tonumber(s_Vec[3]))
 
-	elseif(p_Type == "Vec4") then -- Vec4
+	elseif (p_Type == "Vec4") then -- Vec4
 		local s_Vec = HandleVec(p_Value)
 		return Vec4(tonumber(s_Vec[1]), tonumber(s_Vec[2]), tonumber(s_Vec[3]), tonumber(s_Vec[4]))
 	else 
@@ -472,7 +518,30 @@ function dump(o)
    end
 end
 
-
+function IsBasicType( typ )
+	if typ == "CString" or
+	typ == "Float8" or
+	typ == "Float16" or
+	typ == "Float32" or
+	typ == "Float64" or
+	typ == "Int8" or
+	typ == "Int16" or
+	typ == "Int32" or
+	typ == "Int64" or
+	typ == "Uint8" or
+	typ == "Uint16" or
+	typ == "Uint32" or
+	typ == "Uint64" or
+	typ == "LinearTransform" or
+	typ == "Vec2" or
+	typ == "Vec3" or
+	typ == "Vec4" or
+	typ == "Boolean" or 
+	typ == "Guid" then
+		return true
+	end
+	return false
+end
 
 g_VEManagerClient = VEManagerClient()
 
