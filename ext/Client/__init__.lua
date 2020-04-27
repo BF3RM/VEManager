@@ -1,6 +1,6 @@
 class 'VEManagerClient'
--- ve_base = require "__shared/ve_base"
-easing = require "__shared/easing"
+-- ve_base = require "ve_base"
+easing = require "easing"
 
 function VEManagerClient:__init()
 	print("Initializing VEManagerClient")
@@ -43,7 +43,7 @@ end
 function VEManagerClient:RegisterEvents()
 
 	self.m_OnUpdateInputEvent = Events:Subscribe('Client:UpdateInput', self, self.OnUpdateInput)
-    Events:Subscribe('Client:LevelLoaded', self, self.OnClientLevelLoaded)
+    Events:Subscribe('Level:Loaded', self, self.OnLevelLoaded)
 	Events:Subscribe('Level:Destroy', self, self.RegisterVars)
 
     Events:Subscribe('VEManager:RegisterPreset', self, self.RegisterPreset)
@@ -294,8 +294,8 @@ function VEManagerClient:LoadPresets()
 	Events:Dispatch("VEManager:PresetsLoaded")
 end
 
-function VEManagerClient:OnClientLevelLoaded(p_MapPath, p_GameModeName)
-	self:LoadPresets()
+function VEManagerClient:OnLevelLoaded(p_MapPath, p_GameModeName)
+	self:LoadPresets()		
 end
 
 function VEManagerClient:GetDefaultValue(p_Class, p_Field)
