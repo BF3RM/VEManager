@@ -51,6 +51,7 @@ function VEManagerClient:RegisterEvents()
     Events:Subscribe('VEManager:DisablePreset', self, self.DisablePreset)
     Events:Subscribe('VEManager:SetVisibility', self, self.SetVisibility)
     Events:Subscribe('VEManager:FadeIn', self, self.FadeIn)
+    Events:Subscribe('VEManager:FadeTo', self, self.FadeTo)
     Events:Subscribe('VEManager:FadeOut', self, self.FadeOut)
     Events:Subscribe('VEManager:Lerp', self, self.Lerp)
 end
@@ -76,6 +77,7 @@ function VEManagerClient:EnablePreset(id)
 	self.m_Presets[id]["ve"].enabled = true
 	self.m_Presets[id].entity:FireEvent("Enable")
 end
+
 function VEManagerClient:DisablePreset(id)
 	if self.m_Presets[id] == nil then
 		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(id))
@@ -96,6 +98,23 @@ function VEManagerClient:SetVisibility(id, visibility)
 
 	self.m_Presets[id]["logic"].visibility = visibility
 	self:Reload(id)
+end
+
+function VEManagerClient:FadeIn(id, time)
+	self:FadeTo(id, 1, time)
+end
+
+function VEManagerClient:FadeTo(id, visibility, time)
+	if self.m_Presets[id] == nil then
+		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(id))
+		return
+	end
+
+	self.m_Presets[id]['time'] = time
+	self.m_Presets[id]['startTime'] = SharedUtils:GetTimeMS()
+	self.m_Presets[id]['startValue'] = self.m_Presets[id]["logic"].visibility
+	self.m_Presets[id]['EndValue'] = visibility
+	self.m_Lerping[#self.m_Lerping + 1] = id
 end
 
 function VEManagerClient:FadeIn(id, time)
