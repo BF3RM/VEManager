@@ -2,8 +2,8 @@
 	"Name": "VEManager",
 	"Authors": ["Powback"],
 	"Description": "Handles VE",
-	"URL": "",
-	"Version": "0",
+	"URL": "https://github.com/BF3RM/VEManager",
+	"Version": "0.1.0",
 	"HasWebUI": false,
 	"HasVeniceEXT": true
 }
