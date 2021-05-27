@@ -222,7 +222,7 @@ end
 
 
 
-function VEManagerClient:AddTime(time) -- Add Time System to Map | To be called on Level:Loaded | time in 24hr format e.g. 16 (4pm)
+function VEManagerClient:AddTime(time) -- Add Time System to Map | To be called on Level:Loaded | time in 24hr format (0-23)
 
 	self.Time:Add(self.m_currentMap, time)
 
