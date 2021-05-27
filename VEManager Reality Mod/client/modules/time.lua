@@ -33,14 +33,14 @@ function Time:OnEngineUpdate() -- can be swapped for Engine Update anywhere else
 
     if Settings.dayNightEnabled == true then 
 
-        Time:Ticks(deltaTime)
+        Time:Tick(deltaTime)
 
     end 
 
 end 
 
 
-function Time:Ticks(dt)
+function Time:Tick(id, dt) -- needs restructure if we want to lerp between 4 presets
 
         self.m_clientDayLength = self.m_clientDayLength + dt
         
