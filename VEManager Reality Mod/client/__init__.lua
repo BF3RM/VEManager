@@ -7,7 +7,7 @@ function VEManagerClient:__init()
     self.RegisterVars()
     self.RegisterEvents()
 	self.RegisterModules()
-	
+
 end 
 
 
@@ -54,10 +54,13 @@ function VEManagerClient:RegisterEvents()
     Events:Subscribe('VEManager:EnablePreset', self, self.EnablePreset)
     Events:Subscribe('VEManager:DisablePreset', self, self.DisablePreset)
     Events:Subscribe('VEManager:SetVisibility', self, self.SetVisibility)
+	Events:Subscribe('VEManager:UpdateVisibility', self, self.UpdateVisibility)
     Events:Subscribe('VEManager:FadeIn', self, self.FadeIn)
     Events:Subscribe('VEManager:FadeTo', self, self.FadeTo)
     Events:Subscribe('VEManager:FadeOut', self, self.FadeOut)
     Events:Subscribe('VEManager:Lerp', self, self.Lerp)
+	Events:Subscribe('VEManager:Crossfade', self, self.Crossfade)
+	Events:Subscribe('VEManager:AddTime', self, self.Crossfade)
 
 end
 
