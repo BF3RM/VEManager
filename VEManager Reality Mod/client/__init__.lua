@@ -268,6 +268,7 @@ function VEManagerClient:LoadPresets()
 
 		local s_VE = self:CreateEntity("VisualEnvironmentEntityData")
 		--s_VEB.object = s_VE -- not needed without blueprint
+		self.m_Presets[s_Preset.Name] = {}
 		self.m_Presets[s_Preset.Name]["ve"] = s_VE
 		s_VE.priority = tonumber(s_Preset.Priority)
 		
