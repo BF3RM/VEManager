@@ -1,5 +1,8 @@
 local VEManagerClient = class('VEManagerClient')
-require 'modules/time'
+
+-- Modules 
+local Time = require 'modules/time'
+--
 
 
 function VEManagerClient:__init()
@@ -39,6 +42,7 @@ function VEManagerClient:RegisterVars()
 	self.m_Presets = {}
 	self.m_Lerping = {}
 	self.m_Instances = {}
+	self.m_currentMap = nil
 
 end
 
@@ -208,6 +212,15 @@ function VEManagerClient:Crossfade(id1, id2, time)
     self:FadeTo(id2, self.m_Presets[id1]["ve"].visibility, time) -- Fade id2 to id1 visibility
 
 end 
+
+
+
+function VEManagerClient:AddTime(time) -- Add Time System to Map | To be called on Level:Loaded | time in 24hr format e.g. 16 (4pm)
+
+	Time:Add(self.m_currentMap, time)
+
+end 
+	
 
 
 --[[
@@ -415,7 +428,8 @@ end
 
 
 function VEManagerClient:OnLevelLoaded(p_MapPath, p_GameModeName)
-	self:LoadPresets()		
+	self:LoadPresets()
+	self.m_currentMap = p_MapPath		
 end
 
 

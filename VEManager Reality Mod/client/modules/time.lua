@@ -1,11 +1,17 @@
-local Time = class 'Time'
+local Time = class('Time')
 local Settings = require the settings file if not existent => hard-code
+
+--[[ totalDayLength = 86400 --[sec]
+morningLength = totalDayLength / 4
+dayTimeLength = totalDayLength / 4
+eveningLength = totalDayLength / 4
+nightLength = totalDayLength / 4]]
 
 
 function Time:__init()
 
+    print('Initializing Time Module')
     ClientTime:RegisterVars()
-    ClientTime:GetVE()
 
 end 
 
@@ -23,7 +29,7 @@ end
 
 function Time:RegisterEvents()
 
-    self.m_serverSyncEvent = NetEvents:Subscribe(NetMessage.S2C_SYNC_DAYTIME, self, self.ServerSync) -- Server Sync
+    self.m_serverSyncEvent = NetEvents:Subscribe('TimeServer:Sync', self, self.ServerSync) -- Server Sync
     self.m_engineUpdateEvent = Events:Subscribe('Engine:Update', self, self.Run)
     self.m_levelDestroyEvent = Events:Subscribe('Level:Destroy', self, self.OnLevelDestroy)
 
@@ -161,34 +167,6 @@ function Time:Run(s_deltaTime)
 
 
 end 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-totalDayLength = 86400 --[sec]
-morningLength = totalDayLength / 4
-dayTimeLength = totalDayLength / 4
-eveningLength = totalDayLength / 4
-nightLength = totalDayLength / 4
-
-
-
-
-
 
 
 
