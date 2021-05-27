@@ -1,11 +1,11 @@
 local Time = class('Time')
 local Settings = require the settings file if not existent => hard-code
 
---[[ totalDayLength = 86400 --[sec]
-morningLength = totalDayLength / 4
-dayTimeLength = totalDayLength / 4
-eveningLength = totalDayLength / 4
-nightLength = totalDayLength / 4]]
+--[[ totalDayLength = 86400 [sec]
+morningLength = totalDayLength 25%
+dayTimeLength = totalDayLength 25%
+eveningLength = totalDayLength 25%
+nightLength = totalDayLength 25% ]]
 
 
 function Time:__init()
@@ -126,7 +126,7 @@ function Time:Run(s_deltaTime)
         VEManagerClient:UpdateVisibility(self.m_mapPresets.type['night'], s_factorNight)
         VEManagerClient:UpdateVisibility(self.m_mapPresets.type['morning'], s_factorMorning)
 
-    elseif m_clientTime <= (g_totalDayLength * 0.5) then -- 06:00 to 12:00
+    elseif m_clientTime < (g_totalDayLength * 0.5) then -- 06:00 to 12:00
 
         -- calculate visibility preset morning
         local s_factorMorning = m_clientTime / (g_totalDayLength * 0.5)
