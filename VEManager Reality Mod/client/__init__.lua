@@ -1,16 +1,13 @@
 local VEManagerClient = class('VEManagerClient')
 
--- Modules 
-local Time = require 'modules/time'
---
-
 
 function VEManagerClient:__init()
 
     print('Initializing VEManagerClient')
     self.RegisterVars()
     self.RegisterEvents()
-
+	self.RegisterModules()
+	
 end 
 
 
@@ -63,6 +60,13 @@ function VEManagerClient:RegisterEvents()
     Events:Subscribe('VEManager:Lerp', self, self.Lerp)
 
 end
+
+
+function VEManagerClient:RegisterModules()
+
+	self.Time = require 'modules/time'
+
+end 
 
 
 --[[
@@ -136,7 +140,7 @@ function VEManagerClient:UpdateVisibility(id, visibilityFactor)   -- allows cons
 end 
 
 
-function VEManagerClient:FadeIn(id, time)
+function VEManagerClient:FadeIn(id, time)	
 
     if self.m_Presets[id] == nil then
 		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(id))
@@ -169,7 +173,7 @@ function VEManagerClient:FadeTo(id, visibility, time)
 
 	self.m_Presets[id]['time'] = time
 	self.m_Presets[id]['startTime'] = SharedUtils:GetTimeMS()
-	self.m_Presets[id]['startValue'] = self.m_Presets[id]["ve"].visibility
+	self.m_Presets[id]['startValue'] = self.m_Presets[id]["ve"].visibility -- Changed this back as FadeIn shouldn´t be used on an already visible preset anyways
 	self.m_Presets[id]['EndValue'] = visibility 
 
 	self.m_Lerping[#self.m_Lerping + 1] = id
@@ -217,7 +221,7 @@ end
 
 function VEManagerClient:AddTime(time) -- Add Time System to Map | To be called on Level:Loaded | time in 24hr format e.g. 16 (4pm)
 
-	Time:Add(self.m_currentMap, time)
+	self.Time:Add(self.m_currentMap, time)
 
 end 
 	
