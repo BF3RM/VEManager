@@ -23,7 +23,7 @@ end
 
 function Time:RegisterEvents()
 
-    self.m_serverSyncEvent = NetEvents:Subscribe(NetMessage.S2C_SYNC_DAYTIME, self, self.ServerSync)
+    self.m_serverSyncEvent = NetEvents:Subscribe(NetMessage.S2C_SYNC_DAYTIME, self, self.ServerSync) -- Server Sync
     self.m_engineUpdateEvent = Events:Subscribe('Engine:Update', self, self.OnEngineUpdate)
     self.m_levelDestroyEvent = Events:Subscribe('Level:Destroy', self, self.OnLevelDestroy)
 
@@ -112,7 +112,7 @@ function Time:OnEngineUpdate(s_deltaTime)
     if m_clientTime <= (g_totalDayLength * 0.25) then -- 00:00 to 6:00
 
         -- calculate visibility preset night
-        local s_factorNight = s_startingTime / (g_totalDayLength * 0.25)
+        local s_factorNight = m_clientTime / (g_totalDayLength * 0.25)
         -- calculate visibility preset morning
         local s_factorMorning = 1 - s_factorNight 
 
@@ -123,7 +123,7 @@ function Time:OnEngineUpdate(s_deltaTime)
     elseif m_clientTime <= (g_totalDayLength * 0.5) then -- 06:00 to 12:00
 
         -- calculate visibility preset morning
-        local s_factorMorning = s_startingTime / (g_totalDayLength * 0.5)
+        local s_factorMorning = m_clientTime / (g_totalDayLength * 0.5)
         -- calculate visibility preset noon
         local s_factorNoon = 1 - s_factorMorning
 
@@ -134,7 +134,7 @@ function Time:OnEngineUpdate(s_deltaTime)
     elseif m_clientTime < (g_totalDayLength * 0.75) then -- 12:00 to 18:00
 
         -- calculate visibility preset morning
-        local s_factorNoon = s_startingTime / (g_totalDayLength * 0.75)
+        local s_factorNoon = m_clientTime / (g_totalDayLength * 0.75)
         -- calculate visibility preset noon
         local s_factorEvening = 1 - s_factorNoon
 
@@ -145,7 +145,7 @@ function Time:OnEngineUpdate(s_deltaTime)
     elseif m_clientTime < g_totalDayLength then -- 18:00 to 00:00
 
         -- calculate visibility preset morning
-        local s_factorEvening = s_startingTime / (g_totalDayLength * 0.75)
+        local s_factorEvening = m_clientTime / (g_totalDayLength * 0.75)
         -- calculate visibility preset noon
         local s_factorNight = 1 - s_factorNoon
 
