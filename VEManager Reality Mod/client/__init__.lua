@@ -1,4 +1,5 @@
 local VEManagerClient = class('VEManagerClient')
+require 'modules/time'
 
 
 function VEManagerClient:__init()
@@ -105,7 +106,7 @@ function VEManagerClient:DisablePreset(id, type)
 end
 
 
-function VEManagerClient:SetVisibility(id, visibility)
+function VEManagerClient:SetVisibility(id, visibility)  -- sets visibility to defined value
 
 	if self.m_Presets[id] == nil then
 		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(id))
@@ -116,6 +117,19 @@ function VEManagerClient:SetVisibility(id, visibility)
 	self:Reload(id)
 
 end
+
+
+function VEManagerClient:UpdateVisibility(id, visibilityFactor)   -- allows constant visibility changes
+
+	if self.m_Presets[id] == nil then
+		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(id))
+		return
+	end
+
+    VisualEnvironmentManager:SetDirty(true)
+    self.m_Presets[id]["ve"].visibility = visibilityFactor
+
+end 
 
 
 function VEManagerClient:FadeIn(id, time)
@@ -189,8 +203,6 @@ function VEManagerClient:FadePresets(id1, id2, time)
     self:FadeTo(id2, self.m_Presets[id1]["ve"].visibility, time) -- Fade id2 to id1 visibility
 
 end 
-
-
 
 
 --[[
