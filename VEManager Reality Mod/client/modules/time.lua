@@ -24,7 +24,7 @@ end
 function Time:RegisterEvents()
 
     self.m_serverSyncEvent = NetEvents:Subscribe(NetMessage.S2C_SYNC_DAYTIME, self, self.ServerSync) -- Server Sync
-    self.m_engineUpdateEvent = Events:Subscribe('Engine:Update', self, self.OnEngineUpdate)
+    self.m_engineUpdateEvent = Events:Subscribe('Engine:Update', self, self.Run)
     self.m_levelDestroyEvent = Events:Subscribe('Level:Destroy', self, self.OnLevelDestroy)
 
 end 
@@ -103,7 +103,7 @@ end
 
 
 
-function Time:OnEngineUpdate(s_deltaTime)
+function Time:Run(s_deltaTime)
 
     -- start counter
     self.m_clientTime = self.m_clientTime + s_deltaTime

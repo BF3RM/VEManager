@@ -190,7 +190,7 @@ function VEManagerClient:Lerp(id, value, time)
 end
 
 
-function VEManagerClient:FadePresets(id1, id2, time)
+function VEManagerClient:Crossfade(id1, id2, time)
 
     if self.m_Presets[id1] == nil then
 		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(id1))
