@@ -105,7 +105,7 @@ function VEManagerClient:DisablePreset(id)
 
 end
 
--- EDIT: will now also enable the preset
+-- EDIT: will now also enable the preset [through :Reload]
 function VEManagerClient:SetVisibility(id, visibility)  -- sets visibility to defined value
 
 	if self.m_Presets[id] == nil then
@@ -250,9 +250,10 @@ function VEManagerClient:InitializePresets()
 end
 
 
+-- EDIT: will now also enable the preset
 function VEManagerClient:Reload(id)
 
-	-- check if enabled before firing event (day-night)
+	-- check if enabled before firing event (day-night addition)
 	if self.m_Presets[id]["ve"].enabled == false then 
 		self.m_Presets[id]["ve"].enabled = true 
 	end 
