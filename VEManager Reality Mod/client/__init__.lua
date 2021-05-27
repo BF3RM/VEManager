@@ -192,8 +192,13 @@ end
 
 function VEManagerClient:FadePresets(id1, id2, time)
 
-    if self.m_Presets[id] == nil then
-		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(id))
+    if self.m_Presets[id1] == nil then
+		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(id1))
+		return
+	end
+
+	if self.m_Presets[id2] == nil then
+		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(id2))
 		return
 	end
 
