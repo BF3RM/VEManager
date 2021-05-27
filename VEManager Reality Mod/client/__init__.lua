@@ -73,14 +73,14 @@ function VEManagerClient:RegisterPreset(id, preset)
 end
 
 
-function VEManagerClient:EnablePreset(id, type)
+function VEManagerClient:EnablePreset(id)
 
 	if self.m_Presets[id] == nil then
 		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(id))
 		return
 	end
 
-	print("Enabling preset: " .. tostring(id, type))
+	print("Enabling preset: " .. tostring(id))
 	--self.m_Presets[id]["logic"].visibility = 1 -- logicvisualenvironments aren´t needed | logicvisualenvironments are linked to ingame logic directly [we are doing logic seperately so it´s basically just unneccesary additional code] e.g https://github.com/EmulatorNexus/Venice-EBX/blob/f06c290fa43c80e07985eda65ba74c59f4c01aa0/Vehicles/common/LogicalPrefabs/AircraftNearPlane.txt
     self.m_Presets[id]["ve"].visibility = 1 -- change to ve from logic
 	self.m_Presets[id]["ve"].enabled = true
@@ -89,7 +89,7 @@ function VEManagerClient:EnablePreset(id, type)
 end
 
 
-function VEManagerClient:DisablePreset(id, type)
+function VEManagerClient:DisablePreset(id)
 
 
 	if self.m_Presets[id] == nil then
@@ -105,7 +105,7 @@ function VEManagerClient:DisablePreset(id, type)
 
 end
 
-
+-- EDIT: will now also enable the preset
 function VEManagerClient:SetVisibility(id, visibility)  -- sets visibility to defined value
 
 	if self.m_Presets[id] == nil then
@@ -216,6 +216,20 @@ end
 
 ]]
 
+function VEManagerClient:GetMapPresets(mapName) -- gets all Main Map Environments for Day-Night Cycle
+
+	for i, s_Preset in pairs(self.m_Presets) do 
+
+		if s_Preset.Map[mapName] then 
+
+			return s_Preset 
+
+		end 
+
+	end 
+
+end 
+
 
 function VEManagerClient:InitializePresets()
 
@@ -237,6 +251,11 @@ end
 
 
 function VEManagerClient:Reload(id)
+
+	-- check if enabled before firing event (day-night)
+	if self.m_Presets[id]["ve"].enabled == false then 
+		self.m_Presets[id]["ve"].enabled = true 
+	end 
 
 	self.m_Presets[id].entity:FireEvent("Disable")
 	self.m_Presets[id].entity:FireEvent("Enable")
