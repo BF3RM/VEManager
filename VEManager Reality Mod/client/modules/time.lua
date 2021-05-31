@@ -13,18 +13,18 @@ function Time:__init()
     print('Initializing Time Module')
     ClientTime:RegisterVars()
 
-end 
+end
 
 
 function Time:RegisterVars()
 
     self.m_transitionFactor = nil
-    self.m_clientTime = 0 
-    self.m_previousFactor = nil 
-    
+    self.m_clientTime = 0
+    self.m_previousFactor = nil
+
     self.m_mapPresets = {}
 
-end 
+end
 
 
 function Time:RegisterEvents()
@@ -33,14 +33,14 @@ function Time:RegisterEvents()
     self.m_engineUpdateEvent = Events:Subscribe('Engine:Update', self, self.Run)
     self.m_levelDestroyEvent = Events:Subscribe('Level:Destroy', self, self.OnLevelDestroy)
 
-end 
+end
 
 
 function Time:OnLevelDestroy()
 
     self.m_engineUpdateEvent:Unsubscribe()
 
-end 
+end
 
 
 -- ADD TIME TO MAP
@@ -51,7 +51,7 @@ function Time:Add(mapName, time) -- time in 24hr format
     table.insert(self.m_mapPresets, #self.m_mapPresets + 1, VEManagerClient:GetMapPresets(mapName))
 
     -- convert time to seconds
-    local s_startingTime = time * 60
+    local s_startingTime = time * 3600
     self.m_clientTime = s_startingTime
 
     -- calculate visibilities and presets
@@ -61,7 +61,7 @@ function Time:Add(mapName, time) -- time in 24hr format
         -- calculate visibility preset night
         local s_factorNight = s_startingTime / (g_totalDayLength * 0.25)
         -- calculate visibility preset morning
-        local s_factorMorning = 1 - s_factorNight 
+        local s_factorMorning = 1 - s_factorNight
 
         -- apply visibility factors
         VEManagerClient:SetVisibility(self.m_mapPresets.type['night'], s_factorNight)
@@ -92,7 +92,7 @@ function Time:Add(mapName, time) -- time in 24hr format
     elseif s_startingTime <= g_totalDayLength then -- 18:00 to 00:00
 
         -- calculate visibility preset morning
-        local s_factorEvening = s_startingTime / (g_totalDayLength * 0.75)
+        local s_factorEvening = s_startingTime / (g_totalDayLength)
         -- calculate visibility preset noon
         local s_factorNight = 1 - s_factorNoon
 
@@ -100,11 +100,11 @@ function Time:Add(mapName, time) -- time in 24hr format
         VEManagerClient:SetVisibility(self.m_mapPresets.type['evening'], s_factorEvening)
         VEManagerClient:SetVisibility(self.m_mapPresets.type['night'], s_factorNight)
 
-    end 
+    end
 
     Time:RegisterEvents()
 
-end 
+end
 
 
 
@@ -120,7 +120,7 @@ function Time:Run(s_deltaTime)
         -- calculate visibility preset night
         local s_factorNight = m_clientTime / (g_totalDayLength * 0.25)
         -- calculate visibility preset morning
-        local s_factorMorning = 1 - s_factorNight 
+        local s_factorMorning = 1 - s_factorNight
 
         -- update visibility
         VEManagerClient:UpdateVisibility(self.m_mapPresets.type['night'], s_factorNight)
@@ -159,14 +159,14 @@ function Time:Run(s_deltaTime)
         VEManagerClient:UpdateVisibility(self.m_mapPresets.type['evening'], s_factorEvening)
         VEManagerClient:UpdateVisibility(self.m_mapPresets.type['night'], s_factorNight)
 
-    elseif m_clientTime >= g_totalDayLength then 
+    elseif m_clientTime >= g_totalDayLength then
 
         m_clientTime = 0.0
 
-    end 
+    end
 
 
-end 
+end
 
 
 

@@ -6,22 +6,22 @@ function TimeServer:__init()
     print('Initializing Time Server')
     self.RegisterVars()
 
-end 
+end
 
 
 function TimeServer:RegisterVars()
 
-    self.m_serverDayTime = 0.0 
+    self.m_serverDayTime = 0.0
     self.m_engineUpdateTimer = 0.0
 
-end 
+end
 
 
 function TimeServer:RegisterEvents()
 
     self.m_engineUpdateEvent = Events:Subscribe('Engine:Update', self, self.Run)
 
-end 
+end
 
 
 function TimeServer:CalculateStart(time) -- time in 24hr format
@@ -32,17 +32,17 @@ function TimeServer:CalculateStart(time) -- time in 24hr format
 
     self.RegisterEvents()
 
-end 
+end
 
 
 function TimeServer:Run(deltaTime)
 
-    self.m_serverDayTime = self.m_serverDayTime + deltaTime 
+    self.m_serverDayTime = self.m_serverDayTime + deltaTime
     self.m_engineUpdateTimer = self.m_engineUpdateTimer + deltaTime
 
-    if self.m_serverDayTime <= g_totalDayLength then 
+    if self.m_serverDayTime <= g_totalDayLength then
         self.m_serverDayTime = 0
-    end 
+    end
 
     if self.m_engineUpdateTimer < g_UpdateFrequency then
         return
@@ -52,17 +52,11 @@ function TimeServer:Run(deltaTime)
 
     TimeServer:Broadcast()
 
-end 
+end
 
 
 function TimeServer:Broadcast()
 
     NetEvents:Broadcast('TimeServer:Sync', self.m_serverDayTime)
 
-end 
-
-
-
-
-
-
+end

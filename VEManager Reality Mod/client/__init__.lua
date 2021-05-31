@@ -8,7 +8,7 @@ function VEManagerClient:__init()
     self.RegisterEvents()
 	self.RegisterModules()
 
-end 
+end
 
 
 function VEManagerClient:RegisterVars()
@@ -60,7 +60,7 @@ function VEManagerClient:RegisterEvents()
     Events:Subscribe('VEManager:FadeOut', self, self.FadeOut)
     Events:Subscribe('VEManager:Lerp', self, self.Lerp)
 	Events:Subscribe('VEManager:Crossfade', self, self.Crossfade)
-	Events:Subscribe('VEManager:AddTime', self, self.Crossfade)
+	Events:Subscribe('VEManager:AddTime', self, self.AddTime)
 
 end
 
@@ -69,7 +69,7 @@ function VEManagerClient:RegisterModules()
 
 	self.Time = require 'modules/time'
 
-end 
+end
 
 
 --[[
@@ -140,10 +140,10 @@ function VEManagerClient:UpdateVisibility(id, visibilityFactor)   -- allows cons
     VisualEnvironmentManager:SetDirty(true)
     self.m_Presets[id]["ve"].visibility = visibilityFactor
 
-end 
+end
 
 
-function VEManagerClient:FadeIn(id, time)	
+function VEManagerClient:FadeIn(id, time)
 
     if self.m_Presets[id] == nil then
 		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(id))
@@ -177,7 +177,7 @@ function VEManagerClient:FadeTo(id, visibility, time)
 	self.m_Presets[id]['time'] = time
 	self.m_Presets[id]['startTime'] = SharedUtils:GetTimeMS()
 	self.m_Presets[id]['startValue'] = self.m_Presets[id]["ve"].visibility -- Changed this back as FadeIn shouldn´t be used on an already visible preset anyways
-	self.m_Presets[id]['EndValue'] = visibility 
+	self.m_Presets[id]['EndValue'] = visibility
 
 	self.m_Lerping[#self.m_Lerping + 1] = id
 
@@ -198,7 +198,7 @@ function VEManagerClient:Lerp(id, value, time)
 
 	self.m_Lerping[#self.m_Lerping +1] = id
 
-end
+end -- Same as FadeTo Function, may be deleted
 
 
 function VEManagerClient:Crossfade(id1, id2, time)
@@ -218,7 +218,7 @@ function VEManagerClient:Crossfade(id1, id2, time)
     self:FadeTo(id1, self.m_Presets[id2]["ve"].visibility, time) -- Fade id1 to id2 visibility
     self:FadeTo(id2, self.m_Presets[id1]["ve"].visibility, time) -- Fade id2 to id1 visibility
 
-end 
+end
 
 
 
@@ -226,8 +226,7 @@ function VEManagerClient:AddTime(time) -- Add Time System to Map | To be called 
 
 	self.Time:Add(self.m_currentMap, time)
 
-end 
-	
+end
 
 
 --[[
@@ -238,17 +237,17 @@ end
 
 function VEManagerClient:GetMapPresets(mapName) -- gets all Main Map Environments for Day-Night Cycle
 
-	for i, s_Preset in pairs(self.m_Presets) do 
+	for i, s_Preset in pairs(self.m_Presets) do
 
-		if s_Preset.Map[mapName] then 
+		if s_Preset.Map[mapName] then
 
-			return s_Preset 
+			return i
 
-		end 
+		end
 
-	end 
+	end
 
-end 
+end
 
 
 function VEManagerClient:InitializePresets()
@@ -274,9 +273,9 @@ end
 function VEManagerClient:Reload(id)
 
 	-- check if enabled before firing event (day-night addition)
-	if self.m_Presets[id]["ve"].enabled == false then 
-		self.m_Presets[id]["ve"].enabled = true 
-	end 
+	if self.m_Presets[id]["ve"].enabled == false then
+		self.m_Presets[id]["ve"].enabled = true
+	end
 
 	self.m_Presets[id].entity:FireEvent("Disable")
 	self.m_Presets[id].entity:FireEvent("Enable")
@@ -290,7 +289,7 @@ function VEManagerClient:LoadPresets()
 	--Foreach preset
 	-- print(self.m_RawPresets)
 	for i, s_Preset in pairs(self.m_RawPresets) do
-		
+
 		-- Generate our VisualEnvironment
 		local s_IsBasePreset = s_Preset.Priority == 1
 		-- print("IsBasePreset: " .. tostring(s_IsBasePreset))
@@ -304,21 +303,21 @@ function VEManagerClient:LoadPresets()
 		--[[local s_VEB = self:CreateEntity("VisualEnvironmentBlueprint")
 		s_VEB.name = s_Preset.Name
 		s_LVEED.visualEnvironment = s_VEB
-		self.m_Presets[s_Preset.Name]["blueprint"] = s_VEB ]] -- not needed 
+		self.m_Presets[s_Preset.Name]["blueprint"] = s_VEB ]] -- not needed
 
 		local s_VE = self:CreateEntity("VisualEnvironmentEntityData")
 		--s_VEB.object = s_VE -- not needed without blueprint
 		self.m_Presets[s_Preset.Name] = {}
 		self.m_Presets[s_Preset.Name]["ve"] = s_VE
 		s_VE.priority = tonumber(s_Preset.Priority)
-		
+
 		--Foreach class
 		local componentCount = 0
 		for _,l_Class in pairs(self.m_SupportedClasses) do
 
 			if(s_Preset[l_Class] ~= nil) then
 
-				componentCount = componentCount + 1 
+				componentCount = componentCount + 1
 				-- Create class and add it to the VE entity.
 				local s_Class =  _G[l_Class.."ComponentData"]()
 				s_VE.components:add(s_Class)
@@ -428,7 +427,7 @@ function VEManagerClient:LoadPresets()
 
 	end
 
-	self:InitializePresets()  
+	self:InitializePresets()
 	Events:Dispatch("VEManager:PresetsLoaded")
 
 end
@@ -436,7 +435,7 @@ end
 
 function VEManagerClient:OnLevelLoaded(p_MapPath, p_GameModeName)
 	self:LoadPresets()
-	self.m_currentMap = p_MapPath		
+	self.m_currentMap = p_MapPath
 end
 
 
@@ -489,7 +488,7 @@ function VEManagerClient:CreateEntity(p_Class, p_Guid)
 	if(p_Guid == nil) then
 		-- Clone the instance and return the clone with a randomly generated Guid
 		return _G[p_Class](s_Entity:Clone(GenerateGuid()))
-	else 
+	else
 		return _G[p_Class](s_Entity:Clone(p_Guid))
 	end
 
@@ -518,7 +517,7 @@ function VEManagerClient:UpdateLerp(percentage)
 		if(self.m_Presets[preset].transition ~= nil) then
 			transition = self.m_Presets[preset].transition
 		end
-		
+
 		local lerpValue = easing[transition](t,b,c,d)
 
 		if(PercentageComplete >= 1 or PercentageComplete < 0) then
@@ -545,7 +544,7 @@ function VEManagerClient:OnUpdateInput(p_Delta, p_SimulationDelta)
 	end
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F3) then
 		self:DisablePreset("ve_base")
-		
+
 	end
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F4) then
 		self:SetVisibility("ve_base", 0.5)
@@ -613,19 +612,19 @@ function VEManagerClient:ParseValue(p_Type, p_Value)
 	elseif (p_Type == "Vec4") then -- Vec4
 		local s_Vec = HandleVec(p_Value)
 		return Vec4(tonumber(s_Vec[1]), tonumber(s_Vec[2]), tonumber(s_Vec[3]), tonumber(s_Vec[4]))
-	else 
+	else
 		print("Unhandled type: " .. p_Type)
 		return nil
 	end
 end
 
 
-function h() 
+function h()
     local vars = {"A","B","C","D","E","F","0","1","2","3","4","5","6","7","8","9"}
     return vars[math.floor(MathUtils:GetRandomInt(1,16))]..vars[math.floor(MathUtils:GetRandomInt(1,16))]
 end
 
-function GenerateGuid() 
+function GenerateGuid()
     return Guid(h()..h()..h()..h().."-"..h()..h().."-"..h()..h().."-"..h()..h().."-"..h()..h()..h()..h()..h()..h(), "D")
 end
 
@@ -695,7 +694,7 @@ function IsBasicType( typ )
 	typ == "Vec2" or
 	typ == "Vec3" or
 	typ == "Vec4" or
-	typ == "Boolean" or 
+	typ == "Boolean" or
 	typ == "Guid" then
 		return true
 	end
