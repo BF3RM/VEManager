@@ -1,11 +1,13 @@
 local Time = class('Time')
-local Settings = require the settings file if not existent => hard-code
+--local Settings = require the settings file if not existent => hard-code
 
 --[[ totalDayLength = 86400 [sec]
 morningLength = totalDayLength 25%
 dayTimeLength = totalDayLength 25%
 eveningLength = totalDayLength 25%
 nightLength = totalDayLength 25% ]]
+
+g_totalDayLength = 60
 
 
 function Time:__init()

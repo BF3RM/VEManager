@@ -702,3 +702,6 @@ function IsBasicType( typ )
 end
 
 g_VEManagerClient = VEManagerClient()
+
+
+VEManagerClient:__init()
