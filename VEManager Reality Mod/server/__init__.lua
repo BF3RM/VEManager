@@ -29,6 +29,7 @@ function TimeServer:CalculateStart(time) -- time in 24hr format
     -- convert time to seconds
     local s_startingTime = time * 60
     self.m_serverDayTime = s_startingTime
+    self.m_totalServerTime = 0
 
     self.RegisterEvents()
 
@@ -39,6 +40,7 @@ function TimeServer:Run(deltaTime)
 
     self.m_serverDayTime = self.m_serverDayTime + deltaTime
     self.m_engineUpdateTimer = self.m_engineUpdateTimer + deltaTime
+    self.m_totalServerTime = self.m_totalServerTime + deltaTime
 
     if self.m_serverDayTime <= g_totalDayLength then
         self.m_serverDayTime = 0
@@ -57,6 +59,6 @@ end
 
 function TimeServer:Broadcast()
 
-    NetEvents:Broadcast('TimeServer:Sync', self.m_serverDayTime)
+    NetEvents:Broadcast('TimeServer:Sync', self.m_serverDayTime, self.m_totalServerTime)
 
 end

@@ -20,6 +20,7 @@ function Time:RegisterVars()
 
     self.m_transitionFactor = nil
     self.m_clientTime = 0
+    self.m_totalClientTime = 0
     self.m_previousFactor = nil
 
     self.m_mapPresets = {}
@@ -113,6 +114,7 @@ function Time:Run(s_deltaTime)
 
     -- start counter
     self.m_clientTime = self.m_clientTime + s_deltaTime
+    self.m_totalClientTime = self.m_totalClientTime + s_deltaTime
 
 
     if m_clientTime <= (g_totalDayLength * 0.25) then -- 00:00 to 6:00
