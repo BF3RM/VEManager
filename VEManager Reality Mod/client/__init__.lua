@@ -1,12 +1,13 @@
-local VEManagerClient = class('VEManagerClient')
-
+class('VEManagerClient')
+ve_base = require "ve_base"
+easing = require "easing"
 
 function VEManagerClient:__init()
 
     print('Initializing VEManagerClient')
-    self.RegisterVars()
-    self.RegisterEvents()
-	self.RegisterModules()
+    self:RegisterVars()
+    self:RegisterEvents()
+	self:RegisterModules()
 
 end
 
@@ -14,6 +15,7 @@ end
 function VEManagerClient:RegisterVars()
 
     self.m_RawPresets = {}
+	self.m_RawPresets["base"] = json.decode(ve_base:GetPreset())
     self.m_SupportedTypes = {"Vec2", "Vec3", "Vec4", "Float32", "Boolean", "Int"}
 	self.m_SupportedClasses = {
 		"CameraParams",
@@ -93,9 +95,12 @@ function VEManagerClient:EnablePreset(id)
 
 	print("Enabling preset: " .. tostring(id))
 	--self.m_Presets[id]["logic"].visibility = 1 -- logicvisualenvironments aren´t needed | logicvisualenvironments are linked to ingame logic directly [we are doing logic seperately so it´s basically just unneccesary additional code] e.g https://github.com/EmulatorNexus/Venice-EBX/blob/f06c290fa43c80e07985eda65ba74c59f4c01aa0/Vehicles/common/LogicalPrefabs/AircraftNearPlane.txt
-    self.m_Presets[id]["ve"].visibility = 1 -- change to ve from logic
+	self.m_Presets[id]["ve"].visibility = 1 -- change to ve from logic
 	self.m_Presets[id]["ve"].enabled = true
 	self.m_Presets[id].entity:FireEvent("Enable")
+
+	local state = self:GetState(self.m_Presets[id].ve.priority)
+	state.visibility = 1
 
 end
 
@@ -114,9 +119,12 @@ function VEManagerClient:DisablePreset(id)
 	self.m_Presets[id]["ve"].enabled = false
 	self.m_Presets[id].entity:FireEvent("Disable")
 
+	local state = self:GetState(self.m_Presets[id].ve.priority)
+	state.visibility = 0
+
 end
 
--- EDIT: will now also enable the preset [through :Reload]
+
 function VEManagerClient:SetVisibility(id, visibility)  -- sets visibility to defined value
 
 	if self.m_Presets[id] == nil then
@@ -137,8 +145,12 @@ function VEManagerClient:UpdateVisibility(id, visibilityFactor)   -- allows cons
 		return
 	end
 
-    VisualEnvironmentManager:SetDirty(true)
-    self.m_Presets[id]["ve"].visibility = visibilityFactor
+	self:SetVisibility(id, visibilityFactor) -- set in EntityData
+
+    local state = self:GetState(self.m_Presets[id].ve.priority)
+	print("*visibility is: " .. state.visibility)
+	state.visibility = visibilityFactor -- set in visual state
+	print("*visibility changed: " .. state.visibility)
 
 end
 
@@ -171,6 +183,9 @@ function VEManagerClient:FadeTo(id, visibility, time)
 
 	if self.m_Presets[id] == nil then
 		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(id))
+		return
+	elseif self.m_Presets[id]["ve"].visibility == visibility then -- not lerp if already at desired visibility
+		print("Already at desired Visibility")
 		return
 	end
 
@@ -206,9 +221,7 @@ function VEManagerClient:Crossfade(id1, id2, time)
     if self.m_Presets[id1] == nil then
 		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(id1))
 		return
-	end
-
-	if self.m_Presets[id2] == nil then
+	elseif self.m_Presets[id2] == nil then
 		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(id2))
 		return
 	end
@@ -240,13 +253,32 @@ function VEManagerClient:GetMapPresets(mapName) -- gets all Main Map Environment
 	for i, s_Preset in pairs(self.m_Presets) do
 
 		if s_Preset.Map[mapName] then
-
 			return i
+		end
+
+	end
+
+end
+
+
+function VEManagerClient:GetState(...) -- takes priority
+	--Get all visual environment states
+	local args = { ... }
+	local states = VisualEnvironmentManager:GetStates()
+	--Loop through all states
+	for _, state in pairs(states) do
+
+		for i,priority in pairs(args) do
+
+			if state.priority == priority then
+				return state
+			end
 
 		end
 
 	end
 
+	return nil
 end
 
 
@@ -263,19 +295,14 @@ function VEManagerClient:InitializePresets()
 
 		s_Preset["entity"]:Init(Realm.Realm_Client, true)
 		VisualEnvironmentManager:SetDirty(true)
+		print("Spawned Preset: " .. i)
 
 	end
 
 end
 
 
--- EDIT: will now also enable the preset
 function VEManagerClient:Reload(id)
-
-	-- check if enabled before firing event (day-night addition)
-	if self.m_Presets[id]["ve"].enabled == false then
-		self.m_Presets[id]["ve"].enabled = true
-	end
 
 	self.m_Presets[id].entity:FireEvent("Disable")
 	self.m_Presets[id].entity:FireEvent("Enable")
@@ -310,10 +337,11 @@ function VEManagerClient:LoadPresets()
 		self.m_Presets[s_Preset.Name] = {}
 		self.m_Presets[s_Preset.Name]["ve"] = s_VE
 		s_VE.priority = tonumber(s_Preset.Priority)
+		s_VE.visibility = 1
 
 		--Foreach class
 		local componentCount = 0
-		for _,l_Class in pairs(self.m_SupportedClasses) do
+		for _, l_Class in pairs(self.m_SupportedClasses) do
 
 			if(s_Preset[l_Class] ~= nil) then
 
@@ -429,6 +457,7 @@ function VEManagerClient:LoadPresets()
 
 	self:InitializePresets()
 	Events:Dispatch("VEManager:PresetsLoaded")
+	print("Presets loaded")
 
 end
 
@@ -455,8 +484,8 @@ function VEManagerClient:GetDefaultValue(p_Class, p_Field)
 	local s_States = VisualEnvironmentManager:GetStates()
 
 	for i, s_State in ipairs(s_States) do
-		-- print(">>>>>> state:")
-		-- print(s_State.entityName)
+		--print(">>>>>> state:")
+		--print(s_State.entityName)
 
 		if(s_State.entityName == "Levels/Web_Loading/Lighting/Web_Loading_VE") then
 			goto continue
@@ -471,6 +500,7 @@ function VEManagerClient:GetDefaultValue(p_Class, p_Field)
 			end
 
 			-- print("Sending default value: " .. tostring(p_Class) .. " | " .. tostring(p_Field.typeInfo.name) .. " | " .. tostring(s_Class[firstToLower(p_Field.typeInfo.name)]))
+			-- print(tostring(s_Class[firstToLower(p_Field.name)]) .. ' | ' .. tostring(p_Field.typeInfo.name))
 			return s_Class[firstToLower(p_Field.name)] --colorCorrection Contrast
 
 		end
@@ -521,11 +551,13 @@ function VEManagerClient:UpdateLerp(percentage)
 		local lerpValue = easing[transition](t,b,c,d)
 
 		if(PercentageComplete >= 1 or PercentageComplete < 0) then
-			self:SetVisibility(preset, self.m_Presets[preset].EndValue)
+			self:UpdateVisibility(preset, self.m_Presets[preset].EndValue)
 			self.m_Lerping[i] = nil
 		else
-			self:SetVisibility(preset, lerpValue)
+			self:UpdateVisibility(preset, lerpValue)
 		end
+
+		print('Lerping: '.. lerpValue .. ' - ' .. preset)
 
 	end
 
@@ -534,7 +566,7 @@ end
 
 function VEManagerClient:OnUpdateInput(p_Delta, p_SimulationDelta)
 
-	--[[
+
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F1) then
 		self:LoadPresets()
 	end
@@ -542,16 +574,16 @@ function VEManagerClient:OnUpdateInput(p_Delta, p_SimulationDelta)
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F2) then
 		self:EnablePreset("ve_base")
 	end
+
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F3) then
 		self:DisablePreset("ve_base")
-
 	end
+
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F4) then
 		self:SetVisibility("ve_base", 0.5)
 	end
 
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F5) then
-		print("oy")
 		self:FadeIn("ve_base", 10000)
 	end
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F6) then
@@ -561,7 +593,7 @@ function VEManagerClient:OnUpdateInput(p_Delta, p_SimulationDelta)
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F7) then
 		self:Lerp("ve_base", 0.5, 1000)
 	end
-	--]]
+
 	if(#self.m_Lerping > 0 ) then
 		self:UpdateLerp(p_Delta)
 	end
@@ -704,4 +736,3 @@ end
 g_VEManagerClient = VEManagerClient()
 
 
-VEManagerClient:__init()
