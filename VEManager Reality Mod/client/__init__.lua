@@ -1,5 +1,8 @@
 class('VEManagerClient')
-ve_base = require "ve_base"
+night = require "night"
+morning = require "morning"
+noon = require "noon"
+evening = require "evening"
 easing = require "easing"
 
 function VEManagerClient:__init()
@@ -15,7 +18,10 @@ end
 function VEManagerClient:RegisterVars()
 
     self.m_RawPresets = {}
-	self.m_RawPresets["base"] = json.decode(ve_base:GetPreset())
+	self.m_RawPresets["Testing1"] = json.decode(night:GetPreset())
+	self.m_RawPresets["Testing2"] = json.decode(morning:GetPreset())
+	self.m_RawPresets["Testing3"] = json.decode(noon:GetPreset())
+	self.m_RawPresets["Testing4"] = json.decode(evening:GetPreset())
     self.m_SupportedTypes = {"Vec2", "Vec3", "Vec4", "Float32", "Boolean", "Int"}
 	self.m_SupportedClasses = {
 		"CameraParams",
@@ -94,13 +100,13 @@ function VEManagerClient:EnablePreset(id)
 	end
 
 	print("Enabling preset: " .. tostring(id))
+	local state = self:GetState(id)
+	state.visibility = 1
+
 	--self.m_Presets[id]["logic"].visibility = 1 -- logicvisualenvironments aren´t needed | logicvisualenvironments are linked to ingame logic directly [we are doing logic seperately so it´s basically just unneccesary additional code] e.g https://github.com/EmulatorNexus/Venice-EBX/blob/f06c290fa43c80e07985eda65ba74c59f4c01aa0/Vehicles/common/LogicalPrefabs/AircraftNearPlane.txt
 	self.m_Presets[id]["ve"].visibility = 1 -- change to ve from logic
 	self.m_Presets[id]["ve"].enabled = true
 	self.m_Presets[id].entity:FireEvent("Enable")
-
-	local state = self:GetState(self.m_Presets[id].ve.priority)
-	state.visibility = 1
 
 end
 
@@ -114,13 +120,14 @@ function VEManagerClient:DisablePreset(id)
 	end
 
 	print("Disabling preset: " .. tostring(id))
-    --self.m_Presets[id]["logic"].visibility = 1 -- logicvisualenvironments aren´t needed | logicvisualenvironments are linked to ingame logic directly [we are doing logic seperately so it´s basically just unneccesary additional code] e.g https://github.com/EmulatorNexus/Venice-EBX/blob/f06c290fa43c80e07985eda65ba74c59f4c01aa0/Vehicles/common/LogicalPrefabs/AircraftNearPlane.txt
+
+	local state = self:GetState(id)
+	state.visibility = 0
+
+	--self.m_Presets[id]["logic"].visibility = 1 -- logicvisualenvironments aren´t needed | logicvisualenvironments are linked to ingame logic directly [we are doing logic seperately so it´s basically just unneccesary additional code] e.g https://github.com/EmulatorNexus/Venice-EBX/blob/f06c290fa43c80e07985eda65ba74c59f4c01aa0/Vehicles/common/LogicalPrefabs/AircraftNearPlane.txt
 	self.m_Presets[id]["ve"].visibility = 0 -- change to ve from logic
 	self.m_Presets[id]["ve"].enabled = false
 	self.m_Presets[id].entity:FireEvent("Disable")
-
-	local state = self:GetState(self.m_Presets[id].ve.priority)
-	state.visibility = 0
 
 end
 
@@ -147,7 +154,9 @@ function VEManagerClient:UpdateVisibility(id, visibilityFactor)   -- allows cons
 
 	self:SetVisibility(id, visibilityFactor) -- set in EntityData
 
-    local state = self:GetState(self.m_Presets[id].ve.priority)
+    local state = self:GetState(id)
+
+	VisualEnvironmentManager:SetDirty(true)
 	print("*visibility is: " .. state.visibility)
 	state.visibility = visibilityFactor -- set in visual state
 	print("*visibility changed: " .. state.visibility)
@@ -234,10 +243,9 @@ function VEManagerClient:Crossfade(id1, id2, time)
 end
 
 
+function VEManagerClient:AddTime(startingTime, lengthOfDayInSeconds) -- Add Time System to Map | To be called on Level:Loaded | time in 24hr format (0-23)
 
-function VEManagerClient:AddTime(time) -- Add Time System to Map | To be called on Level:Loaded | time in 24hr format (0-23)
-
-	self.Time:Add(self.m_currentMap, time)
+	self.Time:Add(self.m_currentMap, startingTime, lengthOfDayInSeconds)
 
 end
 
@@ -250,10 +258,10 @@ end
 
 function VEManagerClient:GetMapPresets(mapName) -- gets all Main Map Environments for Day-Night Cycle
 
-	for i, s_Preset in pairs(self.m_Presets) do
+	for id, s_Preset in pairs(self.m_Presets) do
 
 		if s_Preset.Map[mapName] then
-			return i
+			return id
 		end
 
 	end
@@ -261,19 +269,23 @@ function VEManagerClient:GetMapPresets(mapName) -- gets all Main Map Environment
 end
 
 
-function VEManagerClient:GetState(...) -- takes priority
+function VEManagerClient:GetState(id) -- takes priority
 	--Get all visual environment states
-	local args = { ... }
 	local states = VisualEnvironmentManager:GetStates()
 	--Loop through all states
 	for _, state in pairs(states) do
 
-		for i,priority in pairs(args) do
+		print(id)
+		print("State: " .. state.priority)
+		print("Entity: " .. self.m_Presets[id]["ve"].priority)
 
-			if state.priority == priority then
-				return state
-			end
+		print("Visibility:")
+		print("State: " .. state.visibility)
+		print("Entity: " .. self.m_Presets[id]["ve"].visibility)
 
+		if state.priority == self.m_Presets[id]["ve"].priority and state.visibility == self.m_Presets[id]["ve"].visibility then
+			print('returned state for: ' .. tostring(id))
+			return state
 		end
 
 	end
@@ -418,7 +430,7 @@ function VEManagerClient:LoadPresets()
 						end
 
 					else
-
+						print("Getting Default Value for: " .. tostring(l_Class) .. " | " .. tostring(s_FieldName))
 						local s_Value = self:GetDefaultValue(l_Class, l_Field)
 
 						if (s_Value == nil) then
@@ -464,7 +476,7 @@ end
 
 function VEManagerClient:OnLevelLoaded(p_MapPath, p_GameModeName)
 	self:LoadPresets()
-	self.m_currentMap = p_MapPath
+	self.m_currentMap = p_MapPath:match('/[^/]+'):sub(2)
 end
 
 
@@ -572,22 +584,24 @@ function VEManagerClient:OnUpdateInput(p_Delta, p_SimulationDelta)
 	end
 
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F2) then
-		self:EnablePreset("ve_base")
+		self:EnablePreset("Testing1")
 	end
 
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F3) then
-		self:DisablePreset("ve_base")
+		self:DisablePreset("Testing1")
 	end
 
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F4) then
-		self:SetVisibility("ve_base", 0.5)
+		--self:SetVisibility("ve_base", 0.5)
+		self:Crossfade("Testing1", "Testing2", 10000)
 	end
 
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F5) then
-		self:FadeIn("ve_base", 10000)
+		self:FadeIn("Testing3", 10000)
 	end
+
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F6) then
-		self:FadeOut("ve_base", 10000)
+		self:FadeOut("Testing3", 10000)
 	end
 
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F7) then
