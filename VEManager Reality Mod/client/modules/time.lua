@@ -45,13 +45,20 @@ end
 function Time:ServerSync(serverDayTime, totalServerTime)
 
     self.m_clientTime = serverDayTime
-    self.m_totalDayLength = totalServerTime
+    self.m_totalClientTime = totalServerTime
+
+end
+
+
+function Time:SetSunPosition(currentTime) -- for smoother sun
+
+    local factor = ( self.m_clientTime / self.m_totalDayLength )
+    VisualEnvironmentManager:SetSunRotationY( 180 * factor )
 
 end
 
 
 -- ADD TIME TO MAP
-
 function Time:Add(mapName, time, totalDayLength, isStatic, serverUpdateFrequency) -- time in 24hr [e.g 1600] format
 
     if self.m_systemActive == true then
@@ -134,6 +141,8 @@ function Time:Add(mapName, time, totalDayLength, isStatic, serverUpdateFrequency
 
     end
 
+    self:SetSunPosition(self.m_clientTime)
+
     if isStatic ~= true then
         self.m_systemActive = true
     end
@@ -202,6 +211,7 @@ function Time:Run(s_deltaTime)
 
     end
 
+    self:SetSunPosition(self.m_clientTime)
 
 end
 

@@ -528,22 +528,21 @@ function VEManagerClient:OnUpdateInput(p_Delta, p_SimulationDelta)
 
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F2) then
 		self:FadeIn("Testing1", 5000)
-		self:FadeOut("Testing2", 5000)
 	end
 
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F3) then
+		self:FadeIn("Testing2", 5000)
+		self:FadeOut("Testing1", 5000)
+	end
+
+	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F4) then
 		self:FadeIn("Testing3", 5000)
 		self:FadeOut("Testing2", 5000)
 	end
 
-	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F4) then
+	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F5) then
 		self:FadeIn("Testing4", 5000)
 		self:FadeOut("Testing3", 5000)
-	end
-
-	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F5) then
-		self:FadeIn("Testing1", 5000)
-		self:FadeOut("Testing4", 5000)
 	end
 
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F6) then
