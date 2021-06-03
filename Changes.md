@@ -32,6 +32,7 @@ time ( time of fade in ms ).
 
 ### AddTime:
 Adds the "time system" to a map via Event.
+
 Takes mapName ( automatic ),
 time ( the time you want the cycle to start from in 24hr format, e.g 1230 for 12:30pm ),
 totalDayLength ( dayLength in Seconds, "1" will convert to a full day in realtime ),
