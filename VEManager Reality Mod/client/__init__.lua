@@ -6,17 +6,14 @@ evening = require "evening"
 easing = require "easing"
 
 function VEManagerClient:__init()
-
     print('Initializing VEManagerClient')
     self:RegisterVars()
     self:RegisterEvents()
 	self:RegisterModules()
-
 end
 
 
 function VEManagerClient:RegisterVars()
-
     self.m_RawPresets = {}
 	self.m_RawPresets["Testing1"] = json.decode(night:GetPreset())
 	self.m_RawPresets["Testing2"] = json.decode(morning:GetPreset())
@@ -48,12 +45,10 @@ function VEManagerClient:RegisterVars()
 	self.m_Lerping = {}
 	self.m_Instances = {}
 	self.m_currentMap = nil
-
 end
 
 
 function VEManagerClient:RegisterEvents()
-
 	self.m_OnUpdateInputEvent = Events:Subscribe('Client:UpdateInput', self, self.OnUpdateInput)
     Events:Subscribe('Level:Loaded', self, self.OnLevelLoaded)
 	Events:Subscribe('Level:Destroy', self, self.RegisterVars)
@@ -69,14 +64,11 @@ function VEManagerClient:RegisterEvents()
     Events:Subscribe('VEManager:Lerp', self, self.Lerp)
 	Events:Subscribe('VEManager:Crossfade', self, self.Crossfade)
 	Events:Subscribe('VEManager:AddTime', self, self.AddTime)
-
 end
 
 
 function VEManagerClient:RegisterModules()
-
 	self.Time = require 'modules/time'
-
 end
 
 
@@ -93,130 +85,64 @@ end
 
 
 function VEManagerClient:EnablePreset(id)
-
 	if self.m_Presets[id] == nil then
 		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(id))
 		return
 	end
 
 	print("Enabling preset: " .. tostring(id))
-	local state = self:GetState(id)
-	state.visibility = 1
-	print("GotState:" .. tostring(state))
-
-	--self.m_Presets[id]["logic"].visibility = 1 -- logicvisualenvironments aren´t needed | logicvisualenvironments are linked to ingame logic directly [we are doing logic seperately so it´s basically just unneccesary additional code] e.g https://github.com/EmulatorNexus/Venice-EBX/blob/f06c290fa43c80e07985eda65ba74c59f4c01aa0/Vehicles/common/LogicalPrefabs/AircraftNearPlane.txt
-	self.m_Presets[id]["ve"].visibility = 1 -- change to ve from logic
+	self.m_Presets[id]["logic"].visibility = 1
+	self.m_Presets[id]["ve"].visibility = 1
 	self.m_Presets[id]["ve"].enabled = true
 	self.m_Presets[id].entity:FireEvent("Enable")
-
 end
 
 
 function VEManagerClient:DisablePreset(id)
-
-
 	if self.m_Presets[id] == nil then
 		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(id))
 		return
 	end
 
 	print("Disabling preset: " .. tostring(id))
-
-	local state = self:GetState(id)
-	state.visibility = 0
-	print("GotState:" .. tostring(state))
-
-	--self.m_Presets[id]["logic"].visibility = 1 -- logicvisualenvironments aren´t needed | logicvisualenvironments are linked to ingame logic directly [we are doing logic seperately so it´s basically just unneccesary additional code] e.g https://github.com/EmulatorNexus/Venice-EBX/blob/f06c290fa43c80e07985eda65ba74c59f4c01aa0/Vehicles/common/LogicalPrefabs/AircraftNearPlane.txt
-	self.m_Presets[id]["ve"].visibility = 0 -- change to ve from logic
+	self.m_Presets[id]["logic"].visibility = 1
+	self.m_Presets[id]["ve"].visibility = 0
 	self.m_Presets[id]["ve"].enabled = false
 	self.m_Presets[id].entity:FireEvent("Disable")
-
 end
 
 
-function VEManagerClient:SetVisibility(id, visibility)  -- sets visibility to defined value
-
+function VEManagerClient:SetVisibility(id, visibility)
 	if self.m_Presets[id] == nil then
 		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(id))
 		return
 	end
 
-	self.m_Presets[id]["ve"].visibility = visibility -- change to ve from logic
+	self.m_Presets[id]["logic"].visibility = visibility
+	self.m_Presets[id]["ve"].visibility = visibility
 	self:Reload(id)
-
-end
-
-
-function VEManagerClient:UpdateVisibility(id, visibilityFactor)   -- allows constant visibility changes
-
-	if self.m_Presets[id] == nil then
-		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(id))
-		return
-	end
-
-	self:SetVisibility(id, visibilityFactor) -- set in EntityData
-
-	local s_State
-
-	if s_State ~= self:GetState(id) or s_State == nil then
-    	s_State = self:GetState(id)
-		print("yoyoyo" .. tostring(s_State))
-	end
-
-	VisualEnvironmentManager:SetDirty(true)
-	--print("*visibility is: " .. s_State.visibility)
-	--s_State.visibility = visibilityFactor -- set in visual state
-	--print("*visibility changed: " .. s_State.visibility)
-
 end
 
 
 function VEManagerClient:FadeIn(id, time)
-
-    if self.m_Presets[id] == nil then
-		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(id))
-		return
-	end
-
 	self:FadeTo(id, 1, time)
-
 end
-
-
-function VEManagerClient:FadeOut(id, time)
-
-	if self.m_Presets[id] == nil then
-		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(id))
-		return
-	end
-
-    self:FadeTo(id, 0, time) --removed unnecessary lines of code
-
-end
-
 
 function VEManagerClient:FadeTo(id, visibility, time)
-
 	if self.m_Presets[id] == nil then
 		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(id))
-		return
-	elseif self.m_Presets[id]["ve"].visibility == visibility then -- not lerp if already at desired visibility
-		print("Already at desired Visibility")
 		return
 	end
 
 	self.m_Presets[id]['time'] = time
 	self.m_Presets[id]['startTime'] = SharedUtils:GetTimeMS()
-	self.m_Presets[id]['startValue'] = self.m_Presets[id]["ve"].visibility -- Changed this back as FadeIn shouldn´t be used on an already visible preset anyways
-	self.m_Presets[id]['EndValue'] = visibility
-
+	self.m_Presets[id]['startValue'] = 0 -- Fade in should always start from 0
+	self.m_Presets[id]['EndValue'] = visibility -- this doesn't allow for a preset to have a visibility ~= 0. The basic visibility of each preset needs to be indipendent of the current visibility (aka opacity).
 	self.m_Lerping[#self.m_Lerping + 1] = id
-
 end
 
-
-function VEManagerClient:Lerp(id, value, time)
-
+--[[
+function VEManagerClient:FadeIn(id, time)
 	if self.m_Presets[id] == nil then
 		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(id))
 		return
@@ -224,16 +150,41 @@ function VEManagerClient:Lerp(id, value, time)
 
 	self.m_Presets[id]['time'] = time
 	self.m_Presets[id]['startTime'] = SharedUtils:GetTimeMS()
-	self.m_Presets[id]['startValue'] = self.m_Presets[id]["ve"].visibility
+	self.m_Presets[id]['startValue'] = self.m_Presets[id]["logic"].visibility
+	self.m_Presets[id]['EndValue'] = 1
+	self.m_Lerping[#self.m_Lerping +1] = id
+end
+]]
+
+function VEManagerClient:FadeOut(id, time)
+	if self.m_Presets[id] == nil then
+		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(id))
+		return
+	end
+
+	self.m_Presets[id]['time'] = time
+	self.m_Presets[id]['startTime'] = SharedUtils:GetTimeMS()
+	self.m_Presets[id]['startValue'] = self.m_Presets[id]["logic"].visibility
+	self.m_Presets[id]['EndValue'] = 0
+
+	self.m_Lerping[#self.m_Lerping +1] = id
+end
+
+function VEManagerClient:Lerp(id, value, time)
+	if self.m_Presets[id] == nil then
+		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(id))
+		return
+	end
+	self.m_Presets[id]['time'] = time
+	self.m_Presets[id]['startTime'] = SharedUtils:GetTimeMS()
+	self.m_Presets[id]['startValue'] = self.m_Presets[id]["logic"].visibility
 	self.m_Presets[id]['EndValue'] = value
 
 	self.m_Lerping[#self.m_Lerping +1] = id
+end
 
-end -- Same as FadeTo Function, may be deleted
 
-
-function VEManagerClient:Crossfade(id1, id2, time)
-
+--[[function VEManagerClient:Crossfade(id1, id2, time)
     if self.m_Presets[id1] == nil then
 		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(id1))
 		return
@@ -242,18 +193,14 @@ function VEManagerClient:Crossfade(id1, id2, time)
 		return
 	end
 
-    local s_startTime = SharedUtils:GetTimeMS()
+    self:FadeTo(id1, self.m_Presets[id2]["logic"].visibility, time) -- Fade id1 to id2 visibility
+    self:FadeTo(id2, self.m_Presets[id1]["logic"].visibility, time) -- Fade id2 to id1 visibility
 
-    self:FadeTo(id1, self.m_Presets[id2]["ve"].visibility, time) -- Fade id1 to id2 visibility
-    self:FadeTo(id2, self.m_Presets[id1]["ve"].visibility, time) -- Fade id2 to id1 visibility
-
-end
+end]]
 
 
-function VEManagerClient:AddTime(startingTime, lengthOfDayInSeconds) -- Add Time System to Map | To be called on Level:Loaded | time in 24hr format (0-23)
-
-	self.Time:Add(self.m_currentMap, startingTime, lengthOfDayInSeconds)
-
+function VEManagerClient:AddTime(startingTime, lengthOfDayInSeconds, isStatic, serverUpdateFrequency) -- Add Time System to Map | To be called on Level:Loaded | time in 24hr format (0-23)
+	self.Time:Add(self.m_currentMap, startingTime, lengthOfDayInSeconds, isStatic, serverUpdateFrequency)
 end
 
 
@@ -264,7 +211,6 @@ end
 ]]
 
 function VEManagerClient:GetMapPresets(mapName) -- gets all Main Map Environments for Day-Night Cycle
-
 	for id, s_Preset in pairs(self.m_Presets) do
 
 		if s_Preset.Map[mapName] then
@@ -272,32 +218,33 @@ function VEManagerClient:GetMapPresets(mapName) -- gets all Main Map Environment
 		end
 
 	end
-
 end
 
 
-function VEManagerClient:GetState(id) -- takes priority
+function VEManagerClient:GetState(...)
 	--Get all visual environment states
+	local args = { ... }
 	local states = VisualEnvironmentManager:GetStates()
 	--Loop through all states
 	for _, state in pairs(states) do
 
-		if state.priority == self.m_Presets[id]["ve"].priority and state.visibility == self.m_Presets[id]["ve"].visibility then
-			print('returned state for: ' .. tostring(id))
-			return state
+		for i,priority in pairs(args) do
+
+			if state.priority == priority then
+				return state
+			end
+
 		end
 
 	end
-
 	return nil
 end
 
 
 function VEManagerClient:InitializePresets()
-
 	for i, s_Preset in pairs(self.m_Presets) do
-
-		s_Preset["entity"] = EntityManager:CreateEntity(s_Preset["ve"], LinearTransform())
+		print(s_Preset["logic"])
+		s_Preset["entity"] = EntityManager:CreateEntity(s_Preset["logic"], LinearTransform())
 
 		if s_Preset["entity"] == nil then
 			print("Could not spawn preset.")
@@ -307,22 +254,17 @@ function VEManagerClient:InitializePresets()
 		s_Preset["entity"]:Init(Realm.Realm_Client, true)
 		VisualEnvironmentManager:SetDirty(true)
 		print("Spawned Preset: " .. i)
-
 	end
-
 end
 
 
 function VEManagerClient:Reload(id)
-
 	self.m_Presets[id].entity:FireEvent("Disable")
 	self.m_Presets[id].entity:FireEvent("Enable")
-
 end
 
 
 function VEManagerClient:LoadPresets()
-
 	print("Loading presets....")
 	--Foreach preset
 	-- print(self.m_RawPresets)
@@ -332,21 +274,23 @@ function VEManagerClient:LoadPresets()
 		local s_IsBasePreset = s_Preset.Priority == 1
 		-- print("IsBasePreset: " .. tostring(s_IsBasePreset))
 
-		--[[ Not sure if we need the LogicelVEEntity, but :shrug:
+		--Not sure if we need the LogicelVEEntity, but :shrug:
 		local s_LVEED = self:CreateEntity("LogicVisualEnvironmentEntityData")
 		self.m_Presets[s_Preset.Name] = {}
 		self.m_Presets[s_Preset.Name]["logic"] = s_LVEED
-		s_LVEED.visibility = 1]] -- not needed
+		s_LVEED.visibility = 1
 
-		--[[local s_VEB = self:CreateEntity("VisualEnvironmentBlueprint")
+		local s_VEB = self:CreateEntity("VisualEnvironmentBlueprint")
 		s_VEB.name = s_Preset.Name
 		s_LVEED.visualEnvironment = s_VEB
-		self.m_Presets[s_Preset.Name]["blueprint"] = s_VEB ]] -- not needed
+		self.m_Presets[s_Preset.Name]["blueprint"] = s_VEB 
 
 		local s_VE = self:CreateEntity("VisualEnvironmentEntityData")
-		--s_VEB.object = s_VE -- not needed without blueprint
-		self.m_Presets[s_Preset.Name] = {}
+		s_VEB.object = s_VE
 		self.m_Presets[s_Preset.Name]["ve"] = s_VE
+		self.m_Presets[s_Preset.Name]["type"] = s_Preset.Type
+
+		print("Preset Type: " .. s_Preset.Type)
 		s_VE.priority = tonumber(s_Preset.Priority)
 		s_VE.visibility = 1
 
@@ -463,13 +407,13 @@ function VEManagerClient:LoadPresets()
 		s_VE.runtimeComponentCount = componentCount
 		s_VE.visibility = 0
 		s_VE.enabled = false
+		s_LVEED.visibility = 0
 
 	end
 
 	self:InitializePresets()
 	Events:Dispatch("VEManager:PresetsLoaded")
 	print("Presets loaded")
-
 end
 
 
@@ -480,7 +424,6 @@ end
 
 
 function VEManagerClient:GetDefaultValue(p_Class, p_Field)
-
 	if (p_Field.typeInfo.enum) then
 
 		if (p_Field.typeInfo.name == "Realm") then
@@ -518,7 +461,6 @@ function VEManagerClient:GetDefaultValue(p_Class, p_Field)
 
 		::continue::
 	end
-
 end
 
 -- This one is a little dirty.
@@ -537,7 +479,6 @@ end
 
 
 function VEManagerClient:UpdateLerp(percentage)
-
 	for i,preset in pairs(self.m_Lerping) do
 
 		local TimeSinceStarted = SharedUtils:GetTimeMS() - self.m_Presets[preset].startTime
@@ -554,7 +495,6 @@ function VEManagerClient:UpdateLerp(percentage)
 		local d = self.m_Presets[preset].time
 
 		local transition = "linear"
-
 		if(self.m_Presets[preset].transition ~= nil) then
 			transition = self.m_Presets[preset].transition
 		end
@@ -562,16 +502,20 @@ function VEManagerClient:UpdateLerp(percentage)
 		local lerpValue = easing[transition](t,b,c,d)
 
 		if(PercentageComplete >= 1 or PercentageComplete < 0) then
-			self:UpdateVisibility(preset, self.m_Presets[preset].EndValue)
+			self:SetVisibility(preset, self.m_Presets[preset].EndValue)
 			self.m_Lerping[i] = nil
 		else
-			self:UpdateVisibility(preset, lerpValue)
+			self:SetVisibility(preset, lerpValue)
 		end
-
-		print('Lerping: '.. lerpValue .. ' - ' .. preset)
-
 	end
 
+end
+
+
+function VEManagerClient:SetLerpPriority(id)
+	if self.m_Presets[id].type ~= 'Time' then
+		return
+	end
 end
 
 
@@ -583,24 +527,30 @@ function VEManagerClient:OnUpdateInput(p_Delta, p_SimulationDelta)
 	end
 
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F2) then
-		self:EnablePreset("Testing1")
+		self:FadeIn("Testing1", 5000)
+		self:FadeOut("Testing2", 5000)
 	end
 
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F3) then
-		self:DisablePreset("Testing1")
+		self:FadeIn("Testing3", 5000)
+		self:FadeOut("Testing2", 5000)
 	end
 
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F4) then
-		--self:SetVisibility("ve_base", 0.5)
-		self:Crossfade("Testing1", "Testing2", 10000)
+		self:FadeIn("Testing4", 5000)
+		self:FadeOut("Testing3", 5000)
 	end
 
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F5) then
-		self:FadeIn("Testing3", 10000)
+		self:FadeIn("Testing1", 5000)
+		self:FadeOut("Testing4", 5000)
 	end
 
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F6) then
-		self:FadeOut("Testing3", 10000)
+		self:DisablePreset("Testing1")
+		self:DisablePreset("Testing2")
+		self:DisablePreset("Testing3")
+		self:DisablePreset("Testing4")
 	end
 
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F7) then
@@ -706,19 +656,21 @@ function split(pString, pPattern)
 end
 
 function dump(o)
+
 	if(o == nil) then
 		print("tried to load jack shit")
 	end
-   if type(o) == 'table' then
-      local s = '{ '
-      for k,v in pairs(o) do
-         if type(k) ~= 'number' then k = '"'..k..'"' end
-         s = s .. '['..k..'] = ' .. dump(v) .. ','
-      end
-      return s .. '} '
-   else
-      return tostring(o)
-   end
+
+	if type(o) == 'table' then
+		local s = '{ '
+		for k,v in pairs(o) do
+			if type(k) ~= 'number' then k = '"'..k..'"' end
+			s = s .. '['..k..'] = ' .. dump(v) .. ','
+		end
+		return s .. '} '
+	else
+		return tostring(o)
+	end
 end
 
 function IsBasicType( typ )

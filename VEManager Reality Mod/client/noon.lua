@@ -79,8 +79,8 @@ local table = [[
         "Realm": "0",
         "Enable": "true",
         "SunRotationX": "270",
-        "SunRotationY": "90",
-        "SunColor": ":1:1:0.85",
+        "SunRotationY": "85",
+        "SunColor": ":1:0.85:0.8",
         "SkyColor": "(1, 1, 0.85)",
         "GroundColor": "(1, 1, 0.85)",
         "SkyLightAngleFactor": "0.0089999996125698",
@@ -101,8 +101,8 @@ local table = [[
         "Realm": "0",
         "Enable": "true",
         "BrightnessScale": "1",
-        "SunSize": "0.1",
-        "SunScale": "5"
+        "SunSize": "0.01",
+        "SunScale": "25"
     },
     "SunFlare": {
         "Realm": "0",
@@ -163,8 +163,7 @@ local table = [[
         "WindStrength": "1.7"
     },
     "Name": "Testing3",
-    "Map": "XP1_004",
-    "Type": "Noon",
+    "Type": "Time",
     "Priority": "100000",
     "Visibility": "1"
 }

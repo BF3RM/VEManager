@@ -113,7 +113,7 @@ function VEManagerClient:FadeTo(id, visibility, time)
 	self.m_Presets[id]['time'] = time
 	self.m_Presets[id]['startTime'] = SharedUtils:GetTimeMS()
 	self.m_Presets[id]['startValue'] = 0 -- Fade in should always start from 0
-	self.m_Presets[id]['EndValue'] = visibility -- this doesn't allow for a preset to have a visibility ~= 0. The basic visibility of each preset needs to be indipendent of the current visibility (aka opacity). 
+	self.m_Presets[id]['EndValue'] = visibility -- this doesn't allow for a preset to have a visibility ~= 0. The basic visibility of each preset needs to be indipendent of the current visibility (aka opacity).
 	self.m_Lerping[#self.m_Lerping + 1] = id
 end
 
