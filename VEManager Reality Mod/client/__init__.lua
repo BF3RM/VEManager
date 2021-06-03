@@ -102,6 +102,7 @@ function VEManagerClient:EnablePreset(id)
 	print("Enabling preset: " .. tostring(id))
 	local state = self:GetState(id)
 	state.visibility = 1
+	print("GotState:" .. tostring(state))
 
 	--self.m_Presets[id]["logic"].visibility = 1 -- logicvisualenvironments aren´t needed | logicvisualenvironments are linked to ingame logic directly [we are doing logic seperately so it´s basically just unneccesary additional code] e.g https://github.com/EmulatorNexus/Venice-EBX/blob/f06c290fa43c80e07985eda65ba74c59f4c01aa0/Vehicles/common/LogicalPrefabs/AircraftNearPlane.txt
 	self.m_Presets[id]["ve"].visibility = 1 -- change to ve from logic
@@ -123,6 +124,7 @@ function VEManagerClient:DisablePreset(id)
 
 	local state = self:GetState(id)
 	state.visibility = 0
+	print("GotState:" .. tostring(state))
 
 	--self.m_Presets[id]["logic"].visibility = 1 -- logicvisualenvironments aren´t needed | logicvisualenvironments are linked to ingame logic directly [we are doing logic seperately so it´s basically just unneccesary additional code] e.g https://github.com/EmulatorNexus/Venice-EBX/blob/f06c290fa43c80e07985eda65ba74c59f4c01aa0/Vehicles/common/LogicalPrefabs/AircraftNearPlane.txt
 	self.m_Presets[id]["ve"].visibility = 0 -- change to ve from logic
@@ -154,12 +156,17 @@ function VEManagerClient:UpdateVisibility(id, visibilityFactor)   -- allows cons
 
 	self:SetVisibility(id, visibilityFactor) -- set in EntityData
 
-    local state = self:GetState(id)
+	local s_State
+
+	if s_State ~= self:GetState(id) or s_State == nil then
+    	s_State = self:GetState(id)
+		print("yoyoyo" .. tostring(s_State))
+	end
 
 	VisualEnvironmentManager:SetDirty(true)
-	print("*visibility is: " .. state.visibility)
-	state.visibility = visibilityFactor -- set in visual state
-	print("*visibility changed: " .. state.visibility)
+	--print("*visibility is: " .. s_State.visibility)
+	--s_State.visibility = visibilityFactor -- set in visual state
+	--print("*visibility changed: " .. s_State.visibility)
 
 end
 
@@ -274,14 +281,6 @@ function VEManagerClient:GetState(id) -- takes priority
 	local states = VisualEnvironmentManager:GetStates()
 	--Loop through all states
 	for _, state in pairs(states) do
-
-		print(id)
-		print("State: " .. state.priority)
-		print("Entity: " .. self.m_Presets[id]["ve"].priority)
-
-		print("Visibility:")
-		print("State: " .. state.visibility)
-		print("Entity: " .. self.m_Presets[id]["ve"].visibility)
 
 		if state.priority == self.m_Presets[id]["ve"].priority and state.visibility == self.m_Presets[id]["ve"].visibility then
 			print('returned state for: ' .. tostring(id))
