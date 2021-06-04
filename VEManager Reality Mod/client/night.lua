@@ -59,12 +59,12 @@ local table = [[
         "FogDistanceMultiplier": "1.0",
         "FogGradientEnable": "true",
         "Start": "15",
-        "EndValue": "225.0",
+        "EndValue": "100.0",
         "Curve": "0.4:-0.77:1.3:-0.01:",
         "FogColorEnable": "true",
         "FogColor": "0.02:0.05:0.11:",
         "FogColorStart": "0",
-        "FogColorEnd": "5000",
+        "FogColorEnd": "20000",
         "FogColorCurve": "6.1:-11.7:5.62:-0.18:",
         "TransparencyFadeStart": "5000",
         "TransparencyFadeEnd": "0",
@@ -80,17 +80,32 @@ local table = [[
         "Enable": "true",
         "SunRotationX": "270",
         "SunColor": "0:0:0:",
-        "SkyColor": "(0.025, 0.025, 0.025)",
-        "GroundColor": "(0.01, 0.01, 0.01)",
+        "SkyColor": "(0.0025, 0.0025, 0.0025)",
+        "GroundColor": "(0.001, 0.001, 0.001)",
         "SkyLightAngleFactor": "0.0089999996125698",
-        "SunSpecularScale": "0"
+        "SunSpecularScale": "0",
+        "SunRotationX": "270",
+        "SunRotationY": "0"
     },
     "Sky": {
         "Realm": "0",
         "Enable": "true",
-        "BrightnessScale": "0.015",
+        "BrightnessScale": "0.001",
         "SunSize": "0.01",
-        "SunScale": "15"
+        "SunScale": "5",
+        "CloudLayer1Altitude": "2000000.0",
+        "CloudLayer1TileFactor": "0.600000023842",
+        "CloudLayer1Rotation": "237.072998047",
+        "CloudLayer1Speed": "0",
+        "CloudLayer2Altitude": "500000.0",
+        "CloudLayer2TileFactor": "0.25",
+        "CloudLayer2Rotation": "223.52900695801",
+        "CloudLayer2Speed": "0",
+        "CloudLayer2SunLightIntensity": "0",
+        "CloudLayer2SunLightPower": "0",
+        "CloudLayer2AmbientLightIntensity": "0",
+        "CloudLayer2Color": "(0, 0, 0)",
+        "CloudLayer2AlphaMul": "0"
     },
     "SunFlare": {
         "Realm": "0",
@@ -144,14 +159,6 @@ local table = [[
         "ChromostereopsisEnable": "false",
         "ChromostereopsisScale": "1.0",
         "ChromostereopsisOffset": "1.0"
-    },
-    "Vignette": {
-        "Realm": "0",
-        "Enable": "true",
-        "Scale": "(2.000000, 2.000000)",
-        "Exponent": "1.5",
-        "Color": "(0.000000, 0.000000, 0.000000)",
-        "Opacity": "0.2039999961853"
     },
     "Wind": {
         "Realm": "0",

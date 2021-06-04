@@ -80,14 +80,35 @@ local table = [[
         "Enable": "true",
         "SunColor": "(1, 0.16, 0.06)",
         "SkyColor": "(0.3, 0.3, 0.3)",
-        "GroundColor": "(0.01, 0.01, 0.01)"
+        "GroundColor": "(0.01, 0.01, 0.01)",
+        "SunRotationX": "270",
+        "SunRotationY": "0"
     },
     "Sky": {
         "Realm": "0",
         "Enable": "true",
         "BrightnessScale": "0.3",
         "SunSize": "0.01",
-        "SunScale": "15"
+        "SunScale": "5",
+        "CloudLayerSunColor": "(0, 0, 0)",
+        "CloudLayer1Altitude": "2000000.0",
+        "CloudLayer1TileFactor": "0.60000002384186",
+        "CloudLayer1Rotation": "237.07299804688",
+        "CloudLayer1Speed": "0",
+        "CloudLayer1SunLightIntensity": "0",
+        "CloudLayer1SunLightPower": "0",
+        "CloudLayer1AmbientLightIntensity": "0",
+        "CloudLayer1Color": "0:0:0:",
+        "CloudLayer1AlphaMul": "0",
+        "CloudLayer2Altitude": "500000.0",
+        "CloudLayer2TileFactor": "0.25",
+        "CloudLayer2Rotation": "223.52900695801",
+        "CloudLayer2Speed": "0",
+        "CloudLayer2SunLightIntensity": "0",
+        "CloudLayer2SunLightPower": "0",
+        "CloudLayer2AmbientLightIntensity": "0",
+        "CloudLayer2Color": "(0, 0, 0)",
+        "CloudLayer2AlphaMul": "0"
     },
     "Tonemap": {
         "Realm": "0",
@@ -108,7 +129,7 @@ local table = [[
     },
     "Name": "Testing4",
     "Type": "Evening",
-    "Priority": "100001",
+    "Priority": "100000",
     "Visibility": "1"
 }
 ]]

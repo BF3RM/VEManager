@@ -44,7 +44,6 @@ function VEManagerClient:RegisterVars()
 	self.m_Presets = {}
 	self.m_Lerping = {}
 	self.m_Instances = {}
-	self.m_currentMap = nil
 end
 
 
@@ -68,7 +67,8 @@ end
 
 
 function VEManagerClient:RegisterModules()
-	self.Time = require 'modules/time'
+	require 'modules/time'
+	Time:__init()
 end
 
 
@@ -120,6 +120,7 @@ function VEManagerClient:SetVisibility(id, visibility)
 
 	self.m_Presets[id]["logic"].visibility = visibility
 	self.m_Presets[id]["ve"].visibility = visibility
+
 	self:Reload(id)
 end
 
@@ -199,8 +200,9 @@ end
 end]]
 
 
-function VEManagerClient:AddTime(startingTime, lengthOfDayInSeconds, isStatic, serverUpdateFrequency) -- Add Time System to Map | To be called on Level:Loaded | time in 24hr format (0-23)
-	self.Time:Add(self.m_currentMap, startingTime, lengthOfDayInSeconds, isStatic, serverUpdateFrequency)
+function VEManagerClient:AddTime(startingTime, lengthOfDayInMinutes, isStatic, serverUpdateFrequency) -- Add Time System to Map | To be called on Level:Loaded | time in 24hr format (0-23)
+	local s_currentMap = SharedUtils:GetLevelName()
+	Time:Add(s_currentMap, startingTime, lengthOfDayInMinutes, isStatic, serverUpdateFrequency)
 end
 
 
@@ -210,13 +212,14 @@ end
 
 ]]
 
+
 function VEManagerClient:GetMapPresets(mapName) -- gets all Main Map Environments for Day-Night Cycle
-	for id, s_Preset in pairs(self.m_Presets) do
-
-		if s_Preset.Map[mapName] then
-			return id
+	local map = mapName:match('/[^/]+'):sub(2)
+	for i, s_Preset in pairs(VEManagerClient.m_Presets) do
+		if s_Preset.Map[map] then
+            print(i)
+			return i
 		end
-
 	end
 end
 
@@ -243,7 +246,7 @@ end
 
 function VEManagerClient:InitializePresets()
 	for i, s_Preset in pairs(self.m_Presets) do
-		print(s_Preset["logic"])
+		--print(s_Preset["logic"])
 		s_Preset["entity"] = EntityManager:CreateEntity(s_Preset["logic"], LinearTransform())
 
 		if s_Preset["entity"] == nil then
@@ -283,14 +286,16 @@ function VEManagerClient:LoadPresets()
 		local s_VEB = self:CreateEntity("VisualEnvironmentBlueprint")
 		s_VEB.name = s_Preset.Name
 		s_LVEED.visualEnvironment = s_VEB
-		self.m_Presets[s_Preset.Name]["blueprint"] = s_VEB 
+		self.m_Presets[s_Preset.Name]["blueprint"] = s_VEB
 
 		local s_VE = self:CreateEntity("VisualEnvironmentEntityData")
 		s_VEB.object = s_VE
 		self.m_Presets[s_Preset.Name]["ve"] = s_VE
 		self.m_Presets[s_Preset.Name]["type"] = s_Preset.Type
 
+		print("Preset Name: " .. s_Preset.Name)
 		print("Preset Type: " .. s_Preset.Type)
+		print("Preset Priority: " .. s_Preset.Priority)
 		s_VE.priority = tonumber(s_Preset.Priority)
 		s_VE.visibility = 1
 
@@ -360,7 +365,15 @@ function VEManagerClient:LoadPresets()
 								elseif (l_Field.typeInfo.enum) then
 									s_Class[firstToLower(s_FieldName)] = tonumber(s_Value)
 								elseif (s_Type == "TextureAsset") then
-									s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
+									if s_FieldName == "PanoramicTexture" or s_FieldName == "PanoramicAlphaTexture" or s_FieldName == "StaticEnvmapTexture" then
+										s_Class[firstToLower(s_FieldName)] = nil -- needs to be included in another way to keep it out of the VEManager itself^
+									elseif s_FieldName == "CloudLayer1Texture" then
+										s_Class[firstToLower(s_FieldName)] = TextureAsset(_G['g_Stars'])
+										print("Added Stars")
+									else
+										--print("Added FieldName: " .. s_FieldName)
+										s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
+									end
 								elseif l_Field.typeInfo.array then
 									print("Found unexpected array, ignoring")
 								else
@@ -373,7 +386,7 @@ function VEManagerClient:LoadPresets()
 						end
 
 					else
-						print("Getting Default Value for: " .. tostring(l_Class) .. " | " .. tostring(s_FieldName))
+						--print("Getting Default Value for: " .. tostring(l_Class) .. " | " .. tostring(s_FieldName))
 						local s_Value = self:GetDefaultValue(l_Class, l_Field)
 
 						if (s_Value == nil) then
@@ -386,7 +399,15 @@ function VEManagerClient:LoadPresets()
 							elseif (l_Field.typeInfo.enum) then
 								s_Class[firstToLower(s_FieldName)] = tonumber(s_Value)
 							elseif (s_Type == "TextureAsset") then
-								s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
+								if s_FieldName == "PanoramicTexture" or s_FieldName == "PanoramicAlphaTexture" or s_FieldName == "StaticEnvmapTexture" then
+									s_Class[firstToLower(s_FieldName)] = nil -- needs to be included in another way to keep it out of the VEManager itself^
+								elseif s_FieldName == "CloudLayer1Texture" then
+									s_Class[firstToLower(s_FieldName)] = TextureAsset(_G['g_Stars'])
+									print("Added Stars")
+								else
+									--print("Added FieldName: " .. s_FieldName)
+									s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
+								end
 							elseif l_Field.typeInfo.array then
 								print("Found unexpected array, ignoring")
 							else
@@ -419,7 +440,6 @@ end
 
 function VEManagerClient:OnLevelLoaded(p_MapPath, p_GameModeName)
 	self:LoadPresets()
-	self.m_currentMap = p_MapPath:match('/[^/]+'):sub(2)
 end
 
 
@@ -527,29 +547,31 @@ function VEManagerClient:OnUpdateInput(p_Delta, p_SimulationDelta)
 	end
 
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F2) then
-		self:FadeIn("Testing1", 5000)
+		--self:FadeIn("Testing1", 5000)
+		VEManagerClient:AddTime(0, 60, false, 30)
 	end
 
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F3) then
-		self:FadeIn("Testing2", 5000)
-		self:FadeOut("Testing1", 5000)
+		VEManagerClient:AddTime(0, 60, true, 30)
+		--self:FadeIn("Testing2", 5000)
+		--self:FadeOut("Testing1", 5000)
 	end
 
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F4) then
-		self:FadeIn("Testing3", 5000)
-		self:FadeOut("Testing2", 5000)
+		--self:FadeIn("Testing3", 5000)
+		--self:FadeOut("Testing2", 5000)
 	end
 
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F5) then
-		self:FadeIn("Testing4", 5000)
-		self:FadeOut("Testing3", 5000)
+		--self:FadeIn("Testing4", 5000)
+		--self:FadeOut("Testing3", 5000)
 	end
 
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F6) then
-		self:DisablePreset("Testing1")
-		self:DisablePreset("Testing2")
-		self:DisablePreset("Testing3")
-		self:DisablePreset("Testing4")
+		--self:DisablePreset("Testing1")
+		--self:DisablePreset("Testing2")
+		--self:DisablePreset("Testing3")
+		--self:DisablePreset("Testing4")
 	end
 
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F7) then

@@ -75,12 +75,43 @@ local table = [[
         "HeightFogDepth": "100.0",
         "HeightFogVisibilityRange": "100.0"
     },
+    "OutdoorLight": {
+        "Realm": "0",
+        "Enable": "true",
+        "SunRotationX": "270",
+        "SunColor": "1:0.9:1:",
+        "SkyColor": "(1, 0.9, 1)",
+        "GroundColor": "(1, 0.9, 1)",
+        "SkyLightAngleFactor": "0.0089999996125698",
+        "SunSpecularScale": "0",
+        "SunRotationX": "270",
+        "SunRotationY": "0"
+    },
     "Sky": {
         "Realm": "0",
         "Enable": "true",
         "BrightnessScale": "1",
         "SunSize": "0.01",
-        "SunScale": "15"
+        "SunScale": "5",
+        "CloudLayerSunColor": "(0, 0, 0)",
+        "CloudLayer1Altitude": "2000000.0",
+        "CloudLayer1TileFactor": "0.60000002384186",
+        "CloudLayer1Rotation": "237.07299804688",
+        "CloudLayer1Speed": "0",
+        "CloudLayer1SunLightIntensity": "0",
+        "CloudLayer1SunLightPower": "0",
+        "CloudLayer1AmbientLightIntensity": "0",
+        "CloudLayer1Color": "0:0:0:",
+        "CloudLayer1AlphaMul": "0",
+        "CloudLayer2Altitude": "500000.0",
+        "CloudLayer2TileFactor": "0.25",
+        "CloudLayer2Rotation": "223.52900695801",
+        "CloudLayer2Speed": "0",
+        "CloudLayer2SunLightIntensity": "0",
+        "CloudLayer2SunLightPower": "0",
+        "CloudLayer2AmbientLightIntensity": "0",
+        "CloudLayer2Color": "(0, 0, 0)",
+        "CloudLayer2AlphaMul": "0"
     },
     "Tonemap": {
         "Realm": "0",
@@ -100,7 +131,7 @@ local table = [[
         "WindStrength": "1.7"
     },
     "Name": "Testing3",
-    "Type": "Time",
+    "Type": "Noon",
     "Priority": "100000",
     "Visibility": "1"
 }
