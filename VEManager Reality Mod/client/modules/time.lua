@@ -382,15 +382,6 @@ function Time:Run(deltaTime)
 
         print("Night Visibility: " .. s_factorNight)
 
-        -- set Priorities
-        g_VEManagerClient.m_Presets[self.m_currentNightPreset]["ve"].priority = self.m_fadeInPriority
-        g_VEManagerClient.m_Presets[self.m_currentMorningPreset]["ve"].priority = self.m_idlePriority
-        g_VEManagerClient.m_Presets[self.m_currentNoonPreset]["ve"].priority = self.m_idlePriority
-        g_VEManagerClient.m_Presets[self.m_currentEveningPreset]["ve"].priority = self.m_idlePriority
-
-        local s_FadeInPrio = g_VEManagerClient.m_Presets[self.m_currentNightPreset]["ve"].priority
-        local s_FadeOutPrio = g_VEManagerClient.m_Presets[self.m_currentEveningPreset]["ve"].priority
-
         -- update visibility
         self:UpdateIdle()
         g_VEManagerClient:UpdateVisibility(self.m_currentNightPreset, self.m_nightPriority, s_factorNight)
