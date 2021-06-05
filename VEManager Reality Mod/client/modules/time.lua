@@ -19,9 +19,9 @@ function Time:RegisterVars()
     self.m_originalSunX = nil
     self.m_originalSunY = nil
     self.m_nightPriority = 100001
-    self.m_morningPriority = 100001
-    self.m_noonPriority = 100001
-    self.m_eveningPriority = 100001
+    self.m_morningPriority = 100002
+    self.m_noonPriority = 100003
+    self.m_eveningPriority = 100004
     self.m_mapPresets = {}
 end
 
