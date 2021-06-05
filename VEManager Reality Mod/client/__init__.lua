@@ -132,15 +132,12 @@ function VEManagerClient:UpdateVisibility(id, priority, visibilityFactor)
 		return
 	end
 
-	self.m_Presets[id]["logic"].visibility = visibilityFactor
-	self.m_Presets[id]["ve"].visibility = visibilityFactor
-
-	local states = VisualEnvironmentManager:GetStates()
+	local s_states = VisualEnvironmentManager:GetStates()
 	VisualEnvironmentManager:SetDirty(true)
-	local fixedPriority = 10000000 + priority
+	local s_fixedPriority = 10000000 + priority
 
-	for _, state in pairs(states) do
-		if state.priority == fixedPriority then
+	for _, state in pairs(s_states) do
+		if state.priority == s_fixedPriority then
 			state.visibility = visibilityFactor
 		end
 	end
