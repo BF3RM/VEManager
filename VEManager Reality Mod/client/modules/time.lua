@@ -307,7 +307,6 @@ function Time:Run(deltaTime)
         print("Time Till Switch: " .. (self.m_totalDayLength * 0.25 - self.m_clientTime))
 
         -- apply visibility factor
-        self:UpdateIdle()
         g_VEManagerClient:UpdateVisibility(self.m_currentNightPreset, self.m_nightPriority, s_factorNight)
 
     elseif self.m_clientTime < ( self.m_totalDayLength * 0.375 ) then -- 6:00 to 9:00
@@ -322,7 +321,6 @@ function Time:Run(deltaTime)
         print("Time Till Switch: " .. (self.m_totalDayLength * 0.375 - self.m_clientTime))
 
         -- update visibility
-        self:UpdateIdle()
         g_VEManagerClient:UpdateVisibility(self.m_currentNightPreset, self.m_nightPriority, s_factorNight)
         g_VEManagerClient:UpdateVisibility(self.m_currentMorningPreset, self.m_morningPriority, s_factorMorning)
 
@@ -338,7 +336,6 @@ function Time:Run(deltaTime)
         print("Time Till Switch: " .. (self.m_totalDayLength * 0.5 - self.m_clientTime))
 
         -- update visibility
-        self:UpdateIdle()
         g_VEManagerClient:UpdateVisibility(self.m_currentNoonPreset, self.m_noonPriority, s_factorNoon)
         g_VEManagerClient:UpdateVisibility(self.m_currentMorningPreset, self.m_morningPriority, s_factorMorning)
 
@@ -354,7 +351,6 @@ function Time:Run(deltaTime)
         print("Time Till Switch: " .. (self.m_totalDayLength * 0.75 - self.m_clientTime))
 
         -- update visibility
-        self:UpdateIdle()
         g_VEManagerClient:UpdateVisibility(self.m_currentNoonPreset, self.m_noonPriority, s_factorNoon)
         g_VEManagerClient:UpdateVisibility(self.m_currentEveningPreset, self.m_eveningPriority, s_factorEvening)
 
@@ -371,7 +367,6 @@ function Time:Run(deltaTime)
         print("Time Till Switch: " .. (self.m_totalDayLength * 0.875 - self.m_clientTime))
 
         -- update visibility
-        self:UpdateIdle()
         g_VEManagerClient:UpdateVisibility(self.m_currentEveningPreset, self.m_eveningPriority, s_factorEvening)
         g_VEManagerClient:UpdateVisibility(self.m_currentNightPreset, self.m_nightPriority, s_factorNight)
 
@@ -383,7 +378,6 @@ function Time:Run(deltaTime)
         print("Night Visibility: " .. s_factorNight)
 
         -- update visibility
-        self:UpdateIdle()
         g_VEManagerClient:UpdateVisibility(self.m_currentNightPreset, self.m_nightPriority, s_factorNight)
 
     elseif self.m_clientTime >= self.m_totalDayLength then
