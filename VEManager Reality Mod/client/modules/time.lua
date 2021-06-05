@@ -318,7 +318,6 @@ function Time:Run(deltaTime)
         local s_factorNight = 1
 
         print("Night Visibility: " .. s_factorNight)
-        print("Morning Visibility: " .. s_factorMorning)
         print("Time Till Switch: " .. (self.m_totalDayLength * 0.25 - self.m_clientTime))
 
         -- set Priorities
