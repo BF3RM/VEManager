@@ -63,6 +63,7 @@ function VEManagerClient:RegisterEvents()
     Events:Subscribe('VEManager:Lerp', self, self.Lerp)
 	Events:Subscribe('VEManager:Crossfade', self, self.Crossfade)
 	Events:Subscribe('VEManager:AddTime', self, self.AddTime)
+	Events:Subscribe('VEManager:RemoveTime', self, self.AddTime)
 end
 
 
@@ -122,6 +123,24 @@ function VEManagerClient:SetVisibility(id, visibility)
 	self.m_Presets[id]["ve"].visibility = visibility
 
 	self:Reload(id)
+end
+
+
+function VEManagerClient:UpdateVisibility(id, priority, visibilityFactor)
+	if self.m_Presets[id] == nil then
+		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(id))
+		return
+	end
+
+	local states = VisualEnvironmentManager:GetStates()
+	VisualEnvironmentManager:SetDirty(true)
+	local fixedPriority = 10000000 + priority
+
+	for _, state in pairs(states) do
+		if state.priority == fixedPriority then
+			state.visibility = visibilityFactor
+		end
+	end
 end
 
 
@@ -203,6 +222,10 @@ end]]
 function VEManagerClient:AddTime(startingTime, lengthOfDayInMinutes, isStatic, serverUpdateFrequency) -- Add Time System to Map | To be called on Level:Loaded | time in 24hr format (0-23)
 	local s_currentMap = SharedUtils:GetLevelName()
 	Time:Add(s_currentMap, startingTime, lengthOfDayInMinutes, isStatic, serverUpdateFrequency)
+end
+
+function VEManagerClient:RemoveTime()
+	Time:Remove()
 end
 
 
@@ -290,14 +313,15 @@ function VEManagerClient:LoadPresets()
 
 		local s_VE = self:CreateEntity("VisualEnvironmentEntityData")
 		s_VEB.object = s_VE
-		self.m_Presets[s_Preset.Name]["ve"] = s_VE
-		self.m_Presets[s_Preset.Name]["type"] = s_Preset.Type
-
 		print("Preset Name: " .. s_Preset.Name)
 		print("Preset Type: " .. s_Preset.Type)
 		print("Preset Priority: " .. s_Preset.Priority)
+		s_VE.enabled = true
 		s_VE.priority = tonumber(s_Preset.Priority)
 		s_VE.visibility = 1
+
+		self.m_Presets[s_Preset.Name]["ve"] = s_VE
+		self.m_Presets[s_Preset.Name]["type"] = s_Preset.Type
 
 		--Foreach class
 		local componentCount = 0
@@ -305,10 +329,8 @@ function VEManagerClient:LoadPresets()
 
 			if(s_Preset[l_Class] ~= nil) then
 
-				componentCount = componentCount + 1
 				-- Create class and add it to the VE entity.
 				local s_Class =  _G[l_Class.."ComponentData"]()
-				s_VE.components:add(s_Class)
 				-- print("")
 				-- print("CLASS:")
 				-- print(l_Class)
@@ -366,8 +388,8 @@ function VEManagerClient:LoadPresets()
 									s_Class[firstToLower(s_FieldName)] = tonumber(s_Value)
 								elseif (s_Type == "TextureAsset") then
 									if s_FieldName == "PanoramicTexture" or s_FieldName == "PanoramicAlphaTexture" or s_FieldName == "StaticEnvmapTexture" then
-										s_Class[firstToLower(s_FieldName)] = nil -- needs to be included in another way to keep it out of the VEManager itself^
-									elseif s_FieldName == "CloudLayer1Texture" then
+										s_Class[firstToLower(s_FieldName)] = nil --todo needs to be included in another way to keep it out of the VEManager itself^
+									elseif s_FieldName == "CloudLayer2Texture" then
 										s_Class[firstToLower(s_FieldName)] = TextureAsset(_G['g_Stars'])
 										print("Added Stars")
 									else
@@ -400,8 +422,8 @@ function VEManagerClient:LoadPresets()
 								s_Class[firstToLower(s_FieldName)] = tonumber(s_Value)
 							elseif (s_Type == "TextureAsset") then
 								if s_FieldName == "PanoramicTexture" or s_FieldName == "PanoramicAlphaTexture" or s_FieldName == "StaticEnvmapTexture" then
-									s_Class[firstToLower(s_FieldName)] = nil -- needs to be included in another way to keep it out of the VEManager itself^
-								elseif s_FieldName == "CloudLayer1Texture" then
+									s_Class[firstToLower(s_FieldName)] = nil --todo needs to be included in another way to keep it out of the VEManager itself^
+								elseif s_FieldName == "CloudLayer2Texture" then
 									s_Class[firstToLower(s_FieldName)] = TextureAsset(_G['g_Stars'])
 									print("Added Stars")
 								else
@@ -421,6 +443,8 @@ function VEManagerClient:LoadPresets()
 
 				end
 
+			componentCount = componentCount + 1
+			s_VE.components:add(s_Class)
 			end
 
 		end
@@ -548,16 +572,17 @@ function VEManagerClient:OnUpdateInput(p_Delta, p_SimulationDelta)
 
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F2) then
 		--self:FadeIn("Testing1", 5000)
-		VEManagerClient:AddTime(0, 60, false, 30)
+		self:AddTime(0, 1440, false, 30)
 	end
 
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F3) then
-		VEManagerClient:AddTime(0, 60, true, 30)
+		self:AddTime(0, 2, false, 30)
 		--self:FadeIn("Testing2", 5000)
 		--self:FadeOut("Testing1", 5000)
 	end
 
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F4) then
+		self:RemoveTime()
 		--self:FadeIn("Testing3", 5000)
 		--self:FadeOut("Testing2", 5000)
 	end
