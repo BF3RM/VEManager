@@ -98,13 +98,13 @@ end
 function Time:UpdateIdle()
     -- set Priorities
     if g_VEManagerClient.m_Presets[self.m_currentNightPreset]["ve"].priority == self.m_idlePriority then
-        g_VEManagerClient:SetVisibility(self.m_currentNightPreset, 0)
+        g_VEManagerClient:SetVisibility(self.m_currentNightPreset, self.m_idlePriority, 0)
     elseif g_VEManagerClient.m_Presets[self.m_currentMorningPreset]["ve"].priority == self.m_idlePriority then
-        g_VEManagerClient:SetVisibility(self.m_currentMorningPreset, 0)
+        g_VEManagerClient:SetVisibility(self.m_currentMorningPreset, self.m_idlePriority, 0)
     elseif g_VEManagerClient.m_Presets[self.m_currentNoonPreset]["ve"].priority == self.m_idlePriority then
-        g_VEManagerClient:SetVisibility(self.m_currentNoonPreset, 0)
+        g_VEManagerClient:SetVisibility(self.m_currentNoonPreset, self.m_idlePriority, 0)
     elseif g_VEManagerClient.m_Presets[self.m_currentEveningPreset]["ve"].priority == self.m_idlePriority then
-        g_VEManagerClient:SetVisibility(self.m_currentEveningPreset, 0)
+        g_VEManagerClient:SetVisibility(self.m_currentEveningPreset, self.m_idlePriority, 0)
     end
 end
 
