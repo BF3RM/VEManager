@@ -332,7 +332,6 @@ function Time:Run(deltaTime)
         -- apply visibility factor
         self:UpdateIdle()
         g_VEManagerClient:UpdateVisibility(self.m_currentNightPreset, s_FadeOutPrio, s_factorNight)
-        g_VEManagerClient:UpdateVisibility(self.m_currentMorningPreset, s_FadeInPrio, s_factorMorning)
 
     elseif self.m_clientTime < ( self.m_totalDayLength * 0.375 ) then -- 6:00 to 9:00
 
