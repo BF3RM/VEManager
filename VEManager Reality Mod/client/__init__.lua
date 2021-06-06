@@ -218,7 +218,6 @@ end
 
 end]]
 
-
 function VEManagerClient:AddTime(startingTime, lengthOfDayInMinutes, isStatic, serverUpdateFrequency) -- Add Time System to Map | To be called on Level:Loaded | time in 24hr format (0-23)
 	local s_currentMap = SharedUtils:GetLevelName()
 	Time:Add(s_currentMap, startingTime, lengthOfDayInMinutes, isStatic, serverUpdateFrequency)
@@ -387,7 +386,7 @@ function VEManagerClient:LoadPresets()
 								elseif (l_Field.typeInfo.enum) then
 									s_Class[firstToLower(s_FieldName)] = tonumber(s_Value)
 								elseif (s_Type == "TextureAsset") then
-									if s_FieldName == "PanoramicTexture" or s_FieldName == "PanoramicAlphaTexture" or s_FieldName == "StaticEnvmapTexture" then
+									if --[[s_FieldName == "PanoramicTexture" or s_FieldName == "PanoramicAlphaTexture" or]] s_FieldName == "StaticEnvmapTexture" then
 										s_Class[firstToLower(s_FieldName)] = nil --todo needs to be included in another way to keep it out of the VEManager itself
 									elseif s_FieldName == "CloudLayer2Texture" then
 										s_Class[firstToLower(s_FieldName)] = TextureAsset(_G['g_Stars'])
@@ -421,7 +420,7 @@ function VEManagerClient:LoadPresets()
 							elseif (l_Field.typeInfo.enum) then
 								s_Class[firstToLower(s_FieldName)] = tonumber(s_Value)
 							elseif (s_Type == "TextureAsset") then
-								if s_FieldName == "PanoramicTexture" or s_FieldName == "PanoramicAlphaTexture" or s_FieldName == "StaticEnvmapTexture" then
+								if --[[s_FieldName == "PanoramicTexture" or s_FieldName == "PanoramicAlphaTexture" or]] s_FieldName == "StaticEnvmapTexture" then
 									s_Class[firstToLower(s_FieldName)] = nil --todo needs to be included in another way to keep it out of the VEManager itself
 								elseif s_FieldName == "CloudLayer2Texture" then
 									s_Class[firstToLower(s_FieldName)] = TextureAsset(_G['g_Stars'])
@@ -572,7 +571,7 @@ function VEManagerClient:OnUpdateInput(p_Delta, p_SimulationDelta)
 
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F2) then
 		--self:FadeIn("Testing1", 5000)
-		self:AddTime(0, 1440, false, 30)
+		self:AddTime(0, 0.5, false, 30)
 	end
 
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F3) then
@@ -590,6 +589,14 @@ function VEManagerClient:OnUpdateInput(p_Delta, p_SimulationDelta)
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F5) then
 		--self:FadeIn("Testing4", 5000)
 		--self:FadeOut("Testing3", 5000)
+
+		local s_states = VisualEnvironmentManager:GetStates()
+		VisualEnvironmentManager:SetDirty(true)
+
+		local found = false
+		for _, state in pairs(s_states) do
+			print('PRIORITY: ' .. tostring(state.priority))
+		end
 	end
 
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F6) then
@@ -597,6 +604,25 @@ function VEManagerClient:OnUpdateInput(p_Delta, p_SimulationDelta)
 		--self:DisablePreset("Testing2")
 		--self:DisablePreset("Testing3")
 		--self:DisablePreset("Testing4")
+
+		local s_states = VisualEnvironmentManager:GetStates()
+		VisualEnvironmentManager:SetDirty(true)
+		local s_fixedPriority = 10000000 + 100015
+
+		local found = false
+		for _, state in pairs(s_states) do
+			if state.priority == s_fixedPriority then
+				found = true
+
+				state.visibility = visibilityFactor
+				print('VISIBILITY: ' .. tostring(state.visibility))
+				print('PRIORITY: ' .. tostring(state.priority))
+			end
+		end
+
+		if found == false then
+			print('Not found')
+		end
 	end
 
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F7) then
