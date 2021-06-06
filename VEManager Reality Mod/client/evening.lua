@@ -78,7 +78,7 @@ local table = [[
         "SunColor": "(1, 0.16, 0.06)",
         "SkyColor": "(0.3, 0.3, 0.3)",
         "GroundColor": "(0.01, 0.01, 0.01)",
-        "SunRotationX": "270",
+        "SunRotationX": "0",
         "SunRotationY": "0"
     },
     "Sky": {

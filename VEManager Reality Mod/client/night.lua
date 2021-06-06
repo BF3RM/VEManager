@@ -80,7 +80,7 @@ local table = [[
         "SkyColor": "(0.015, 0.015, 0.015)",
         "GroundColor": "(0.0005, 0.0005, 0.0005)",
         "SunSpecularScale": "0",
-        "SunRotationX": "270",
+        "SunRotationX": "0",
         "SunRotationY": "0"
     },
     "Sky": {
