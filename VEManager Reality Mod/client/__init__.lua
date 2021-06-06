@@ -71,7 +71,7 @@ end
 function VEManagerClient:RegisterModules()
 	require 'modules/time'
 	Time:__init()
-	require 'modules/DebugGUI'
+	require '__shared/DebugGUI'
 	require 'modules/cinematictools'
 	CinematicTools:__init()
 end
