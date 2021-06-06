@@ -71,8 +71,8 @@ end
 
 
 function Time:ResetSunPosition()
-    VisualEnvironmentManager:SetSunRotationX(self.m_originalSunX)
-    VisualEnvironmentManager:SetSunRotationY(self.m_originalSunY)
+    VisualEnvironmentManager:SetSunRotationX(0)
+    VisualEnvironmentManager:SetSunRotationY(70)
 end
 
 
@@ -131,8 +131,6 @@ function Time:Add(mapName, time, totalDayLength, isStatic, serverUpdateFrequency
     for _, state in pairs(s_States) do
         if state.entityName ~= "EffectEntity" then
             state.visibility = 1
-            self.m_originalSunY = state.outdoorLight.sunRotationX
-            self.m_originalSunY = state.outdoorLight.sunRotationY
             print('Set Default to Prio 1')
         end
     end
