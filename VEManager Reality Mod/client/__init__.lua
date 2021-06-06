@@ -5,6 +5,7 @@ noon = require "noon"
 evening = require "evening"
 easing = require "easing"
 
+
 function VEManagerClient:__init()
     print('Initializing VEManagerClient')
     self:RegisterVars()
@@ -70,6 +71,9 @@ end
 function VEManagerClient:RegisterModules()
 	require 'modules/time'
 	Time:__init()
+	require 'modules/DebugGUI'
+	require 'modules/cinematictools'
+	CinematicTools:__init()
 end
 
 
@@ -589,14 +593,7 @@ function VEManagerClient:OnUpdateInput(p_Delta, p_SimulationDelta)
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F5) then
 		--self:FadeIn("Testing4", 5000)
 		--self:FadeOut("Testing3", 5000)
-
-		local s_states = VisualEnvironmentManager:GetStates()
-		VisualEnvironmentManager:SetDirty(true)
-
-		local found = false
-		for _, state in pairs(s_states) do
-			print('PRIORITY: ' .. tostring(state.priority))
-		end
+		CinematicTools:CreateGUI()
 	end
 
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F6) then
