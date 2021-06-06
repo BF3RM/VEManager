@@ -88,7 +88,6 @@ function CinematicTools:GenericCallback(p_Path, p_Value)
 
 end
 
-
 function CinematicTools:CreateGUI()
     print("*Creating GUI for Cinematic Tools")
     -- Sky
@@ -469,13 +468,127 @@ function CinematicTools:CreateGUI()
             self.m_PresetName = p_PresetName
         end)
 
-        DebugGUI:Button('(WIP) Save Preset', function(value)
-            print("*Yo - i am saved")
+        DebugGUI:Button('(WIP) Print Preset', function(value)
+    		print(self:ParseJSON())
         end)
 
     end)
 
 end
 
+-- Print Preset as JSON
+function CinematicTools:ParseJSON()
+
+	if self.m_CineState == nil then
+		return 'No changes'
+	end
+	
+	local s_Result = {}
+
+	--Foreach class
+	local componentCount = 0
+	for _, l_Class in pairs(g_VEManagerClient.m_SupportedClasses) do
+
+		if(self.m_CineState[firstToLower(l_Class)] ~= nil) then
+			-- Create class and add it to the VE entity.
+			local s_Class =  _G[l_Class.."ComponentData"]()
+
+			local s_Rows = {}
+
+			-- Foreach field in class
+			for _, l_Field in ipairs(s_Class.typeInfo.fields) do
+				
+				-- Fix lua types
+				local s_FieldName = l_Field.name
+
+				if(s_FieldName == "End") then
+					s_FieldName = "EndValue"
+				end
+
+				-- Get type
+				local s_Type = l_Field.typeInfo.name --Boolean, Int32, Vec3 etc.
+
+				-- If the preset contains that field
+				if self.m_CineState[firstToLower(l_Class)][firstToLower(s_FieldName)] ~= nil then
+					local s_Value
+
+					if IsBasicType(s_Type) then
+						s_Value = self:ParseValue(s_Type, self.m_CineState[firstToLower(l_Class)][firstToLower(s_FieldName)])
+					elseif l_Field.typeInfo.enum then
+						s_Value = tonumber(self.m_CineState[firstToLower(l_Class)][firstToLower(s_FieldName)])
+					elseif l_Field.typeInfo.array then
+						s_Value = "\"Found unexpected array\""
+						s_Value = nil
+					else
+						s_Value = "\"Found unexpected DataContainer\""
+						s_Value = nil
+					end
+
+					if (s_Value ~= nil) then
+						table.insert(s_Rows, string.format("\"%s\":%s", s_FieldName, s_Value))
+					end
+
+				end
+
+			end
+			
+			if s_Rows ~= nil then
+				table.insert(s_Result, "\"" .. l_Class .. "\" : {" .. table.concat(s_Rows, ",") .. "}")
+			end
+		end
+
+	end
+
+	-- Get simple json string
+    if s_Result == nil then
+        s_Result = 'Error while converting preset to JSON'
+    else
+		-- Add Preset Name
+		if self.m_PresetName ~= nil then
+			self.m_PresetName = "New preset"
+		end
+		local s_PresetNameInJSON = ", \"Name\":\"" .. self.m_PresetName .. "\""
+
+		-- Final JSON convert
+        s_Result = "{" .. table.concat(s_Result, ",") .. s_PresetNameInJSON .. "}"
+    end
+
+	return s_Result
+end
+
+function CinematicTools:ParseValue(p_Type, p_Value)
+	-- This seperates Vectors. Let's just do it to everything, who cares?
+	if (p_Type == "Boolean") then
+		return p_Value
+	elseif p_Type == "CString" then
+		return tostring(p_Value)
+
+	elseif  p_Type == "Float8" or
+			p_Type == "Float16" or
+			p_Type == "Float32" or
+			p_Type == "Float64" or
+			p_Type == "Int8" or
+			p_Type == "Int16" or
+			p_Type == "Int32" or
+			p_Type == "Int64" or
+			p_Type == "Uint8" or
+			p_Type == "Uint16" or
+			p_Type == "Uint32" or
+			p_Type == "Uint64" then
+		return p_Value
+
+	elseif (p_Type == "Vec2") then -- Vec2
+		return "\"(" .. p_Value.x .. "," .. p_Value.y .. ")\""
+
+	elseif (p_Type == "Vec3") then -- Vec3
+		return "\"(" .. p_Value.x .. "," .. p_Value.y .. "," .. p_Value.z .. ")\""
+
+	elseif (p_Type == "Vec4") then -- Vec4
+		return "\"(" .. p_Value.x .. "," .. p_Value.y .. "," .. p_Value.z .. "," .. p_Value.w .. ")\""
+	else
+		print("Unhandled type: " .. p_Type)
+		return nil
+	end
+end
 
 return CinematicTools
