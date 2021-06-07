@@ -222,9 +222,9 @@ end
 
 end]]
 
-function VEManagerClient:AddTime(startingTime, lengthOfDayInMinutes, isStatic, serverUpdateFrequency) -- Add Time System to Map | To be called on Level:Loaded | time in 24hr format (0-23)
+function VEManagerClient:AddTime(startingTime, isStatic, lengthOfDayInMinutes, serverUpdateFrequency) -- Add Time System to Map | To be called on Level:Loaded | time in 24hr format (0-23)
 	local s_currentMap = SharedUtils:GetLevelName()
-	Time:Add(s_currentMap, startingTime, lengthOfDayInMinutes, isStatic, serverUpdateFrequency)
+	Time:Add(s_currentMap, startingTime, isStatic, lengthOfDayInMinutes, serverUpdateFrequency)
 end
 
 function VEManagerClient:RemoveTime()
@@ -575,11 +575,11 @@ function VEManagerClient:OnUpdateInput(p_Delta, p_SimulationDelta)
 
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F2) then
 		--self:FadeIn("Testing1", 5000)
-		self:AddTime(0, 0.5, false, 30)
+		self:AddTime(0, false, 0.5, 30)
 	end
 
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F3) then
-		self:AddTime(0, 2, false, 30)
+		self:AddTime(0, false, 2, 30)
 		--self:FadeIn("Testing2", 5000)
 		--self:FadeOut("Testing1", 5000)
 	end

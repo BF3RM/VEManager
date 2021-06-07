@@ -97,7 +97,7 @@ end
 
 -- ADD TIME TO MAP
 -- Add(Map name, starting hour (24h), day length (min), static time = true/false, server update frequency)
-function Time:Add(mapName, time, totalDayLength, isStatic, serverUpdateFrequency)
+function Time:Add(mapName, time, isStatic, totalDayLength, serverUpdateFrequency)
 
     if self.m_systemActive == true then
         self:RegisterVars()
@@ -337,7 +337,7 @@ function Time:Run(deltaTime)
         local s_factorEvening = ( self.m_clientTime - ( self.m_totalDayLength * 0.5 )) / ( self.m_totalDayLength * ( 0.75 - 0.5 ))
         -- calculate visibility preset noon
         local s_factorNoon = 1
-		
+
 		if s_print_enabled then
 			print("Noon Visibility: " .. s_factorNoon)
 			print("Evening Visibility: " .. s_factorEvening)
@@ -380,5 +380,3 @@ end
 
 
 return Time
-
---todo NOON EVENING???
