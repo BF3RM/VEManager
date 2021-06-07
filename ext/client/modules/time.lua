@@ -11,6 +11,7 @@ end
 
 
 function Time:RegisterVars()
+    self.m_systemActive = false
     self.m_transitionFactor = nil
     self.m_clientTime = 0
     self.m_totalClientTime = 0

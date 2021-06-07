@@ -579,13 +579,13 @@ function CinematicTools:ParseValue(p_Type, p_Value)
 		return p_Value
 
 	elseif (p_Type == "Vec2") then -- Vec2
-		return "\"(" .. p_Value.x .. "," .. p_Value.y .. ")\""
+		return "\"(" .. p_Value.x .. ", " .. p_Value.y .. ")\""
 
 	elseif (p_Type == "Vec3") then -- Vec3
-		return "\"(" .. p_Value.x .. "," .. p_Value.y .. "," .. p_Value.z .. ")\""
+		return "\"(" .. p_Value.x .. ", " .. p_Value.y .. ", " .. p_Value.z .. ")\""
 
 	elseif (p_Type == "Vec4") then -- Vec4
-		return "\"(" .. p_Value.x .. "," .. p_Value.y .. "," .. p_Value.z .. "," .. p_Value.w .. ")\""
+		return "\"(" .. p_Value.x .. ", " .. p_Value.y .. ", " .. p_Value.z .. ", " .. p_Value.w .. ")\""
 	else
 		print("Unhandled type: " .. p_Type)
 		return nil

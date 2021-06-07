@@ -3,11 +3,11 @@ local TimeServer = class('TimeServer')
 
 function TimeServer:__init()
     print('Initializing Time Server')
-    self:RegisterVars()
     self:RegisterEvents()
 end
 
 function TimeServer:RegisterVars()
+    print('Registered Vars')
     self.m_ServerDayTime = 0.0
     self.m_TotalServerTime = 0.0
     self.m_EngineUpdateTimer = 0.0
@@ -23,18 +23,18 @@ function TimeServer:RegisterEvents()
     self.m_AddTimeEvent = Events:Subscribe('TimeServer:AddTime', self, self.AddTime)
     self.m_AddTimeNetEvent = NetEvents:Subscribe('TimeServer:AddTime', self, self.AddTimeNet)
     self.m_EngineUpdateEvent = Events:Subscribe('Engine:Update', self, self.Run)
-    self.m_LevelDestroyEvent = Events:Subscribe('Level:Loaded', self, self.OnLevelLoaded)
+    self.m_LevelLoadedEvent = Events:Subscribe('Level:Loaded', self, self.OnLevelLoaded)
     self.m_LevelDestroyEvent = Events:Subscribe('Level:Destroy', self, self.OnLevelDestroy)
 end
 
 
 function TimeServer:OnLevelLoad()
-    self:__init()
+    self:RegisterVars()
 end
 
 
 function TimeServer:OnLevelDestroy()
-    self.m_EngineUpdateEvent:Unsubscribe()
+    self.m_SystemRunning = false
 end
 
 
@@ -68,11 +68,17 @@ end
 
 function TimeServer:Run(deltaTime)
     if self.m_SystemRunning == true and self.m_IsStatic == false then
+
         self.m_ServerDayTime = self.m_ServerDayTime + deltaTime
         self.m_EngineUpdateTimer = self.m_EngineUpdateTimer + deltaTime
         self.m_TotalServerTime = self.m_TotalServerTime + deltaTime
 
-        if self.m_EngineUpdateTimer < self.m_ServerUpdateFrequency then
+        --print(self.m_EngineUpdateTimer)
+
+        if self.m_EngineUpdateTimer <= self.m_ServerUpdateFrequency then
+            if self.m_EngineUpdateTimer == 0.5 * self.m_ServerUpdateFrequency then
+                print('Time left till next server sync: ' .. ( self.m_ServerUpdateFrequency - self.m_EngineUpdateTimer ))
+            end
             return
         end
 
