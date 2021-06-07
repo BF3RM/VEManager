@@ -544,7 +544,7 @@ function CinematicTools:ParseJSON()
         s_Result = 'Error while converting preset to JSON'
     else
 		-- Add Preset Name
-		if self.m_PresetName ~= nil then
+		if self.m_PresetName == nil then
 			self.m_PresetName = "New preset"
 		end
 		local s_PresetNameInJSON = ", \"Name\":\"" .. self.m_PresetName .. "\""

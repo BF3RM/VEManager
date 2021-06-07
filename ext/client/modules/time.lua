@@ -56,14 +56,14 @@ function Time:OnLevelDestroy()
 end
 
 
-function Time:ServerSync(serverDayTime, totalServerTime)
-    self.m_clientTime = serverDayTime
-    self.m_totalClientTime = totalServerTime
+function Time:ServerSync(p_ServerDayTime, p_TotalServerTime)
+    self.m_clientTime = p_ServerDayTime
+    self.m_totalClientTime = p_TotalServerTime
 end
 
 
-function Time:SetSunPosition(currentTime) -- for smoother sun relative to time
-    local factor = ( currentTime / self.m_totalDayLength )
+function Time:SetSunPosition(p_CurrentTime) -- for smoother sun relative to time
+    local factor = ( p_CurrentTime / self.m_totalDayLength )
     --print("Sun Pos Y: " .. ( -90 + ( 360 * factor )))
     VisualEnvironmentManager:SetSunRotationX(260)
     VisualEnvironmentManager:SetSunRotationY( -90 + ( 360 * factor ))
@@ -154,7 +154,7 @@ function Time:Add(mapName, time, isStatic, totalDayLength, serverUpdateFrequency
 	g_VEManagerClient.m_Presets[self.m_currentMorningPreset]["ve"].priority = self.m_morningPriority
 	g_VEManagerClient.m_Presets[self.m_currentNoonPreset]["ve"].priority = self.m_noonPriority
 	g_VEManagerClient.m_Presets[self.m_currentEveningPreset]["ve"].priority = self.m_eveningPriority
-	
+
     -- calculate visibilities and presets
     if self.m_clientTime < self.m_totalDayLength * 0.25 or self.m_clientTime > 0.875 * self.m_totalDayLength then -- 00:00 to 6:00 or 21:00 to 00:00
 

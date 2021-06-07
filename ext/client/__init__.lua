@@ -586,7 +586,7 @@ function VEManagerClient:OnUpdateInput(p_Delta, p_SimulationDelta)
 	end
 
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F4) then
-		self:RemoveTime()
+		Events:Dispatch('VEManager:AddTime', 0, false, 2, 30)
 		--self:FadeIn("Testing3", 5000)
 		--self:FadeOut("Testing2", 5000)
 	end

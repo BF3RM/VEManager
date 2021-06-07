@@ -14,41 +14,53 @@ end
 
 
 function TimeServer:RegisterVars()
-    self.m_serverDayTime = 0.0
-    self.m_engineUpdateTimer = 0.0
+    self.m_ServerDayTime = 0.0
+    self.m_EngineUpdateTimer = 0.0
+    self.m_TotalDayLength = nil
+    self.m_IsStatic = nil
+    self.m_ServerUpdateFrequency = 30
 end
 
 
 function TimeServer:RegisterEvents()
-    self.m_engineUpdateEvent = Events:Subscribe('Engine:Update', self, self.Run)
+    self.m_EngineUpdateEvent = Events:Subscribe('Engine:Update', self, self.Run)
 end
 
 
-function TimeServer:AddTime(startingTime, totalDayLength, isStatic, serverUpdateFrequency)
-    self.m_serverDayTime = startingTime * 36
-    self.m_totalDayLength = totalDayLength
-    self.m_isStatic = isStatic
-    self.m_serverUpdateFrequency = serverUpdateFrequency
+function TimeServer:AddTime(p_StartingTime, p_IsStatic, p_LengthOfDayInMinutes, p_ServerUpdateFrequency)
+
+    if self.m_TotalDayLength <= 1 then
+        self.m_TotalDayLength = 86000
+    else
+        self.m_TotalDayLength = p_LengthOfDayInMinutes * 60
+    end
+    print("Length of Day: " .. self.m_TotalDayLength .. " Seconds")
+
+    self.m_ServerDayTime = p_StartingTime * 3600 -- to sec
+    print("Starting at Time: " .. ( self.m_ServerDayTime / 60 / 60 ) .. " Hours")
+
+    self.m_IsStatic = p_IsStatic
+    self.m_ServerUpdateFrequency = p_ServerUpdateFrequency
 end
 
 
 function TimeServer:Run(deltaTime)
-    if self.m_isStatic ~= true then
-        self.m_serverDayTime = self.m_serverDayTime + deltaTime
-        self.m_engineUpdateTimer = self.m_engineUpdateTimer + deltaTime
-        self.m_totalServerTime = self.m_totalServerTime + deltaTime
+    if self.m_IsStatic == false then
+        self.m_ServerDayTime = self.m_ServerDayTime + deltaTime
+        self.m_EngineUpdateTimer = self.m_EngineUpdateTimer + deltaTime
+        self.m_TotalServerTime = self.m_TotalServerTime + deltaTime
 
-        if self.m_serverDayTime <= m_totalDayLength then
-            self.m_serverDayTime = 0
+        if self.m_ServerDayTime <= self.m_TotalDayLength then
+            self.m_ServerDayTime = 0
         end
 
-        if self.m_engineUpdateTimer < self.m_serverUpdateFrequency then
+        if self.m_EngineUpdateTimer < self.m_ServerUpdateFrequency then
             return
         end
 
-        self.engineUpdateTimer = 0
+        self.EngineUpdateTimer = 0
 
-        TimeServer:Broadcast()
+        self:Broadcast()
     end
 end
 
@@ -56,3 +68,7 @@ end
 function TimeServer:Broadcast()
     NetEvents:Broadcast('TimeServer:Sync', self.m_serverDayTime, self.m_totalServerTime)
 end
+
+
+TimeServer:__init()
+
