@@ -3,6 +3,7 @@ local TimeServer = class('TimeServer')
 
 function TimeServer:__init()
     print('Initializing Time Server')
+    self:RegisterVars()
     self:RegisterEvents()
 end
 
@@ -28,13 +29,8 @@ function TimeServer:RegisterEvents()
 end
 
 
-function TimeServer:OnLevelLoad()
-    self:RegisterVars()
-end
-
-
 function TimeServer:OnLevelDestroy()
-    self.m_SystemRunning = false
+    TimeServer:RegisterVars()
 end
 
 
@@ -72,8 +68,6 @@ function TimeServer:Run(deltaTime)
         self.m_ServerDayTime = self.m_ServerDayTime + deltaTime
         self.m_EngineUpdateTimer = self.m_EngineUpdateTimer + deltaTime
         self.m_TotalServerTime = self.m_TotalServerTime + deltaTime
-
-        --print(self.m_EngineUpdateTimer)
 
         if self.m_EngineUpdateTimer <= self.m_ServerUpdateFrequency then
             if self.m_EngineUpdateTimer == 0.5 * self.m_ServerUpdateFrequency then

@@ -593,7 +593,7 @@ function VEManagerClient:OnUpdateInput(p_Delta, p_SimulationDelta)
 	end
 
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F4) then
-		NetEvents:Send('TimeServer:AddTime', 0, false, 2, 30)
+		NetEvents:Send('TimeServer:AddTime', 0, false, 60, 30)
 		print('Dispatching Add Time Event')
 		--self:FadeIn("Testing3", 5000)
 		--self:FadeOut("Testing2", 5000)
