@@ -4,8 +4,8 @@ local Time = class('Time')
 function Time:__init()
 
     print('Initializing Time Module')
-    Time:RegisterVars()
-    Time:RegisterEvents()
+    self:RegisterVars()
+    self:RegisterEvents()
 
 end
 
@@ -57,6 +57,7 @@ end
 
 
 function Time:ServerSync(p_ServerDayTime, p_TotalServerTime)
+    print('Server Sync:' .. 'Current Time: ' .. p_ServerDayTime .. ' | ' .. 'Total Time:' .. p_TotalServerTime)
     self.m_clientTime = p_ServerDayTime
     self.m_totalClientTime = p_TotalServerTime
 end
@@ -88,7 +89,7 @@ function Time:Remove()
     g_VEManagerClient:DisablePreset(self.m_currentMorningPreset)
     g_VEManagerClient:DisablePreset(self.m_currentNoonPreset)
     g_VEManagerClient:DisablePreset(self.m_currentEveningPreset)
-    Time:ResetSunPosition()
+    self:ResetSunPosition()
     self:RegisterVars()
     print("Removed Time System")
 

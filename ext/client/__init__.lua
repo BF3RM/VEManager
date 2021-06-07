@@ -63,7 +63,7 @@ function VEManagerClient:RegisterEvents()
     Events:Subscribe('VEManager:FadeOut', self, self.FadeOut)
     Events:Subscribe('VEManager:Lerp', self, self.Lerp)
 	Events:Subscribe('VEManager:Crossfade', self, self.Crossfade)
-	Events:Subscribe('VEManager:AddTime', self, self.AddTime)
+	NetEvents:Subscribe('VEManager:AddTimeToClient', self, self.AddTimeToClient)
 	Events:Subscribe('VEManager:RemoveTime', self, self.AddTime)
 end
 
@@ -222,7 +222,7 @@ end
 
 end]]
 
-function VEManagerClient:AddTime(startingTime, isStatic, lengthOfDayInMinutes, serverUpdateFrequency) -- Add Time System to Map | To be called on Level:Loaded | time in 24hr format (0-23)
+function VEManagerClient:AddTimeToClient(startingTime, isStatic, lengthOfDayInMinutes, serverUpdateFrequency) -- Add Time System to Map | To be called on Level:Loaded | time in 24hr format (0-23)
 	local s_currentMap = SharedUtils:GetLevelName()
 	Time:Add(s_currentMap, startingTime, isStatic, lengthOfDayInMinutes, serverUpdateFrequency)
 end
@@ -586,7 +586,8 @@ function VEManagerClient:OnUpdateInput(p_Delta, p_SimulationDelta)
 	end
 
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F4) then
-		Events:Dispatch('VEManager:AddTime', 0, false, 2, 30)
+		NetEvents:Send('TimeServer:AddTime', 0, false, 2, 30)
+		print('Dispatching Add Time Event')
 		--self:FadeIn("Testing3", 5000)
 		--self:FadeOut("Testing2", 5000)
 	end
