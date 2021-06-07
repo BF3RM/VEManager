@@ -65,6 +65,7 @@ function VEManagerClient:RegisterEvents()
 	Events:Subscribe('VEManager:Crossfade', self, self.Crossfade)
 	NetEvents:Subscribe('VEManager:AddTimeToClient', self, self.AddTimeToClient)
 	Events:Subscribe('VEManager:RemoveTime', self, self.AddTime)
+	Events:Subscribe('VEManager:CreateCinematicTools', self, self.CreateCinematicTools)
 end
 
 
@@ -73,7 +74,6 @@ function VEManagerClient:RegisterModules()
 	Time:__init()
 	require '__shared/DebugGUI'
 	require 'modules/cinematictools'
-	CinematicTools:__init()
 end
 
 
@@ -222,13 +222,20 @@ end
 
 end]]
 
+
 function VEManagerClient:AddTimeToClient(startingTime, isStatic, lengthOfDayInMinutes, serverUpdateFrequency) -- Add Time System to Map | To be called on Level:Loaded | time in 24hr format (0-23)
 	local s_currentMap = SharedUtils:GetLevelName()
 	Time:Add(s_currentMap, startingTime, isStatic, lengthOfDayInMinutes, serverUpdateFrequency)
 end
 
+
 function VEManagerClient:RemoveTime()
 	Time:Remove()
+end
+
+
+function VEManagerClient:CreateCinematicTools()
+	CinematicTools:__init()
 end
 
 
@@ -595,7 +602,6 @@ function VEManagerClient:OnUpdateInput(p_Delta, p_SimulationDelta)
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F5) then
 		--self:FadeIn("Testing4", 5000)
 		--self:FadeOut("Testing3", 5000)
-		CinematicTools:CreateGUI()
 	end
 
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F6) then

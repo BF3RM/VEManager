@@ -5,6 +5,7 @@ function CinematicTools:__init()
     print("Initializing Cinematic Tools")
     self:RegisterVars()
     self:RegisterEvents()
+    self:CreateGUI()
 end
 
 
@@ -19,12 +20,12 @@ end
 
 function CinematicTools:RegisterEvents()
     --self.m_VisualStateAddedEvent = Events:Subscribe('VE:StateAdded', self, self.OnVisualStateAdded)
-    self.m_LevelLoadEvent = Events:Subscribe('Level:Loaded', self, self.OnLevelLoaded)
+    --self.m_LevelLoadEvent = Events:Subscribe('Level:Loaded', self, self.OnLevelLoaded)
 end
 
 
 function CinematicTools:OnLevelLoaded()
-    self:CreateGUI()
+    --
 end
 
 

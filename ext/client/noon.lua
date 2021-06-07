@@ -75,9 +75,6 @@ local table = [[
         "OutdoorLight": {
             "Realm": "0",
             "Enable": "true",
-            "SunColor": "(1, 0.9, 1)",
-            "SkyColor": "(1, 0.9, 1)",
-            "GroundColor": "(1, 0.9, 1)",
             "SunRotationX": "0",
             "SunRotationY": "0"
         },
