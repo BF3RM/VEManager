@@ -465,11 +465,11 @@ function CinematicTools:CreateGUI()
     -- Utilities
     DebugGUI:Folder("Utilities", function ()
 
-        DebugGUI:Text('(WIP) Presetname', 'New Preset', function(p_PresetName)
+        DebugGUI:Text('(WIP) Preset name', 'New Preset', function(p_PresetName)
             self.m_PresetName = p_PresetName
         end)
 
-        DebugGUI:Button('(WIP) Print Preset', function(value)
+        DebugGUI:Button('Print Preset', function(value)
     		print(self:ParseJSON())
         end)
 
@@ -516,7 +516,7 @@ function CinematicTools:ParseJSON()
 					if IsBasicType(s_Type) then
 						s_Value = self:ParseValue(s_Type, self.m_CineState[firstToLower(l_Class)][firstToLower(s_FieldName)])
 					elseif l_Field.typeInfo.enum then
-						s_Value = tonumber(self.m_CineState[firstToLower(l_Class)][firstToLower(s_FieldName)])
+						s_Value = "\"" .. tostring(self.m_CineState[firstToLower(l_Class)][firstToLower(s_FieldName)]) .. "\""
 					elseif l_Field.typeInfo.array then
 						s_Value = "\"Found unexpected array\""
 						s_Value = nil
@@ -558,11 +558,11 @@ function CinematicTools:ParseJSON()
 end
 
 function CinematicTools:ParseValue(p_Type, p_Value)
-	-- This seperates Vectors. Let's just do it to everything, who cares?
+	-- This separates Vectors. Let's just do it to everything, who cares?
 	if (p_Type == "Boolean") then
-		return p_Value
+		return "\"" .. tostring(p_Value) .. "\""
 	elseif p_Type == "CString" then
-		return tostring(p_Value)
+		return "\"" .. p_Value .. "\""
 
 	elseif  p_Type == "Float8" or
 			p_Type == "Float16" or
@@ -576,7 +576,7 @@ function CinematicTools:ParseValue(p_Type, p_Value)
 			p_Type == "Uint16" or
 			p_Type == "Uint32" or
 			p_Type == "Uint64" then
-		return p_Value
+		return "\"" .. tostring(p_Value) .. "\""
 
 	elseif (p_Type == "Vec2") then -- Vec2
 		return "\"(" .. p_Value.x .. ", " .. p_Value.y .. ")\""
