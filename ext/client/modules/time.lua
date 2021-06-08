@@ -2,11 +2,9 @@ local Time = class('Time')
 
 
 function Time:__init()
-
     print('Initializing Time Module')
     self:RegisterVars()
     self:RegisterEvents()
-
 end
 
 
@@ -15,6 +13,7 @@ function Time:RegisterVars()
     self.m_transitionFactor = nil
     self.m_clientTime = 0
     self.m_totalClientTime = 0
+    self.m_totalDayLength = 0
     self.m_previousFactor = nil
     self.m_timeAdded = false
     self.m_originalSunX = nil
@@ -33,6 +32,8 @@ function Time:RegisterEvents()
     self.m_engineUpdateEvent = Events:Subscribe('Engine:Update', self, self.Run)
     self.m_levelLoadEvent = Events:Subscribe('Level:Loaded', self, self.OnLevelLoad)
     self.m_levelDestroyEvent = Events:Subscribe('Level:Destroy', self, self.OnLevelDestroy)
+    self.m_AddTimeToClientEvent = NetEvents:Subscribe('VEManager:AddTimeToClient', self, self.AddTimeToClient)
+	self.m_RemoveTimeEvent = Events:Subscribe('VEManager:RemoveTime', self, self.RemoveTime)
 end
 
 
@@ -49,11 +50,12 @@ end
 
 function Time:OnLevelLoad()
     self:__init()
+    self:RequestTime()
 end
 
 
 function Time:OnLevelDestroy()
-    self.m_engineUpdateEvent:Unsubscribe()
+    Time:RemoveTime()
 end
 
 
@@ -61,6 +63,17 @@ function Time:ServerSync(p_ServerDayTime, p_TotalServerTime)
     print('Server Sync:' .. 'Current Time: ' .. p_ServerDayTime .. ' | ' .. 'Total Time:' .. p_TotalServerTime)
     self.m_clientTime = p_ServerDayTime
     self.m_totalClientTime = p_TotalServerTime
+end
+
+
+function Time:RequestTime()
+    NetEvents:Send('TimeServer:PlayerRequest')
+end
+
+
+function Time:AddTimeToClient(startingTime, isStatic, lengthOfDayInMinutes, serverUpdateFrequency) -- Add Time System to Map | To be called on Level:Loaded | time in 24hr format (0-23)
+	local s_currentMap = SharedUtils:GetLevelName()
+	self:Add(s_currentMap, startingTime, isStatic, lengthOfDayInMinutes, serverUpdateFrequency)
 end
 
 
@@ -78,8 +91,8 @@ function Time:ResetSunPosition()
 end
 
 
-function Time:Remove()
-
+function Time:RemoveTime()
+    self.m_engineUpdateEvent:Unsubscribe()
     self.m_systemActive = false
     g_VEManagerClient:SetVisibility(self.m_currentNightPreset, 0)
     g_VEManagerClient:SetVisibility(self.m_currentMorningPreset, 0)
@@ -93,7 +106,6 @@ function Time:Remove()
     self:ResetSunPosition()
     self:RegisterVars()
     print("Removed Time System")
-
 end
 
 
@@ -237,7 +249,7 @@ function Time:Add(mapName, time, isStatic, totalDayLength, serverUpdateFrequency
         g_VEManagerClient:SetVisibility(self.m_currentMorningPreset, 0)
         g_VEManagerClient:SetVisibility(self.m_currentNoonPreset, 0)
         g_VEManagerClient:SetVisibility(self.m_currentEveningPreset, s_factorEvening)
-		
+
     else
         error("What?")
     end
@@ -272,11 +284,11 @@ function Time:Run(deltaTime)
 		s_print_enabled = true
 		last_print_h = s_h_time
 	end
-	
+
 	if s_print_enabled then
     	print("Current Time: " .. s_h_time .. " Hours.")
 	end
-	
+
     if self.m_clientTime < self.m_totalDayLength * 0.25 or self.m_clientTime > 0.875 * self.m_totalDayLength then -- 00:00 to 6:00 or 21:00 to 00:00
 
         -- set visibility preset night
@@ -301,7 +313,7 @@ function Time:Run(deltaTime)
         local s_factorMorning = ( self.m_clientTime - ( self.m_totalDayLength * 0.25 )) / ( self.m_totalDayLength * ( 0.375 - 0.25 )) --todo change these multiplication values to variables later to calculate automatically
         -- calculate visibility preset night
         local s_factorNight = 1
-	
+
 		if s_print_enabled then
 			print("Night Visibility: " .. s_factorNight)
 			print("Morning Visibility: " .. s_factorMorning)

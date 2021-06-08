@@ -63,8 +63,6 @@ function VEManagerClient:RegisterEvents()
     Events:Subscribe('VEManager:FadeOut', self, self.FadeOut)
     Events:Subscribe('VEManager:Lerp', self, self.Lerp)
 	Events:Subscribe('VEManager:Crossfade', self, self.Crossfade)
-	NetEvents:Subscribe('VEManager:AddTimeToClient', self, self.AddTimeToClient)
-	Events:Subscribe('VEManager:RemoveTime', self, self.AddTime)
 	Events:Subscribe('VEManager:CreateCinematicTools', self, self.CreateCinematicTools)
 end
 
@@ -221,18 +219,6 @@ end
     self:FadeTo(id2, self.m_Presets[id1]["logic"].visibility, time) -- Fade id2 to id1 visibility
 
 end]]
-
-
-function VEManagerClient:AddTimeToClient(startingTime, isStatic, lengthOfDayInMinutes, serverUpdateFrequency) -- Add Time System to Map | To be called on Level:Loaded | time in 24hr format (0-23)
-	local s_currentMap = SharedUtils:GetLevelName()
-	Time:Add(s_currentMap, startingTime, isStatic, lengthOfDayInMinutes, serverUpdateFrequency)
-end
-
-
-function VEManagerClient:RemoveTime()
-	Time:Remove()
-end
-
 
 function VEManagerClient:CreateCinematicTools()
 	CinematicTools:__init()
@@ -582,34 +568,23 @@ function VEManagerClient:OnUpdateInput(p_Delta, p_SimulationDelta)
 	end
 
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F2) then
-		--self:FadeIn("Testing1", 5000)
-		self:AddTime(0, false, 0.5, 30)
+		NetEvents:Send('TimeServer:AddTime', 0, false, 30, 30)
+		print('Dispatching Add Time Event')
 	end
 
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F3) then
-		self:AddTime(0, false, 60, 30)
-		--self:FadeIn("Testing2", 5000)
-		--self:FadeOut("Testing1", 5000)
+		--
 	end
 
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F4) then
-		NetEvents:Send('TimeServer:AddTime', 0, false, 60, 30)
-		print('Dispatching Add Time Event')
-		--self:FadeIn("Testing3", 5000)
-		--self:FadeOut("Testing2", 5000)
+		--
 	end
 
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F5) then
-		--self:FadeIn("Testing4", 5000)
-		--self:FadeOut("Testing3", 5000)
+		--
 	end
 
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F6) then
-		--self:DisablePreset("Testing1")
-		--self:DisablePreset("Testing2")
-		--self:DisablePreset("Testing3")
-		--self:DisablePreset("Testing4")
-
 		local s_states = VisualEnvironmentManager:GetStates()
 		VisualEnvironmentManager:SetDirty(true)
 		local s_fixedPriority = 10000000 + 100015
