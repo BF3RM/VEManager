@@ -55,7 +55,7 @@ end
 
 
 function Time:OnLevelDestroy()
-    Time:RemoveTime()
+    self:RemoveTime()
 end
 
 
