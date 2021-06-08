@@ -12,7 +12,7 @@ function TimeServer:RegisterVars()
     self.m_ServerDayTime = 0.0
     self.m_TotalServerTime = 0.0
     self.m_EngineUpdateTimer = 0.0
-    self.m_TotalDayLength = nil
+    self.m_TotalDayLength = 0.0
     self.m_IsStatic = nil
     self.m_ServerUpdateFrequency = 30
     self.m_SystemRunning = false
@@ -96,6 +96,18 @@ function TimeServer:OnPlayerRequest(player)
         print('[Time-Server]: Calling Sync Broadcast')
         NetEvents:SendTo('VEManager:AddTimeToClient', player, self.m_ServerDayTime / 3600 , self.m_IsStatic, self.m_TotalDayLength / 60, self.m_ServerUpdateFrequency)
         TimeServer:Broadcast()
+    end
+end
+
+
+function TimeServer:PauseContinue()
+    if self.m_SystemRunning == true then
+        self.m_SystemRunning = false
+        NetEvents:Broadcast('TimeServer:Pause', false)
+    elseif self.m_SystemRunning == false then
+        self.m_SystemRunning = true
+        NetEvents:Broadcast('TimeServer:Pause', true)
+        self:Broadcast()
     end
 end
 

@@ -34,6 +34,7 @@ function Time:RegisterEvents()
     self.m_levelDestroyEvent = Events:Subscribe('Level:Destroy', self, self.OnLevelDestroy)
     self.m_AddTimeToClientEvent = NetEvents:Subscribe('VEManager:AddTimeToClient', self, self.AddTimeToClient)
 	self.m_RemoveTimeEvent = Events:Subscribe('VEManager:RemoveTime', self, self.RemoveTime)
+    self.m_PauseContinueEvent = NetEvents:Subscribe('TimeServer:Pause', self, self.PauseContinue)
 end
 
 
@@ -91,6 +92,22 @@ function Time:ResetSunPosition()
 end
 
 
+function Time:CallPauseContinue()
+    NetEvents:Send('TimeServer:CallPauseContinue')
+end
+
+
+function Time:PauseContinue(p_Pause)
+    if p_Pause == true then
+        self.m_SystemRunning = false
+    elseif p_Pause == false then
+        self.m_SystemRunning = true
+    else
+        error('Failed to receive Pause Bool')
+    end
+end
+
+
 function Time:RemoveTime()
     self.m_engineUpdateEvent:Unsubscribe()
     self.m_systemActive = false
@@ -112,7 +129,6 @@ end
 -- ADD TIME TO MAP
 -- Add(Map name, starting hour (24h), day length (min), static time = true/false, server update frequency)
 function Time:Add(mapName, time, isStatic, totalDayLength, serverUpdateFrequency)
-
     if self.m_systemActive == true then
         self:RegisterVars()
     end
@@ -171,7 +187,6 @@ function Time:Add(mapName, time, isStatic, totalDayLength, serverUpdateFrequency
 
     -- calculate visibilities and presets
     if self.m_clientTime < self.m_totalDayLength * 0.25 or self.m_clientTime > 0.875 * self.m_totalDayLength then -- 00:00 to 6:00 or 21:00 to 00:00
-
         -- set visibility preset night
         local s_factorNight = 1
         local s_factorMorning = 0
@@ -183,9 +198,7 @@ function Time:Add(mapName, time, isStatic, totalDayLength, serverUpdateFrequency
         g_VEManagerClient:SetVisibility(self.m_currentMorningPreset, s_factorMorning)
         g_VEManagerClient:SetVisibility(self.m_currentNoonPreset, 0)
         g_VEManagerClient:SetVisibility(self.m_currentEveningPreset, 0)
-
     elseif self.m_clientTime <= self.m_totalDayLength * 0.375 then -- 6:00 to 9:00
-
         -- calculate visibility preset morning
         local s_factorMorning = ( self.m_clientTime - ( self.m_totalDayLength * 0.25 )) / ( self.m_totalDayLength * ( 0.375 - 0.25 )) --todo change these multiplication values to variables later to calculate automatically
         -- calculate visibility preset night
@@ -199,9 +212,7 @@ function Time:Add(mapName, time, isStatic, totalDayLength, serverUpdateFrequency
         g_VEManagerClient:SetVisibility(self.m_currentMorningPreset, s_factorMorning)
         g_VEManagerClient:SetVisibility(self.m_currentNoonPreset, 0)
         g_VEManagerClient:SetVisibility(self.m_currentEveningPreset, 0)
-
     elseif self.m_clientTime <= self.m_totalDayLength * 0.5 then -- 9:00 to 12:00
-
         -- calculate visibility preset noon
         local s_factorNoon = ( self.m_clientTime - ( self.m_totalDayLength * 0.375 )) / ( self.m_totalDayLength * ( 0.5 - 0.375 ))
         -- calculate visibility preset morning
@@ -215,9 +226,7 @@ function Time:Add(mapName, time, isStatic, totalDayLength, serverUpdateFrequency
         g_VEManagerClient:SetVisibility(self.m_currentMorningPreset, s_factorMorning)
         g_VEManagerClient:SetVisibility(self.m_currentNoonPreset, s_factorNoon)
         g_VEManagerClient:SetVisibility(self.m_currentEveningPreset, 0)
-
     elseif self.m_clientTime <= self.m_totalDayLength * 0.75 then -- 12:00 to 18:00
-
         -- calculate visibility preset evening
         local s_factorEvening = ( self.m_clientTime - ( self.m_totalDayLength * 0.5 )) / ( self.m_totalDayLength * ( 0.75 - 0.5 ))
         -- calculate visibility preset noon
@@ -231,8 +240,6 @@ function Time:Add(mapName, time, isStatic, totalDayLength, serverUpdateFrequency
         g_VEManagerClient:SetVisibility(self.m_currentMorningPreset, 0)
         g_VEManagerClient:SetVisibility(self.m_currentNoonPreset, s_factorNoon)
         g_VEManagerClient:SetVisibility(self.m_currentEveningPreset, s_factorEvening)
-
-
     elseif self.m_clientTime <= self.m_totalDayLength * 0.875 then -- 18:00 to 21:00
 		-- Night preset has a lower visibility, thus we change evening visibility back to 0
 
@@ -249,9 +256,8 @@ function Time:Add(mapName, time, isStatic, totalDayLength, serverUpdateFrequency
         g_VEManagerClient:SetVisibility(self.m_currentMorningPreset, 0)
         g_VEManagerClient:SetVisibility(self.m_currentNoonPreset, 0)
         g_VEManagerClient:SetVisibility(self.m_currentEveningPreset, s_factorEvening)
-
     else
-        error("What?")
+        error("Critical Time System Error")
     end
 
     if isStatic ~= true then

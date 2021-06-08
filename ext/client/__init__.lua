@@ -317,8 +317,15 @@ function VEManagerClient:LoadPresets()
 		s_VE.visibility = 1
 
 		self.m_Presets[s_Preset.Name]["ve"] = s_VE
+
+		if s_Preset.Type == nil then
+			s_Preset.Type = 'generic'
+		end
 		self.m_Presets[s_Preset.Name]["type"] = s_Preset.Type
-		self.m_Presets[s_Preset.Name]["map"] = s_Preset.Map
+
+		if s_Preset.Map ~= nil then
+			self.m_Presets[s_Preset.Name]["map"] = s_Preset.Map
+		end
 
 		--Foreach class
 		local componentCount = 0
