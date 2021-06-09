@@ -23,6 +23,7 @@ function Time:RegisterVars()
     self.m_noonPriority = 100015
     self.m_eveningPriority = 100020
     self.m_mapPresets = {}
+    self.m_IsStatic = nil
 end
 
 
@@ -56,7 +57,7 @@ end
 
 
 function Time:OnLevelDestroy()
-    if m_SystemRunning == true then
+    if self.m_IsStatic ~= nil then
         self:RemoveTime()
     end
 end
@@ -76,6 +77,7 @@ end
 
 function Time:AddTimeToClient(startingTime, isStatic, lengthOfDayInMinutes, serverUpdateFrequency) -- Add Time System to Map | To be called on Level:Loaded | time in 24hr format (0-23)
 	local s_currentMap = SharedUtils:GetLevelName()
+    self.m_IsStatic = isStatic
 	self:Add(s_currentMap, startingTime, isStatic, lengthOfDayInMinutes, serverUpdateFrequency)
 end
 
