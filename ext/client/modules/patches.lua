@@ -9,8 +9,6 @@ function Patches:Components(partition)
             Patches:MeshAsset(instance)
         elseif instance:Is('MeshMaterialVariation') then
             Patches:MeshMaterialVariation(instance)
-	    elseif instance:Is('LocalLightEntityData') then
-	        Patches:HDLights(instance)
         elseif instance:Is('LensFlareEntityData') then
             Patches:LensFlareEntityData(instance)
         elseif instance:Is('LocalLightEntityData') then
