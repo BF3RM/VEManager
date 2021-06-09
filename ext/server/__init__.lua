@@ -14,7 +14,7 @@ function TimeServer:RegisterVars()
     self.m_EngineUpdateTimer = 0.0
     self.m_TotalDayLength = 0.0
     self.m_IsStatic = nil
-    self.m_ServerUpdateFrequency = 30
+    self.m_ServerUpdateFrequency = 15
     self.m_SystemRunning = false
 end
 
@@ -32,6 +32,7 @@ end
 
 function TimeServer:OnLevelDestroy()
     TimeServer:RegisterVars()
+    Events:Dispatch('VEManager:RemoveTime')
 end
 
 
@@ -42,7 +43,7 @@ end
 
 
 function TimeServer:AddTime(p_StartingTime, p_IsStatic, p_LengthOfDayInMinutes, p_ServerUpdateFrequency)
-    if self.m_systemActive == true then
+    if self.m_SystemRunning == true then
         self:RegisterVars()
     end
 
