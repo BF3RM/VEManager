@@ -63,7 +63,8 @@ function VEManagerClient:RegisterEvents()
     Events:Subscribe('VEManager:FadeOut', self, self.FadeOut)
     Events:Subscribe('VEManager:Lerp', self, self.Lerp)
 	Events:Subscribe('VEManager:Crossfade', self, self.Crossfade)
-	Events:Subscribe('VEManager:CreateCinematicTools', self, self.CreateCinematicTools)
+	--Events:Subscribe('VEManager:CreateCinematicTools', self, self.CreateCinematicTools)
+	NetEvents:Subscribe('VEManager:CreateCinematicTools', self, self.CreateCinematicTools)
 end
 
 
@@ -292,6 +293,10 @@ function VEManagerClient:LoadPresets()
 	-- print(self.m_RawPresets)
 	for i, s_Preset in pairs(self.m_RawPresets) do
 
+		if s_Preset.Type == nil then
+			s_Preset.Type = 'generic'
+		end
+
 		-- Generate our VisualEnvironment
 		local s_IsBasePreset = s_Preset.Priority == 1
 		-- print("IsBasePreset: " .. tostring(s_IsBasePreset))
@@ -318,9 +323,6 @@ function VEManagerClient:LoadPresets()
 
 		self.m_Presets[s_Preset.Name]["ve"] = s_VE
 
-		if s_Preset.Type == nil then
-			s_Preset.Type = 'generic'
-		end
 		self.m_Presets[s_Preset.Name]["type"] = s_Preset.Type
 
 		if s_Preset.Map ~= nil then
