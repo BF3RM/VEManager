@@ -1,4 +1,5 @@
 local Time = class('Time')
+local Patches = require('modules/patches')
 
 
 function Time:__init()
@@ -37,6 +38,9 @@ end
 
 
 function Time:OnPartitionLoad(partition)
+
+    Patches:Components(partition)
+
     if partition.guid == Guid('6E5D35D9-D9D5-11DE-ADB5-9D4DBC23632A') then
         for _, instance in pairs(partition.instances) do
             if instance.instanceGuid == Guid('32CE96BB-E578-9589-7B11-B670661DF2DF') then
