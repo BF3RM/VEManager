@@ -10,12 +10,10 @@ end
 
 function Time:RegisterVars()
     self.m_systemActive = false
-    self.m_transitionFactor = nil
+    self.m_IsStatic = nil
     self.m_clientTime = 0
     self.m_totalClientTime = 0
     self.m_totalDayLength = 0
-    self.m_previousFactor = nil
-    self.m_timeAdded = false
     self.m_originalSunX = nil
     self.m_originalSunY = nil
     self.m_nightPriority = 100005
@@ -23,7 +21,6 @@ function Time:RegisterVars()
     self.m_noonPriority = 100015
     self.m_eveningPriority = 100020
     self.m_mapPresets = {}
-    self.m_IsStatic = nil
 end
 
 
@@ -115,11 +112,6 @@ end
 function Time:RemoveTime()
     self.m_engineUpdateEvent:Unsubscribe()
     self.m_systemActive = false
-    g_VEManagerClient:SetVisibility(self.m_currentNightPreset, 0)
-    g_VEManagerClient:SetVisibility(self.m_currentMorningPreset, 0)
-    g_VEManagerClient:SetVisibility(self.m_currentNoonPreset, 0)
-    g_VEManagerClient:SetVisibility(self.m_currentEveningPreset, 0)
-
     g_VEManagerClient:DisablePreset(self.m_currentNightPreset)
     g_VEManagerClient:DisablePreset(self.m_currentMorningPreset)
     g_VEManagerClient:DisablePreset(self.m_currentNoonPreset)
