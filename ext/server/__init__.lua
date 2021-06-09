@@ -22,7 +22,7 @@ end
 function TimeServer:RegisterEvents()
     print('[Time-Server]: Registered Events')
     self.m_AddTimeEvent = Events:Subscribe('TimeServer:AddTime', self, self.AddTime)
-    self.m_AddTimeNetEvent = NetEvents:Subscribe('TimeServer:AddTime', self, self.AddTimeNet)
+    self.m_AddTimeNetEvent = NetEvents:Subscribe('TimeServer:ApplyTime', self, self.AddTimeNet)
     self.m_EngineUpdateEvent = Events:Subscribe('Engine:Update', self, self.Run)
     self.m_LevelLoadedEvent = Events:Subscribe('Level:Loaded', self, self.OnLevelLoaded)
     self.m_LevelDestroyEvent = Events:Subscribe('Level:Destroy', self, self.OnLevelDestroy)
@@ -42,8 +42,13 @@ end
 
 
 function TimeServer:AddTime(p_StartingTime, p_IsStatic, p_LengthOfDayInMinutes, p_ServerUpdateFrequency)
+    if self.m_systemActive == true then
+        self:RegisterVars()
+    end
+
     print('[Time-Server]: Received Add Time Event')
     print(tostring(p_StartingTime) .. " | "  .. tostring(p_IsStatic) .. " | "  .. tostring(p_LengthOfDayInMinutes) .. " | "  .. tostring(p_ServerUpdateFrequency))
+
     if p_LengthOfDayInMinutes <= 1 then
         self.m_TotalDayLength = 86000
     else

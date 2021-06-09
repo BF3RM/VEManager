@@ -56,7 +56,9 @@ end
 
 
 function Time:OnLevelDestroy()
-    self:RemoveTime()
+    if m_SystemRunning == true then
+        self:RemoveTime()
+    end
 end
 
 
