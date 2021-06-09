@@ -60,7 +60,9 @@ function TimeServer:AddTime(p_StartingTime, p_IsStatic, p_LengthOfDayInMinutes, 
     print('[Time-Server]: Starting at Time: ' .. ( self.m_ServerDayTime / 60 / 60 ) .. ' Hours')
 
     self.m_IsStatic = p_IsStatic
-    self.m_ServerUpdateFrequency = p_ServerUpdateFrequency
+	if p_ServerUpdateFrequency ~= nil then
+    	self.m_ServerUpdateFrequency = p_ServerUpdateFrequency
+	end
 
     NetEvents:Broadcast('VEManager:AddTimeToClient', p_StartingTime, p_IsStatic, p_LengthOfDayInMinutes, p_ServerUpdateFrequency)
 
