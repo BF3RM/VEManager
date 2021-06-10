@@ -66,7 +66,7 @@ end
 
 function Time:ServerSync(p_ServerDayTime, p_TotalServerTime)
     if self.m_clientTime ~= p_ServerDayTime then
-        print('Server Sync:' .. 'Current Time: ' .. p_ServerDayTime .. ' | ' .. 'Total Time:' .. p_TotalServerTime)
+        --print('Server Sync:' .. 'Current Time: ' .. p_ServerDayTime .. ' | ' .. 'Total Time:' .. p_TotalServerTime)
         self.m_clientTime = p_ServerDayTime
         self.m_totalClientTime = p_TotalServerTime
     end
@@ -275,12 +275,12 @@ function Time:Run(deltaTime)
     end
 
     -- start counter
-    self.m_clientTime = ( self.m_clientTime + deltaTime )
+    --self.m_clientTime = ( self.m_clientTime + deltaTime )
 	if self.m_clientTime > self.m_totalDayLength then
 		self.m_clientTime =  self.m_clientTime - self.m_totalDayLength -- reset day
 	end
 
-    self.m_totalClientTime = ( self.m_totalClientTime + deltaTime )
+    --self.m_totalClientTime = ( self.m_totalClientTime + deltaTime )
 
 	local s_print_enabled = false
 	local s_h_time = self.m_clientTime / ( self.m_totalDayLength / 24 )
