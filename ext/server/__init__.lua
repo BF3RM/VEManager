@@ -15,6 +15,8 @@ function TimeServer:RegisterVars()
     self.m_TotalDayLength = 0.0
     self.m_IsStatic = nil
     self.m_ServerUpdateFrequency = 30
+    self.m_ServerTickrate = SharedUtils:GetTickrate()
+    self.m_SyncTickrate = 1 / self.m_ServerTickrate
     self.m_SystemRunning = false
 end
 
@@ -31,7 +33,7 @@ end
 
 
 function TimeServer:OnLevelLoaded()
-    self:AddTime(8, false, 240, 30) -- debug only
+    self:AddTime(8, false, 2, self.m_SyncTickrate) -- debug only
 end
 
 
@@ -70,7 +72,7 @@ function TimeServer:AddTime(p_StartingTime, p_IsStatic, p_LengthOfDayInMinutes, 
     	self.m_ServerUpdateFrequency = p_ServerUpdateFrequency
 	end
 
-    NetEvents:Broadcast('VEManager:AddTimeToClient', self.m_ServerDayTime, p_IsStatic, self.m_TotalDayLength, p_ServerUpdateFrequency)
+    NetEvents:BroadcastUnreliable('VEManager:AddTimeToClient', self.m_ServerDayTime, p_IsStatic, self.m_TotalDayLength, p_ServerUpdateFrequency)
 
     self.m_SystemRunning = true
 end
@@ -126,7 +128,7 @@ end
 
 
 function TimeServer:Broadcast()
-    print('[Time-Server]: Syncing Players')
+    --print('[Time-Server]: Syncing Players')
     NetEvents:Broadcast('TimeServer:Sync', self.m_ServerDayTime, self.m_TotalServerTime)
 end
 
