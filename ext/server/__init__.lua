@@ -14,7 +14,7 @@ function TimeServer:RegisterVars()
     self.m_EngineUpdateTimer = 0.0
     self.m_TotalDayLength = 0.0
     self.m_IsStatic = nil
-    self.m_ServerUpdateFrequency = 30
+    self.m_ServerUpdateFrequency = 30 --todo remove
     self.m_ServerTickrate = SharedUtils:GetTickrate()
     self.m_SyncTickrate = 1 / self.m_ServerTickrate
     self.m_SystemRunning = false
