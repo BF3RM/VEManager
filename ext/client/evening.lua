@@ -59,7 +59,7 @@ local table = [[
         "FogDistanceMultiplier": "1.0",
         "FogGradientEnable": "true",
         "Start": "15",
-        "EndValue": "225.0",
+        "EndValue": "600.0",
         "Curve": "0.4:-0.77:1.3:-0.01:",
         "FogColorEnable": "true",
         "FogColor": "0.02:0.05:0.11:",

@@ -65,9 +65,11 @@ end
 
 
 function Time:ServerSync(p_ServerDayTime, p_TotalServerTime)
-    print('Server Sync:' .. 'Current Time: ' .. p_ServerDayTime .. ' | ' .. 'Total Time:' .. p_TotalServerTime)
-    self.m_clientTime = p_ServerDayTime
-    self.m_totalClientTime = p_TotalServerTime
+    if self.m_clientTime ~= p_ServerDayTime then
+        print('Server Sync:' .. 'Current Time: ' .. p_ServerDayTime .. ' | ' .. 'Total Time:' .. p_TotalServerTime)
+        self.m_clientTime = p_ServerDayTime
+        self.m_totalClientTime = p_TotalServerTime
+    end
 end
 
 
@@ -76,10 +78,10 @@ function Time:RequestTime()
 end
 
 
-function Time:AddTimeToClient(startingTime, isStatic, lengthOfDayInMinutes, serverUpdateFrequency) -- Add Time System to Map | To be called on Level:Loaded | time in 24hr format (0-23)
-	local s_currentMap = SharedUtils:GetLevelName()
-    self.m_IsStatic = isStatic
-	self:Add(s_currentMap, startingTime, isStatic, lengthOfDayInMinutes, serverUpdateFrequency)
+function Time:AddTimeToClient(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds, p_ServerUpdateFrequency) -- Add Time System to Map | To be called on Level:Loaded | time in 24hr format (0-23)
+	local s_CurrentMap = SharedUtils:GetLevelName()
+    self.m_IsStatic = p_IsStatic
+	self:Add(s_CurrentMap, p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds, p_ServerUpdateFrequency)
 end
 
 
@@ -128,7 +130,7 @@ end
 
 -- ADD TIME TO MAP
 -- Add(Map name, starting hour (24h), day length (min), static time = true/false, server update frequency)
-function Time:Add(mapName, time, isStatic, totalDayLength, serverUpdateFrequency)
+function Time:Add(p_MapName, p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds, p_ServerUpdateFrequency)
     if self.m_systemActive == true then
         self:RegisterVars()
     end
@@ -169,15 +171,11 @@ function Time:Add(mapName, time, isStatic, totalDayLength, serverUpdateFrequency
 	]]
 
     -- save dayLength in Class (minutes -> seconds)
-    if totalDayLength <= 1 then
-        self.m_totalDayLength = 86000
-    else
-        self.m_totalDayLength = totalDayLength * 60
-    end
-    print("Length of Day: " .. self.m_totalDayLength .. " Seconds")
+    self.m_totalDayLength = p_LengthOfDayInSeconds
+    print('[Time-Client]: Length of Day: ' .. self.m_totalDayLength .. ' Seconds')
+    self.m_clientTime = p_StartingTime
+    print('[Time-Client]: Starting at Time: ' .. p_StartingTime .. ' Hours ('.. p_StartingTime * 3600 ..' Seconds)')
 
-    self.m_clientTime = time * 3600 -- to sec
-    print("Starting at Time: " .. ( self.m_clientTime / 60 / 60 ) .. " Hours")
 
 	-- Set Priorities
 	g_VEManagerClient.m_Presets[self.m_currentNightPreset]["ve"].priority = self.m_nightPriority
@@ -260,7 +258,7 @@ function Time:Add(mapName, time, isStatic, totalDayLength, serverUpdateFrequency
         error("Critical Time System Error")
     end
 
-    if isStatic ~= true then
+    if p_IsStatic ~= true then
         self.m_systemActive = true
         print("Time System Activated")
     end

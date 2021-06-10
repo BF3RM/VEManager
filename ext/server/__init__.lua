@@ -14,7 +14,7 @@ function TimeServer:RegisterVars()
     self.m_EngineUpdateTimer = 0.0
     self.m_TotalDayLength = 0.0
     self.m_IsStatic = nil
-    self.m_ServerUpdateFrequency = 15
+    self.m_ServerUpdateFrequency = 30
     self.m_SystemRunning = false
 end
 
@@ -30,8 +30,13 @@ function TimeServer:RegisterEvents()
 end
 
 
+function TimeServer:OnLevelLoaded()
+    self:AddTime(8, false, 240, 30) -- debug only
+end
+
+
 function TimeServer:OnLevelDestroy()
-    TimeServer:RegisterVars()
+    self:RegisterVars()
     Events:Dispatch('VEManager:RemoveTime')
 end
 
@@ -57,36 +62,36 @@ function TimeServer:AddTime(p_StartingTime, p_IsStatic, p_LengthOfDayInMinutes, 
     end
     print('[Time-Server]: Length of Day: ' .. self.m_TotalDayLength .. ' Seconds')
 
-    self.m_ServerDayTime = p_StartingTime * 3600 -- to sec
-    print('[Time-Server]: Starting at Time: ' .. ( self.m_ServerDayTime / 60 / 60 ) .. ' Hours')
+    self.m_ServerDayTime = p_StartingTime * 3600 * (self.m_TotalDayLength / 86000)
+    print('[Time-Server]: Starting at Time: ' .. p_StartingTime .. ' Hours')
 
     self.m_IsStatic = p_IsStatic
 	if p_ServerUpdateFrequency ~= nil then
     	self.m_ServerUpdateFrequency = p_ServerUpdateFrequency
 	end
 
-    NetEvents:Broadcast('VEManager:AddTimeToClient', p_StartingTime, p_IsStatic, p_LengthOfDayInMinutes, p_ServerUpdateFrequency)
+    NetEvents:Broadcast('VEManager:AddTimeToClient', self.m_ServerDayTime, p_IsStatic, self.m_TotalDayLength, p_ServerUpdateFrequency)
 
     self.m_SystemRunning = true
 end
 
 
-function TimeServer:Run(deltaTime)
+function TimeServer:Run(p_DeltaTime, p_SimulationDeltaTime)
     if self.m_SystemRunning == true and self.m_IsStatic == false then
 
-        self.m_ServerDayTime = self.m_ServerDayTime + deltaTime
-        self.m_EngineUpdateTimer = self.m_EngineUpdateTimer + deltaTime
-        self.m_TotalServerTime = self.m_TotalServerTime + deltaTime
+        self.m_ServerDayTime = self.m_ServerDayTime + p_DeltaTime
+        self.m_EngineUpdateTimer = self.m_EngineUpdateTimer + p_DeltaTime
+
+        if self.m_TotalServerTime == 0.0 then
+            self.m_TotalServerTime = self.m_TotalServerTime + self.m_ServerDayTime
+        end
+        self.m_TotalServerTime = self.m_TotalServerTime + p_DeltaTime
 
         if self.m_EngineUpdateTimer <= self.m_ServerUpdateFrequency then
-            if self.m_EngineUpdateTimer == 0.5 * self.m_ServerUpdateFrequency then
-                print('[Time-Server]: Time left till next server sync: ' .. ( self.m_ServerUpdateFrequency - self.m_EngineUpdateTimer ))
-            end
             return
         end
 
         self.m_EngineUpdateTimer = 0
-
         self:Broadcast()
 
         if self.m_ServerDayTime >= self.m_TotalDayLength then
@@ -102,8 +107,8 @@ function TimeServer:OnPlayerRequest(player)
     print('[Time-Server]: Received Request by Player')
     if self.m_SystemRunning == true and self.m_IsStatic == false then
         print('[Time-Server]: Calling Sync Broadcast')
-        NetEvents:SendTo('VEManager:AddTimeToClient', player, self.m_ServerDayTime / 3600 , self.m_IsStatic, self.m_TotalDayLength / 60, self.m_ServerUpdateFrequency)
-        TimeServer:Broadcast()
+        NetEvents:SendTo('VEManager:AddTimeToClient', player, self.m_ServerDayTime, self.m_IsStatic, self.m_TotalDayLength, self.m_ServerUpdateFrequency)
+        self:Broadcast()
     end
 end
 
