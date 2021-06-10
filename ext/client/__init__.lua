@@ -590,7 +590,7 @@ function VEManagerClient:OnUpdateInput(p_Delta, p_SimulationDelta)
 	end
 
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F5) then
-		--
+		CinematicTools:__init()
 	end
 
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F6) then
