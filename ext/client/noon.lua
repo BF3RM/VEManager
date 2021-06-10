@@ -84,7 +84,6 @@ local table = [[
     "Sky": {
         "Realm": "0",
         "Enable": "true",
-        "BrightnessScale": "0.4",
         "SunSize": "0.01",
         "SunScale": "5",
         "CloudLayerSunColor": "(1.71, 1.25, 0.42)",
@@ -104,12 +103,7 @@ local table = [[
         "CloudLayer2SunLightIntensity": "0.5",
         "CloudLayer2SunLightPower": "5",
         "CloudLayer2AmbientLightIntensity": "0.5",
-        "CloudLayer2Color": "1:1:1:",
-        "StaticEnvmapScale": "0",
-        "SkyVisibilityExponent": "0",
-        "SkyEnvmap8BitTexScale": "5",
-        "CustomEnvmapScale": "1",
-        "CustomEnvmapAmbient": "1"
+        "CloudLayer2Color": "1:1:1:"
     },
     "SunFlare": {
         "Realm": "0",
