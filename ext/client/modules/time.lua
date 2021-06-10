@@ -22,7 +22,7 @@ function Time:RegisterVars()
     self.m_noonPriority = 100015
     self.m_eveningPriority = 100020
     self.m_mapPresets = {}
-self.m_presetTimings = {0.225, 0.30, 0.4, 0.75, 0.875} --Always need to have the end time of the last preset in a day at the end
+    self.m_presetTimings = {0.225, 0.30, 0.4, 0.75, 0.875} --Always need to have the end time of the last preset in a day at the end
     self.m_currentPresetTimingIndex = 1
 end
 
