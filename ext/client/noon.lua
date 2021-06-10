@@ -82,7 +82,7 @@ local table = [[
         "Realm": "0",
         "Enable": "true",
         "SunSize": "0.01",
-        "SunScale": "5",
+        "SunScale": "4",
         "CloudLayerSunColor": "(1.71, 1.25, 0.42)",
         "CloudLayer1Altitude": "500000.0",
         "CloudLayer1TileFactor": "0.25",
