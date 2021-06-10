@@ -24,6 +24,7 @@ function Time:RegisterVars()
     self.m_mapPresets = {}
     self.m_presetTimings = {0.225, 0.30, 0.4, 0.75, 0.875} --Always need to have the end time of the last preset in a day at the end
     self.m_currentPresetTimingIndex = 1
+    self.m_LevelLoaded = false
 end
 
 
@@ -56,6 +57,7 @@ end
 function Time:OnLevelLoad()
     self:__init()
     self:RequestTime()
+    self.m_LevelLoaded = true
 end
 
 
@@ -63,6 +65,7 @@ function Time:OnLevelDestroy()
     if self.m_IsStatic ~= nil then
         self:RemoveTime()
     end
+    self.m_LevelLoaded = false
 end
 
 
