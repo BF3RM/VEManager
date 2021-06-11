@@ -393,7 +393,7 @@ function VEManagerClient:LoadPresets()
 								elseif (l_Field.typeInfo.enum) then
 									s_Class[firstToLower(s_FieldName)] = tonumber(s_Value)
 								elseif (s_Type == "TextureAsset") then
-									if --[[s_FieldName == "PanoramicTexture" or s_FieldName == "PanoramicAlphaTexture" or]] s_FieldName == "StaticEnvmapTexture" then
+									if s_FieldName == "PanoramicTexture" or s_FieldName == "PanoramicAlphaTexture" or s_FieldName == "StaticEnvmapTexture" then
 										s_Class[firstToLower(s_FieldName)] = nil --todo this is dirty - needs to be included in another way to keep it out of the VEManager itself
 									elseif s_FieldName == "CloudLayer2Texture" then
 										s_Class[firstToLower(s_FieldName)] = TextureAsset(_G['g_Stars'])
@@ -427,7 +427,7 @@ function VEManagerClient:LoadPresets()
 							elseif (l_Field.typeInfo.enum) then
 								s_Class[firstToLower(s_FieldName)] = tonumber(s_Value)
 							elseif (s_Type == "TextureAsset") then
-								if --[[s_FieldName == "PanoramicTexture" or s_FieldName == "PanoramicAlphaTexture" or]] s_FieldName == "StaticEnvmapTexture" then
+								if s_FieldName == "PanoramicTexture" or s_FieldName == "PanoramicAlphaTexture" or s_FieldName == "StaticEnvmapTexture" then
 									s_Class[firstToLower(s_FieldName)] = nil --todo this is dirty - needs to be included in another way to keep it out of the VEManager itself
 								elseif s_FieldName == "CloudLayer2Texture" then
 									s_Class[firstToLower(s_FieldName)] = TextureAsset(_G['g_Stars'])

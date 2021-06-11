@@ -6,6 +6,7 @@ function Time:__init()
     print('Initializing Time Module')
     self:RegisterVars()
     self:RegisterEvents()
+    self:RequestTime()
 end
 
 
@@ -24,15 +25,13 @@ function Time:RegisterVars()
     self.m_mapPresets = {}
     self.m_presetTimings = {0.225, 0.30, 0.4, 0.75, 0.875} --Always need to have the end time of the last preset in a day at the end
     self.m_currentPresetTimingIndex = 1
-    self.m_LevelLoaded = false
 end
 
 
 function Time:RegisterEvents()
     self.m_partitionLoadedEvent = Events:Subscribe('Partition:Loaded', self, self.OnPartitionLoad)
-    self.m_serverSyncEvent = NetEvents:Subscribe('TimeServer:Sync', self, self.ServerSync) -- Server Sync
     self.m_engineUpdateEvent = Events:Subscribe('Engine:Update', self, self.Run)
-    self.m_levelLoadEvent = Events:Subscribe('Level:Loaded', self, self.OnLevelLoad)
+    self.m_levelLoadEvent = Events:Subscribe('Level:Loaded', self, self.OnLevelLoaded)
     self.m_levelDestroyEvent = Events:Subscribe('Level:Destroy', self, self.OnLevelDestroy)
     self.m_AddTimeToClientEvent = NetEvents:Subscribe('VEManager:AddTimeToClient', self, self.AddTimeToClient)
 	self.m_RemoveTimeEvent = Events:Subscribe('VEManager:RemoveTime', self, self.RemoveTime)
@@ -42,7 +41,7 @@ end
 
 function Time:OnPartitionLoad(partition)
 
-    Patches:Components(partition)
+    --Patches:Components(partition) --todo crashes the game
 
     if partition.guid == Guid('6E5D35D9-D9D5-11DE-ADB5-9D4DBC23632A') then
         for _, instance in pairs(partition.instances) do
@@ -54,10 +53,9 @@ function Time:OnPartitionLoad(partition)
 end
 
 
-function Time:OnLevelLoad()
+function Time:OnLevelLoaded()
     self:__init()
-    self:RequestTime()
-    self.m_LevelLoaded = true
+    self.m_serverSyncEvent = NetEvents:Subscribe('TimeServer:Sync', self, self.ServerSync) -- Server Sync
 end
 
 
@@ -65,13 +63,12 @@ function Time:OnLevelDestroy()
     if self.m_IsStatic ~= nil then
         self:RemoveTime()
     end
-    self.m_LevelLoaded = false
 end
 
 
 function Time:ServerSync(p_ServerDayTime, p_TotalServerTime)
-    if self.m_clientTime ~= p_ServerDayTime then
-        --print('Server Sync:' .. 'Current Time: ' .. p_ServerDayTime .. ' | ' .. 'Total Time:' .. p_TotalServerTime)
+    if self.m_systemActive == true then
+        print('Server Sync:' .. 'Current Time: ' .. p_ServerDayTime .. ' | ' .. 'Total Time:' .. p_TotalServerTime)
         self.m_clientTime = p_ServerDayTime
         self.m_totalClientTime = p_TotalServerTime
     end
@@ -178,7 +175,7 @@ function Time:Add(p_MapName, p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds,
     -- save dayLength in Class (minutes -> seconds)
     self.m_totalDayLength = p_LengthOfDayInSeconds
     print('[Time-Client]: Length of Day: ' .. self.m_totalDayLength .. ' Seconds')
-    self.m_clientTime = p_StartingTime
+    self.m_clientTime = p_StartingTime * 3600 * (self.m_totalDayLength / 86000)
     print('[Time-Client]: Starting at Time: ' .. p_StartingTime .. ' Hours ('.. p_StartingTime * 3600 ..' Seconds)')
 
 
