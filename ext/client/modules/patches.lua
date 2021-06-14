@@ -4,7 +4,6 @@ local PatchData = require('modules/patchdatatable')
 
 function Patches:Components(partition)
     for _, instance in pairs(partition.instances) do
-
         if instance:Is('MeshAsset') then
             Patches:MeshAsset(instance)
         elseif instance:Is('MeshMaterialVariation') then
@@ -14,7 +13,6 @@ function Patches:Components(partition)
         elseif instance:Is('LocalLightEntityData') then
             Patches:LightSmoothening(instance)
 	    end
-
     end
 end
 
@@ -91,9 +89,7 @@ function Patches:LensFlareEntityData(instance)
     local flares = LensFlareEntityData(instance)
     flares:MakeWritable()
     for _, element in pairs(flares.elements) do
-
         element.size = element.size * 0.3
-
     end
 end
 
@@ -103,8 +99,6 @@ function Patches:LightSmoothening(instance)
     BetterLight:MakeWritable()
     BetterLight.radius = BetterLight.radius * 1.25
     BetterLight.intensity = BetterLight.intensity * 0.65
-    BetterLight.enlightenColorMode = 0
-    BetterLight.enlightenEnable = true
     BetterLight.attenuationOffset = BetterLight.attenuationOffset * 17.5
 end
 

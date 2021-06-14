@@ -91,7 +91,7 @@ local table = [[
         "CloudLayer1Altitude": "500000.0",
         "CloudLayer1TileFactor": "0.25",
         "CloudLayer1Rotation": "223.52900695801",
-        "CloudLayer1Speed": "0",
+        "CloudLayer1Speed": "-0.001",
         "CloudLayer1SunLightIntensity": "0.5",
         "CloudLayer1SunLightPower": "0.5",
         "CloudLayer1AmbientLightIntensity": "0.5",

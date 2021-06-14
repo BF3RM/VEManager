@@ -384,23 +384,26 @@ function VEManagerClient:LoadPresets()
 
 							local s_Value = self:GetDefaultValue(l_Class, l_Field)
 							if (s_Value == nil) then
-                                print("Failed to fetch original value: " .. tostring(l_Class) .. " | " .. tostring(s_FieldName))
+								print("Failed to fetch original value: " .. tostring(l_Class) .. " | " .. tostring(s_FieldName))
+								s_Class[firstToLower(s_FieldName)] = nil
 							else
-
 								-- print("Setting default value for field " .. s_FieldName .. " of class " .. l_Class .. " | " ..  tostring(s_Value))
 								if (IsBasicType(s_Type)) then
 									s_Class[firstToLower(s_FieldName)] = self:ParseValue(s_Type, s_Value)
 								elseif (l_Field.typeInfo.enum) then
 									s_Class[firstToLower(s_FieldName)] = tonumber(s_Value)
 								elseif (s_Type == "TextureAsset") then
-									if s_FieldName == "PanoramicTexture" or s_FieldName == "PanoramicAlphaTexture" or s_FieldName == "StaticEnvmapTexture" then
-										s_Class[firstToLower(s_FieldName)] = nil --todo this is dirty - needs to be included in another way to keep it out of the VEManager itself
+									if s_FieldName == "PanoramicTexture" then
+										s_Class[firstToLower(s_FieldName)] = nil
+									elseif s_FieldName == "PanoramicAlphaTexture" then
+										s_Class[firstToLower(s_FieldName)] = nil
+									elseif s_FieldName == "StaticEnvmapTexture" then
+										s_Class[firstToLower(s_FieldName)] = nil
 									elseif s_FieldName == "CloudLayer2Texture" then
 										s_Class[firstToLower(s_FieldName)] = TextureAsset(_G['g_Stars'])
-										print("Added Stars")
 									else
-										--print("Added FieldName: " .. s_FieldName)
-										s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
+									--print("Added FieldName: " .. s_FieldName)
+									s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
 									end
 								elseif l_Field.typeInfo.array then
 									print("Found unexpected array, ignoring")
@@ -416,25 +419,26 @@ function VEManagerClient:LoadPresets()
 					else
 						--print("Getting Default Value for: " .. tostring(l_Class) .. " | " .. tostring(s_FieldName))
 						local s_Value = self:GetDefaultValue(l_Class, l_Field)
-
 						if (s_Value == nil) then
 							print("Failed to fetch original value: " .. tostring(l_Class) .. " | " .. tostring(s_FieldName))
 						else
-
 							-- print("Setting default value for field " .. s_FieldName .. " of class " .. l_Class .. " | " ..  tostring(s_Value))
 							if (IsBasicType(s_Type)) then
 								s_Class[firstToLower(s_FieldName)] = s_Value
 							elseif (l_Field.typeInfo.enum) then
 								s_Class[firstToLower(s_FieldName)] = tonumber(s_Value)
 							elseif (s_Type == "TextureAsset") then
-								if s_FieldName == "PanoramicTexture" or s_FieldName == "PanoramicAlphaTexture" or s_FieldName == "StaticEnvmapTexture" then
-									s_Class[firstToLower(s_FieldName)] = nil --todo this is dirty - needs to be included in another way to keep it out of the VEManager itself
+								if s_FieldName == "PanoramicTexture" then
+									s_Class[firstToLower(s_FieldName)] = nil
+								elseif s_FieldName == "PanoramicAlphaTexture" then
+									s_Class[firstToLower(s_FieldName)] = nil
+								elseif s_FieldName == "StaticEnvmapTexture" then
+									s_Class[firstToLower(s_FieldName)] = nil
 								elseif s_FieldName == "CloudLayer2Texture" then
 									s_Class[firstToLower(s_FieldName)] = TextureAsset(_G['g_Stars'])
-									print("Added Stars")
 								else
-									--print("Added FieldName: " .. s_FieldName)
-									s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
+								--print("Added FieldName: " .. s_FieldName)
+								s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
 								end
 							elseif l_Field.typeInfo.array then
 								print("Found unexpected array, ignoring")

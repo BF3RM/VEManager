@@ -31,7 +31,7 @@ function Time:RegisterEvents()
     self.m_partitionLoadedEvent = Events:Subscribe('Partition:Loaded', self, self.OnPartitionLoad)
     self.m_engineUpdateEvent = Events:Subscribe('Engine:Update', self, self.Run)
     self.m_levelLoadEvent = Events:Subscribe('Level:Loaded', self, self.OnLevelLoaded)
-    self.m_levelDestroyEvent = Events:Subscribe('Level:Destroy', self, self.OnLevelDestroy)
+    self.m_levelResourceEvent = Events:Subscribe('Level:LoadResources', self, self.OnLevelResources)
     self.m_AddTimeToClientEvent = NetEvents:Subscribe('VEManager:AddTimeToClient', self, self.AddTimeToClient)
 	self.m_RemoveTimeEvent = Events:Subscribe('VEManager:RemoveTime', self, self.RemoveTime)
     self.m_PauseContinueEvent = NetEvents:Subscribe('TimeServer:Pause', self, self.PauseContinue)
@@ -59,7 +59,7 @@ function Time:OnLevelLoaded()
 end
 
 
-function Time:OnLevelDestroy()
+function Time:OnLevelResources()
     if self.m_IsStatic ~= nil then
         self:RemoveTime()
     end
@@ -77,15 +77,14 @@ function Time:ServerSync(p_ServerDayTime, p_TotalServerTime)
     elseif self.m_systemActive == true then
         --print('Server Sync:' .. 'Current Time: ' .. p_ServerDayTime .. ' | ' .. 'Total Time:' .. p_TotalServerTime)
         self.m_clientTime = p_ServerDayTime
-        self.m_totalClientTime = p_TotalServerTime
+        --self.m_totalClientTime = p_TotalServerTime
     end
 end
 
 
 function Time:AddTimeToClient(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds) -- Add Time System to Map | To be called on Level:Loaded | time in 24hr format (0-23)
-	local s_CurrentMap = SharedUtils:GetLevelName()
     self.m_IsStatic = p_IsStatic
-	self:Add(s_CurrentMap, p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
+	self:Add(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 end
 
 
@@ -134,7 +133,7 @@ end
 
 -- ADD TIME TO MAP
 -- Add(Map name, starting hour (24h), day length (min))
-function Time:Add(p_MapName, p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
+function Time:Add(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
     if self.m_systemActive == true then
         self:RegisterVars()
     end
@@ -281,16 +280,8 @@ function Time:Run(deltaTime)
         return
     end
 
-    -- start counter
-    --self.m_clientTime = ( self.m_clientTime + deltaTime )
-	if self.m_clientTime > self.m_totalDayLength then
-		self.m_clientTime =  self.m_clientTime - self.m_totalDayLength -- reset day
-	end
-
-    --self.m_totalClientTime = ( self.m_totalClientTime + deltaTime )
-
 	local s_print_enabled = false
-	local s_h_time = self.m_clientTime / ( self.m_totalDayLength / 24 )
+	--[[local s_h_time = self.m_clientTime / ( self.m_totalDayLength / 24 )
 	if s_h_time - last_print_h >= 1 then
 		s_print_enabled = true
 		last_print_h = s_h_time
@@ -298,7 +289,7 @@ function Time:Run(deltaTime)
 
 	if s_print_enabled then
         print("Current Time: " .. s_h_time .. " Hours.")
-	end
+	end]]
 
     if self.m_clientTime < self.m_totalDayLength * self.m_presetTimings[1] or self.m_clientTime > self.m_presetTimings[#self.m_presetTimings] * self.m_totalDayLength then -- 00:00 to 6:00 or 21:00 to 00:00
 

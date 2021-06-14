@@ -33,7 +33,7 @@ end
 
 
 function TimeServer:OnLevelLoaded()
-    self:AddTime(8, 10) -- debug only
+    self:AddTime(8, 0.5) -- debug only
 end
 
 
@@ -121,7 +121,7 @@ end
 
 function TimeServer:Broadcast()
     --print('[Time-Server]: Syncing Players')
-    NetEvents:BroadcastUnreliable('TimeServer:Sync', self.m_ServerDayTime, self.m_TotalServerTime)
+    NetEvents:BroadcastUnreliableOrdered('TimeServer:Sync', self.m_ServerDayTime, self.m_TotalServerTime)
 end
 
 
