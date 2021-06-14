@@ -33,7 +33,7 @@ end
 
 
 function TimeServer:OnLevelLoaded()
-    self:AddTime(8, 0.5) -- debug only
+    self:AddTime(19, 20) -- debug only
 end
 
 

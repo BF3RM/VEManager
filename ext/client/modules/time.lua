@@ -10,7 +10,7 @@ end
 
 
 function Time:RegisterVars()
-    self.m_systemActive = false
+    self.m_SystemRunning = false
     self.m_IsStatic = nil
     self.m_clientTime = 0
     self.m_totalClientTime = 0
@@ -28,10 +28,10 @@ end
 
 
 function Time:RegisterEvents()
-    self.m_partitionLoadedEvent = Events:Subscribe('Partition:Loaded', self, self.OnPartitionLoad)
-    self.m_engineUpdateEvent = Events:Subscribe('Engine:Update', self, self.Run)
+    self.m_PartitionLoadedEvent = Events:Subscribe('Partition:Loaded', self, self.OnPartitionLoad)
+    self.m_EngineUpdateEvent = Events:Subscribe('Engine:Update', self, self.Run)
     self.m_levelLoadEvent = Events:Subscribe('Level:Loaded', self, self.OnLevelLoaded)
-    self.m_levelResourceEvent = Events:Subscribe('Level:LoadResources', self, self.OnLevelResources)
+    self.m_levelDestroyEvent = Events:Subscribe('Level:Destroy', self, self.OnLevelDestroy)
     self.m_AddTimeToClientEvent = NetEvents:Subscribe('VEManager:AddTimeToClient', self, self.AddTimeToClient)
 	self.m_RemoveTimeEvent = Events:Subscribe('VEManager:RemoveTime', self, self.RemoveTime)
     self.m_PauseContinueEvent = NetEvents:Subscribe('TimeServer:Pause', self, self.PauseContinue)
@@ -59,8 +59,9 @@ function Time:OnLevelLoaded()
 end
 
 
-function Time:OnLevelResources()
+function Time:OnLevelDestroy()
     if self.m_IsStatic ~= nil then
+        self.m_SystemRunning = false
         self:RemoveTime()
     end
 end
@@ -74,7 +75,7 @@ end
 function Time:ServerSync(p_ServerDayTime, p_TotalServerTime)
     if p_ServerDayTime == nil or p_TotalServerTime == nil then
         return
-    elseif self.m_systemActive == true then
+    elseif self.m_SystemRunning == true then
         --print('Server Sync:' .. 'Current Time: ' .. p_ServerDayTime .. ' | ' .. 'Total Time:' .. p_TotalServerTime)
         self.m_clientTime = p_ServerDayTime
         --self.m_totalClientTime = p_TotalServerTime
@@ -119,8 +120,7 @@ end
 
 
 function Time:RemoveTime()
-    self.m_engineUpdateEvent:Unsubscribe()
-    self.m_systemActive = false
+    self.m_EngineUpdateEvent:Unsubscribe()
     g_VEManagerClient:DisablePreset(self.m_currentNightPreset)
     g_VEManagerClient:DisablePreset(self.m_currentMorningPreset)
     g_VEManagerClient:DisablePreset(self.m_currentNoonPreset)
@@ -134,7 +134,7 @@ end
 -- ADD TIME TO MAP
 -- Add(Map name, starting hour (24h), day length (min))
 function Time:Add(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
-    if self.m_systemActive == true then
+    if self.m_SystemRunning == true then
         self:RegisterVars()
     end
 
@@ -264,7 +264,7 @@ function Time:Add(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
     end
 
     if p_IsStatic ~= true then
-        self.m_systemActive = true
+        self.m_SystemRunning = true
         print("Time System Activated")
     end
 
@@ -276,7 +276,15 @@ local last_print_h = -1
 --ALSO LOOP THIS CODE PLEASE
 function Time:Run(deltaTime)
 
-    if self.m_systemActive ~= true then
+    if self.m_SystemRunning ~= true then
+        return
+    end
+
+    if self.m_currentNightPreset == nil or
+        self.m_currentMorningPreset == nil or
+        self.m_currentNoonPreset == nil or
+        self.m_currentEveningPreset == nil then
+        self.m_SystemRunning = false
         return
     end
 

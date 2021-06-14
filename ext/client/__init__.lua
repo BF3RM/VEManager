@@ -384,7 +384,7 @@ function VEManagerClient:LoadPresets()
 
 							local s_Value = self:GetDefaultValue(l_Class, l_Field)
 							if (s_Value == nil) then
-								print("Failed to fetch original value: " .. tostring(l_Class) .. " | " .. tostring(s_FieldName))
+								print("Failed to fetch original value: " .. tostring(l_Class) .. " | " .. tostring(s_FieldName) .. " [1]")
 								s_Class[firstToLower(s_FieldName)] = nil
 							else
 								-- print("Setting default value for field " .. s_FieldName .. " of class " .. l_Class .. " | " ..  tostring(s_Value))
@@ -420,7 +420,13 @@ function VEManagerClient:LoadPresets()
 						--print("Getting Default Value for: " .. tostring(l_Class) .. " | " .. tostring(s_FieldName))
 						local s_Value = self:GetDefaultValue(l_Class, l_Field)
 						if (s_Value == nil) then
-							print("Failed to fetch original value: " .. tostring(l_Class) .. " | " .. tostring(s_FieldName))
+							print("Failed to fetch original value: " .. tostring(l_Class) .. " | " .. tostring(s_FieldName) .. " [2]")
+							if s_FieldName == "CloudLayer2Texture" then
+								print("CloudTexture")
+								s_Class[firstToLower(s_FieldName)] = TextureAsset(_G['g_Stars'])
+							else
+								s_Class[firstToLower(s_FieldName)] = nil
+							end
 						else
 							-- print("Setting default value for field " .. s_FieldName .. " of class " .. l_Class .. " | " ..  tostring(s_Value))
 							if (IsBasicType(s_Type)) then
