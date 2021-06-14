@@ -33,7 +33,7 @@ end
 
 
 function TimeServer:OnLevelLoaded()
-    self:AddTime(8, false, 2, self.m_SyncTickrate) -- debug only
+    self:AddTime(8, 10) -- debug only
 end
 
 
@@ -43,34 +43,33 @@ function TimeServer:OnLevelDestroy()
 end
 
 
-function TimeServer:AddTimeNet(p_Player, p_StartingTime, p_IsStatic, p_LengthOfDayInMinutes)
+function TimeServer:AddTimeNet(p_Player, p_StartingTime, p_LengthOfDayInMinutes)
     print('[Time-Server]: Time Event Called by ' .. p_Player.name)
-    self:AddTime(p_StartingTime, p_IsStatic, p_LengthOfDayInMinutes)
+    self:AddTime(p_StartingTime, p_LengthOfDayInMinutes)
 end
 
 
-function TimeServer:AddTime(p_StartingTime, p_IsStatic, p_LengthOfDayInMinutes)
+function TimeServer:AddTime(p_StartingTime, p_LengthOfDayInMinutes)
     if self.m_SystemRunning == true then
         self:RegisterVars()
     end
 
     print('[Time-Server]: Received Add Time Event')
-    print(tostring(p_StartingTime) .. " | "  .. tostring(p_IsStatic) .. " | "  .. tostring(p_LengthOfDayInMinutes) .. " | "  .. tostring(p_ServerUpdateFrequency))
+    print(tostring(p_StartingTime) .. " | " .. tostring(p_LengthOfDayInMinutes))
 
-    if p_LengthOfDayInMinutes <= 1 then
-        self.m_TotalDayLength = 86000
-    else
+    if p_LengthOfDayInMinutes ~= nil then
         self.m_TotalDayLength = p_LengthOfDayInMinutes * 60
+        print('[Time-Server]: Length of Day: ' .. self.m_TotalDayLength .. ' Seconds')
+        self.m_ServerDayTime = p_StartingTime * 3600 * (self.m_TotalDayLength / 86000)
+        print('[Time-Server]: Starting at Time: ' .. p_StartingTime .. ' Hours')
+        self.m_IsStatic = false
+    else
+        self.m_TotalDayLength = 86000
+        self.m_ServerDayTime = p_StartingTime * 3600
+        self.m_IsStatic = true
     end
-    print('[Time-Server]: Length of Day: ' .. self.m_TotalDayLength .. ' Seconds')
 
-    self.m_ServerDayTime = p_StartingTime * 3600 * (self.m_TotalDayLength / 86000)
-    print('[Time-Server]: Starting at Time: ' .. p_StartingTime .. ' Hours')
-
-    self.m_IsStatic = p_IsStatic
-
-    NetEvents:Broadcast('VEManager:AddTimeToClient', p_StartingTime, p_IsStatic, self.m_TotalDayLength, p_ServerUpdateFrequency)
-
+    --NetEvents:Broadcast('VEManager:AddTimeToClient', self.m_ServerDayTime, self.m_IsStatic, self.m_TotalDayLength)
     self.m_SystemRunning = true
 end
 
@@ -104,10 +103,8 @@ end
 
 function TimeServer:OnPlayerRequest(player)
     print('[Time-Server]: Received Request by Player')
-    if self.m_SystemRunning == true and self.m_IsStatic == false then
-        print('[Time-Server]: Calling Sync Broadcast')
-        NetEvents:SendTo('VEManager:AddTimeToClient', player, self.m_ServerDayTime, self.m_IsStatic, self.m_TotalDayLength, self.m_ServerUpdateFrequency)
-    end
+    print('[Time-Server]: Calling Sync Broadcast')
+    NetEvents:SendTo('VEManager:AddTimeToClient', player, self.m_ServerDayTime, self.m_IsStatic, self.m_TotalDayLength)
 end
 
 

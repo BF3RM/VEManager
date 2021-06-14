@@ -573,12 +573,12 @@ function VEManagerClient:OnUpdateInput(p_Delta, p_SimulationDelta)
 
 
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F1) then
-		self:LoadPresets()
+		--self:LoadPresets()
 	end
 
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F2) then
-		NetEvents:Send('TimeServer:AddTime', 0, false, 30, 30)
-		print('Dispatching Add Time Event')
+		--NetEvents:Send('TimeServer:AddTime', 0, false, 30, 30)
+		--print('Dispatching Add Time Event')
 	end
 
 	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F3) then

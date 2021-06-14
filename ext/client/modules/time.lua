@@ -6,7 +6,6 @@ function Time:__init()
     print('Initializing Time Module')
     self:RegisterVars()
     self:RegisterEvents()
-    self:RequestTime()
 end
 
 
@@ -23,7 +22,7 @@ function Time:RegisterVars()
     self.m_noonPriority = 100015
     self.m_eveningPriority = 100020
     self.m_mapPresets = {}
-    self.m_presetTimings = {0.225, 0.30, 0.4, 0.75, 0.875} --Always need to have the end time of the last preset in a day at the end
+    self.m_presetTimings = {0.2, 0.28, 0.38, 0.75, 0.875} --Always need to have the end time of the last preset in a day at the end
     self.m_currentPresetTimingIndex = 1
 end
 
@@ -41,7 +40,7 @@ end
 
 function Time:OnPartitionLoad(partition)
 
-    --Patches:Components(partition) --todo crashes the game
+    Patches:Components(partition)
 
     if partition.guid == Guid('6E5D35D9-D9D5-11DE-ADB5-9D4DBC23632A') then
         for _, instance in pairs(partition.instances) do
@@ -56,6 +55,7 @@ end
 function Time:OnLevelLoaded()
     self:__init()
     self.m_serverSyncEvent = NetEvents:Subscribe('TimeServer:Sync', self, self.ServerSync) -- Server Sync
+    self:RequestTime()
 end
 
 
@@ -66,24 +66,26 @@ function Time:OnLevelDestroy()
 end
 
 
+function Time:RequestTime()
+    NetEvents:Send('TimeServer:PlayerRequest')
+end
+
+
 function Time:ServerSync(p_ServerDayTime, p_TotalServerTime)
-    if self.m_systemActive == true then
-        print('Server Sync:' .. 'Current Time: ' .. p_ServerDayTime .. ' | ' .. 'Total Time:' .. p_TotalServerTime)
+    if p_ServerDayTime == nil or p_TotalServerTime == nil then
+        return
+    elseif self.m_systemActive == true then
+        --print('Server Sync:' .. 'Current Time: ' .. p_ServerDayTime .. ' | ' .. 'Total Time:' .. p_TotalServerTime)
         self.m_clientTime = p_ServerDayTime
         self.m_totalClientTime = p_TotalServerTime
     end
 end
 
 
-function Time:RequestTime()
-    NetEvents:Send('TimeServer:PlayerRequest')
-end
-
-
-function Time:AddTimeToClient(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds, p_ServerUpdateFrequency) -- Add Time System to Map | To be called on Level:Loaded | time in 24hr format (0-23)
+function Time:AddTimeToClient(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds) -- Add Time System to Map | To be called on Level:Loaded | time in 24hr format (0-23)
 	local s_CurrentMap = SharedUtils:GetLevelName()
     self.m_IsStatic = p_IsStatic
-	self:Add(s_CurrentMap, p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds, p_ServerUpdateFrequency)
+	self:Add(s_CurrentMap, p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 end
 
 
@@ -131,8 +133,8 @@ end
 
 
 -- ADD TIME TO MAP
--- Add(Map name, starting hour (24h), day length (min), static time = true/false, server update frequency)
-function Time:Add(p_MapName, p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds, p_ServerUpdateFrequency)
+-- Add(Map name, starting hour (24h), day length (min))
+function Time:Add(p_MapName, p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
     if self.m_systemActive == true then
         self:RegisterVars()
     end
@@ -175,8 +177,8 @@ function Time:Add(p_MapName, p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds,
     -- save dayLength in Class (minutes -> seconds)
     self.m_totalDayLength = p_LengthOfDayInSeconds
     print('[Time-Client]: Length of Day: ' .. self.m_totalDayLength .. ' Seconds')
-    self.m_clientTime = p_StartingTime * 3600 * (self.m_totalDayLength / 86000)
-    print('[Time-Client]: Starting at Time: ' .. p_StartingTime .. ' Hours ('.. p_StartingTime * 3600 ..' Seconds)')
+    self.m_clientTime = p_StartingTime
+    print('[Time-Client]: Starting at Time: ' .. p_StartingTime / 3600 / (self.m_totalDayLength / 86000) .. ' Hours ('.. p_StartingTime ..' Seconds)')
 
 
 	-- Set Priorities

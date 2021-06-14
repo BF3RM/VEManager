@@ -82,7 +82,7 @@ local table = [[
         "Realm": "0",
         "Enable": "true",
         "SunSize": "0.01",
-        "SunScale": "4",
+        "SunScale": "1.5",
         "CloudLayerSunColor": "(1.71, 1.25, 0.42)",
         "CloudLayer1Altitude": "500000.0",
         "CloudLayer1TileFactor": "0.25",
@@ -147,7 +147,7 @@ local table = [[
         "MinExposure": "0.8",
         "MaxExposure": "3.5",
         "ExposureAdjustTime": "0.5",
-        "BloomScale": "0.3:0.3:0.3:",
+        "BloomScale": "0.05:0.05:0.05:",
         "ChromostereopsisEnable": "false",
         "ChromostereopsisScale": "1.0",
         "ChromostereopsisOffset": "1.0"
