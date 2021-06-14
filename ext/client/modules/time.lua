@@ -25,6 +25,7 @@ function Time:RegisterVars()
     self.m_mapPresets = {}
     self.m_presetTimings = {0.2, 0.28, 0.38, 0.75, 0.875} --Always need to have the end time of the last preset in a day at the end
     self.m_currentPresetTimingIndex = 1
+    print('Registered Vars')
 end
 
 
@@ -35,6 +36,7 @@ function Time:RegisterEvents()
     self.m_levelDestroyEvent = Events:Subscribe('Level:Destroy', self, self.OnLevelDestroy)
     self.m_AddTimeToClientEvent = NetEvents:Subscribe('VEManager:AddTimeToClient', self, self.AddTimeToClient)
     self.m_PauseContinueEvent = NetEvents:Subscribe('TimeServer:Pause', self, self.PauseContinue)
+    self.m_serverSyncEvent = NetEvents:Subscribe('TimeServer:Sync', self, self.ServerSync) -- Server Sync
 end
 
 
@@ -53,7 +55,6 @@ end
 
 
 function Time:OnLevelFinalized()
-    self.m_serverSyncEvent = NetEvents:Subscribe('TimeServer:Sync', self, self.ServerSync) -- Server Sync
     self:RequestTime()
     self.m_LevelLoaded = true
 end
@@ -67,6 +68,13 @@ end
 function Time:RequestTime()
     print('Request Time')
     NetEvents:Send('TimeServer:PlayerRequest')
+end
+
+
+function Time:RemoveTime()
+    self:RegisterVars()
+    self:ResetSunPosition()
+    print("Removed Time System")
 end
 
 
@@ -114,14 +122,6 @@ function Time:PauseContinue(p_Pause)
     else
         error('Failed to receive Pause Bool')
     end
-end
-
-
-function Time:RemoveTime()
-    self:RegisterVars()
-    Events:Unsubscribe('TimeServer:Sync')
-    self:ResetSunPosition()
-    print("Removed Time System")
 end
 
 
@@ -271,12 +271,12 @@ local last_print_h = -1
 function Time:Run(deltaTime)
 
     if self.m_SystemRunning ~= true or self.m_LevelLoaded ~= true then
-        --print("System Disabled: " .. "System Running: " .. tostring(self.m_SystemRunning) .. "Level Loaded: " .. tostring(self.m_LevelLoaded ~= true))
+        print("System Disabled: " .. "System Running: " .. tostring(self.m_SystemRunning) .. "Level Loaded: " .. tostring(self.m_LevelLoaded ~= true))
         return
     end
 
     if self.m_clientTime == nil then
-        print("Faulty ClientTime")
+        print("Faulty ClientTime: " .. self.m_clientTime)
         return
     end
 
@@ -387,7 +387,8 @@ function Time:Run(deltaTime)
         g_VEManagerClient:UpdateVisibility(self.m_currentEveningPreset, self.m_eveningPriority, s_factorEvening)
 
     else
-		print('What?')
+		print("Faulty ClientTime: " .. self.m_clientTime)
+        self.m_clientTime = 1.0
     end
 
     self:SetSunPosition(self.m_clientTime)
