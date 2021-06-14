@@ -165,5 +165,4 @@ return {
     meshs = meshs,
     variations = variations,
     effects = effects,
-    effects = effects
 }

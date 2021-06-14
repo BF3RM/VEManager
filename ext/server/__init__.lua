@@ -33,13 +33,13 @@ end
 
 
 function TimeServer:OnLevelLoaded()
-    self:AddTime(19, 20) -- debug only
+    self:AddTime(17, 2) -- debug only
 end
 
 
 function TimeServer:OnLevelDestroy()
+    self.m_SystemRunning = false
     self:RegisterVars()
-    Events:Dispatch('VEManager:RemoveTime')
 end
 
 
@@ -69,7 +69,7 @@ function TimeServer:AddTime(p_StartingTime, p_LengthOfDayInMinutes)
         self.m_IsStatic = true
     end
 
-    --NetEvents:Broadcast('VEManager:AddTimeToClient', self.m_ServerDayTime, self.m_IsStatic, self.m_TotalDayLength)
+    NetEvents:Broadcast('VEManager:AddTimeToClient', self.m_ServerDayTime, self.m_IsStatic, self.m_TotalDayLength)
     self.m_SystemRunning = true
 end
 

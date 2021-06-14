@@ -11,6 +11,7 @@ end
 
 function Time:RegisterVars()
     self.m_SystemRunning = false
+    self.m_LevelLoaded = false
     self.m_IsStatic = nil
     self.m_clientTime = 0
     self.m_totalClientTime = 0
@@ -30,10 +31,9 @@ end
 function Time:RegisterEvents()
     self.m_PartitionLoadedEvent = Events:Subscribe('Partition:Loaded', self, self.OnPartitionLoad)
     self.m_EngineUpdateEvent = Events:Subscribe('Engine:Update', self, self.Run)
-    self.m_levelLoadEvent = Events:Subscribe('Level:Loaded', self, self.OnLevelLoaded)
+    self.m_levelLoadEvent = Events:Subscribe('Level:Finalized', self, self.OnLevelFinalized)
     self.m_levelDestroyEvent = Events:Subscribe('Level:Destroy', self, self.OnLevelDestroy)
     self.m_AddTimeToClientEvent = NetEvents:Subscribe('VEManager:AddTimeToClient', self, self.AddTimeToClient)
-	self.m_RemoveTimeEvent = Events:Subscribe('VEManager:RemoveTime', self, self.RemoveTime)
     self.m_PauseContinueEvent = NetEvents:Subscribe('TimeServer:Pause', self, self.PauseContinue)
 end
 
@@ -52,22 +52,20 @@ function Time:OnPartitionLoad(partition)
 end
 
 
-function Time:OnLevelLoaded()
-    self:__init()
+function Time:OnLevelFinalized()
     self.m_serverSyncEvent = NetEvents:Subscribe('TimeServer:Sync', self, self.ServerSync) -- Server Sync
     self:RequestTime()
+    self.m_LevelLoaded = true
 end
 
 
 function Time:OnLevelDestroy()
-    if self.m_IsStatic ~= nil then
-        self.m_SystemRunning = false
-        self:RemoveTime()
-    end
+    self:RemoveTime()
 end
 
 
 function Time:RequestTime()
+    print('Request Time')
     NetEvents:Send('TimeServer:PlayerRequest')
 end
 
@@ -75,10 +73,10 @@ end
 function Time:ServerSync(p_ServerDayTime, p_TotalServerTime)
     if p_ServerDayTime == nil or p_TotalServerTime == nil then
         return
-    elseif self.m_SystemRunning == true then
+    else
         --print('Server Sync:' .. 'Current Time: ' .. p_ServerDayTime .. ' | ' .. 'Total Time:' .. p_TotalServerTime)
         self.m_clientTime = p_ServerDayTime
-        --self.m_totalClientTime = p_TotalServerTime
+        self.m_totalClientTime = p_TotalServerTime
     end
 end
 
@@ -120,13 +118,9 @@ end
 
 
 function Time:RemoveTime()
-    self.m_EngineUpdateEvent:Unsubscribe()
-    g_VEManagerClient:DisablePreset(self.m_currentNightPreset)
-    g_VEManagerClient:DisablePreset(self.m_currentMorningPreset)
-    g_VEManagerClient:DisablePreset(self.m_currentNoonPreset)
-    g_VEManagerClient:DisablePreset(self.m_currentEveningPreset)
-    self:ResetSunPosition()
     self:RegisterVars()
+    Events:Unsubscribe('TimeServer:Sync')
+    self:ResetSunPosition()
     print("Removed Time System")
 end
 
@@ -276,20 +270,18 @@ local last_print_h = -1
 --ALSO LOOP THIS CODE PLEASE
 function Time:Run(deltaTime)
 
-    if self.m_SystemRunning ~= true then
+    if self.m_SystemRunning ~= true or self.m_LevelLoaded ~= true then
+        --print("System Disabled: " .. "System Running: " .. tostring(self.m_SystemRunning) .. "Level Loaded: " .. tostring(self.m_LevelLoaded ~= true))
         return
     end
 
-    if self.m_currentNightPreset == nil or
-        self.m_currentMorningPreset == nil or
-        self.m_currentNoonPreset == nil or
-        self.m_currentEveningPreset == nil then
-        self.m_SystemRunning = false
+    if self.m_clientTime == nil then
+        print("Faulty ClientTime")
         return
     end
 
 	local s_print_enabled = false
-	--[[local s_h_time = self.m_clientTime / ( self.m_totalDayLength / 24 )
+	local s_h_time = self.m_clientTime / ( self.m_totalDayLength / 24 )
 	if s_h_time - last_print_h >= 1 then
 		s_print_enabled = true
 		last_print_h = s_h_time
@@ -297,7 +289,7 @@ function Time:Run(deltaTime)
 
 	if s_print_enabled then
         print("Current Time: " .. s_h_time .. " Hours.")
-	end]]
+	end
 
     if self.m_clientTime < self.m_totalDayLength * self.m_presetTimings[1] or self.m_clientTime > self.m_presetTimings[#self.m_presetTimings] * self.m_totalDayLength then -- 00:00 to 6:00 or 21:00 to 00:00
 
