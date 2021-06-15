@@ -271,7 +271,7 @@ local last_print_h = -1
 function Time:Run(deltaTime)
 
     if self.m_SystemRunning ~= true or self.m_LevelLoaded ~= true then
-        print("System Disabled: " .. "System Running: " .. tostring(self.m_SystemRunning) .. "Level Loaded: " .. tostring(self.m_LevelLoaded ~= true))
+        print("System Disabled: " .. "System Running: " .. tostring(self.m_SystemRunning) .. "Level Loaded: " .. tostring(self.m_LevelLoaded))
         return
     end
 
