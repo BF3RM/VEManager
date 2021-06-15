@@ -34,7 +34,7 @@ end
 
 function TimeServer:OnLevelLoaded()
     self:__init()
-    self:AddTime(17, 2) -- debug/testing only
+    self:AddTime(0, 2) -- debug/testing only
 end
 
 
@@ -90,7 +90,7 @@ function TimeServer:Run(p_DeltaTime, p_SimulationDeltaTime)
         end
 
         self.m_EngineUpdateTimer = 0
-        self:Broadcast()
+        self:Broadcast(self.m_ServerDayTime, self.m_TotalServerTime)
 
         if self.m_ServerDayTime >= self.m_TotalDayLength then
             print('[Time-Server]: Reset Day')
@@ -119,9 +119,9 @@ function TimeServer:PauseContinue()
 end
 
 
-function TimeServer:Broadcast()
+function TimeServer:Broadcast(p_ServerDayTime, p_TotalServerTime)
     --print('[Time-Server]: Syncing Players')
-    NetEvents:BroadcastUnreliableOrdered('TimeServer:Sync', self.m_ServerDayTime, self.m_TotalServerTime)
+    NetEvents:BroadcastUnreliableOrdered('TimeServer:Sync', p_ServerDayTime, p_TotalServerTime)
 end
 
 

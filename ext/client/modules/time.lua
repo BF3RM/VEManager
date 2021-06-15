@@ -17,25 +17,23 @@ function Time:RegisterVars()
     self.m_totalDayLength = 0
     self.m_originalSunX = nil
     self.m_originalSunY = nil
-    self.m_nightPriority = 100005
-    self.m_morningPriority = 100010
-    self.m_noonPriority = 100015
-    self.m_eveningPriority = 100020
+    self.m_nightPriority = 100001
+    self.m_morningPriority = 100002
+    self.m_noonPriority = 100003
+    self.m_eveningPriority = 100004
     self.m_mapPresets = {}
-    self.m_presetTimings = {0.2, 0.28, 0.38, 0.75, 0.875} --Always need to have the end time of the last preset in a day at the end
-    self.m_currentPresetTimingIndex = 1
+    self.m_presetTimings = {0.125, 0.375, 0.5, 0.75, 0.875} --Always need to have the end time of the last preset in a day at the end
     print('Registered Vars')
 end
 
 
 function Time:RegisterEvents()
     self.m_PartitionLoadedEvent = Events:Subscribe('Partition:Loaded', self, self.OnPartitionLoad)
-    self.m_EngineUpdateEvent = Events:Subscribe('Engine:Update', self, self.Run)
+    --self.m_EngineUpdateEvent = Events:Subscribe('Engine:Update', self, self.Run)
     self.m_LevelLoadEvent = Events:Subscribe('Level:Loaded', self, self.OnLevelLoaded)
     self.m_LevelDestroyEvent = Events:Subscribe('Level:Destroy', self, self.OnLevelDestroy)
     self.m_AddTimeToClientEvent = NetEvents:Subscribe('VEManager:AddTimeToClient', self, self.AddTimeToClient)
     self.m_PauseContinueEvent = NetEvents:Subscribe('TimeServer:Pause', self, self.PauseContinue)
-    self.m_ServerSyncEvent = NetEvents:Subscribe('TimeServer:Sync', self, self.ServerSync) -- Server Sync
 end
 
 
@@ -54,11 +52,13 @@ end
 
 
 function Time:OnLevelLoaded()
+    self.m_ServerSyncEvent = NetEvents:Subscribe('TimeServer:Sync', self, self.ServerSync) -- Server Sync
     self:RequestTime()
 end
 
 
 function Time:OnLevelDestroy()
+    self.m_ServerSyncEvent = NetEvents:Unsubscribe('TimeServer:Sync') -- Server Sync
     self:RemoveTime()
 end
 
@@ -83,6 +83,7 @@ function Time:ServerSync(p_ServerDayTime, p_TotalServerTime)
         --print('Server Sync:' .. 'Current Time: ' .. p_ServerDayTime .. ' | ' .. 'Total Time:' .. p_TotalServerTime)
         self.m_clientTime = p_ServerDayTime
         self.m_totalClientTime = p_TotalServerTime
+        self:Run()
     end
 end
 
@@ -207,7 +208,7 @@ function Time:Add(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
         g_VEManagerClient:SetVisibility(self.m_currentMorningPreset, s_factorMorning)
         g_VEManagerClient:SetVisibility(self.m_currentNoonPreset, 0)
         g_VEManagerClient:SetVisibility(self.m_currentEveningPreset, 0)
-    elseif self.m_clientTime <= self.m_totalDayLength * 0.5 then -- 9:00 to 12:00
+    elseif self.m_clientTime <= self.m_totalDayLength * self.m_presetTimings[3] then -- 9:00 to 12:00
         -- calculate visibility preset noon
         local s_factorNoon = ( self.m_clientTime - ( self.m_totalDayLength * self.m_presetTimings[2] )) / ( self.m_totalDayLength * ( self.m_presetTimings[3] - self.m_presetTimings[2] ))
         -- calculate visibility preset morning
@@ -266,7 +267,7 @@ end
 
 local last_print_h = -1
 --ALSO LOOP THIS CODE PLEASE
-function Time:Run(deltaTime)
+function Time:Run()
 
     if self.m_SystemRunning ~= true then
         --print("System Running: " .. tostring(self.m_SystemRunning))
@@ -278,8 +279,8 @@ function Time:Run(deltaTime)
         return
     end
 
-	local s_print_enabled = false
-	local s_h_time = self.m_clientTime / ( self.m_totalDayLength / 24 )
+	local s_print_enabled = true
+	--[[local s_h_time = self.m_clientTime / ( self.m_totalDayLength / 24 )
 	if s_h_time - last_print_h >= 1 then
 		s_print_enabled = true
 		last_print_h = s_h_time
@@ -287,19 +288,20 @@ function Time:Run(deltaTime)
 
 	if s_print_enabled then
         print("Current Time: " .. s_h_time .. " Hours.")
-	end
+	end]]
 
-    if self.m_clientTime < self.m_totalDayLength * self.m_presetTimings[1] or self.m_clientTime > self.m_presetTimings[#self.m_presetTimings] * self.m_totalDayLength then -- 00:00 to 6:00 or 21:00 to 00:00
+
+    if self.m_clientTime <= ( self.m_totalDayLength * self.m_presetTimings[1] ) or self.m_clientTime > ( self.m_presetTimings[#self.m_presetTimings] * self.m_totalDayLength ) then -- 00:00 to 6:00 or 21:00 to 00:00
 
         -- set visibility preset night
         local s_factorNight = 1
 
-		if s_print_enabled then
-			print("Night Visibility: " .. s_factorNight)
-			if self.m_clientTime < self.m_presetTimings[1] * self.m_totalDayLength then
-				print("Time Till Switch: " .. (self.m_totalDayLength * self.m_presetTimings[1] - self.m_clientTime))
-			end
-		end
+        if s_print_enabled then
+            print("Night Visibility: " .. s_factorNight)
+            if self.m_clientTime < self.m_presetTimings[1] * self.m_totalDayLength then
+                print("Time Till Switch: " .. (self.m_totalDayLength * self.m_presetTimings[1] - self.m_clientTime))
+            end
+        end
 
         -- apply visibility factor
         g_VEManagerClient:UpdateVisibility(self.m_currentNightPreset, self.m_nightPriority, s_factorNight)
@@ -307,36 +309,36 @@ function Time:Run(deltaTime)
         g_VEManagerClient:UpdateVisibility(self.m_currentNoonPreset, self.m_noonPriority, 0)
         g_VEManagerClient:UpdateVisibility(self.m_currentEveningPreset, self.m_eveningPriority, 0)
 
-    elseif self.m_clientTime < self.m_totalDayLength * self.m_presetTimings[2] then -- 6:00 to 9:00
+    elseif self.m_clientTime <= ( self.m_totalDayLength * self.m_presetTimings[2] ) then
 
         -- calculate visibility preset morning
         local s_factorMorning = ( self.m_clientTime - ( self.m_totalDayLength * self.m_presetTimings[1] )) / ( self.m_totalDayLength * ( self.m_presetTimings[2] - self.m_presetTimings[1] )) --todo change these multiplication values to variables later to calculate automatically
         -- calculate visibility preset night
         local s_factorNight = 1
 
-		if s_print_enabled then
-			print("Night Visibility: " .. s_factorNight)
-			print("Morning Visibility: " .. s_factorMorning)
-			print("Time Till Switch: " .. (self.m_totalDayLength * self.m_presetTimings[2] - self.m_clientTime))
-		end
+        if s_print_enabled then
+            print("Night Visibility: " .. s_factorNight)
+            print("Morning Visibility: " .. s_factorMorning)
+            print("Time Till Switch: " .. (self.m_totalDayLength * self.m_presetTimings[2] - self.m_clientTime))
+        end
         -- update visibility
         g_VEManagerClient:UpdateVisibility(self.m_currentNightPreset, self.m_nightPriority, s_factorNight)
         g_VEManagerClient:UpdateVisibility(self.m_currentMorningPreset, self.m_morningPriority, s_factorMorning)
         g_VEManagerClient:UpdateVisibility(self.m_currentNoonPreset, self.m_noonPriority, 0)
         g_VEManagerClient:UpdateVisibility(self.m_currentEveningPreset, self.m_eveningPriority, 0)
 
-    elseif self.m_clientTime < ( self.m_totalDayLength * self.m_presetTimings[3] ) then -- 9:00 to 12:00
+    elseif self.m_clientTime <= ( self.m_totalDayLength * self.m_presetTimings[3] ) then
 
         -- calculate visibility preset noon
         local s_factorNoon = ( self.m_clientTime - ( self.m_totalDayLength * self.m_presetTimings[2] )) / ( self.m_totalDayLength * ( self.m_presetTimings[3] - self.m_presetTimings[2] ))
         -- calculate visibility preset morning
         local s_factorMorning = 1
 
-		if s_print_enabled then
-    	    print("Morning Visibility: " .. s_factorMorning)
-			print("Noon Visibility: " .. s_factorNoon)
-			print("Time Till Switch: " .. (self.m_totalDayLength * self.m_presetTimings[3] - self.m_clientTime))
-		end
+        if s_print_enabled then
+            print("Morning Visibility: " .. s_factorMorning)
+            print("Noon Visibility: " .. s_factorNoon)
+            print("Time Till Switch: " .. (self.m_totalDayLength * self.m_presetTimings[3] - self.m_clientTime))
+        end
 
         -- update visibility
         g_VEManagerClient:UpdateVisibility(self.m_currentNightPreset, self.m_nightPriority, 0)
@@ -344,19 +346,18 @@ function Time:Run(deltaTime)
         g_VEManagerClient:UpdateVisibility(self.m_currentNoonPreset, self.m_noonPriority, s_factorNoon)
         g_VEManagerClient:UpdateVisibility(self.m_currentEveningPreset, self.m_eveningPriority, 0)
 
-
-    elseif self.m_clientTime < ( self.m_totalDayLength * self.m_presetTimings[4] ) then -- 12:00 to 18:00
+    elseif self.m_clientTime <= ( self.m_totalDayLength * self.m_presetTimings[4] ) then
 
         -- calculate visibility preset evening
         local s_factorEvening = ( self.m_clientTime - ( self.m_totalDayLength * self.m_presetTimings[3] )) / ( self.m_totalDayLength * ( self.m_presetTimings[4] - self.m_presetTimings[3] ))
         -- calculate visibility preset noon
         local s_factorNoon = 1
 
-		if s_print_enabled then
-			print("Noon Visibility: " .. s_factorNoon)
-			print("Evening Visibility: " .. s_factorEvening)
-			print("Time Till Switch: " .. (self.m_totalDayLength * self.m_presetTimings[4] - self.m_clientTime))
-		end
+        if s_print_enabled then
+            print("Noon Visibility: " .. s_factorNoon)
+            print("Evening Visibility: " .. s_factorEvening)
+            print("Time Till Switch: " .. (self.m_totalDayLength * self.m_presetTimings[4] - self.m_clientTime))
+        end
 
         -- update visibility
         g_VEManagerClient:UpdateVisibility(self.m_currentNightPreset, self.m_nightPriority, 0)
@@ -364,19 +365,18 @@ function Time:Run(deltaTime)
         g_VEManagerClient:UpdateVisibility(self.m_currentNoonPreset, self.m_noonPriority, s_factorNoon)
         g_VEManagerClient:UpdateVisibility(self.m_currentEveningPreset, self.m_eveningPriority, s_factorEvening)
 
-
-    elseif self.m_clientTime < ( self.m_totalDayLength * self.m_presetTimings[5] ) then -- 18:00 to 21:00
-		-- Night preset has a lower visibility, thus we change evening visibility back to 0
+    elseif self.m_clientTime <= ( self.m_totalDayLength * self.m_presetTimings[5] ) then
+        -- Night preset has a lower visibility, thus we change evening visibility back to 0
         -- calculate visibility preset night
         local s_factorNight = 1
         -- calculate visibility preset evening
         local s_factorEvening = 1 - ( self.m_clientTime - ( self.m_totalDayLength * self.m_presetTimings[4] )) / ( self.m_totalDayLength * ( self.m_presetTimings[5] - self.m_presetTimings[4] ))
 
-		if s_print_enabled then
-			print("Evening Visibility: " .. s_factorEvening)
-			print("Night Visibility: " .. s_factorNight)
-			print("Time Till Switch: " .. (self.m_totalDayLength * self.m_presetTimings[5] - self.m_clientTime))
-		end
+        if s_print_enabled then
+            print("Evening Visibility: " .. s_factorEvening)
+            print("Night Visibility: " .. s_factorNight)
+            print("Time Till Switch: " .. (self.m_totalDayLength * self.m_presetTimings[5] - self.m_clientTime))
+        end
 
         -- update visibility
         g_VEManagerClient:UpdateVisibility(self.m_currentNightPreset, self.m_nightPriority, s_factorNight)
