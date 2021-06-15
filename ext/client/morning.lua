@@ -103,7 +103,7 @@ local table = [[
         "CloudLayer2Rotation": "237.07299804688",
         "CloudLayer2Speed": "-0.0010000000474975",
         "CloudLayer2SunLightIntensity": "0.5",
-        "CloudLayer2SunLightPower": "5",
+        "CloudLayer2SunLightPower": "2.5",
         "CloudLayer2AmbientLightIntensity": "0.5",
         "CloudLayer2Color": "1:1:1:",
         "CloudLayer2AlphaMul": "0.3",
