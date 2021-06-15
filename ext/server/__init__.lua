@@ -16,7 +16,7 @@ function TimeServer:RegisterVars()
     self.m_IsStatic = nil
     self.m_ServerTickrate = SharedUtils:GetTickrate()
     self.m_UpdateThreshold = 0.5
-    self.m_SyncTickrate = 1 / self.m_ServerTickrate * self.m_UpdateThreshold
+    self.m_SyncTickrate = 1 / (self.m_ServerTickrate * self.m_UpdateThreshold) --[Hz]
     self.m_SystemRunning = false
 end
 
@@ -33,13 +33,13 @@ end
 
 
 function TimeServer:OnLevelLoaded()
-    self:AddTime(17, 2) -- debug only
+    self:__init()
+    self:AddTime(17, 2) -- debug/testing only
 end
 
 
 function TimeServer:OnLevelDestroy()
     self.m_SystemRunning = false
-    self:RegisterVars()
 end
 
 
@@ -55,7 +55,7 @@ function TimeServer:AddTime(p_StartingTime, p_LengthOfDayInMinutes)
     end
 
     print('[Time-Server]: Received Add Time Event')
-    print(tostring(p_StartingTime) .. " | " .. tostring(p_LengthOfDayInMinutes))
+    --print(tostring(p_StartingTime) .. " | " .. tostring(p_LengthOfDayInMinutes))
 
     if p_LengthOfDayInMinutes ~= nil then
         self.m_TotalDayLength = p_LengthOfDayInMinutes * 60

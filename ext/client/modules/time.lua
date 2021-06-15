@@ -11,7 +11,6 @@ end
 
 function Time:RegisterVars()
     self.m_SystemRunning = false
-    self.m_LevelLoaded = false
     self.m_IsStatic = nil
     self.m_clientTime = 0
     self.m_totalClientTime = 0
@@ -32,11 +31,11 @@ end
 function Time:RegisterEvents()
     self.m_PartitionLoadedEvent = Events:Subscribe('Partition:Loaded', self, self.OnPartitionLoad)
     self.m_EngineUpdateEvent = Events:Subscribe('Engine:Update', self, self.Run)
-    self.m_levelLoadEvent = Events:Subscribe('Level:Finalized', self, self.OnLevelFinalized)
-    self.m_levelDestroyEvent = Events:Subscribe('Level:Destroy', self, self.OnLevelDestroy)
+    self.m_LevelLoadEvent = Events:Subscribe('Level:Loaded', self, self.OnLevelLoaded)
+    self.m_LevelDestroyEvent = Events:Subscribe('Level:Destroy', self, self.OnLevelDestroy)
     self.m_AddTimeToClientEvent = NetEvents:Subscribe('VEManager:AddTimeToClient', self, self.AddTimeToClient)
     self.m_PauseContinueEvent = NetEvents:Subscribe('TimeServer:Pause', self, self.PauseContinue)
-    self.m_serverSyncEvent = NetEvents:Subscribe('TimeServer:Sync', self, self.ServerSync) -- Server Sync
+    self.m_ServerSyncEvent = NetEvents:Subscribe('TimeServer:Sync', self, self.ServerSync) -- Server Sync
 end
 
 
@@ -54,14 +53,20 @@ function Time:OnPartitionLoad(partition)
 end
 
 
-function Time:OnLevelFinalized()
+function Time:OnLevelLoaded()
     self:RequestTime()
-    self.m_LevelLoaded = true
 end
 
 
 function Time:OnLevelDestroy()
     self:RemoveTime()
+end
+
+
+function Time:RemoveTime()
+    self:RegisterVars()
+    self:ResetSunPosition()
+    print("Reset Time System")
 end
 
 
@@ -71,17 +76,10 @@ function Time:RequestTime()
 end
 
 
-function Time:RemoveTime()
-    self:RegisterVars()
-    self:ResetSunPosition()
-    print("Removed Time System")
-end
-
-
 function Time:ServerSync(p_ServerDayTime, p_TotalServerTime)
     if p_ServerDayTime == nil or p_TotalServerTime == nil then
         return
-    else
+    elseif self.m_SystemRunning == true then
         --print('Server Sync:' .. 'Current Time: ' .. p_ServerDayTime .. ' | ' .. 'Total Time:' .. p_TotalServerTime)
         self.m_clientTime = p_ServerDayTime
         self.m_totalClientTime = p_TotalServerTime
@@ -270,8 +268,8 @@ local last_print_h = -1
 --ALSO LOOP THIS CODE PLEASE
 function Time:Run(deltaTime)
 
-    if self.m_SystemRunning ~= true or self.m_LevelLoaded ~= true then
-        print("System Disabled: " .. "System Running: " .. tostring(self.m_SystemRunning) .. "Level Loaded: " .. tostring(self.m_LevelLoaded))
+    if self.m_SystemRunning ~= true then
+        --print("System Running: " .. tostring(self.m_SystemRunning))
         return
     end
 
