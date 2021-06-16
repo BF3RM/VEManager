@@ -404,9 +404,11 @@ function VEManagerClient:LoadPresets()
 									s_Class[firstToLower(s_FieldName)] = tonumber(s_Value)
 								elseif (s_Type == "TextureAsset") then
 									if s_FieldName == "PanoramicTexture" then
-										s_Class[firstToLower(s_FieldName)] = nil
+										--s_Class[firstToLower(s_FieldName)] = nil
+										s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
 									elseif s_FieldName == "PanoramicAlphaTexture" then
-										s_Class[firstToLower(s_FieldName)] = nil
+										--s_Class[firstToLower(s_FieldName)] = nil
+										s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
 									elseif s_FieldName == "StaticEnvmapTexture" then
 										s_Class[firstToLower(s_FieldName)] = nil
 									elseif s_FieldName == "CloudLayer2Texture" then
@@ -445,9 +447,11 @@ function VEManagerClient:LoadPresets()
 								s_Class[firstToLower(s_FieldName)] = tonumber(s_Value)
 							elseif (s_Type == "TextureAsset") then
 								if s_FieldName == "PanoramicTexture" then
-									s_Class[firstToLower(s_FieldName)] = nil
+									--s_Class[firstToLower(s_FieldName)] = nil
+									s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
 								elseif s_FieldName == "PanoramicAlphaTexture" then
-									s_Class[firstToLower(s_FieldName)] = nil
+									--s_Class[firstToLower(s_FieldName)] = nil
+									s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
 								elseif s_FieldName == "StaticEnvmapTexture" then
 									s_Class[firstToLower(s_FieldName)] = nil
 								elseif s_FieldName == "CloudLayer2Texture" then

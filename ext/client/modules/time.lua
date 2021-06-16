@@ -101,7 +101,7 @@ end
 function Time:SetSunPosition(p_CurrentTime) -- for smoother sun relative to time
     local factor = ( p_CurrentTime / self.m_totalDayLength )
     ---- print("Sun Pos Y: " .. ( -90 + ( 360 * factor )))
-    VisualEnvironmentManager:SetSunRotationX(260)
+    VisualEnvironmentManager:SetSunRotationX(275)
     VisualEnvironmentManager:SetSunRotationY( -90 + ( 360 * factor ))
 end
 

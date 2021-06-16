@@ -97,10 +97,11 @@ local table = [[
         "CloudLayer2TileFactor": "0.60000002384186",
         "CloudLayer2Rotation": "237.07299804688",
         "CloudLayer2Speed": "-0.0010000000474975",
-        "CloudLayer2SunLightIntensity": "0.5",
-        "CloudLayer2SunLightPower": "2.5",
-        "CloudLayer2AmbientLightIntensity": "0.5",
-        "CloudLayer2Color": "1:1:1:"
+        "CloudLayer2SunLightIntensity": "0",
+        "CloudLayer2SunLightPower": "0",
+        "CloudLayer2AmbientLightIntensity": "0",
+        "CloudLayer2Color": "1:1:1:",
+        "CloudLayer2AlphaMul": "0.0"
     },
     "SunFlare": {
         "Element1Size": "0.35:0.35:",
