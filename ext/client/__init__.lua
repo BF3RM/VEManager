@@ -410,7 +410,8 @@ function VEManagerClient:LoadPresets()
 										--s_Class[firstToLower(s_FieldName)] = nil
 										s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
 									elseif s_FieldName == "StaticEnvmapTexture" then
-										s_Class[firstToLower(s_FieldName)] = nil
+										--s_Class[firstToLower(s_FieldName)] = nil
+										s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
 									elseif s_FieldName == "CloudLayer2Texture" then
 										s_Class[firstToLower(s_FieldName)] = TextureAsset(_G['g_Stars'])
 									else
@@ -453,7 +454,8 @@ function VEManagerClient:LoadPresets()
 									--s_Class[firstToLower(s_FieldName)] = nil
 									s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
 								elseif s_FieldName == "StaticEnvmapTexture" then
-									s_Class[firstToLower(s_FieldName)] = nil
+									--s_Class[firstToLower(s_FieldName)] = nil
+									s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
 								elseif s_FieldName == "CloudLayer2Texture" then
 									s_Class[firstToLower(s_FieldName)] = TextureAsset(_G['g_Stars'])
 								else
