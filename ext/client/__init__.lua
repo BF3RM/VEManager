@@ -308,6 +308,7 @@ function VEManagerClient:LoadPresets()
 		-- print("IsBasePreset: " .. tostring(s_IsBasePreset))
 
 		-- Restrict using day-night cycle priorities
+		s_Preset.Priority = tonumber(s_Preset.Priority)
 		if s_Preset.Priority >= 100001 and s_Preset.Priority <= 100004 then
 			s_Preset.Priority = s_Preset.Priority + 5
 		end
@@ -327,9 +328,9 @@ function VEManagerClient:LoadPresets()
 		s_VEB.object = s_VE
 		print("Preset Name: " .. s_Preset.Name)
 		print("Preset Type: " .. s_Preset.Type)
-		print("Preset Priority: " .. s_Preset.Priority)
+		print("Preset Priority: " .. tostring(s_Preset.Priority))
 		s_VE.enabled = true
-		s_VE.priority = tonumber(s_Preset.Priority)
+		s_VE.priority = s_Preset.Priority
 		s_VE.visibility = 1
 
 		self.m_Presets[s_Preset.Name]["ve"] = s_VE
