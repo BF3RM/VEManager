@@ -43,12 +43,12 @@ local table = [[
         "SunScale": "0",
         "TerrainColor": "(0.0, 0.0, 0.0)",
         "CullDistance": "-1.0",
-        "SkyBoxEnable": "false",
-        "SkyBoxSkyColor": "(0.022000, 0.078000, 0.177000)",
-        "SkyBoxGroundColor": "(0.085000, 0.206000, 0.394000)",
-        "SkyBoxSunLightColor": "(0.282000, 0.991000, 3.000000)",
+        "SkyBoxEnable": "true",
+        "SkyBoxSkyColor": "(0.0, 0.0, 0.0)",
+        "SkyBoxGroundColor": "(0.0, 0.0, 0.0)",
+        "SkyBoxSunLightColor": "(0.0, 0.0, 0.0)",
         "SkyBoxSunLightColorSize": "0.0",
-        "SkyBoxBackLightColor": "(0.022000, 0.078000, 0.177000)",
+        "SkyBoxBackLightColor": "(0.0, 0.0, 0.0)",
         "SkyBoxBackLightColorSize": "0.1",
         "SkyBoxBackLightRotationX": "171.95899963379",
         "SkyBoxBackLightRotationY": "26.563999176025"
@@ -75,10 +75,11 @@ local table = [[
     "OutdoorLight": {
         "Realm": "0",
         "Enable": "true",
-        "SunSpecularScale": "0",
+        "SkyColor": "(0.7, 0.7, 0.7)",
+        "GroundColor": "(0.7, 0.7, 0.7)",
         "SunRotationX": "0",
         "SunRotationY": "0"
-        },
+    },
     "Sky": {
         "Realm": "0",
         "Enable": "true",
