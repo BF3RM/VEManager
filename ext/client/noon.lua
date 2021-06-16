@@ -128,7 +128,7 @@ local table = [[
     "Name": "Testing3",
     "Type": "Noon",
     "Priority": "100000",
-    "Visibility": "1"
+    "Visibility": "1",
 }
 ]]
 

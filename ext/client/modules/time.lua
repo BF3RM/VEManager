@@ -21,6 +21,10 @@ function Time:RegisterVars()
     self.m_morningPriority = 100002
     self.m_noonPriority = 100003
     self.m_eveningPriority = 100004
+    self.m_NightState = nil
+    self.m_MorningState = nil
+    self.m_NoonState = nil
+    self.m_EveningState = nil
     self.m_mapPresets = {}
     self.m_presetTimings = {0.25, 0.375, 0.5, 0.75, 0.875} --Always need to have the end time of the last preset in a day at the end
     print('Registered Vars')
@@ -153,6 +157,8 @@ function Time:Add(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
         print('Failed to Load Presets for Time')
         return
     end
+
+    self.m_NightState, self.m_MorningState, self.m_NoonState, self.m_EveningState = g_VEManagerClient:GetState(10000001, 10000002, 10000003, 10000004)
 
 	--[[
     -- Set Default to Nope
