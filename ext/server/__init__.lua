@@ -102,9 +102,13 @@ end
 
 
 function TimeServer:OnPlayerRequest(player)
-    print('[Time-Server]: Received Request by Player')
-    print('[Time-Server]: Calling Sync Broadcast')
-    NetEvents:SendTo('VEManager:AddTimeToClient', player, self.m_ServerDayTime, self.m_IsStatic, self.m_TotalDayLength)
+    if self.m_SystemRunning == true or self.m_IsStatic == true then
+        print('[Time-Server]: Received Request by Player')
+        print('[Time-Server]: Calling Sync Broadcast')
+        NetEvents:SendTo('VEManager:AddTimeToClient', player, self.m_ServerDayTime, self.m_IsStatic, self.m_TotalDayLength)
+    else
+        return
+    end
 end
 
 
