@@ -75,6 +75,7 @@ local table = [[
     "OutdoorLight": {
         "Realm": "0",
         "Enable": "true",
+        "SunSpecularScale": "0",
         "SunRotationX": "0",
         "SunRotationY": "0"
         },
@@ -128,7 +129,7 @@ local table = [[
     "Name": "Testing3",
     "Type": "Noon",
     "Priority": "100000",
-    "Visibility": "1",
+    "Visibility": "1"
 }
 ]]
 

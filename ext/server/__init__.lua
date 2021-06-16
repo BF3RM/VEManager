@@ -34,6 +34,7 @@ end
 
 function TimeServer:OnLevelLoaded()
     self:__init() -- debug/testing only
+    self:AddTime(8, 2)
 end
 
 

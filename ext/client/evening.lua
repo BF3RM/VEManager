@@ -78,6 +78,7 @@ local table = [[
         "SunColor": "(1, 0.3, 0.051)",
         "SkyColor": "(0.08, 0.08, 0.08)",
         "GroundColor": "(0.08, 0.08, 0.08)",
+        "SunSpecularScale": "0",
         "SunRotationX": "0",
         "SunRotationY": "0"
     },
@@ -139,7 +140,7 @@ local table = [[
     "Name": "Testing4",
     "Type": "Evening",
     "Priority": "100000",
-    "Visibility": "1",
+    "Visibility": "1"
 }
 ]]
 

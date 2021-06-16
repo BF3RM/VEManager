@@ -85,7 +85,7 @@ local table = [[
     "Sky": {
         "Realm": "0",
         "Enable": "true",
-        "BrightnessScale": "0.0075",
+        "BrightnessScale": "0.005",
         "SunSize": "0",
         "SunScale": "0",
         "CloudLayerSunColor": "(0, 0, 0)",
@@ -140,7 +140,7 @@ local table = [[
     "Name": "Testing1",
     "Type": "Night",
     "Priority": "100000",
-    "Visibility": "1",
+    "Visibility": "1"
 }
 ]]
 

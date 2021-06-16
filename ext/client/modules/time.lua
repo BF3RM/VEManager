@@ -17,16 +17,16 @@ function Time:RegisterVars()
     self.m_totalDayLength = 0
     self.m_originalSunX = nil
     self.m_originalSunY = nil
-    self.m_nightPriority = 100001
-    self.m_morningPriority = 100002
-    self.m_noonPriority = 100003
-    self.m_eveningPriority = 100004
+    self.m_nightPriority = 700
+    self.m_morningPriority = 701
+    self.m_noonPriority = 703
+    self.m_eveningPriority = 704
     self.m_NightState = nil
     self.m_MorningState = nil
     self.m_NoonState = nil
     self.m_EveningState = nil
     self.m_mapPresets = {}
-    self.m_presetTimings = {0.2, 0.375, 0.5, 0.75, 0.875} --Always need to have the end time of the last preset in a day at the end
+    self.m_presetTimings = {0.25, 0.375, 0.5, 0.75, 0.875} --Always need to have the end time of the last preset in a day at the end
     print('Registered Vars')
 end
 
