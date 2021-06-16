@@ -307,6 +307,11 @@ function VEManagerClient:LoadPresets()
 		local s_IsBasePreset = s_Preset.Priority == 1
 		-- print("IsBasePreset: " .. tostring(s_IsBasePreset))
 
+		-- Restrict using day-night cycle priorities
+		if s_Preset.Priority >= 100001 and s_Preset.Priority <= 100004 then
+			s_Preset.Priority = s_Preset.Priority + 5
+		end
+		
 		--Not sure if we need the LogicelVEEntity, but :shrug:
 		local s_LVEED = self:CreateEntity("LogicVisualEnvironmentEntityData")
 		self.m_Presets[s_Preset.Name] = {}
