@@ -5,7 +5,6 @@ noon = require "noon"
 evening = require "evening"
 easing = require "easing"
 
-
 function VEManagerClient:__init()
     print('Initializing VEManagerClient')
     self:RegisterVars()
@@ -45,6 +44,7 @@ function VEManagerClient:RegisterVars()
 	self.m_Presets = {}
 	self.m_Lerping = {}
 	self.m_Instances = {}
+	self.m_VisibilityUpdateThreshold = 0.005
 end
 
 
@@ -135,6 +135,10 @@ function VEManagerClient:UpdateVisibility(id, priority, visibilityFactor)
 		return
 	end
 
+	if math.abs(self.m_Presets[id]["logic"].visibility - visibilityFactor) < self.m_VisibilityUpdateThreshold then
+        return
+    end
+
 	self.m_Presets[id]["logic"].visibility = visibilityFactor
 	self.m_Presets[id]["ve"].visibility = visibilityFactor
 
@@ -145,9 +149,9 @@ function VEManagerClient:UpdateVisibility(id, priority, visibilityFactor)
 		if state.priority == s_fixedPriority then
 			state.visibility = visibilityFactor
 			VisualEnvironmentManager:SetDirty(true)
+			return
 		end
 	end
-
 end
 
 
@@ -306,11 +310,15 @@ function VEManagerClient:LoadPresets()
 		-- print("IsBasePreset: " .. tostring(s_IsBasePreset))
 
 		-- Restrict using day-night cycle priorities
-		s_Preset.Priority = tonumber(s_Preset.Priority)
-		if s_Preset.Priority >= 100001 and s_Preset.Priority <= 100004 then
-			s_Preset.Priority = s_Preset.Priority + 5
+		if s_Preset.Priority == nil then
+			s_Preset.Priority = 1
+		else
+			s_Preset.Priority = tonumber(s_Preset.Priority)
+			if s_Preset.Priority >= 11 and s_Preset.Priority <= 14 then
+				s_Preset.Priority = s_Preset.Priority + 5
+			end
 		end
-		
+
 		--Not sure if we need the LogicelVEEntity, but :shrug:
 		local s_LVEED = self:CreateEntity("LogicVisualEnvironmentEntityData")
 		self.m_Presets[s_Preset.Name] = {}
