@@ -63,7 +63,6 @@ function VEManagerClient:RegisterEvents()
     Events:Subscribe('VEManager:FadeOut', self, self.FadeOut)
     Events:Subscribe('VEManager:Lerp', self, self.Lerp)
 	Events:Subscribe('VEManager:Crossfade', self, self.Crossfade)
-	--Events:Subscribe('VEManager:CreateCinematicTools', self, self.CreateCinematicTools)
 	NetEvents:Subscribe('VEManager:CreateCinematicTools', self, self.CreateCinematicTools)
 end
 
