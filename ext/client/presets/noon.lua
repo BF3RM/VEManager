@@ -128,8 +128,8 @@ local table = [[
         "WindDirection": "211.25799560547",
         "WindStrength": "1.7"
     },
-    "Name": "Testing3",
-    "Type": "Noon",
+    "Name": "DefaultNoon",
+    "Type": "DefaultNoon",
     "Priority": "100000",
     "Visibility": "1"
 }

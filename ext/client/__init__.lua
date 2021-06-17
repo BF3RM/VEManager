@@ -14,10 +14,10 @@ end
 
 function VEManagerClient:RegisterVars()
     self.m_RawPresets = {}
-	self.m_RawPresets["Testing1"] = json.decode(night:GetPreset())
-	self.m_RawPresets["Testing2"] = json.decode(morning:GetPreset())
-	self.m_RawPresets["Testing3"] = json.decode(noon:GetPreset())
-	self.m_RawPresets["Testing4"] = json.decode(evening:GetPreset())
+	self.m_RawPresets["DefaultNight"] = json.decode(night:GetPreset())
+	self.m_RawPresets["DefaultMorning"] = json.decode(morning:GetPreset())
+	self.m_RawPresets["DefaultNoon"] = json.decode(noon:GetPreset())
+	self.m_RawPresets["DefaultEvening"] = json.decode(evening:GetPreset())
     self.m_SupportedTypes = {"Vec2", "Vec3", "Vec4", "Float32", "Boolean", "Int"}
 	self.m_SupportedClasses = {
 		"CameraParams",

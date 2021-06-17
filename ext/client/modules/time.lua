@@ -136,27 +136,30 @@ end
 -- ADD TIME TO MAP
 -- Add(Map name, starting hour (24h), day length (min))
 function Time:Add(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
-    if self.m_SystemRunning == true then
-        self:RegisterVars()
-    end
+	if self.m_SystemRunning == true then
+		self:RegisterVars()
+	end
 
-    -- get all presets associated with map and remove unused textures
-    for id, s_Preset in pairs(g_VEManagerClient.m_Presets) do
+	-- Get all dynamic presets (TODO: associated with map)
+	for id, s_Preset in pairs(g_VEManagerClient.m_Presets) do
 
-        if g_VEManagerClient.m_Presets[id].type == 'Night' then
-            self.m_currentNightPreset = id
-        
-		elseif g_VEManagerClient.m_Presets[id].type == 'Morning' then
-            self.m_currentMorningPreset = id
-        
-		elseif g_VEManagerClient.m_Presets[id].type == 'Noon' then
-            self.m_currentNoonPreset = id
-       
-		elseif g_VEManagerClient.m_Presets[id].type == 'Evening' then
-            self.m_currentEveningPreset = id
-        end
+		if g_VEManagerClient.m_Presets[id].type == 'Night' or
+		(g_VEManagerClient.m_Presets[id].type == 'DefaultNight' and self.m_currentNightPreset == nil) then
+			self.m_currentNightPreset = id
+			
+		elseif g_VEManagerClient.m_Presets[id].type == 'Morning' or
+		(g_VEManagerClient.m_Presets[id].type == 'DefaultMorning' and self.m_currentMorningPreset == nil) then
+			self.m_currentMorningPreset = id
 
-    end
+		elseif g_VEManagerClient.m_Presets[id].type == 'Noon' or
+		(g_VEManagerClient.m_Presets[id].type == 'DefaultNoon' and self.m_currentNoonPreset == nil) then
+			self.m_currentNoonPreset = id
+
+		elseif g_VEManagerClient.m_Presets[id].type == 'Evening' or
+		(g_VEManagerClient.m_Presets[id].type == 'DefaultEvening' and self.m_currentEveningPreset == nil) then
+			self.m_currentEveningPreset = id
+		end
+	end
 
     if self.m_currentNightPreset == nil or
         self.m_currentMorningPreset == nil or
