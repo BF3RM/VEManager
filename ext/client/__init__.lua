@@ -1,9 +1,9 @@
 class('VEManagerClient')
-night = require "night"
-morning = require "morning"
-noon = require "noon"
-evening = require "evening"
-easing = require "easing"
+night = require "presets/night"
+morning = require "presets/morning"
+noon = require "presets/noon"
+evening = require "presets/evening"
+easing = require "modules/easing"
 
 function VEManagerClient:__init()
     print('Initializing VEManagerClient')
