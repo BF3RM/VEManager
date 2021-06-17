@@ -390,6 +390,26 @@ local function outInBounce(t, b, c, d)
   end
 end
 
+local function tableGetIndex(tab,el)
+  for index, value in pairs(tab) do
+      if value == el then
+          return index
+      end
+  end
+end
+
+local function tableHasValue(tab, val)
+    for index, value in ipairs(tab) do
+        if value == val then
+            return true
+        end
+    end
+
+    return false
+end
+
+
+
 return {
   linear = linear,
   inQuad = inQuad,
@@ -432,4 +452,6 @@ return {
   outBounce = outBounce,
   inOutBounce = inOutBounce,
   outInBounce = outInBounce,
+  hasValue = hasValue,
+  tableGetIndex = tableGetIndex,
 }
