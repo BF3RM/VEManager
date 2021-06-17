@@ -33,8 +33,8 @@ end
 
 
 function TimeServer:OnLevelLoaded()
-    self:__init() -- debug/testing only
-    self:AddTime(8, 2)
+    self:__init()
+    --self:AddTime(0, 2) -- debug/testing only
 end
 
 
@@ -106,8 +106,6 @@ function TimeServer:OnPlayerRequest(player)
         print('[Time-Server]: Received Request by Player')
         print('[Time-Server]: Calling Sync Broadcast')
         NetEvents:SendTo('VEManager:AddTimeToClient', player, self.m_ServerDayTime, self.m_IsStatic, self.m_TotalDayLength)
-    else
-        return
     end
 end
 
