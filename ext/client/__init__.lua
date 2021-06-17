@@ -3,7 +3,6 @@ night = require "presets/night"
 morning = require "presets/morning"
 noon = require "presets/noon"
 evening = require "presets/evening"
-easing = require "modules/easing"
 
 function VEManagerClient:__init()
     print('Initializing VEManagerClient')
@@ -68,6 +67,7 @@ end
 
 
 function VEManagerClient:RegisterModules()
+	easing = require "modules/easing"
 	require 'modules/time'
 	Time:__init()
 	--require '__shared/DebugGUI'
