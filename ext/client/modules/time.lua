@@ -1,13 +1,12 @@
-local Time = class('Time')
-local Patches = require('modules/patches')
+class 'Time'
 
+local Patches = require('modules/patches')
 
 function Time:__init()
     print('Initializing Time Module')
     self:RegisterVars()
     self:RegisterEvents()
 end
-
 
 function Time:RegisterVars()
     self.m_SystemRunning = false
@@ -32,19 +31,19 @@ function Time:RegisterVars()
     print('Registered Vars')
 end
 
-
 function Time:RegisterEvents()
     self.m_PartitionLoadedEvent = Events:Subscribe('Partition:Loaded', self, self.OnPartitionLoad)
     --self.m_EngineUpdateEvent = Events:Subscribe('Engine:Update', self, self.Run)
     self.m_LevelLoadEvent = Events:Subscribe('Level:Loaded', self, self.OnLevelLoaded)
     self.m_LevelDestroyEvent = Events:Subscribe('Level:Destroy', self, self.OnLevelDestroy)
     self.m_AddTimeToClientEvent = NetEvents:Subscribe('VEManager:AddTimeToClient', self, self.AddTimeToClient)
-    self.m_PauseContinueEvent = NetEvents:Subscribe('TimeServer:Pause', self, self.PauseContinue)
+    
+	NetEvents:Subscribe('ClientTime:Pause', self, self.PauseContinue)
+    NetEvents:Subscribe('ClientTime:Disable', self, self.Disable)
 end
 
 
 function Time:OnPartitionLoad(partition)
-
     Patches:Components(partition)
 
     if partition.guid == Guid('6E5D35D9-D9D5-11DE-ADB5-9D4DBC23632A') then
@@ -56,31 +55,26 @@ function Time:OnPartitionLoad(partition)
     end
 end
 
-
 function Time:OnLevelLoaded()
-    self.m_ServerSyncEvent = NetEvents:Subscribe('TimeServer:Sync', self, self.ServerSync) -- Server Sync
-    self:RequestTime()
+	self.m_ServerSyncEvent = NetEvents:Subscribe('TimeServer:Sync', self, self.ServerSync) -- Server Sync
+	self:RequestTime()
 end
-
 
 function Time:OnLevelDestroy()
-    self.m_ServerSyncEvent = NetEvents:Unsubscribe('TimeServer:Sync') -- Server Sync
-    self:RemoveTime()
+	self.m_ServerSyncEvent = NetEvents:Unsubscribe('TimeServer:Sync') -- Server Sync
+	self:RemoveTime()
 end
-
-
-function Time:RemoveTime()
-    self:RegisterVars()
-    self:ResetSunPosition()
-    print("Reset Time System")
-end
-
 
 function Time:RequestTime()
-    print('Request Time')
-    NetEvents:Send('TimeServer:PlayerRequest')
+	print('Request Time')
+	NetEvents:Send('TimeServer:PlayerRequest')
 end
 
+function Time:RemoveTime()
+	self:RegisterVars()
+	self:ResetSunPosition()
+	print("Reset Time System")
+end
 
 function Time:ServerSync(p_ServerDayTime, p_TotalServerTime)
     if p_ServerDayTime == nil or p_TotalServerTime == nil then
@@ -115,21 +109,27 @@ function Time:ResetSunPosition()
 end
 
 
-function Time:CallPauseContinue()
-    NetEvents:Send('TimeServer:CallPauseContinue')
+function Time:PauseContinue(p_SystemRunning)
+	self.m_SystemRunning = p_SystemRunning
 end
 
+function Time:Disable()
+	-- Check if presets exist
+	if self.m_currentNightPreset == nil or
+		self.m_currentMorningPreset == nil or
+		self.m_currentNoonPreset == nil or
+		self.m_currentEveningPreset == nil then
+		return
+	end
 
-function Time:PauseContinue(p_Pause)
-    if p_Pause == true then
-        self.m_SystemRunning = false
-    
-	elseif p_Pause == false then
-        self.m_SystemRunning = true
-    
-	else
-        error('Failed to receive Pause Bool')
-    end
+	-- Disable time system if running
+	self.m_SystemRunning = false
+
+	-- Hide Presets
+	g_VEManagerClient:SetVisibility(self.m_currentNightPreset, 0)
+	g_VEManagerClient:SetVisibility(self.m_currentMorningPreset, 0)
+	g_VEManagerClient:SetVisibility(self.m_currentNoonPreset, 0)
+	g_VEManagerClient:SetVisibility(self.m_currentEveningPreset, 0)
 end
 
 
@@ -214,10 +214,6 @@ function Time:Run()
 		self.m_LastPrintHours = s_h_time
 	end
 
-	if s_print_enabled then
-		print("Current Time: " .. s_h_time .. " hours.")
-	end
-
 	-- Default visibility factors
 	local s_factorNight = 0
 	local s_factorMorning = 0
@@ -271,8 +267,8 @@ function Time:Run()
     end
 
 	if s_print_enabled then
-		print("Visibilities (Night, Morning, Noon, Evening): " .. MathUtils:Round(s_factorNight*100) .. "%, " .. MathUtils:Round(s_factorMorning*100) .. "%, " .. MathUtils:Round(s_factorNoon*100) .. "%, " .. MathUtils:Round(s_factorEvening*100) .. "%")
-		print("Time Till Switch: " .. MathUtils:Round(s_timeToChange) .. "sec")
+		print("Visibilities (Night, Morning, Noon, Evening): " .. MathUtils:Round(s_factorNight*100) .. "%, " .. MathUtils:Round(s_factorMorning*100) .. "%, " .. MathUtils:Round(s_factorNoon*100) .. "%, " .. MathUtils:Round(s_factorEvening*100) .. "% | Current time: " .. s_h_time .. "h")
+		--print("Time Till Switch: " .. MathUtils:Round(s_timeToChange) .. "sec")
 	end
 
 	-- Apply visibility factor
@@ -293,5 +289,9 @@ function Time:Run()
     self:SetSunPosition(self.m_ClientTime)
 end
 
+-- Singleton.
+if g_Time == nil then
+	g_Time = Time()
+end
 
-return Time
+return g_Time
