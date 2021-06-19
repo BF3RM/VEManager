@@ -1,8 +1,13 @@
 class('VEManagerClient')
+
+require 'modules/time'
+
+-- Default Dynamic day-night cycle Presets
 night = require "presets/night"
 morning = require "presets/morning"
 noon = require "presets/noon"
 evening = require "presets/evening"
+
 
 function VEManagerClient:__init()
     print('Initializing VEManagerClient')
@@ -43,7 +48,7 @@ function VEManagerClient:RegisterVars()
 	self.m_Presets = {}
 	self.m_Lerping = {}
 	self.m_Instances = {}
-	self.m_VisibilityUpdateThreshold = 0.005
+	self.m_VisibilityUpdateThreshold = 0.000001
 end
 
 
@@ -69,7 +74,7 @@ end
 function VEManagerClient:RegisterModules()
 	easing = require "modules/easing"
 	require 'modules/time'
-	Time:__init()
+	--Time:__init()
 	--require '__shared/DebugGUI'
 	--require 'modules/cinematictools'
 end
@@ -171,21 +176,6 @@ function VEManagerClient:FadeTo(id, visibility, time)
 	self.m_Lerping[#self.m_Lerping + 1] = id
 end
 
---[[
-function VEManagerClient:FadeIn(id, time)
-	if self.m_Presets[id] == nil then
-		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(id))
-		return
-	end
-
-	self.m_Presets[id]['time'] = time
-	self.m_Presets[id]['startTime'] = SharedUtils:GetTimeMS()
-	self.m_Presets[id]['startValue'] = self.m_Presets[id]["logic"].visibility
-	self.m_Presets[id]['EndValue'] = 1
-	self.m_Lerping[#self.m_Lerping +1] = id
-end
-]]
-
 function VEManagerClient:FadeOut(id, time)
 	if self.m_Presets[id] == nil then
 		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(id))
@@ -250,11 +240,11 @@ function VEManagerClient:GetMapPresets(mapName) -- gets all Main Map Environment
 	end
 end
 
-
 function VEManagerClient:GetState(...)
 	--Get all visual environment states
 	local args = { ... }
 	local states = VisualEnvironmentManager:GetStates()
+	
 	--Loop through all states
 	for _, state in pairs(states) do
 
@@ -270,10 +260,8 @@ function VEManagerClient:GetState(...)
 	return nil
 end
 
-
 function VEManagerClient:InitializePresets()
 	for i, s_Preset in pairs(self.m_Presets) do
-		--print(s_Preset["logic"])
 		s_Preset["entity"] = EntityManager:CreateEntity(s_Preset["logic"], LinearTransform())
 
 		if s_Preset["entity"] == nil then
@@ -297,7 +285,6 @@ end
 function VEManagerClient:LoadPresets()
 	print("Loading presets....")
 	--Foreach preset
-	-- print(self.m_RawPresets)
 	for i, s_Preset in pairs(self.m_RawPresets) do
 
 		if s_Preset.Type == nil then
@@ -306,7 +293,6 @@ function VEManagerClient:LoadPresets()
 
 		-- Generate our VisualEnvironment
 		local s_IsBasePreset = s_Preset.Priority == 1
-		-- print("IsBasePreset: " .. tostring(s_IsBasePreset))
 
 		-- Restrict using day-night cycle priorities
 		if s_Preset.Priority == nil then
@@ -331,15 +317,14 @@ function VEManagerClient:LoadPresets()
 
 		local s_VE = self:CreateEntity("VisualEnvironmentEntityData")
 		s_VEB.object = s_VE
-		print("Preset Name: " .. s_Preset.Name)
-		print("Preset Type: " .. s_Preset.Type)
-		print("Preset Priority: " .. tostring(s_Preset.Priority))
+		
+		print("Preset (Name, Type, Priority): " .. s_Preset.Name .. ", " .. s_Preset.Type .. ", " .. tostring(s_Preset.Priority))
+		
 		s_VE.enabled = true
 		s_VE.priority = s_Preset.Priority
 		s_VE.visibility = 1
 
 		self.m_Presets[s_Preset.Name]["ve"] = s_VE
-
 		self.m_Presets[s_Preset.Name]["type"] = s_Preset.Type
 
 		if s_Preset.Map ~= nil then
@@ -354,10 +339,8 @@ function VEManagerClient:LoadPresets()
 
 				-- Create class and add it to the VE entity.
 				local s_Class =  _G[l_Class.."ComponentData"]()
-				-- print("")
 				-- print("CLASS:")
 				-- print(l_Class)
-				-- print("")
 				s_Class.excluded = false
 				s_Class.isEventConnectionTarget = 3
 				s_Class.isPropertyConnectionTarget = 3
@@ -568,10 +551,10 @@ function VEManagerClient:UpdateLerp(percentage)
 		local PercentageComplete = TimeSinceStarted / self.m_Presets[preset].time
 		--local lerpValue = self.m_Presets[preset].startValue + (self.m_Presets[preset].EndValue - self.m_Presets[preset].startValue) * PercentageComplete
 
-	-- t = elapsed time
-	-- b = begin
-	-- c = change == ending - beginning
-	-- d = duration (total time)
+		-- t = elapsed time
+		-- b = begin
+		-- c = change == ending - beginning
+		-- d = duration (total time)
 		local t = TimeSinceStarted
 		local b = self.m_Presets[preset].startValue
 		local c = self.m_Presets[preset].EndValue - self.m_Presets[preset].startValue
@@ -604,29 +587,29 @@ end
 
 function VEManagerClient:OnUpdateInput(p_Delta, p_SimulationDelta)
 
-
-	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F1) then
+	if InputManager:WentKeyUp(InputDeviceKeys.IDK_F1) then
 		--self:LoadPresets()
 	end
 
-	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F2) then
-		--NetEvents:Send('TimeServer:AddTime', 0, false, 30, 30)
+	if InputManager:WentKeyUp(InputDeviceKeys.IDK_F2) then
+		--NetEvents:Send('TimeServer:AddTime', 9, 0.2)
 		--print('Dispatching Add Time Event')
 	end
 
-	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F3) then
+	if InputManager:WentKeyUp(InputDeviceKeys.IDK_F3) then
+		
+	end
+
+	if InputManager:WentKeyUp(InputDeviceKeys.IDK_F4) then
 		--
 	end
 
-	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F4) then
-		--
+	if InputManager:WentKeyUp(InputDeviceKeys.IDK_F5) then
+		--CinematicTools:__init()
 	end
 
-	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F5) then
-		CinematicTools:__init()
-	end
-
-	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F6) then
+	if InputManager:WentKeyUp(InputDeviceKeys.IDK_F6) then
+		--[[
 		local s_states = VisualEnvironmentManager:GetStates()
 		VisualEnvironmentManager:SetDirty(true)
 		local s_fixedPriority = 10000000 + 100015
@@ -644,11 +627,11 @@ function VEManagerClient:OnUpdateInput(p_Delta, p_SimulationDelta)
 
 		if found == false then
 			print('Not found')
-		end
+		end]]
 	end
 
-	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F7) then
-		self:Lerp("ve_base", 0.5, 1000)
+	if InputManager:WentKeyUp(InputDeviceKeys.IDK_F7) then
+		--self:Lerp("ve_base", 0.5, 1000)
 	end
 
 	if(#self.m_Lerping > 0 ) then
@@ -707,7 +690,6 @@ function VEManagerClient:ParseValue(p_Type, p_Value)
 	end
 end
 
-
 function h()
     local vars = {"A","B","C","D","E","F","0","1","2","3","4","5","6","7","8","9"}
     return vars[math.floor(MathUtils:GetRandomInt(1,16))]..vars[math.floor(MathUtils:GetRandomInt(1,16))]
@@ -723,6 +705,7 @@ function HandleVec(vec)
 	s_fixedContents = string.gsub(s_fixedContents, ", ", ":")
 	return split(s_fixedContents, ":")
 end
+
 function firstToUpper(str)
 	return (str:gsub("^%U", string.upper))
 end
@@ -730,6 +713,7 @@ end
 function firstToLower(str)
 	return (str:gsub("^%L", string.lower))
 end
+
 function split(pString, pPattern)
 	local Table = {} -- NOTE: use {n = 0} in Lua-5.0
 	local fpat = "(.-)" .. pPattern
@@ -792,6 +776,9 @@ function IsBasicType( typ )
 	return false
 end
 
-g_VEManagerClient = VEManagerClient()
+-- Singleton.
+if g_VEManagerClient == nil then
+	g_VEManagerClient = VEManagerClient()
+end
 
-
+return g_VEManagerClient
