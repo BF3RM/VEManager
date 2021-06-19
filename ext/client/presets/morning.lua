@@ -138,7 +138,7 @@ local table = [[
     },
     "Name": "DefaultMorning",
     "Type": "DefaultMorning",
-    "Priority": "100000",
+    "Priority": "10",
     "Visibility": "1"
 }
 ]]
