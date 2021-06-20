@@ -1,6 +1,4 @@
-class('VEManagerClient')
-
-require 'modules/time'
+class 'VEManagerClient'
 
 -- Default Dynamic day-night cycle Presets
 night = require "presets/night"
@@ -74,7 +72,6 @@ end
 function VEManagerClient:RegisterModules()
 	easing = require "modules/easing"
 	require 'modules/time'
-	--Time:__init()
 	--require '__shared/DebugGUI'
 	--require 'modules/cinematictools'
 end
@@ -133,7 +130,7 @@ function VEManagerClient:SetVisibility(id, visibility)
 end
 
 
-function VEManagerClient:UpdateVisibility(id, priority, visibilityFactor)
+function VEManagerClient:UpdateVisibility(id, priority, visibilityFactor) -- APO to JACK: How is this different to "SetVisibility"? Which works best?
 	if self.m_Presets[id] == nil then
 		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(id))
 		return
@@ -202,7 +199,6 @@ function VEManagerClient:Lerp(id, value, time)
 
 	self.m_Lerping[#self.m_Lerping +1] = id
 end
-
 
 --[[function VEManagerClient:Crossfade(id1, id2, time)
     if self.m_Presets[id1] == nil then
@@ -385,7 +381,7 @@ function VEManagerClient:LoadPresets()
 							local s_Value = self:GetDefaultValue(l_Class, l_Field)
 							if (s_Value == nil) then
 								print("Failed to fetch original value: " .. tostring(l_Class) .. " | " .. tostring(s_FieldName) .. " [1]")
-								s_Class[firstToLower(s_FieldName)] = nil
+								--s_Class[firstToLower(s_FieldName)] = nil -- Crashes
 							else
 								-- print("Setting default value for field " .. s_FieldName .. " of class " .. l_Class .. " | " ..  tostring(s_Value))
 								if (IsBasicType(s_Type)) then
@@ -428,7 +424,7 @@ function VEManagerClient:LoadPresets()
 								print("CloudTexture")
 								s_Class[firstToLower(s_FieldName)] = TextureAsset(_G['g_Stars'])
 							else
-								s_Class[firstToLower(s_FieldName)] = nil
+								--s_Class[firstToLower(s_FieldName)] = nil -- Crashes
 							end
 						else
 							-- print("Setting default value for field " .. s_FieldName .. " of class " .. l_Class .. " | " ..  tostring(s_Value))
@@ -490,32 +486,28 @@ end
 
 
 function VEManagerClient:GetDefaultValue(p_Class, p_Field)
-	if (p_Field.typeInfo.enum) then
+	if p_Field.typeInfo.enum then
 
-		if (p_Field.typeInfo.name == "Realm") then
+		if p_Field.typeInfo.name == "Realm" then
 			return Realm.Realm_Client
 		else
-			print("Found unhandled enum, "..p_Field.typeInfo.name)
+			print("Found unhandled enum, " .. p_Field.typeInfo.name)
 			return
 		end
-
 	end
 
 	local s_States = VisualEnvironmentManager:GetStates()
 
 	for i, s_State in ipairs(s_States) do
-		--print(">>>>>> state:")
-		--print(s_State.entityName)
+		--print(">>>>>> state:" .. s_State.entityName)
 
-		if(s_State.entityName == "Levels/Web_Loading/Lighting/Web_Loading_VE") then
+		if s_State.entityName == "Levels/Web_Loading/Lighting/Web_Loading_VE" then
 			goto continue
-		end
-
-		if s_State.entityName ~= 'EffectEntity' then
-
+		
+		elseif s_State.entityName ~= 'EffectEntity' then
 			local s_Class = s_State[firstToLower(p_Class)] --colorCorrection
 
-			if (s_Class == nil) then
+			if s_Class == nil then
 				goto continue
 			end
 
@@ -587,51 +579,8 @@ end
 
 function VEManagerClient:OnUpdateInput(p_Delta, p_SimulationDelta)
 
-	if InputManager:WentKeyUp(InputDeviceKeys.IDK_F1) then
-		--self:LoadPresets()
-	end
-
-	if InputManager:WentKeyUp(InputDeviceKeys.IDK_F2) then
-		--NetEvents:Send('TimeServer:AddTime', 9, 0.2)
-		--print('Dispatching Add Time Event')
-	end
-
-	if InputManager:WentKeyUp(InputDeviceKeys.IDK_F3) then
-		
-	end
-
-	if InputManager:WentKeyUp(InputDeviceKeys.IDK_F4) then
-		--
-	end
-
-	if InputManager:WentKeyUp(InputDeviceKeys.IDK_F5) then
-		--CinematicTools:__init()
-	end
-
-	if InputManager:WentKeyUp(InputDeviceKeys.IDK_F6) then
-		--[[
-		local s_states = VisualEnvironmentManager:GetStates()
-		VisualEnvironmentManager:SetDirty(true)
-		local s_fixedPriority = 10000000 + 100015
-
-		local found = false
-		for _, state in pairs(s_states) do
-			if state.priority == s_fixedPriority then
-				found = true
-
-				state.visibility = visibilityFactor
-				print('VISIBILITY: ' .. tostring(state.visibility))
-				print('PRIORITY: ' .. tostring(state.priority))
-			end
-		end
-
-		if found == false then
-			print('Not found')
-		end]]
-	end
-
-	if InputManager:WentKeyUp(InputDeviceKeys.IDK_F7) then
-		--self:Lerp("ve_base", 0.5, 1000)
+	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F1) then
+		--self:CreateCinematicTools()
 	end
 
 	if(#self.m_Lerping > 0 ) then
