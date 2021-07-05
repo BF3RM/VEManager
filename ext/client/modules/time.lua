@@ -9,26 +9,29 @@ function Time:__init()
 end
 
 function Time:RegisterVars()
-    self.m_SystemRunning = false
-    self.m_IsStatic = nil
-    self.m_ClientTime = 0
-    self.m_totalClientTime = 0
-    self.m_totalDayLength = 0
-    self.m_originalSunX = nil
-    self.m_originalSunY = nil
-    self.m_nightPriority = 11
-    self.m_morningPriority = 12
-    self.m_noonPriority = 13
-    self.m_eveningPriority = 14
-    self.m_mapPresets = {}
-    self.m_presetTimings = {0.25, 0.375, 0.5, 0.75, 0.875} --Always need to have the end time of the last preset in a day at the end
+	-- Config
+	self.m_presetTimings = {0.25, 0.375, 0.5, 0.75, 0.875} --Always need to have the end time of the last preset in a day at the end
+	
+	-- Initialise variables
+	print('[Client Time Module] Registered Vars')
+	self.m_SystemRunning = false
+	self.m_IsStatic = nil
+	self.m_ClientTime = 0
+	self.m_totalClientTime = 0
+	self.m_totalDayLength = 0
+	self.m_originalSunX = nil
+	self.m_originalSunY = nil
+	self.m_mapPresets = {}
+	self.m_nightPriority = 11
+	self.m_morningPriority = 12
+	self.m_noonPriority = 13
+	self.m_eveningPriority = 14
+	self.m_currentNightPreset = nil
+	self.m_currentMorningPreset = nil
+	self.m_currentNoonPreset = nil
+	self.m_currentEveningPreset = nil
 	self.m_LastPrintHours = -1
 	self.m_FirstRun = false
-	self.m_currentNightPreset = nil
-    self.m_currentMorningPreset = nil
-    self.m_currentNoonPreset = nil
-    self.m_currentEveningPreset = nil
-    print('Registered Vars')
 end
 
 function Time:RegisterEvents()

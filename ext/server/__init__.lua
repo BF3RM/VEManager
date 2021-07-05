@@ -7,6 +7,10 @@ function TimeServer:__init()
 end
 
 function TimeServer:RegisterVars()
+    -- Config
+	self.m_ClientUpdateThreshold = 0.5
+	
+	-- Initialise variables
     print('[Time-Server]: Registered Vars')
     self.m_ServerDayTime = 0.0
     self.m_TotalServerTime = 0.0
@@ -14,8 +18,7 @@ function TimeServer:RegisterVars()
     self.m_TotalDayLength = 0.0
     self.m_IsStatic = nil
     self.m_ServerTickrate = SharedUtils:GetTickrate()
-    self.m_UpdateThreshold = 0.5
-    self.m_SyncTickrate = 1 / (self.m_ServerTickrate * self.m_UpdateThreshold) --[Hz]
+    self.m_SyncTickrate = 1 / (self.m_ServerTickrate * self.m_ClientUpdateThreshold) --[Hz]
     self.m_SystemRunning = false
 end
 
@@ -30,10 +33,7 @@ function TimeServer:RegisterEvents()
     self.m_LevelDestroyEvent = Events:Subscribe('Level:Destroy', self, self.OnLevelDestroy)
     self.m_PlayerRequestEvent = NetEvents:Subscribe('TimeServer:PlayerRequest', self, self.OnPlayerRequest)
 	-- For Devs
-	Events:Subscribe('Player:Chat', self, self.ChatCommands)
-	--NetEvents:Subscribe('TimeServer:AddTime', self, self.AddTimeNet)
-	--NetEvents:Subscribe('TimeServer:Pause', self, self.PauseNet)
-	--NetEvents:Subscribe('TimeServer:Disable', self, self.DisableNet)
+	Events:Subscribe('Player:Chat', self, self.ChatCommands) -- Uncomment to enable chat commands in VEManager
 end
 
 
@@ -52,19 +52,17 @@ function TimeServer:AddTime(p_StartingTime, p_LengthOfDayInMinutes)
         self:RegisterVars()
     end
 
-    print('[Time-Server]: Received Add Time Event')
-    --print(tostring(p_StartingTime) .. " | " .. tostring(p_LengthOfDayInMinutes))
-
     if p_LengthOfDayInMinutes ~= nil then
         self.m_TotalDayLength = p_LengthOfDayInMinutes * 60
         self.m_ServerDayTime = p_StartingTime * 3600 * (self.m_TotalDayLength / 86000)
         self.m_IsStatic = false
-        print('[Time-Server]: New time (Starting Time, Length of Day): ' .. p_StartingTime .. 'h, '.. self.m_TotalDayLength .. 'sec')
     else
         self.m_TotalDayLength = 86000
         self.m_ServerDayTime = p_StartingTime * 3600
         self.m_IsStatic = true
     end
+    
+	print('[Time-Server]: Received new time (Starting Time, Length of Day): ' .. p_StartingTime .. 'h, '.. self.m_TotalDayLength .. 'sec')
 
     NetEvents:Broadcast('VEManager:AddTimeToClient', self.m_ServerDayTime, self.m_IsStatic, self.m_TotalDayLength)
     self.m_SystemRunning = true
@@ -128,7 +126,19 @@ end
 function TimeServer:ChatCommands(p_Player, recipientMask, message)
 	if message == '!settime' then
 		print('[Time-Server]: Time Event called by ' .. p_Player.name)
-		self:AddTime(9, 2)
+		self:AddTime(9, 0.5)
+	elseif message == '!setnight' then
+		print('[Time-Server]: Time Event called by ' .. p_Player.name)
+		self:AddTime(0, nil)
+	elseif message == '!setmorning' then
+		print('[Time-Server]: Time Event called by ' .. p_Player.name)
+		self:AddTime(9, nil)
+	elseif message == '!setnoon' then
+		print('[Time-Server]: Time Event called by ' .. p_Player.name)
+		self:AddTime(12, nil)
+	elseif message == '!setafternoon' then
+		print('[Time-Server]: Time Event called by ' .. p_Player.name)
+		self:AddTime(15, nil)
 	elseif message == '!pausetime' then
 		print('[Time-Server]: Time Pause called by ' .. p_Player.name)
 		self:PauseContinue()
@@ -137,23 +147,6 @@ function TimeServer:ChatCommands(p_Player, recipientMask, message)
 		self:DisableDynamicCycle()
 	end
 end
-
---[[
-function TimeServer:AddTimeNet(p_Player, p_StartingTime, p_LengthOfDayInMinutes)
-	print('[Time-Server]: Time Event called by ' .. p_Player.name)
-	self:AddTime(p_StartingTime, p_LengthOfDayInMinutes)
-end
-
-function TimeServer:PauseNet(p_Player)
-	print('[Time-Server]: Time Pause called by ' .. p_Player.name)
-	self:PauseContinue()
-end
-
-function TimeServer:DisableNet(p_Player)
-	print('[Time-Server]: Time Disable called by ' .. p_Player.name)
-	self:DisableDynamicCycle()
-end
-]]
 
 -- Singleton.
 if g_TimeServer == nil then
