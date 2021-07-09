@@ -104,7 +104,7 @@ local table = [[
         "CloudLayer2SunLightIntensity": "0",
         "CloudLayer2SunLightPower": "0",
         "CloudLayer2AmbientLightIntensity": "0",
-        "CloudLayer2Color": "1:1:1:",
+        "CloudLayer2Color": "0:0:0:",
         "CloudLayer2AlphaMul": "0.0",
         "StaticEnvmapScale": "0",
         "SkyVisibilityExponent": "0",
