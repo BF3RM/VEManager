@@ -102,7 +102,16 @@ function Time:SetSunPosition(p_CurrentTime) -- for smoother sun relative to time
     local factor = ( p_CurrentTime / self.m_totalDayLength )
     --print("Sun Pos Y: " .. ( -90 + ( 360 * factor )))
     VisualEnvironmentManager:SetSunRotationX(275)
-    VisualEnvironmentManager:SetSunRotationY( -90 + ( 360 * factor ))
+
+	local s_SunPosX = -90 + ( 360 * factor )
+
+	if s_SunPosX > 180 then -- after 22:00
+		VisualEnvironmentManager:SetSunRotationY( -180 + s_SunPosX )
+	elseif factor < self.m_presetTimings[1] then
+		VisualEnvironmentManager:SetSunRotationY( 90 + s_SunPosX )
+	else
+		VisualEnvironmentManager:SetSunRotationY(s_SunPosX)
+	end
 end
 
 
