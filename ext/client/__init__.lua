@@ -351,7 +351,7 @@ function VEManagerClient:LoadPresets()
 					-- Fix lua types
 					local s_FieldName = l_Field.name
 
-					if(s_FieldName == "End") then
+					if s_FieldName == "End" then
 						s_FieldName = "EndValue"
 					end
 
@@ -371,26 +371,32 @@ function VEManagerClient:LoadPresets()
 						elseif l_Field.typeInfo.array then
 							error("Found unexpected array")
 							return
+						elseif s_Type == "TextureAsset" then
+							print("TextureAsset is not yet supported.")
+							s_Value = nil -- Make sure this value is nil so the saved value is not saved
 						else
-							error("Found unexpected DataContainer")
+							error("Found unexpected DataContainer: " .. s_Type)
 							return
 						end
 
-						if (s_Value ~= nil) then
+						if s_Value ~= nil then
 							s_Class[firstToLower(s_FieldName)] = s_Value
+						
 						else
-
 							local s_Value = self:GetDefaultValue(l_Class, l_Field)
-							if (s_Value == nil) then
+							if s_Value == nil then
 								print("Failed to fetch original value: " .. tostring(l_Class) .. " | " .. tostring(s_FieldName) .. " [1]")
 								--s_Class[firstToLower(s_FieldName)] = nil -- Crashes
 							else
 								-- print("Setting default value for field " .. s_FieldName .. " of class " .. l_Class .. " | " ..  tostring(s_Value))
-								if (IsBasicType(s_Type)) then
+								if IsBasicType(s_Type) then
 									s_Class[firstToLower(s_FieldName)] = self:ParseValue(s_Type, s_Value)
+								
 								elseif (l_Field.typeInfo.enum) then
 									s_Class[firstToLower(s_FieldName)] = tonumber(s_Value)
-								elseif (s_Type == "TextureAsset") then
+								
+								elseif s_Type == "TextureAsset" then
+									
 									if s_FieldName == "PanoramicTexture" then
 										--s_Class[firstToLower(s_FieldName)] = nil
 										s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
@@ -406,6 +412,7 @@ function VEManagerClient:LoadPresets()
 									--print("Added FieldName: " .. s_FieldName)
 									s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
 									end
+								
 								elseif l_Field.typeInfo.array then
 									print("Found unexpected array, ignoring")
 								else
@@ -422,6 +429,7 @@ function VEManagerClient:LoadPresets()
 						local s_Value = self:GetDefaultValue(l_Class, l_Field)
 						if (s_Value == nil) then
 							print("Failed to fetch original value: " .. tostring(l_Class) .. " | " .. tostring(s_FieldName) .. " [2]")
+							
 							if s_FieldName == "CloudLayer2Texture" then
 								print("CloudTexture")
 								s_Class[firstToLower(s_FieldName)] = TextureAsset(_G['g_Stars'])
@@ -430,11 +438,14 @@ function VEManagerClient:LoadPresets()
 							end
 						else
 							-- print("Setting default value for field " .. s_FieldName .. " of class " .. l_Class .. " | " ..  tostring(s_Value))
-							if (IsBasicType(s_Type)) then
+							if IsBasicType(s_Type) then
 								s_Class[firstToLower(s_FieldName)] = s_Value
-							elseif (l_Field.typeInfo.enum) then
+							
+							elseif l_Field.typeInfo.enum then
 								s_Class[firstToLower(s_FieldName)] = tonumber(s_Value)
-							elseif (s_Type == "TextureAsset") then
+							
+							elseif s_Type == "TextureAsset" then
+								
 								if s_FieldName == "PanoramicTexture" then
 									--s_Class[firstToLower(s_FieldName)] = nil
 									s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
@@ -450,8 +461,10 @@ function VEManagerClient:LoadPresets()
 								--print("Added FieldName: " .. s_FieldName)
 								s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
 								end
+							
 							elseif l_Field.typeInfo.array then
 								print("Found unexpected array, ignoring")
+							
 							else
 								-- Its a DataContainer
 								s_Class[firstToLower(s_FieldName)] = _G[s_Type](s_Value)
