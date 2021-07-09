@@ -34,6 +34,7 @@ function Time:RegisterVars()
 	self.m_FirstRun = false
 
 	self.m_EnableMoon = true
+	self.m_CloudSpeed = -0.001
 end
 
 function Time:RegisterEvents()
@@ -130,6 +131,12 @@ function Time:SetSunPosition(p_CurrentTime) -- for smoother sun relative to time
 end
 
 
+function Time:SetCloudSpeed()
+	self.m_CloudSpeed = ( 1 / (( self.m_totalDayLength / 60 ) * 0.5 ))
+	print('Set Cloud Speed')
+end
+
+
 function Time:ResetSunPosition()
     VisualEnvironmentManager:SetSunRotationX(0)
     VisualEnvironmentManager:SetSunRotationY(70)
@@ -173,7 +180,7 @@ function Time:Add(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 		if g_VEManagerClient.m_Presets[id].type == 'Night' or
 		(g_VEManagerClient.m_Presets[id].type == 'DefaultNight' and self.m_currentNightPreset == nil) then
 			self.m_currentNightPreset = id
-			
+
 		elseif g_VEManagerClient.m_Presets[id].type == 'Morning' or
 		(g_VEManagerClient.m_Presets[id].type == 'DefaultMorning' and self.m_currentMorningPreset == nil) then
 			self.m_currentMorningPreset = id
@@ -217,6 +224,7 @@ function Time:Add(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
     end
 
     self:SetSunPosition(self.m_ClientTime)
+	self:SetCloudSpeed()
 end
 
 
@@ -304,8 +312,11 @@ function Time:Run()
 		g_VEManagerClient:SetVisibility(self.m_currentMorningPreset, s_factorMorning)
 		g_VEManagerClient:SetVisibility(self.m_currentNoonPreset, s_factorNoon)
 		g_VEManagerClient:SetVisibility(self.m_currentEveningPreset, s_factorEvening)
+		g_VEManagerClient:SetSingleValue(self.m_currentNightPreset, self.m_nightPriority, 'cloudLayer1Speed', self.m_CloudSpeed)
+		g_VEManagerClient:SetSingleValue(self.m_currentMorningPreset, self.m_morningPriority, 'cloudLayer1Speed', self.m_CloudSpeed)
+		g_VEManagerClient:SetSingleValue(self.m_currentNoonPreset, self.m_noonPriority, 'cloudLayer1Speed', self.m_CloudSpeed)
+		g_VEManagerClient:SetSingleValue(self.m_currentEveningPreset, self.m_eveningPriority, 'cloudLayer1Speed', self.m_CloudSpeed)
 		self.m_FirstRun = false
-	
 	else
 		g_VEManagerClient:UpdateVisibility(self.m_currentNightPreset, self.m_nightPriority, s_factorNight)
 		g_VEManagerClient:UpdateVisibility(self.m_currentMorningPreset, self.m_morningPriority, s_factorMorning)

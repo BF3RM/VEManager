@@ -158,6 +158,25 @@ function VEManagerClient:UpdateVisibility(id, priority, visibilityFactor) -- APO
 end
 
 
+function VEManagerClient:SetSingleValue(id, priority, desiredValue, value)
+	if self.m_Presets[id] == nil then
+		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(id))
+		return
+	end
+
+	local s_states = VisualEnvironmentManager:GetStates()
+	local s_fixedPriority = 10000000 + priority
+
+	for _, state in pairs(s_states) do
+		if state.priority == s_fixedPriority then
+			state.sky[desiredValue] = value
+			VisualEnvironmentManager:SetDirty(true)
+			return
+		end
+	end
+end
+
+
 function VEManagerClient:FadeIn(id, time)
 	self:FadeTo(id, 1, time)
 end
