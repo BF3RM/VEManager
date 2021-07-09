@@ -32,6 +32,8 @@ function Time:RegisterVars()
 	self.m_currentEveningPreset = nil
 	self.m_LastPrintHours = -1
 	self.m_FirstRun = false
+
+	self.m_EnableMoon = true
 end
 
 function Time:RegisterEvents()
@@ -104,14 +106,14 @@ function Time:SetSunPosition(p_CurrentTime) -- for smoother sun relative to time
     VisualEnvironmentManager:SetSunRotationX(275)
 
 	local s_SunPosY = (-90 + ( 360 * factor ))
-    if factor >= self.m_presetTimings[5] then -- after 21:00
+    if factor >= self.m_presetTimings[5] and self.m_EnableMoon == true then -- after 21:00
 		local s_LocalSunPosY = (( -180 + s_SunPosY ) / 180 )
 		if s_LocalSunPosY >= 1.0 then
 			return
 		end
         VisualEnvironmentManager:SetSunRotationY(( -90 + ( 360 * s_LocalSunPosY )))
 		print(s_LocalSunPosY)
-    elseif factor <= self.m_presetTimings[1] then -- before 6:00
+    elseif factor <= self.m_presetTimings[1] and self.m_EnableMoon == true then -- before 6:00
 		local s_LocalSunPosY = (0.5 + ( 90 + s_SunPosY ) / 180 )
 		if s_LocalSunPosY > 180 then
 			return
