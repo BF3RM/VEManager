@@ -5,7 +5,7 @@ night = require "presets/night"
 morning = require "presets/morning"
 noon = require "presets/noon"
 evening = require "presets/evening"
-ve_cinematic_tools = require "presets/custompreset"
+ve_cinematic_tools = require "presets/custompreset" -- Dev cinematic tools custom preset
 
 function VEManagerClient:__init()
     print('Initializing VEManagerClient')
@@ -17,7 +17,7 @@ end
 
 function VEManagerClient:RegisterVars()
     self.m_RawPresets = {}
-	self.m_RawPresets["CinematicTools"] = json.decode(ve_cinematic_tools:GetPreset())
+	self.m_RawPresets["CinematicTools"] = json.decode(ve_cinematic_tools:GetPreset()) -- Dev cinematic tools custom preset
 	self.m_RawPresets["DefaultNight"] = json.decode(night:GetPreset())
 	self.m_RawPresets["DefaultMorning"] = json.decode(morning:GetPreset())
 	self.m_RawPresets["DefaultNoon"] = json.decode(noon:GetPreset())
