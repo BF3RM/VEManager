@@ -1,5 +1,4 @@
-local CinematicTools = class('CinematicTools')
-
+class 'CinematicTools'
 
 function CinematicTools:__init()
     print("Initializing Cinematic Tools")
@@ -8,11 +7,10 @@ function CinematicTools:__init()
     self:CreateGUI()
 end
 
-
 function CinematicTools:RegisterVars()
     self.m_CineState = nil
     self.m_PendingDirty = false
-    self.m_CinePriority = 1
+    self.m_CinePriority = 100000
     self.m_PresetName = nil
     self.m_PresetPriority = nil
 end
@@ -20,12 +18,13 @@ end
 
 function CinematicTools:RegisterEvents()
     --self.m_VisualStateAddedEvent = Events:Subscribe('VE:StateAdded', self, self.OnVisualStateAdded)
-    --self.m_LevelLoadEvent = Events:Subscribe('Level:Loaded', self, self.OnLevelLoaded)
+    self.m_LevelLoadEvent = Events:Subscribe('Level:Loaded', self, self.OnLevelLoaded)
 end
 
 
 function CinematicTools:OnLevelLoaded()
-    --
+	-- Load preset
+    --g_VEManagerClient:EnablePreset("CinematicTools")  -- Load dev cinematic tools custom preset
 end
 
 
@@ -592,4 +591,9 @@ function CinematicTools:ParseValue(p_Type, p_Value)
 	end
 end
 
-return CinematicTools
+-- Singleton.
+if g_CinematicTools == nil then
+	g_CinematicTools = CinematicTools()
+end
+
+return g_CinematicTools

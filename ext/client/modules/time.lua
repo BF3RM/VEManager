@@ -9,26 +9,32 @@ function Time:__init()
 end
 
 function Time:RegisterVars()
-    self.m_SystemRunning = false
-    self.m_IsStatic = nil
-    self.m_ClientTime = 0
-    self.m_totalClientTime = 0
-    self.m_totalDayLength = 0
-    self.m_originalSunX = nil
-    self.m_originalSunY = nil
-    self.m_nightPriority = 11
-    self.m_morningPriority = 12
-    self.m_noonPriority = 13
-    self.m_eveningPriority = 14
-    self.m_mapPresets = {}
-    self.m_presetTimings = {0.25, 0.375, 0.5, 0.75, 0.875} --Always need to have the end time of the last preset in a day at the end
+	-- Config
+	self.m_presetTimings = {0.25, 0.375, 0.5, 0.75, 0.875} --Always need to have the end time of the last preset in a day at the end
+	
+	-- Initialise variables
+	print('[Client Time Module] Registered Vars')
+	self.m_SystemRunning = false
+	self.m_IsStatic = nil
+	self.m_ClientTime = 0
+	self.m_totalClientTime = 0
+	self.m_totalDayLength = 0
+	self.m_originalSunX = nil
+	self.m_originalSunY = nil
+	self.m_mapPresets = {}
+	self.m_nightPriority = 11
+	self.m_morningPriority = 12
+	self.m_noonPriority = 13
+	self.m_eveningPriority = 14
+	self.m_currentNightPreset = nil
+	self.m_currentMorningPreset = nil
+	self.m_currentNoonPreset = nil
+	self.m_currentEveningPreset = nil
 	self.m_LastPrintHours = -1
 	self.m_FirstRun = false
-	self.m_currentNightPreset = nil
-    self.m_currentMorningPreset = nil
-    self.m_currentNoonPreset = nil
-    self.m_currentEveningPreset = nil
-    print('Registered Vars')
+
+	self.m_EnableMoon = true
+	self.m_CloudSpeed = -0.001
 end
 
 function Time:RegisterEvents()
@@ -97,9 +103,37 @@ end
 
 function Time:SetSunPosition(p_CurrentTime) -- for smoother sun relative to time
     local factor = ( p_CurrentTime / self.m_totalDayLength )
-    --print("Sun Pos Y: " .. ( -90 + ( 360 * factor )))
+	VisualEnvironmentManager:SetDirty(true)
     VisualEnvironmentManager:SetSunRotationX(275)
-    VisualEnvironmentManager:SetSunRotationY( -90 + ( 360 * factor ))
+
+	local s_SunPosY = (-90 + ( 360 * factor ))
+    if factor >= self.m_presetTimings[5] and self.m_EnableMoon == true then -- after 21:00
+		local s_LocalSunPosY = (( -180 + s_SunPosY ) / 180 )
+		if s_LocalSunPosY >= 1.0 then
+			return
+		end
+        VisualEnvironmentManager:SetSunRotationY(( -90 + ( 360 * s_LocalSunPosY )))
+		--print(s_LocalSunPosY)
+    elseif factor <= self.m_presetTimings[1] and self.m_EnableMoon == true then -- before 6:00
+		local s_LocalSunPosY = (0.5 + ( 90 + s_SunPosY ) / 180 )
+		if s_LocalSunPosY > 180 then
+			return
+		end
+        VisualEnvironmentManager:SetSunRotationY(( -90 + ( 360 * s_LocalSunPosY )))
+		--print(s_LocalSunPosY)
+    else
+		if s_SunPosY > 180 then
+			return
+		end
+        VisualEnvironmentManager:SetSunRotationY(s_SunPosY)
+		--print(s_SunPosY)
+    end
+end
+
+
+function Time:SetCloudSpeed()
+	self.m_CloudSpeed = ( 1 / (( self.m_totalDayLength / 60 ) * 0.5 ))
+	print('Set Cloud Speed')
 end
 
 
@@ -146,7 +180,7 @@ function Time:Add(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 		if g_VEManagerClient.m_Presets[id].type == 'Night' or
 		(g_VEManagerClient.m_Presets[id].type == 'DefaultNight' and self.m_currentNightPreset == nil) then
 			self.m_currentNightPreset = id
-			
+
 		elseif g_VEManagerClient.m_Presets[id].type == 'Morning' or
 		(g_VEManagerClient.m_Presets[id].type == 'DefaultMorning' and self.m_currentMorningPreset == nil) then
 			self.m_currentMorningPreset = id
@@ -190,6 +224,7 @@ function Time:Add(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
     end
 
     self:SetSunPosition(self.m_ClientTime)
+	self:SetCloudSpeed()
 end
 
 
@@ -277,8 +312,11 @@ function Time:Run()
 		g_VEManagerClient:SetVisibility(self.m_currentMorningPreset, s_factorMorning)
 		g_VEManagerClient:SetVisibility(self.m_currentNoonPreset, s_factorNoon)
 		g_VEManagerClient:SetVisibility(self.m_currentEveningPreset, s_factorEvening)
+		g_VEManagerClient:SetSingleValue(self.m_currentNightPreset, self.m_nightPriority, 'cloudLayer1Speed', self.m_CloudSpeed)
+		g_VEManagerClient:SetSingleValue(self.m_currentMorningPreset, self.m_morningPriority, 'cloudLayer1Speed', self.m_CloudSpeed)
+		g_VEManagerClient:SetSingleValue(self.m_currentNoonPreset, self.m_noonPriority, 'cloudLayer1Speed', self.m_CloudSpeed)
+		g_VEManagerClient:SetSingleValue(self.m_currentEveningPreset, self.m_eveningPriority, 'cloudLayer1Speed', self.m_CloudSpeed)
 		self.m_FirstRun = false
-	
 	else
 		g_VEManagerClient:UpdateVisibility(self.m_currentNightPreset, self.m_nightPriority, s_factorNight)
 		g_VEManagerClient:UpdateVisibility(self.m_currentMorningPreset, self.m_morningPriority, s_factorMorning)

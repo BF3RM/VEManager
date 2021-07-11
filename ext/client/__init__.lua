@@ -5,7 +5,7 @@ night = require "presets/night"
 morning = require "presets/morning"
 noon = require "presets/noon"
 evening = require "presets/evening"
-
+ve_cinematic_tools = require "presets/custompreset" -- Dev cinematic tools custom preset
 
 function VEManagerClient:__init()
     print('Initializing VEManagerClient')
@@ -17,6 +17,7 @@ end
 
 function VEManagerClient:RegisterVars()
     self.m_RawPresets = {}
+	self.m_RawPresets["CinematicTools"] = json.decode(ve_cinematic_tools:GetPreset()) -- Dev cinematic tools custom preset
 	self.m_RawPresets["DefaultNight"] = json.decode(night:GetPreset())
 	self.m_RawPresets["DefaultMorning"] = json.decode(morning:GetPreset())
 	self.m_RawPresets["DefaultNoon"] = json.decode(noon:GetPreset())
@@ -53,6 +54,7 @@ end
 function VEManagerClient:RegisterEvents()
 	self.m_OnUpdateInputEvent = Events:Subscribe('Client:UpdateInput', self, self.OnUpdateInput)
     Events:Subscribe('Level:Loaded', self, self.OnLevelLoaded)
+	Events:Subscribe('Level:LoadResources', self, self.OnLoadResources)
 	Events:Subscribe('Level:Destroy', self, self.RegisterVars)
 
     Events:Subscribe('VEManager:RegisterPreset', self, self.RegisterPreset)
@@ -72,8 +74,8 @@ end
 function VEManagerClient:RegisterModules()
 	easing = require "modules/easing"
 	require 'modules/time'
-	--require '__shared/DebugGUI'
-	--require 'modules/cinematictools'
+	require '__shared/DebugGUI'
+	require 'modules/cinematictools'
 end
 
 
@@ -149,6 +151,25 @@ function VEManagerClient:UpdateVisibility(id, priority, visibilityFactor) -- APO
 	for _, state in pairs(s_states) do
 		if state.priority == s_fixedPriority then
 			state.visibility = visibilityFactor
+			VisualEnvironmentManager:SetDirty(true)
+			return
+		end
+	end
+end
+
+
+function VEManagerClient:SetSingleValue(id, priority, desiredValue, value)
+	if self.m_Presets[id] == nil then
+		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(id))
+		return
+	end
+
+	local s_states = VisualEnvironmentManager:GetStates()
+	local s_fixedPriority = 10000000 + priority
+
+	for _, state in pairs(s_states) do
+		if state.priority == s_fixedPriority then
+			state.sky[desiredValue] = value
 			VisualEnvironmentManager:SetDirty(true)
 			return
 		end
@@ -349,7 +370,7 @@ function VEManagerClient:LoadPresets()
 					-- Fix lua types
 					local s_FieldName = l_Field.name
 
-					if(s_FieldName == "End") then
+					if s_FieldName == "End" then
 						s_FieldName = "EndValue"
 					end
 
@@ -369,26 +390,32 @@ function VEManagerClient:LoadPresets()
 						elseif l_Field.typeInfo.array then
 							error("Found unexpected array")
 							return
+						elseif s_Type == "TextureAsset" then
+							print("TextureAsset is not yet supported.")
+							s_Value = nil -- Make sure this value is nil so the saved value is not saved
 						else
-							error("Found unexpected DataContainer")
+							error("Found unexpected DataContainer: " .. s_Type)
 							return
 						end
 
-						if (s_Value ~= nil) then
+						if s_Value ~= nil then
 							s_Class[firstToLower(s_FieldName)] = s_Value
+						
 						else
-
 							local s_Value = self:GetDefaultValue(l_Class, l_Field)
-							if (s_Value == nil) then
+							if s_Value == nil then
 								print("Failed to fetch original value: " .. tostring(l_Class) .. " | " .. tostring(s_FieldName) .. " [1]")
 								--s_Class[firstToLower(s_FieldName)] = nil -- Crashes
 							else
 								-- print("Setting default value for field " .. s_FieldName .. " of class " .. l_Class .. " | " ..  tostring(s_Value))
-								if (IsBasicType(s_Type)) then
+								if IsBasicType(s_Type) then
 									s_Class[firstToLower(s_FieldName)] = self:ParseValue(s_Type, s_Value)
+								
 								elseif (l_Field.typeInfo.enum) then
 									s_Class[firstToLower(s_FieldName)] = tonumber(s_Value)
-								elseif (s_Type == "TextureAsset") then
+								
+								elseif s_Type == "TextureAsset" then
+									
 									if s_FieldName == "PanoramicTexture" then
 										--s_Class[firstToLower(s_FieldName)] = nil
 										s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
@@ -404,6 +431,7 @@ function VEManagerClient:LoadPresets()
 									--print("Added FieldName: " .. s_FieldName)
 									s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
 									end
+								
 								elseif l_Field.typeInfo.array then
 									print("Found unexpected array, ignoring")
 								else
@@ -420,6 +448,7 @@ function VEManagerClient:LoadPresets()
 						local s_Value = self:GetDefaultValue(l_Class, l_Field)
 						if (s_Value == nil) then
 							print("Failed to fetch original value: " .. tostring(l_Class) .. " | " .. tostring(s_FieldName) .. " [2]")
+							
 							if s_FieldName == "CloudLayer2Texture" then
 								print("CloudTexture")
 								s_Class[firstToLower(s_FieldName)] = TextureAsset(_G['g_Stars'])
@@ -428,11 +457,14 @@ function VEManagerClient:LoadPresets()
 							end
 						else
 							-- print("Setting default value for field " .. s_FieldName .. " of class " .. l_Class .. " | " ..  tostring(s_Value))
-							if (IsBasicType(s_Type)) then
+							if IsBasicType(s_Type) then
 								s_Class[firstToLower(s_FieldName)] = s_Value
-							elseif (l_Field.typeInfo.enum) then
+							
+							elseif l_Field.typeInfo.enum then
 								s_Class[firstToLower(s_FieldName)] = tonumber(s_Value)
-							elseif (s_Type == "TextureAsset") then
+							
+							elseif s_Type == "TextureAsset" then
+								
 								if s_FieldName == "PanoramicTexture" then
 									--s_Class[firstToLower(s_FieldName)] = nil
 									s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
@@ -448,8 +480,10 @@ function VEManagerClient:LoadPresets()
 								--print("Added FieldName: " .. s_FieldName)
 								s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
 								end
+							
 							elseif l_Field.typeInfo.array then
 								print("Found unexpected array, ignoring")
+							
 							else
 								-- Its a DataContainer
 								s_Class[firstToLower(s_FieldName)] = _G[s_Type](s_Value)
@@ -479,6 +513,11 @@ function VEManagerClient:LoadPresets()
 	print("Presets loaded")
 end
 
+
+function VEManagerClient:OnLoadResources(p_LevelName, p_GameMode, p_IsDedicatedServer)
+	-- Devs only
+	self:CreateCinematicTools()
+end
 
 function VEManagerClient:OnLevelLoaded(p_MapPath, p_GameModeName)
 	self:LoadPresets()

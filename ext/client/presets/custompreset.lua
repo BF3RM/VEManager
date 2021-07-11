@@ -1,4 +1,4 @@
-class "ve_base"
+class "ve_cinematic_tools"
 local table = [[
 {
     "CharacterLighting": {
@@ -199,15 +199,15 @@ local table = [[
         "WindDirection": "211.25799560547",
         "WindStrength": "1.7"
     },
-    "Name": "ve_base",
+    "Name": "CinematicTools",
     "Priority": "100000",
     "Visibility": "1"
 }
 ]]
 
-function ve_base:GetPreset()
+function ve_cinematic_tools:GetPreset()
   return table
 end
 
-return ve_base
+return ve_cinematic_tools
 
