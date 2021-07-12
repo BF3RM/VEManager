@@ -116,7 +116,7 @@ function Time:SetSunPosition(p_CurrentTime) -- for smoother sun relative to time
 		--print(s_LocalSunPosY)
     elseif factor <= self.m_presetTimings[1] and self.m_EnableMoon == true then -- before 6:00
 		local s_LocalSunPosY = (0.5 + ( 90 + s_SunPosY ) / 180 )
-		if s_LocalSunPosY > 180 then
+		if s_LocalSunPosY > 1.0 then
 			return
 		end
         VisualEnvironmentManager:SetSunRotationY(( -90 + ( 360 * s_LocalSunPosY )))
