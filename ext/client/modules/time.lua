@@ -11,7 +11,7 @@ end
 function Time:RegisterVars()
 	-- Config
 	self.m_presetTimings = {0.25, 0.375, 0.5, 0.75, 0.875} --Always need to have the end time of the last preset in a day at the end
-	
+
 	-- Initialise variables
 	print('[Client Time Module] Registered Vars')
 	self.m_SystemRunning = false
@@ -43,7 +43,7 @@ function Time:RegisterEvents()
     self.m_LevelLoadEvent = Events:Subscribe('Level:Loaded', self, self.OnLevelLoaded)
     self.m_LevelDestroyEvent = Events:Subscribe('Level:Destroy', self, self.OnLevelDestroy)
     self.m_AddTimeToClientEvent = NetEvents:Subscribe('VEManager:AddTimeToClient', self, self.AddTimeToClient)
-    
+
 	NetEvents:Subscribe('ClientTime:Pause', self, self.PauseContinue)
     NetEvents:Subscribe('ClientTime:Disable', self, self.Disable)
 end
@@ -312,16 +312,16 @@ function Time:Run()
 		g_VEManagerClient:SetVisibility(self.m_currentMorningPreset, s_factorMorning)
 		g_VEManagerClient:SetVisibility(self.m_currentNoonPreset, s_factorNoon)
 		g_VEManagerClient:SetVisibility(self.m_currentEveningPreset, s_factorEvening)
-		g_VEManagerClient:SetSingleValue(self.m_currentNightPreset, self.m_nightPriority, 'cloudLayer1Speed', self.m_CloudSpeed)
-		g_VEManagerClient:SetSingleValue(self.m_currentMorningPreset, self.m_morningPriority, 'cloudLayer1Speed', self.m_CloudSpeed)
-		g_VEManagerClient:SetSingleValue(self.m_currentNoonPreset, self.m_noonPriority, 'cloudLayer1Speed', self.m_CloudSpeed)
-		g_VEManagerClient:SetSingleValue(self.m_currentEveningPreset, self.m_eveningPriority, 'cloudLayer1Speed', self.m_CloudSpeed)
 		self.m_FirstRun = false
 	else
 		g_VEManagerClient:UpdateVisibility(self.m_currentNightPreset, self.m_nightPriority, s_factorNight)
 		g_VEManagerClient:UpdateVisibility(self.m_currentMorningPreset, self.m_morningPriority, s_factorMorning)
 		g_VEManagerClient:UpdateVisibility(self.m_currentNoonPreset, self.m_noonPriority, s_factorNoon)
 		g_VEManagerClient:UpdateVisibility(self.m_currentEveningPreset, self.m_eveningPriority, s_factorEvening)
+		g_VEManagerClient:SetSingleValue(self.m_currentNightPreset, self.m_nightPriority, 'cloudLayer1Speed', self.m_CloudSpeed)
+		g_VEManagerClient:SetSingleValue(self.m_currentMorningPreset, self.m_morningPriority, 'cloudLayer1Speed', self.m_CloudSpeed)
+		g_VEManagerClient:SetSingleValue(self.m_currentNoonPreset, self.m_noonPriority, 'cloudLayer1Speed', self.m_CloudSpeed)
+		g_VEManagerClient:SetSingleValue(self.m_currentEveningPreset, self.m_eveningPriority, 'cloudLayer1Speed', self.m_CloudSpeed)
 	end
 
     self:SetSunPosition(self.m_ClientTime)
