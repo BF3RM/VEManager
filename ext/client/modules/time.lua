@@ -9,9 +9,6 @@ function Time:__init()
 end
 
 function Time:RegisterVars()
-	-- Config
-	self.m_presetTimings = {0.25, 0.375, 0.5, 0.75, 0.875} --Always need to have the end time of the last preset in a day at the end
-	
 	-- Initialise variables
 	print('[Client Time Module] Registered Vars')
 	self.m_SystemRunning = false
@@ -33,7 +30,6 @@ function Time:RegisterVars()
 	self.m_LastPrintHours = -1
 	self.m_FirstRun = false
 
-	self.m_EnableMoon = true
 	self.m_CloudSpeed = -0.001
 end
 
@@ -107,14 +103,14 @@ function Time:SetSunPosition(p_CurrentTime) -- for smoother sun relative to time
     VisualEnvironmentManager:SetSunRotationX(275)
 
 	local s_SunPosY = (-90 + ( 360 * factor ))
-    if factor >= self.m_presetTimings[5] and self.m_EnableMoon == true then -- after 21:00
+    if factor >= VEM_CONFIG.DN_PRESET_TIMINGS[5] and VEM_CONFIG.DN_ENABLE_MOON == true then -- after 21:00
 		local s_LocalSunPosY = (( -180 + s_SunPosY ) / 180 )
 		if s_LocalSunPosY >= 1.0 then
 			return
 		end
         VisualEnvironmentManager:SetSunRotationY(( -90 + ( 360 * s_LocalSunPosY )))
 		--print(s_LocalSunPosY)
-    elseif factor <= self.m_presetTimings[1] and self.m_EnableMoon == true then -- before 6:00
+    elseif factor <= VEM_CONFIG.DN_PRESET_TIMINGS[1] and VEM_CONFIG.DN_ENABLE_MOON == true then -- before 6:00
 		local s_LocalSunPosY = (0.5 + ( 90 + s_SunPosY ) / 180 )
 		if s_LocalSunPosY > 180 then
 			return
@@ -256,45 +252,45 @@ function Time:Run()
 	local s_factorEvening = 0
 	local s_timeToChange = -1
 
-    if self.m_ClientTime <= self.m_totalDayLength * self.m_presetTimings[1] or self.m_ClientTime > self.m_presetTimings[#self.m_presetTimings] * self.m_totalDayLength then -- 00:00 to 6:00 or 21:00 to 00:00
+    if self.m_ClientTime <= self.m_totalDayLength * VEM_CONFIG.DN_PRESET_TIMINGS[1] or self.m_ClientTime > VEM_CONFIG.DN_PRESET_TIMINGS[#VEM_CONFIG.DN_PRESET_TIMINGS] * self.m_totalDayLength then -- 00:00 to 6:00 or 21:00 to 00:00
         -- set visibility preset night
         s_factorNight = 1
 
-		s_timeToChange = self.m_totalDayLength * self.m_presetTimings[1] - self.m_ClientTime
+		s_timeToChange = self.m_totalDayLength * VEM_CONFIG.DN_PRESET_TIMINGS[1] - self.m_ClientTime
     
-	elseif self.m_ClientTime <= ( self.m_totalDayLength * self.m_presetTimings[2] ) then -- 6:00 to 9:00
+	elseif self.m_ClientTime <= ( self.m_totalDayLength * VEM_CONFIG.DN_PRESET_TIMINGS[2] ) then -- 6:00 to 9:00
         -- calculate visibility preset morning
-        s_factorMorning = ( self.m_ClientTime - ( self.m_totalDayLength * self.m_presetTimings[1] )) / ( self.m_totalDayLength * ( self.m_presetTimings[2] - self.m_presetTimings[1] )) --todo change these multiplication values to variables later to calculate automatically
+        s_factorMorning = ( self.m_ClientTime - ( self.m_totalDayLength * VEM_CONFIG.DN_PRESET_TIMINGS[1] )) / ( self.m_totalDayLength * ( VEM_CONFIG.DN_PRESET_TIMINGS[2] - VEM_CONFIG.DN_PRESET_TIMINGS[1] )) --todo change these multiplication values to variables later to calculate automatically
         -- calculate visibility preset night
         s_factorNight = 1
 
-		s_timeToChange = self.m_totalDayLength * self.m_presetTimings[2] - self.m_ClientTime -- 9:00 to 12:00
+		s_timeToChange = self.m_totalDayLength * VEM_CONFIG.DN_PRESET_TIMINGS[2] - self.m_ClientTime -- 9:00 to 12:00
     
-	elseif self.m_ClientTime <= ( self.m_totalDayLength * self.m_presetTimings[3] ) then
+	elseif self.m_ClientTime <= ( self.m_totalDayLength * VEM_CONFIG.DN_PRESET_TIMINGS[3] ) then
         -- calculate visibility preset noon
-        s_factorNoon = ( self.m_ClientTime - ( self.m_totalDayLength * self.m_presetTimings[2] )) / ( self.m_totalDayLength * ( self.m_presetTimings[3] - self.m_presetTimings[2] ))
+        s_factorNoon = ( self.m_ClientTime - ( self.m_totalDayLength * VEM_CONFIG.DN_PRESET_TIMINGS[2] )) / ( self.m_totalDayLength * ( VEM_CONFIG.DN_PRESET_TIMINGS[3] - VEM_CONFIG.DN_PRESET_TIMINGS[2] ))
         -- calculate visibility preset morning
         s_factorMorning = 1
 
-		s_timeToChange = self.m_totalDayLength * self.m_presetTimings[3] - self.m_ClientTime
+		s_timeToChange = self.m_totalDayLength * VEM_CONFIG.DN_PRESET_TIMINGS[3] - self.m_ClientTime
     
-	elseif self.m_ClientTime <= ( self.m_totalDayLength * self.m_presetTimings[4] ) then -- 12:00 to 18:00
+	elseif self.m_ClientTime <= ( self.m_totalDayLength * VEM_CONFIG.DN_PRESET_TIMINGS[4] ) then -- 12:00 to 18:00
 
         -- calculate visibility preset evening
-        s_factorEvening = ( self.m_ClientTime - ( self.m_totalDayLength * self.m_presetTimings[3] )) / ( self.m_totalDayLength * ( self.m_presetTimings[4] - self.m_presetTimings[3] ))
+        s_factorEvening = ( self.m_ClientTime - ( self.m_totalDayLength * VEM_CONFIG.DN_PRESET_TIMINGS[3] )) / ( self.m_totalDayLength * ( VEM_CONFIG.DN_PRESET_TIMINGS[4] - VEM_CONFIG.DN_PRESET_TIMINGS[3] ))
         -- calculate visibility preset noon
         s_factorNoon = 1
 
-		s_timeToChange = self.m_totalDayLength * self.m_presetTimings[4] - self.m_ClientTime
+		s_timeToChange = self.m_totalDayLength * VEM_CONFIG.DN_PRESET_TIMINGS[4] - self.m_ClientTime
     
-	elseif self.m_ClientTime <= self.m_totalDayLength * self.m_presetTimings[5] then-- 18:00 to 21:00
+	elseif self.m_ClientTime <= self.m_totalDayLength * VEM_CONFIG.DN_PRESET_TIMINGS[5] then-- 18:00 to 21:00
         -- Night preset has a lower visibility, thus we change evening visibility back to 0
         -- calculate visibility preset night
         s_factorNight = 1
         -- calculate visibility preset evening
-        s_factorEvening = 1 - ( self.m_ClientTime - ( self.m_totalDayLength * self.m_presetTimings[4] )) / ( self.m_totalDayLength * ( self.m_presetTimings[5] - self.m_presetTimings[4] ))
+        s_factorEvening = 1 - ( self.m_ClientTime - ( self.m_totalDayLength * VEM_CONFIG.DN_PRESET_TIMINGS[4] )) / ( self.m_totalDayLength * ( VEM_CONFIG.DN_PRESET_TIMINGS[5] - VEM_CONFIG.DN_PRESET_TIMINGS[4] ))
 
-		s_timeToChange = self.m_totalDayLength * self.m_presetTimings[5] - self.m_ClientTime 
+		s_timeToChange = self.m_totalDayLength * VEM_CONFIG.DN_PRESET_TIMINGS[5] - self.m_ClientTime 
     
 	else
 		print("Faulty ClientTime: " .. self.m_ClientTime)

@@ -428,8 +428,8 @@ function VEManagerClient:LoadPresets()
 									elseif s_FieldName == "CloudLayer2Texture" then
 										s_Class[firstToLower(s_FieldName)] = TextureAsset(_G['g_Stars'])
 									else
-									--print("Added FieldName: " .. s_FieldName)
-									s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
+										--print("Added FieldName: " .. s_FieldName)
+										s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
 									end
 								
 								elseif l_Field.typeInfo.array then
