@@ -24,7 +24,7 @@ end
 
 function CinematicTools:OnLevelLoaded()
 	-- Load preset
-    g_VEManagerClient:EnablePreset("CinematicTools")
+    --g_VEManagerClient:EnablePreset("CinematicTools")  -- Load dev cinematic tools custom preset
 end
 
 
