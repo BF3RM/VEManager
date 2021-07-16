@@ -132,7 +132,7 @@ function VEManagerClient:SetVisibility(id, visibility)
 end
 
 
-function VEManagerClient:UpdateVisibility(id, priority, visibilityFactor) -- APO to JACK: How is this different to "SetVisibility"? Which works best?
+function VEManagerClient:UpdateVisibility(id, priority, visibilityFactor) -- Jack to APO: These changes directly affect the VE States - while the other one reloads the entity which makes the cycle kill my eyes (on/off/on/off 30 times a sec)
 	if self.m_Presets[id] == nil then
 		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(id))
 		return
@@ -158,7 +158,7 @@ function VEManagerClient:UpdateVisibility(id, priority, visibilityFactor) -- APO
 end
 
 
-function VEManagerClient:SetSingleValue(id, priority, desiredValue, value)
+function VEManagerClient:SetSingleValue(id, priority, class, desiredValue, value)
 	if self.m_Presets[id] == nil then
 		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(id))
 		return
@@ -169,10 +169,10 @@ function VEManagerClient:SetSingleValue(id, priority, desiredValue, value)
 
 	for _, state in pairs(s_states) do
 		if state.priority == s_fixedPriority then
-			state.sky[desiredValue] = value
+			state[class][desiredValue] = value
 			VisualEnvironmentManager:SetDirty(true)
-			return
 		end
+		return
 	end
 end
 

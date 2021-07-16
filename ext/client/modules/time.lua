@@ -100,8 +100,8 @@ function Time:AddTimeToClient(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds
 end
 
 
-function Time:SetSunPosition(p_CurrentTime) -- for smoother sun relative to time
-    local factor = ( p_CurrentTime / self.m_totalDayLength )
+function Time:SetSunPosition() -- for smoother sun relative to time
+    local factor = ( g_ClientTime / self.m_totalDayLength )
 	VisualEnvironmentManager:SetDirty(true)
     VisualEnvironmentManager:SetSunRotationX(275)
 
@@ -121,11 +121,10 @@ function Time:SetSunPosition(p_CurrentTime) -- for smoother sun relative to time
         VisualEnvironmentManager:SetSunRotationY(( -90 + ( 360 * s_LocalSunPosY )))
 		--print(s_LocalSunPosY)
     else
-		if s_SunPosY > 180 then
+		if s_SunPosY > 180 or s_SunPosY <= 0 then
 			return
 		end
-        VisualEnvironmentManager:SetSunRotationY(s_SunPosY)
-		--print(s_SunPosY)
+        VisualEnvironmentManager:SetSunRotationY(180 - s_SunPosY)
     end
 end
 
@@ -317,10 +316,10 @@ function Time:Run()
 		g_VEManagerClient:UpdateVisibility(self.m_currentMorningPreset, self.m_morningPriority, s_factorMorning)
 		g_VEManagerClient:UpdateVisibility(self.m_currentNoonPreset, self.m_noonPriority, s_factorNoon)
 		g_VEManagerClient:UpdateVisibility(self.m_currentEveningPreset, self.m_eveningPriority, s_factorEvening)
-		g_VEManagerClient:SetSingleValue(self.m_currentNightPreset, self.m_nightPriority, 'cloudLayer1Speed', self.m_CloudSpeed)
-		g_VEManagerClient:SetSingleValue(self.m_currentMorningPreset, self.m_morningPriority, 'cloudLayer1Speed', self.m_CloudSpeed)
-		g_VEManagerClient:SetSingleValue(self.m_currentNoonPreset, self.m_noonPriority, 'cloudLayer1Speed', self.m_CloudSpeed)
-		g_VEManagerClient:SetSingleValue(self.m_currentEveningPreset, self.m_eveningPriority, 'cloudLayer1Speed', self.m_CloudSpeed)
+		g_VEManagerClient:SetSingleValue(self.m_currentNightPreset, self.m_nightPriority, 'sky', 'cloudLayer1Speed', self.m_CloudSpeed)
+		g_VEManagerClient:SetSingleValue(self.m_currentMorningPreset, self.m_morningPriority, 'sky', 'cloudLayer1Speed', self.m_CloudSpeed)
+		g_VEManagerClient:SetSingleValue(self.m_currentNoonPreset, self.m_noonPriority, 'sky', 'cloudLayer1Speed', self.m_CloudSpeed)
+		g_VEManagerClient:SetSingleValue(self.m_currentEveningPreset, self.m_eveningPriority, 'sky', 'cloudLayer1Speed', self.m_CloudSpeed)
 	end
 
     self:SetSunPosition(self.m_ClientTime)
