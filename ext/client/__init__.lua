@@ -158,7 +158,7 @@ function VEManagerClient:UpdateVisibility(id, priority, visibilityFactor) -- Jac
 end
 
 
-function VEManagerClient:SetSingleValue(id, priority, class, desiredValue, value)
+function VEManagerClient:SetSingleValue(id, priority, class, property, value)
 	if self.m_Presets[id] == nil then
 		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(id))
 		return
@@ -169,10 +169,10 @@ function VEManagerClient:SetSingleValue(id, priority, class, desiredValue, value
 
 	for _, state in pairs(s_states) do
 		if state.priority == s_fixedPriority then
-			state[class][desiredValue] = value
+			state[class][property] = value
 			VisualEnvironmentManager:SetDirty(true)
+			return
 		end
-		return
 	end
 end
 
