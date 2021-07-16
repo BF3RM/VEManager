@@ -5,19 +5,18 @@ night = require "presets/night"
 morning = require "presets/morning"
 noon = require "presets/noon"
 evening = require "presets/evening"
-ve_cinematic_tools = require "presets/custompreset" -- Dev cinematic tools custom preset
+ve_cinematic_tools = require "presets/custompreset"
 
 function VEManagerClient:__init()
-    print('Initializing VEManagerClient')
-    self:RegisterVars()
-    self:RegisterEvents()
+	print('Initializing VEManagerClient')
+	self:RegisterVars()
+	self:RegisterEvents()
 	self:RegisterModules()
 end
 
-
 function VEManagerClient:RegisterVars()
-    self.m_RawPresets = {}
-	self.m_RawPresets["CinematicTools"] = json.decode(ve_cinematic_tools:GetPreset()) -- Dev cinematic tools custom preset
+	self.m_RawPresets = {}
+	self.m_RawPresets["CinematicTools"] = json.decode(ve_cinematic_tools:GetPreset()) -- TODO: Remove when you can change presets from tools
 	self.m_RawPresets["DefaultNight"] = json.decode(night:GetPreset())
 	self.m_RawPresets["DefaultMorning"] = json.decode(morning:GetPreset())
 	self.m_RawPresets["DefaultNoon"] = json.decode(noon:GetPreset())
@@ -50,32 +49,33 @@ function VEManagerClient:RegisterVars()
 	self.m_VisibilityUpdateThreshold = 0.000001
 end
 
-
 function VEManagerClient:RegisterEvents()
 	self.m_OnUpdateInputEvent = Events:Subscribe('Client:UpdateInput', self, self.OnUpdateInput)
-    Events:Subscribe('Level:Loaded', self, self.OnLevelLoaded)
+	Events:Subscribe('Level:Loaded', self, self.OnLevelLoaded)
 	Events:Subscribe('Level:LoadResources', self, self.OnLoadResources)
 	Events:Subscribe('Level:Destroy', self, self.RegisterVars)
 
-    Events:Subscribe('VEManager:RegisterPreset', self, self.RegisterPreset)
-    Events:Subscribe('VEManager:EnablePreset', self, self.EnablePreset)
-    Events:Subscribe('VEManager:DisablePreset', self, self.DisablePreset)
-    Events:Subscribe('VEManager:SetVisibility', self, self.SetVisibility)
+	Events:Subscribe('VEManager:RegisterPreset', self, self.RegisterPreset)
+	Events:Subscribe('VEManager:EnablePreset', self, self.EnablePreset)
+	Events:Subscribe('VEManager:DisablePreset', self, self.DisablePreset)
+	Events:Subscribe('VEManager:SetVisibility', self, self.SetVisibility)
 	Events:Subscribe('VEManager:UpdateVisibility', self, self.UpdateVisibility)
-    Events:Subscribe('VEManager:FadeIn', self, self.FadeIn)
-    Events:Subscribe('VEManager:FadeTo', self, self.FadeTo)
-    Events:Subscribe('VEManager:FadeOut', self, self.FadeOut)
-    Events:Subscribe('VEManager:Lerp', self, self.Lerp)
+	Events:Subscribe('VEManager:FadeIn', self, self.FadeIn)
+	Events:Subscribe('VEManager:FadeTo', self, self.FadeTo)
+	Events:Subscribe('VEManager:FadeOut', self, self.FadeOut)
+	Events:Subscribe('VEManager:Lerp', self, self.Lerp)
 	Events:Subscribe('VEManager:Crossfade', self, self.Crossfade)
 	NetEvents:Subscribe('VEManager:CreateCinematicTools', self, self.CreateCinematicTools)
 end
-
 
 function VEManagerClient:RegisterModules()
 	easing = require "modules/easing"
 	require 'modules/time'
 	require '__shared/DebugGUI'
-	require 'modules/cinematictools'
+	
+	if VEM_CONFIG.DEV_LOAD_CINEMATIC_TOOLS then
+		require 'modules/cinematictools'
+	end
 end
 
 
@@ -85,11 +85,9 @@ end
 
 ]]
 
-
 function VEManagerClient:RegisterPreset(id, preset)
 	self.m_RawPresets[id] = json.decode(preset)
 end
-
 
 function VEManagerClient:EnablePreset(id)
 	if self.m_Presets[id] == nil then
@@ -104,7 +102,6 @@ function VEManagerClient:EnablePreset(id)
 	self.m_Presets[id].entity:FireEvent("Enable")
 end
 
-
 function VEManagerClient:DisablePreset(id)
 	if self.m_Presets[id] == nil then
 		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(id))
@@ -118,7 +115,6 @@ function VEManagerClient:DisablePreset(id)
 	self.m_Presets[id].entity:FireEvent("Disable")
 end
 
-
 function VEManagerClient:SetVisibility(id, visibility)
 	if self.m_Presets[id] == nil then
 		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(id))
@@ -131,7 +127,6 @@ function VEManagerClient:SetVisibility(id, visibility)
 	self:Reload(id)
 end
 
-
 function VEManagerClient:UpdateVisibility(id, priority, visibilityFactor) -- Jack to APO: These changes directly affect the VE States - while the other one reloads the entity which makes the cycle kill my eyes (on/off/on/off 30 times a sec)
 	if self.m_Presets[id] == nil then
 		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(id))
@@ -139,8 +134,8 @@ function VEManagerClient:UpdateVisibility(id, priority, visibilityFactor) -- Jac
 	end
 
 	if math.abs(self.m_Presets[id]["logic"].visibility - visibilityFactor) < self.m_VisibilityUpdateThreshold then
-        return
-    end
+		return
+	end
 
 	self.m_Presets[id]["logic"].visibility = visibilityFactor
 	self.m_Presets[id]["ve"].visibility = visibilityFactor
@@ -156,7 +151,6 @@ function VEManagerClient:UpdateVisibility(id, priority, visibilityFactor) -- Jac
 		end
 	end
 end
-
 
 function VEManagerClient:SetSingleValue(id, priority, class, property, value)
 	if self.m_Presets[id] == nil then
@@ -175,7 +169,6 @@ function VEManagerClient:SetSingleValue(id, priority, class, property, value)
 		end
 	end
 end
-
 
 function VEManagerClient:FadeIn(id, time)
 	self:FadeTo(id, 1, time)
@@ -222,7 +215,7 @@ function VEManagerClient:Lerp(id, value, time)
 end
 
 --[[function VEManagerClient:Crossfade(id1, id2, time)
-    if self.m_Presets[id1] == nil then
+	if self.m_Presets[id1] == nil then
 		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(id1))
 		return
 	elseif self.m_Presets[id2] == nil then
@@ -230,13 +223,15 @@ end
 		return
 	end
 
-    self:FadeTo(id1, self.m_Presets[id2]["logic"].visibility, time) -- Fade id1 to id2 visibility
-    self:FadeTo(id2, self.m_Presets[id1]["logic"].visibility, time) -- Fade id2 to id1 visibility
+	self:FadeTo(id1, self.m_Presets[id2]["logic"].visibility, time) -- Fade id1 to id2 visibility
+	self:FadeTo(id2, self.m_Presets[id1]["logic"].visibility, time) -- Fade id2 to id1 visibility
 
 end]]
 
 function VEManagerClient:CreateCinematicTools()
-	CinematicTools:__init()
+	if VEM_CONFIG.DEV_LOAD_CINEMATIC_TOOLS then
+		CinematicTools:__init()
+	end
 end
 
 
@@ -246,12 +241,11 @@ end
 
 ]]
 
-
 function VEManagerClient:GetMapPresets(mapName) -- gets all Main Map Environments for Day-Night Cycle
 	local map = mapName:match('/[^/]+'):sub(2)
 	for i, s_Preset in pairs(VEManagerClient.m_Presets) do
 		if s_Preset.Map[map] then
-            print(i)
+			print(i)
 			return i
 		end
 	end
@@ -292,12 +286,10 @@ function VEManagerClient:InitializePresets()
 	end
 end
 
-
 function VEManagerClient:Reload(id)
 	self.m_Presets[id].entity:FireEvent("Disable")
 	self.m_Presets[id].entity:FireEvent("Enable")
 end
-
 
 function VEManagerClient:LoadPresets()
 	print("Loading presets....")
@@ -513,16 +505,15 @@ function VEManagerClient:LoadPresets()
 	print("Presets loaded")
 end
 
-
 function VEManagerClient:OnLoadResources(p_LevelName, p_GameMode, p_IsDedicatedServer)
-	-- Devs only
-	self:CreateCinematicTools()
+	if VEM_CONFIG.DEV_LOAD_CINEMATIC_TOOLS then
+		self:CreateCinematicTools()
+	end
 end
 
 function VEManagerClient:OnLevelLoaded(p_MapPath, p_GameModeName)
 	self:LoadPresets()
 end
-
 
 function VEManagerClient:GetDefaultValue(p_Class, p_Field)
 	if p_Field.typeInfo.enum then
@@ -565,7 +556,7 @@ function VEManagerClient:CreateEntity(p_Class, p_Guid)
 	-- Create the instance
 	local s_Entity = _G[p_Class]()
 
-	if(p_Guid == nil) then
+	if p_Guid == nil then
 		-- Clone the instance and return the clone with a randomly generated Guid
 		return _G[p_Class](s_Entity:Clone(GenerateGuid()))
 	else
@@ -573,7 +564,6 @@ function VEManagerClient:CreateEntity(p_Class, p_Guid)
 	end
 
 end
-
 
 function VEManagerClient:UpdateLerp(percentage)
 	for i,preset in pairs(self.m_Lerping) do
@@ -608,24 +598,33 @@ function VEManagerClient:UpdateLerp(percentage)
 
 end
 
-
 function VEManagerClient:SetLerpPriority(id)
 	if self.m_Presets[id].type ~= 'Time' then
 		return
 	end
 end
 
-
 function VEManagerClient:OnUpdateInput(p_Delta, p_SimulationDelta)
 
-	if InputManager:WentKeyDown(InputDeviceKeys.IDK_F1) then
-		--self:CreateCinematicTools()
+	if VEM_CONFIG.DEV_ENABLE_TEST_KEYS then
+		if InputManager:WentKeyDown(InputDeviceKeys.IDK_F1) then
+			print("DEV KEY: Create cinematic tools")
+			self:CreateCinematicTools()
+		end
+
+		if InputManager:WentKeyDown(InputDeviceKeys.IDK_F2) then
+			print("DEV KEY: Show VE states: name, priority, visibility")
+			local s_states = VisualEnvironmentManager:GetStates()
+		
+			for _, state in pairs(s_states) do
+				print(" - " .. tostring(entityName) .. ", " .. tostring(state.priority) .. ", " .. tostring(state.visibility))
+			end
+		end
 	end
 
-	if(#self.m_Lerping > 0 ) then
+	if #self.m_Lerping > 0 then
 		self:UpdateLerp(p_Delta)
 	end
-
 end
 
 
@@ -679,12 +678,12 @@ function VEManagerClient:ParseValue(p_Type, p_Value)
 end
 
 function h()
-    local vars = {"A","B","C","D","E","F","0","1","2","3","4","5","6","7","8","9"}
-    return vars[math.floor(MathUtils:GetRandomInt(1,16))]..vars[math.floor(MathUtils:GetRandomInt(1,16))]
+	local vars = {"A","B","C","D","E","F","0","1","2","3","4","5","6","7","8","9"}
+	return vars[math.floor(MathUtils:GetRandomInt(1,16))]..vars[math.floor(MathUtils:GetRandomInt(1,16))]
 end
 
 function GenerateGuid()
-    return Guid(h()..h()..h()..h().."-"..h()..h().."-"..h()..h().."-"..h()..h().."-"..h()..h()..h()..h()..h()..h(), "D")
+	return Guid(h()..h()..h()..h().."-"..h()..h().."-"..h()..h().."-"..h()..h().."-"..h()..h()..h()..h()..h()..h(), "D")
 end
 
 function HandleVec(vec)

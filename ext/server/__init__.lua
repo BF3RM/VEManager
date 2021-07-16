@@ -122,29 +122,30 @@ end
 
 
 -- FOR DEVS --
-
 function TimeServer:ChatCommands(p_Player, recipientMask, message)
-	if message == '!settime' then
-		print('[Time-Server]: Time Event called by ' .. p_Player.name)
-		self:AddTime(9, 0.5)
-	elseif message == '!setnight' then
-		print('[Time-Server]: Time Event called by ' .. p_Player.name)
-		self:AddTime(0, nil)
-	elseif message == '!setmorning' then
-		print('[Time-Server]: Time Event called by ' .. p_Player.name)
-		self:AddTime(9, nil)
-	elseif message == '!setnoon' then
-		print('[Time-Server]: Time Event called by ' .. p_Player.name)
-		self:AddTime(12, nil)
-	elseif message == '!setafternoon' then
-		print('[Time-Server]: Time Event called by ' .. p_Player.name)
-		self:AddTime(15, nil)
-	elseif message == '!pausetime' then
-		print('[Time-Server]: Time Pause called by ' .. p_Player.name)
-		self:PauseContinue()
-	elseif message == '!disabletime' then
-		print('[Time-Server]: Time Disable called by ' .. p_Player.name)
-		self:DisableDynamicCycle()
+	if VEM_CONFIG.DEV_ENABLE_CHAT_COMMANDS then
+		if message == '!settime' then
+			print('[Time-Server]: Time Event called by ' .. p_Player.name)
+			self:AddTime(9, 0.5)
+		elseif message == '!setnight' then
+			print('[Time-Server]: Time Event called by ' .. p_Player.name)
+			self:AddTime(0, nil)
+		elseif message == '!setmorning' then
+			print('[Time-Server]: Time Event called by ' .. p_Player.name)
+			self:AddTime(9, nil)
+		elseif message == '!setnoon' then
+			print('[Time-Server]: Time Event called by ' .. p_Player.name)
+			self:AddTime(12, nil)
+		elseif message == '!setafternoon' then
+			print('[Time-Server]: Time Event called by ' .. p_Player.name)
+			self:AddTime(15, nil)
+		elseif message == '!pausetime' then
+			print('[Time-Server]: Time Pause called by ' .. p_Player.name)
+			self:PauseContinue()
+		elseif message == '!disabletime' then
+			print('[Time-Server]: Time Disable called by ' .. p_Player.name)
+			self:DisableDynamicCycle()
+		end
 	end
 end
 

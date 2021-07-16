@@ -94,10 +94,10 @@ end
 
 -- https://github.com/EmulatorNexus/Venice-EBX/blob/f06c290fa43c80e07985eda65ba74c59f4c01aa0/UI/Assets/MenuVisualEnvironment.txt#L140
 function Patches:onMenuBgLoaded(p_Instance)
-	-- Patches based on GUIDs
+	-- Increase priority of menu bg
 	local s_MenuBg = VisualEnvironmentEntityData(p_Instance)
     s_MenuBg:MakeWritable()
-    s_MenuBg.priority = 999
+    s_MenuBg.priority = 100099
 	
 	print("Menu bg patched")
 end

@@ -9,9 +9,6 @@ function Time:__init()
 end
 
 function Time:RegisterVars()
-	-- Config
-	self.m_presetTimings = {0.25, 0.375, 0.5, 0.75, 0.875} --Always need to have the end time of the last preset in a day at the end
-
 	-- Initialise variables
 	print('[Client Time Module] Registered Vars')
 	self.m_SystemRunning = false
@@ -46,7 +43,6 @@ function Time:RegisterEvents()
 	NetEvents:Subscribe('ClientTime:Pause', self, self.PauseContinue)
     NetEvents:Subscribe('ClientTime:Disable', self, self.Disable)
 end
-
 
 function Time:OnPartitionLoad(partition)
     Patches:Components(partition)
@@ -93,15 +89,13 @@ function Time:ServerSync(p_ServerDayTime, p_TotalServerTime)
     end
 end
 
-
 function Time:AddTimeToClient(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds) -- Add Time System to Map | To be called on Level:Loaded | time in 24hr format (0-23)
     self.m_IsStatic = p_IsStatic
 	self:Add(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 end
 
-
 function Time:SetSunPosition() -- for smoother sun relative to time
-    local factor = ( g_ClientTime / self.m_totalDayLength )
+    local factor = ( self.m_ClientTime / self.m_totalDayLength )
 	VisualEnvironmentManager:SetDirty(true)
     VisualEnvironmentManager:SetSunRotationX(275)
 
@@ -128,18 +122,15 @@ function Time:SetSunPosition() -- for smoother sun relative to time
     end
 end
 
-
 function Time:SetCloudSpeed()
-	self.m_CloudSpeed = ( 1 / (( self.m_totalDayLength / 60 ) * 0.5 ))
-	print('Set Cloud Speed')
+	self.m_CloudSpeed = 1 / (self.m_totalDayLength / 60 * 0.5)
+	print('Set Cloud Speed = ' .. tostring(self.m_CloudSpeed))
 end
-
 
 function Time:ResetSunPosition()
     VisualEnvironmentManager:SetSunRotationX(0)
     VisualEnvironmentManager:SetSunRotationY(70)
 end
-
 
 function Time:PauseContinue(p_SystemRunning)
 	self.m_SystemRunning = p_SystemRunning
@@ -163,7 +154,6 @@ function Time:Disable()
 	g_VEManagerClient:SetVisibility(self.m_currentNoonPreset, 0)
 	g_VEManagerClient:SetVisibility(self.m_currentEveningPreset, 0)
 end
-
 
 -- ADD TIME TO MAP
 -- Add(Map name, starting hour (24h), day length (min))
@@ -225,8 +215,7 @@ function Time:Add(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 	self:SetCloudSpeed()
 end
 
-
---ALSO LOOP THIS CODE PLEASE
+-- ALSO LOOP THIS CODE PLEASE
 function Time:Run()
 
     if self.m_SystemRunning ~= true and not self.m_FirstRun then
