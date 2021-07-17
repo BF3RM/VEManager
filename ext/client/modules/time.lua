@@ -95,24 +95,25 @@ function Time:AddTimeToClient(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds
 end
 
 function Time:SetSunPosition() -- for smoother sun relative to time
-    local factor = ( self.m_ClientTime / self.m_totalDayLength )
+    local factor = self.m_ClientTime / self.m_totalDayLength
 	VisualEnvironmentManager:SetDirty(true)
     VisualEnvironmentManager:SetSunRotationX(275)
 
-	local s_SunPosY = (-90 + ( 360 * factor ))
+	local s_SunPosY = -90 + 360 * factor
     if factor >= VEM_CONFIG.DN_PRESET_TIMINGS[5] and VEM_CONFIG.DN_ENABLE_MOON == true then -- after 21:00
-		local s_LocalSunPosY = (( -180 + s_SunPosY ) / 180 )
+		local s_LocalSunPosY = ( -180 + s_SunPosY ) / 180
+		
 		if s_LocalSunPosY >= 1.0 then
 			return
 		end
-        VisualEnvironmentManager:SetSunRotationY(( -90 + ( 360 * s_LocalSunPosY )))
+        VisualEnvironmentManager:SetSunRotationY(-90 + 360 * s_LocalSunPosY)
 		--print(s_LocalSunPosY)
     elseif factor <= VEM_CONFIG.DN_PRESET_TIMINGS[1] and VEM_CONFIG.DN_ENABLE_MOON == true then -- before 6:00
-		local s_LocalSunPosY = (0.5 + ( 90 + s_SunPosY ) / 180 )
+		local s_LocalSunPosY = 0.5 + ( 90 + s_SunPosY ) / 180
 		if s_LocalSunPosY > 180 then
 			return
 		end
-        VisualEnvironmentManager:SetSunRotationY(( -90 + ( 360 * s_LocalSunPosY )))
+        VisualEnvironmentManager:SetSunRotationY( -90 + 360 * s_LocalSunPosY)
 		--print(s_LocalSunPosY)
     else
 		if s_SunPosY > 180 or s_SunPosY <= 0 then
