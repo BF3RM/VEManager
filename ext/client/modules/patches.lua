@@ -1,7 +1,6 @@
 local Patches = class('Patches')
 local PatchData = require('modules/patchdatatable')
 
-
 function Patches:Components(partition)
     for _, instance in pairs(partition.instances) do
         if instance:Is('MeshAsset') then
@@ -81,5 +80,31 @@ function Patches:LightSmoothening(instance)
     BetterLight.attenuationOffset = BetterLight.attenuationOffset * 17.5
 end
 
+local m_MenuBgGuids = {
+	partition = Guid("3A3E5533-4B2A-11E0-A20D-FE03F1AD0E2F", "D"),
+	instance = Guid("F26B7ECE-A71D-93AC-6C49-B6223BF424D6", "D")
+}
 
-return Patches
+function Patches:__init()
+    print("Initializing Patches")
+
+	-- Patches based on GUIDs
+	ResourceManager:RegisterInstanceLoadHandler(m_MenuBgGuids.partition, m_MenuBgGuids.instance, self, self.onMenuBgLoaded)
+end
+
+-- https://github.com/EmulatorNexus/Venice-EBX/blob/f06c290fa43c80e07985eda65ba74c59f4c01aa0/UI/Assets/MenuVisualEnvironment.txt#L140
+function Patches:onMenuBgLoaded(p_Instance)
+	-- Increase priority of menu bg
+	local s_MenuBg = VisualEnvironmentEntityData(p_Instance)
+    s_MenuBg:MakeWritable()
+    s_MenuBg.priority = 100099
+	
+	print("Menu bg patched")
+end
+
+-- Singleton.
+if g_Patches == nil then
+	g_Patches = Patches()
+end
+
+return g_Patches
