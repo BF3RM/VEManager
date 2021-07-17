@@ -1,7 +1,11 @@
 VEM_CONFIG = {
+	-- CLOUDS --
+	CLOUDS_DEFAULT_SPEED = -0.0005, 						-- TODO: this needs to be based on the presets not in VEManager config.
+
 	-- DAY-NIGHT --
 	DN_PRESET_TIMINGS = {0.25, 0.375, 0.5, 0.75, 0.875}, 	-- Always need to have the end time of the last preset in a day at the end
 	DN_ENABLE_MOON = true, 									-- Use sun as moon during night
+	DN_CHANGE_CLOUDS_SPEED_BASED_ON_DAY_LENGTH = false, 	-- TODO: Equation should also be according to clouds speed
 
 	-- DEV --
 	DEV_ENABLE_CHAT_COMMANDS = false,
