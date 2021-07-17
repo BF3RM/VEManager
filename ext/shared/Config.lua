@@ -9,6 +9,9 @@ VEM_CONFIG = {
 	DEV_LOAD_CUSTOM_PRESET = false,
 	DEV_LOAD_CINEMATIC_TOOLS = false,
 
+	-- PRINT --
+	PRINT_DN_TIME_AND_VISIBILITIES = true,	-- Print current time every hour along with the visibilities of the 4 presets
+
 	-- SERVER --
 	SERVER_SYNC_CLIENT_EVERY_TICKS = 2, 	-- Sync clients with the correct time ever X ticks
 }
