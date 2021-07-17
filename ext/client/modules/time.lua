@@ -30,7 +30,7 @@ function Time:RegisterVars()
 	self.m_LastPrintHours = -1
 	self.m_FirstRun = false
 
-	self.m_CloudSpeed = -0.001
+	self.m_CloudSpeed = VEM_CONFIG.CLOUDS_DEFAULT_SPEED
 end
 
 function Time:RegisterEvents()
@@ -127,8 +127,10 @@ function Time:SetSunPosition() -- for smoother sun relative to time
 end
 
 function Time:SetCloudSpeed()
-	self.m_CloudSpeed = 1 / (self.m_totalDayLength / 60 * 0.5)
-	print('Set Cloud Speed = ' .. tostring(self.m_CloudSpeed))
+	if VEM_CONFIG.DN_CHANGE_CLOUDS_SPEED_BASED_ON_DAY_LENGTH then
+		self.m_CloudSpeed = 1 / (self.m_totalDayLength / 60 * 0.5)
+		print('Set Cloud Speed = ' .. tostring(self.m_CloudSpeed))
+	end
 end
 
 function Time:ResetSunPosition()
