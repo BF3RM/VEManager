@@ -10,7 +10,7 @@ end
 
 function Time:RegisterVars()
 	-- Config
-	self.m_presetTimings = {0.25, 0.375, 0.5, 0.75, 0.875} --Always need to have the end time of the last preset in a day at the end
+	self.m_presetTimings = DN_PRESET_TIMINGS --Always need to have the end time of the last preset in a day at the end
 
 	-- Initialise variables
 	print('[Client Time Module] Registered Vars')
@@ -266,7 +266,7 @@ function Time:Run()
         s_factorNight = 1
 
 		s_timeToChange = self.m_totalDayLength * VEM_CONFIG.DN_PRESET_TIMINGS[1] - self.m_ClientTime
-    
+
 	elseif self.m_ClientTime <= ( self.m_totalDayLength * VEM_CONFIG.DN_PRESET_TIMINGS[2] ) then -- 6:00 to 9:00
         -- calculate visibility preset morning
         s_factorMorning = ( self.m_ClientTime - ( self.m_totalDayLength * VEM_CONFIG.DN_PRESET_TIMINGS[1] )) / ( self.m_totalDayLength * ( VEM_CONFIG.DN_PRESET_TIMINGS[2] - VEM_CONFIG.DN_PRESET_TIMINGS[1] )) --todo change these multiplication values to variables later to calculate automatically
@@ -274,7 +274,7 @@ function Time:Run()
         s_factorNight = 1
 
 		s_timeToChange = self.m_totalDayLength * VEM_CONFIG.DN_PRESET_TIMINGS[2] - self.m_ClientTime -- 9:00 to 12:00
-    
+
 	elseif self.m_ClientTime <= ( self.m_totalDayLength * VEM_CONFIG.DN_PRESET_TIMINGS[3] ) then
         -- calculate visibility preset noon
         s_factorNoon = ( self.m_ClientTime - ( self.m_totalDayLength * VEM_CONFIG.DN_PRESET_TIMINGS[2] )) / ( self.m_totalDayLength * ( VEM_CONFIG.DN_PRESET_TIMINGS[3] - VEM_CONFIG.DN_PRESET_TIMINGS[2] ))
@@ -282,7 +282,7 @@ function Time:Run()
         s_factorMorning = 1
 
 		s_timeToChange = self.m_totalDayLength * VEM_CONFIG.DN_PRESET_TIMINGS[3] - self.m_ClientTime
-    
+
 	elseif self.m_ClientTime <= ( self.m_totalDayLength * VEM_CONFIG.DN_PRESET_TIMINGS[4] ) then -- 12:00 to 18:00
 
         -- calculate visibility preset evening
@@ -291,7 +291,7 @@ function Time:Run()
         s_factorNoon = 1
 
 		s_timeToChange = self.m_totalDayLength * VEM_CONFIG.DN_PRESET_TIMINGS[4] - self.m_ClientTime
-    
+
 	elseif self.m_ClientTime <= self.m_totalDayLength * VEM_CONFIG.DN_PRESET_TIMINGS[5] then-- 18:00 to 21:00
         -- Night preset has a lower visibility, thus we change evening visibility back to 0
         -- calculate visibility preset night
@@ -299,8 +299,8 @@ function Time:Run()
         -- calculate visibility preset evening
         s_factorEvening = 1 - ( self.m_ClientTime - ( self.m_totalDayLength * VEM_CONFIG.DN_PRESET_TIMINGS[4] )) / ( self.m_totalDayLength * ( VEM_CONFIG.DN_PRESET_TIMINGS[5] - VEM_CONFIG.DN_PRESET_TIMINGS[4] ))
 
-		s_timeToChange = self.m_totalDayLength * VEM_CONFIG.DN_PRESET_TIMINGS[5] - self.m_ClientTime 
-    
+		s_timeToChange = self.m_totalDayLength * VEM_CONFIG.DN_PRESET_TIMINGS[5] - self.m_ClientTime
+
 	else
 		print("Faulty ClientTime: " .. self.m_ClientTime)
         self.m_ClientTime = 1.0
