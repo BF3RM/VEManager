@@ -4,7 +4,6 @@ VEM_CONFIG = {
 
 	-- DAY-NIGHT --
 	DN_PRESET_TIMINGS = {0.25, 0.375, 0.5, 0.75, 0.875}, 	-- Always need to have the end time of the last preset in a day at the end
-	DN_ENABLE_MOON = true, 									-- Use sun as moon during night
 	DN_CHANGE_CLOUDS_SPEED_BASED_ON_DAY_LENGTH = false, 	-- TODO: Equation should also be according to clouds speed
 
 	-- DEV --
