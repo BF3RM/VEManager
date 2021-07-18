@@ -99,7 +99,7 @@ function Time:SetSunPosition(p_ClientTime) -- for smoother sun relative to time
 	VisualEnvironmentManager:SetDirty(true)
 	VisualEnvironmentManager:SetSunRotationX(275)
 
-	local s_SunPosY = -90 + 360 * factor
+	local s_SunPosY = -90 + (360 * factor)
 	if factor >= VEM_CONFIG.DN_PRESET_TIMINGS[5] and VEM_CONFIG.DN_ENABLE_MOON == true then -- after 21:00
 
 		local s_LocalSunPosY = ( -225 + s_SunPosY ) / 90
@@ -120,7 +120,7 @@ function Time:SetSunPosition(p_ClientTime) -- for smoother sun relative to time
 		s_SunPosY = 180 - (180 * s_LocalSunPosY)
 	else
 
-		s_SunPosY = -90 + 360 * factor
+		s_SunPosY = -90 + (360 * factor)
 	end
 
 	print("Real Sun Pos: " .. s_SunPosY)
