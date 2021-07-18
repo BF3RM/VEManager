@@ -107,7 +107,7 @@ function Time:SetSunPosition(p_ClientTime) -- for smoother sun relative to time
 		if s_LocalSunPosY > 1.0 then
 			return
 		end
-		print("Local Sun Pos: " .. s_LocalSunPosY)
+		--print("Local Sun Pos: " .. s_LocalSunPosY)
 		s_SunPosY = 180 - (180 * s_LocalSunPosY)
 	elseif factor <= VEM_CONFIG.DN_PRESET_TIMINGS[1] and VEM_CONFIG.DN_ENABLE_MOON == true then -- before 6:00
 
@@ -116,14 +116,14 @@ function Time:SetSunPosition(p_ClientTime) -- for smoother sun relative to time
 		if s_LocalSunPosY > 1.0 then
 			return
 		end
-		print("Local Sun Pos: " .. s_LocalSunPosY)
+		--print("Local Sun Pos: " .. s_LocalSunPosY)
 		s_SunPosY = 180 - (180 * s_LocalSunPosY)
 	else
 
 		s_SunPosY = -90 + (360 * factor)
 	end
 
-	print("Real Sun Pos: " .. s_SunPosY)
+	--print("Real Sun Pos: " .. s_SunPosY)
 	VisualEnvironmentManager:SetSunRotationY(s_SunPosY)
 end
 
