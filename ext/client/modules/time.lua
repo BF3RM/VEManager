@@ -134,6 +134,13 @@ function Time:SetSunPosition(p_ClientTime) -- for smoother sun relative to time
 	else
 		print("Faulty ClientTime: " .. p_ClientTime)
 	end
+
+	-- Avoid crashes
+	s_SunPosY = MathUtils:Round(s_SunPosY)
+    if s_SunPosY < 0 or s_SunPosY > 180 then 
+        return 
+    end 
+
 	VisualEnvironmentManager:SetSunRotationY(s_SunPosY)
 end
 
