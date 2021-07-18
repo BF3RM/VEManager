@@ -136,7 +136,7 @@ function Time:SetSunPosition(p_ClientTime) -- for smoother sun relative to time
 	end
 
 	-- Avoid crashes
-	s_SunPosY = MathUtils:Round(s_SunPosY)
+	s_SunPosY = MathUtils:Round(s_SunPosY * 100) / 100
     if s_SunPosY < 0 or s_SunPosY > 180 then 
         return 
     end 
