@@ -10,7 +10,7 @@ end
 function CinematicTools:RegisterVars()
 	self.m_CineState = nil
 	self.m_PendingDirty = false
-	self.m_CinePriority = 100000
+	self.m_CinePriority = 10100000
 	self.m_PresetName = nil
 	self.m_PresetPriority = nil
 end
@@ -49,10 +49,11 @@ function CinematicTools:GetVisualEnvironmentState(...)
 	local states = VisualEnvironmentManager:GetStates()
 	--Loop through all states
 	for _, state in pairs(states) do
-		--Tool:DebugPrint('Searching through states', 'VE')
-		if state.entityName ~= "EffectEntity" then --todo REMOVE LATER
+		--[[if state.entityName ~= "EffectEntity" then --todo REMOVE LATER
 			state.priority = 1
-		end
+		end]]
+
+		--print(state.priority .. ' | ' .. state.visibility)
 
 		for i,priority in pairs(args) do
 			if state.priority == priority then
@@ -70,8 +71,8 @@ function CinematicTools:GenericCallback(p_Path, p_Value)
 	end
 
 	local s_PathTable = self:GenericSeperator(p_Path, "\\.")
-	print(s_PathTable)
-	print(#s_PathTable)
+	--print(s_PathTable)
+	--print(#s_PathTable)
 
 	if self.m_CineState[p_Path] == p_Value then
 		return
@@ -113,15 +114,15 @@ function CinematicTools:CreateGUI()
 			self:GenericCallback("outdoorLight.sunRotationY", p_Value)
 		end)
 
-		DebugGUI:Range('Sun Color Red', {DefValue = 1, Min = 0, Max = 1, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Sun Color Red', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
 			self:GenericCallback("outdoorLight.sunColor.x", p_Value)
 		end)
 
-		DebugGUI:Range('Sun Color Green', {DefValue = 1, Min = 0, Max = 1, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Sun Color Green', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
 			self:GenericCallback("outdoorLight.sunColor.y", p_Value)
 		end)
 
-		DebugGUI:Range('Sun Color Blue', {DefValue = 1, Min = 0, Max = 1, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Sun Color Blue', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
 			self:GenericCallback("outdoorLight.sunColor.z", p_Value)
 		end)
 

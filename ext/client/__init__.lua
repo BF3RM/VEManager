@@ -52,7 +52,6 @@ end
 function VEManagerClient:RegisterEvents()
 	self.m_OnUpdateInputEvent = Events:Subscribe('Client:UpdateInput', self, self.OnUpdateInput)
 	Events:Subscribe('Level:Loaded', self, self.OnLevelLoaded)
-	Events:Subscribe('Level:LoadResources', self, self.OnLoadResources)
 	Events:Subscribe('Level:Destroy', self, self.RegisterVars)
 
 	Events:Subscribe('VEManager:RegisterPreset', self, self.RegisterPreset)
@@ -65,7 +64,6 @@ function VEManagerClient:RegisterEvents()
 	Events:Subscribe('VEManager:FadeOut', self, self.FadeOut)
 	Events:Subscribe('VEManager:Lerp', self, self.Lerp)
 	Events:Subscribe('VEManager:Crossfade', self, self.Crossfade)
-	NetEvents:Subscribe('VEManager:CreateCinematicTools', self, self.CreateCinematicTools)
 end
 
 function VEManagerClient:RegisterModules()
@@ -505,15 +503,11 @@ function VEManagerClient:LoadPresets()
 	print("Presets loaded")
 end
 
-function VEManagerClient:OnLoadResources(p_LevelName, p_GameMode, p_IsDedicatedServer)
-	if VEM_CONFIG.DEV_LOAD_CINEMATIC_TOOLS then
-		self:CreateCinematicTools()
-	end
-end
 
 function VEManagerClient:OnLevelLoaded(p_MapPath, p_GameModeName)
 	self:LoadPresets()
 end
+
 
 function VEManagerClient:GetDefaultValue(p_Class, p_Field)
 	if p_Field.typeInfo.enum then
@@ -607,10 +601,6 @@ end
 function VEManagerClient:OnUpdateInput(p_Delta, p_SimulationDelta)
 
 	if VEM_CONFIG.DEV_ENABLE_TEST_KEYS then
-		if InputManager:WentKeyDown(InputDeviceKeys.IDK_F1) then
-			print("DEV KEY: Create cinematic tools")
-			self:CreateCinematicTools()
-		end
 
 		if InputManager:WentKeyDown(InputDeviceKeys.IDK_F2) then
 			print("DEV KEY: Show VE states: name, priority, visibility")
