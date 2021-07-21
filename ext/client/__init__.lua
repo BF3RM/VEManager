@@ -70,7 +70,7 @@ function VEManagerClient:RegisterModules()
 	easing = require "modules/easing"
 	require 'modules/time'
 	require '__shared/DebugGUI'
-	
+
 	if VEM_CONFIG.DEV_LOAD_CINEMATIC_TOOLS then
 		require 'modules/cinematictools'
 	end
@@ -239,7 +239,7 @@ end
 
 ]]
 
-function VEManagerClient:GetMapPresets(mapName) -- gets all Main Map Environments for Day-Night Cycle
+function VEManagerClient:GetMapPresets(mapName) -- gets all Main Map Environments for Day-Night Cycle -- remove
 	local map = mapName:match('/[^/]+'):sub(2)
 	for i, s_Preset in pairs(VEManagerClient.m_Presets) do
 		if s_Preset.Map[map] then
@@ -592,7 +592,7 @@ function VEManagerClient:UpdateLerp(percentage)
 
 end
 
-function VEManagerClient:SetLerpPriority(id)
+function VEManagerClient:SetLerpPriority(id) -- remove
 	if self.m_Presets[id].type ~= 'Time' then
 		return
 	end
