@@ -49,23 +49,6 @@ local table = [[
 		"HbaoMaxFootprintRadius": "0.10000000149012",
 		"HbaoPowerExponent": "1.0"
 	},
-	"Enlighten": {
-		"Realm": "nil",
-		"Enable": "false",
-		"BounceScale": "0.29699999094009",
-		"SunScale": "2.2679998874664",
-		"TerrainColor": "(0.129000, 0.142000, 0.120000)",
-		"CullDistance": "-1.0",
-		"SkyBoxEnable": "false",
-		"SkyBoxSkyColor": "(0.039000, 0.141000, 0.349000)",
-		"SkyBoxGroundColor": "(0.112000, 0.130000, 0.099000)",
-		"SkyBoxSunLightColor": "(3.000000, 2.898000, 2.700000)",
-		"SkyBoxSunLightColorSize": "0.29699999094009",
-		"SkyBoxBackLightColor": "(0.293000, 0.290000, 0.247000)",
-		"SkyBoxBackLightColorSize": "1.0",
-		"SkyBoxBackLightRotationX": "309.39300537109",
-		"SkyBoxBackLightRotationY": "3.7379999160767"
-	},
 	"FilmGrain": {
 		"Realm": "nil",
 		"Enable": "false",
@@ -75,6 +58,23 @@ local table = [[
 		"RandomEnable": "true",
 		"Texture": "nil"
 	},
+	"Enlighten": {
+        "Realm": "0",
+        "Enable": "false",
+        "BounceScale": "0.1",
+        "SunScale": "0",
+        "TerrainColor": "(0.0, 0.0, 0.0)",
+        "CullDistance": "-1.0",
+        "SkyBoxEnable": "true",
+        "SkyBoxSkyColor": "(0.0, 0.0, 0.0)",
+        "SkyBoxGroundColor": "(0.0, 0.0, 0.0)",
+        "SkyBoxSunLightColor": "(0.0, 0.0, 0.0)",
+        "SkyBoxSunLightColorSize": "0.0",
+        "SkyBoxBackLightColor": "(0.0, 0.0, 0.0)",
+        "SkyBoxBackLightColorSize": "0.1",
+        "SkyBoxBackLightRotationX": "171.95899963379",
+        "SkyBoxBackLightRotationY": "26.563999176025"
+    },
     "Fog": {
         "Realm": "0",
         "Enable": "true",
