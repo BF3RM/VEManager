@@ -10,7 +10,7 @@ end
 function CinematicTools:RegisterVars()
 	self.m_CineState = nil
 	self.m_PendingDirty = false
-	self.m_CinePriority = 10100000
+	self.m_CinePriority = 10000010
 	self.m_PresetName = nil
 	self.m_PresetPriority = nil
 end
@@ -160,6 +160,34 @@ function CinematicTools:CreateGUI()
 
 		DebugGUI:Range('Sky Light Angle', {DefValue = 0.85, Min = 0, Max = 5, Step = 0.001}, function(p_Value)
 			self:GenericCallback("outdoorLight.skyLightAngleFactor", p_Value)
+		end)
+
+		DebugGUI:Range('Cloud Layer 1 Altitude', {DefValue = 500000, Min = 0, Max = 500000, Step = 1}, function(p_Value)
+			self:GenericCallback("sky.cloudLayer1Altitude", p_Value)
+		end)
+
+		DebugGUI:Range('Cloud Layer 1 Tile Factor', {DefValue = 1, Min = 0, Max = 5, Step = 0.1}, function(p_Value)
+			self:GenericCallback("sky.cloudLayer1TileFactor", p_Value)
+		end)
+
+		DebugGUI:Range('Cloud Layer 1 Rotation', {DefValue = 0, Min = 0, Max = 359, Step = 1}, function(p_Value)
+			self:GenericCallback("sky.cloudLayer1Rotation", p_Value)
+		end)
+
+		DebugGUI:Range('Cloud Layer 1 Speed', {DefValue = VEM_CONFIG.CLOUDS_DEFAULT_SPEED, Min = -1, Max = 1, Step = 0.0001}, function(p_Value)
+			self:GenericCallback("sky.cloudLayer1Speed", p_Value)
+		end)
+
+		DebugGUI:Range('Cloud Layer 1 Sunlight Intensity', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
+			self:GenericCallback("sky.cloudLayer1SunLightIntensity", p_Value)
+		end)
+
+		DebugGUI:Range('Cloud Layer 1 Ambientlight Intensity', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
+			self:GenericCallback("sky.cloudLayer1AmbientLightIntensity", p_Value)
+		end)
+
+		DebugGUI:Range('Cloud Layer 1 Alpha Multiplicator', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
+			self:GenericCallback("sky.cloudLayer1AlphaMul", p_Value)
 		end)
 
 	end)
@@ -392,6 +420,22 @@ function CinematicTools:CreateGUI()
 
 		DebugGUI:Range('Fog Color Blue', {DefValue = 1.0, Min = 0.0, Max = 5.0, Step = 0.01}, function(p_Value)
 			self:GenericCallback("fog.fogColor.z", p_Value)
+		end)
+
+		DebugGUI:Range('Curve X', {DefValue = 1.0, Min = -1, Max = 50, Step = 0.001}, function(p_Value)
+			self:GenericCallback("fog.curve.x", p_Value)
+		end)
+
+		DebugGUI:Range('Curve Y', {DefValue = 1.0, Min = -1, Max = 50, Step = 0.001}, function(p_Value)
+			self:GenericCallback("fog.curve.y", p_Value)
+		end)
+
+		DebugGUI:Range('Curve Z', {DefValue = 1.0, Min = -1, Max = 50, Step = 0.001}, function(p_Value)
+			self:GenericCallback("fog.curve.z", p_Value)
+		end)
+
+		DebugGUI:Range('Curve W', {DefValue = 1.0, Min = -1, Max = 50, Step = 0.001}, function(p_Value)
+			self:GenericCallback("fog.curve.w", p_Value)
 		end)
 
 	end)
@@ -721,6 +765,39 @@ function CinematicTools:CreateGUI()
 		end)
 
 	end)]]
+
+	-- Time Control
+	DebugGUI:Folder('Time Control', function ()
+
+		local s_Enabled = false
+		local s_SyncChangesWithServer = false
+		
+		DebugGUI:Checkbox('Enable', false, function(p_Value)
+			if p_Value == true then
+				s_Enabled = true 
+				g_Time:Add(43200, true, 86400)
+			elseif p_Value == false and s_Enabled == true then
+				s_Enabled = false
+				NetEvents:Dispatch('TimeServer:DisableNet')
+			end
+		end)
+
+		DebugGUI:Checkbox('Enable Server Sync', false, function(p_Value)
+			s_SyncChangesWithServer = p_Value
+		end)
+
+		DebugGUI:Range('Time', {DefValue = 12, Min = 0, Max = 23, Step = 0.5}, function(p_Value)
+			local s_Rounded = MathUtils:Round(p_Value)
+			if s_SyncChangesWithServer == true and s_Enabled == true then 
+				print('Dispatching Time: ' .. p_Value)
+				NetEvents:Send('TimeServer:AddTimeNet', s_Rounded)
+			elseif s_Enabled == true then
+				local s_Hour = s_Rounded * 3600
+				g_Time:Add(s_Hour, true, 86400)
+			end
+		end)
+
+	end)
 
 	-- Utilities
 	DebugGUI:Folder("Utilities", function ()
