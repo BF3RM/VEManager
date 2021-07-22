@@ -778,7 +778,7 @@ function CinematicTools:CreateGUI()
 				g_Time:Add(43200, true, 86400)
 			elseif p_Value == false and s_Enabled == true then
 				s_Enabled = false
-				NetEvents:Dispatch('TimeServer:DisableNet')
+				NetEvents:Send('TimeServer:DisableNet')
 			end
 		end)
 
