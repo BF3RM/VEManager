@@ -27,7 +27,7 @@ function TimeServer:RegisterEvents()
 	Events:Subscribe('TimeServer:Disable', self, self.DisableDynamicCycle)
 	NetEvents:Subscribe('TimeServer:DisableNet', self, self.DisableDynamicCycleViaNet)
 	self.m_EngineUpdateEvent = Events:Subscribe('Engine:Update', self, self.Run)
-	self.m_LevelLoadedEvent = Events:Subscribe('Level:Loaded', self, self.OnLevelLoaded)
+	--self.m_LevelLoadedEvent = Events:Subscribe('Level:Loaded', self, self.OnLevelLoaded)
 	self.m_LevelDestroyEvent = Events:Subscribe('Level:Destroy', self, self.OnLevelDestroy)
 	self.m_PlayerRequestEvent = NetEvents:Subscribe('TimeServer:PlayerRequest', self, self.OnPlayerRequest)
 	
