@@ -68,6 +68,10 @@ end
 function CinematicTools:GenericCallback(p_Path, p_Value)
 	if self.m_CineState == nil then
 		self.m_CineState = self:GetVisualEnvironmentState(self.m_CinePriority)
+		print('CineState Name: ' .. self.m_CineState.entityName)
+		print('CineState ID: ' .. self.m_CineState.stateId)
+		self.m_CineState.overrideVisibility = true 
+		self.m_CineState.excluded = false
 	end
 
 	local s_PathTable = self:GenericSeperator(p_Path, "\\.")
@@ -77,6 +81,8 @@ function CinematicTools:GenericCallback(p_Path, p_Value)
 	if self.m_CineState[p_Path] == p_Value then
 		return
 	end
+
+
 
 	if #s_PathTable == 1 then
 		self.m_CineState[s_PathTable[1]] = p_Value
@@ -131,32 +137,133 @@ function CinematicTools:CreateGUI()
 	-- Environment
 	DebugGUI:Folder("Environment", function ()
 
-		DebugGUI:Range('Ground Color Red', {DefValue = 1, Min = 0, Max = 1, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Ground Color Red', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
 			self:GenericCallback("outdoorLight.groundColor.x", p_Value)
 		end)
 
-		DebugGUI:Range('Ground Color Green', {DefValue = 1, Min = 0, Max = 1, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Ground Color Green', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
 			self:GenericCallback("outdoorLight.groundColor.y", p_Value)
 		end)
 
-		DebugGUI:Range('Ground Color Blue', {DefValue = 1, Min = 0, Max = 1, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Ground Color Blue', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
 			self:GenericCallback("outdoorLight.groundColor.z", p_Value)
 		end)
 
-		DebugGUI:Range('Sky Color Red', {DefValue = 1, Min = 0, Max = 1, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Sky Color Red', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
 			self:GenericCallback("outdoorLight.skyColor.x", p_Value)
 		end)
 
-		DebugGUI:Range('Sky Color Green', {DefValue = 1, Min = 0, Max = 1, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Sky Color Green', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
 			self:GenericCallback("outdoorLight.skyColor.y", p_Value)
 		end)
 
-		DebugGUI:Range('Sky Color Blue', {DefValue = 1, Min = 0, Max = 1, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Sky Color Blue', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
 			self:GenericCallback("outdoorLight.skyColor.z", p_Value)
 		end)
 
-		DebugGUI:Range('Sky Light Angle', {DefValue = 0.85, Min = 0, Max = 1, Step = 0.001}, function(p_Value)
+		DebugGUI:Range('Sky Light Angle', {DefValue = 0.85, Min = 0, Max = 5, Step = 0.001}, function(p_Value)
 			self:GenericCallback("outdoorLight.skyLightAngleFactor", p_Value)
+		end)
+
+	end)
+
+	-- Enlighten
+	DebugGUI:Folder("Enlighten", function ()
+
+		DebugGUI:Checkbox('Enlighten Enable', true, function(p_Value)
+			self:GenericCallback("enlighten.enable", p_Value)
+		end)
+
+		DebugGUI:Checkbox('Skybox Enlighten Enable', true, function(p_Value)
+			self:GenericCallback("enlighten.skyBoxEnable", p_Value)
+		end)
+
+		DebugGUI:Range('Skybox Color Red', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
+			self:GenericCallback("enlighten.skyBoxSkyColor.x", p_Value)
+		end)
+
+		DebugGUI:Range('Skybox Color Green', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
+			self:GenericCallback("enlighten.skyBoxSkyColor.y", p_Value)
+		end)
+
+		DebugGUI:Range('Skybox Color Blue', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
+			self:GenericCallback("enlighten.skyBoxSkyColor.z", p_Value)
+		end)
+
+		DebugGUI:Range('Skybox Backlight Color Red', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
+			self:GenericCallback("outdoorLight.skyBoxBackLightColor.x", p_Value)
+		end)
+
+		DebugGUI:Range('Skybox Backlight Color Green', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
+			self:GenericCallback("outdoorLight.skyBoxBackLightColor.y", p_Value)
+		end)
+
+		DebugGUI:Range('Skybox Backlight Color Blue', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
+			self:GenericCallback("outdoorLight.skyBoxBackLightColor.z", p_Value)
+		end)
+
+		DebugGUI:Range('Skybox Backlight Rotation X', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
+			self:GenericCallback("outdoorLight.skyBoxBackLightRotationX", p_Value)
+		end)
+
+		DebugGUI:Range('Skybox Backlight Rotation Y', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
+			self:GenericCallback("outdoorLight.skyBoxBackLightRotationY", p_Value)
+		end)
+
+		DebugGUI:Range('Skybox Ground Color Red', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
+			self:GenericCallback("outdoorLight.skyBoxGroundColor.x", p_Value)
+		end)
+
+		DebugGUI:Range('Skybox Ground Color Green', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
+			self:GenericCallback("outdoorLight.skyBoxGroundColor.y", p_Value)
+		end)
+
+		DebugGUI:Range('Skybox Ground Color Blue', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
+			self:GenericCallback("outdoorLight.skyBoxGroundColor.z", p_Value)
+		end)
+
+		DebugGUI:Range('Skybox Terrain Color Red', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
+			self:GenericCallback("outdoorLight.terrainColor.x", p_Value)
+		end)
+
+		DebugGUI:Range('Skybox Terrain Color Green', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
+			self:GenericCallback("outdoorLight.terrainColor.y", p_Value)
+		end)
+
+		DebugGUI:Range('Skybox Terrain Color Blue', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
+			self:GenericCallback("outdoorLight.terrainColor.z", p_Value)
+		end)
+
+		DebugGUI:Range('Skybox Sunlight Color Red', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
+			self:GenericCallback("outdoorLight.skyBoxSunLightColor.x", p_Value)
+		end)
+
+		DebugGUI:Range('Skybox Sunlight Color Green', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
+			self:GenericCallback("outdoorLight.skyBoxSunLightColor.y", p_Value)
+		end)
+
+		DebugGUI:Range('Skybox Sunlight Color Blue', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
+			self:GenericCallback("outdoorLight.skyBoxSunLightColor.z", p_Value)
+		end)
+
+		DebugGUI:Range('Bounce Scale', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
+			self:GenericCallback("outdoorLight.bounceScale", p_Value)
+		end)
+
+		DebugGUI:Range('Cull Distance', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
+			self:GenericCallback("outdoorLight.cullDistance", p_Value)
+		end)
+
+		DebugGUI:Range('Sun Scale', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
+			self:GenericCallback("outdoorLight.sunScale", p_Value)
+		end)
+
+		DebugGUI:Range('Skybox Sun Light Color Scale', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
+			self:GenericCallback("outdoorLight.skyBoxSunLightColorSize", p_Value)
+		end)
+
+		DebugGUI:Range('Skybox Backlight Color Size', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
+			self:GenericCallback("outdoorLight.skyBoxBackLightColorSize", p_Value)
 		end)
 
 	end)
@@ -372,6 +479,137 @@ function CinematicTools:CreateGUI()
 
 	end)
 
+	-- FilmGrain
+	DebugGUI:Folder("Film Grain", function ()
+
+		DebugGUI:Checkbox('Film Grain Enable', false, function(p_Value)
+			self:GenericCallback("filmGrain.enable", p_Value)
+		end)
+
+		DebugGUI:Checkbox('Film Grain Random', false, function(p_Value)
+			self:GenericCallback("filmGrain.randomEnable", p_Value)
+		end)
+
+		DebugGUI:Checkbox('Film Grain Linear Filtering', false, function(p_Value)
+			self:GenericCallback("filmGrain.linearFilteringEnable", p_Value)
+		end)
+
+		DebugGUI:Range('Color Scale Red', {DefValue = 1.0, Min = 0.0, Max = 2.0, Step = 0.1}, function(p_Value)
+			self:GenericCallback("filmGrain.colorScale.x", p_Value)
+		end)
+
+		DebugGUI:Range('Color Scale Green', {DefValue = 1.0, Min = 0.0, Max = 2.0, Step = 0.1}, function(p_Value)
+			self:GenericCallback("filmGrain.colorScale.y", p_Value)
+		end)
+
+		DebugGUI:Range('Color Scale Blue', {DefValue = 1.0, Min = 0.0, Max = 2.0, Step = 0.1}, function(p_Value)
+			self:GenericCallback("filmGrain.colorScale.z", p_Value)
+		end)
+
+		DebugGUI:Range('Texture Scale X', {DefValue = 1.0, Min = 0.0, Max = 2.0, Step = 0.1}, function(p_Value)
+			self:GenericCallback("filmGrain.textureScale.x", p_Value)
+		end)
+
+		DebugGUI:Range('Texture Scale Y', {DefValue = 1.0, Min = 0.0, Max = 2.0, Step = 0.1}, function(p_Value)
+			self:GenericCallback("filmGrain.textureScale.y", p_Value)
+		end)
+
+	end)
+
+	-- LensScope
+	DebugGUI:Folder("Lens Scope", function ()
+
+		DebugGUI:Checkbox('Lens Scope Enable', false, function(p_Value)
+			self:GenericCallback("lensScope.enable", p_Value)
+		end)
+
+		DebugGUI:Range('Abberation Color 1 Red', {DefValue = 1.0, Min = 0.0, Max = 1.0, Step = 0.01}, function(p_Value)
+			self:GenericCallback("lensScope.chromaticAberrationColor1.x", p_Value)
+		end)
+
+		DebugGUI:Range('Abberation Color 1 Green', {DefValue = 1.0, Min = 0.0, Max = 1.0, Step = 0.01}, function(p_Value)
+			self:GenericCallback("lensScope.chromaticAberrationColor1.y", p_Value)
+		end)
+
+		DebugGUI:Range('Abberation Color 1 Blue', {DefValue = 1.0, Min = 0.0, Max = 1.0, Step = 0.01}, function(p_Value)
+			self:GenericCallback("lensScope.chromaticAberrationColor1.z", p_Value)
+		end)
+
+		DebugGUI:Range('Abberation Displacement 1 X', {DefValue = 1.0, Min = 0.0, Max = 1.0, Step = 0.01}, function(p_Value)
+			self:GenericCallback("lensScope.chromaticAberrationDisplacement1.x", p_Value)
+		end)
+
+		DebugGUI:Range('Abberation Displacement 1 Y', {DefValue = 1.0, Min = 0.0, Max = 1.0, Step = 0.01}, function(p_Value)
+			self:GenericCallback("lensScope.chromaticAberrationDisplacement1.y", p_Value)
+		end)
+
+		DebugGUI:Range('Abberation Color 2 Red', {DefValue = 1.0, Min = 0.0, Max = 1.0, Step = 0.01}, function(p_Value)
+			self:GenericCallback("lensScope.chromaticAberrationColor2.x", p_Value)
+		end)
+
+		DebugGUI:Range('Abberation Color 2 Green', {DefValue = 1.0, Min = 0.0, Max = 1.0, Step = 0.01}, function(p_Value)
+			self:GenericCallback("lensScope.chromaticAberrationColor2.y", p_Value)
+		end)
+
+		DebugGUI:Range('Abberation Color 2 Blue', {DefValue = 1.0, Min = 0.0, Max = 1.0, Step = 0.01}, function(p_Value)
+			self:GenericCallback("lensScope.chromaticAberrationColor2.z", p_Value)
+		end)
+
+		DebugGUI:Range('Abberation Displacement 2 X', {DefValue = 1.0, Min = 0.0, Max = 1.0, Step = 0.01}, function(p_Value)
+			self:GenericCallback("lensScope.chromaticAberrationDisplacement2.x", p_Value)
+		end)
+
+		DebugGUI:Range('Abberation Displacement 2 Y', {DefValue = 1.0, Min = 0.0, Max = 1.0, Step = 0.01}, function(p_Value)
+			self:GenericCallback("lensScope.chromaticAberrationDisplacement2.y", p_Value)
+		end)
+
+		DebugGUI:Range('Abberation Strengths X', {DefValue = 1.0, Min = 0.0, Max = 1.0, Step = 0.01}, function(p_Value)
+			self:GenericCallback("lensScope.chromaticAberrationStrengths.x", p_Value)
+		end)
+
+		DebugGUI:Range('Abberation Strengths Y', {DefValue = 1.0, Min = 0.0, Max = 1.0, Step = 0.01}, function(p_Value)
+			self:GenericCallback("lensScope.chromaticAberrationStrengths.y", p_Value)
+		end)
+
+		DebugGUI:Range('Abberation Radial Blend Coeff Distance X', {DefValue = 1.0, Min = 0.0, Max = 1.0, Step = 0.01}, function(p_Value)
+			self:GenericCallback("lensScope.radialBlendDistanceCoefficients.x", p_Value)
+		end)
+
+		DebugGUI:Range('Abberation Radial Blend Coeff Distance Y', {DefValue = 1.0, Min = 0.0, Max = 1.0, Step = 0.01}, function(p_Value)
+			self:GenericCallback("lensScope.radialBlendDistanceCoefficients.y", p_Value)
+		end)
+
+		DebugGUI:Range('Blur Center X', {DefValue = 1.0, Min = 0.0, Max = 1.0, Step = 0.01}, function(p_Value)
+			self:GenericCallback("lensScope.blurCenter.x", p_Value)
+		end)
+
+		DebugGUI:Range('Blur Center Y', {DefValue = 1.0, Min = 0.0, Max = 1.0, Step = 0.01}, function(p_Value)
+			self:GenericCallback("lensScope.blurCenter.y", p_Value)
+		end)
+
+		DebugGUI:Range('Blur Scale', {DefValue = 1.0, Min = 0.0, Max = 2.0, Step = 0.1}, function(p_Value)
+			self:GenericCallback("lensScope.blurScale", p_Value)
+		end)
+
+	end)
+
+	-- Camera Parameters
+	DebugGUI:Folder('Camera Parameters', function ()
+
+		DebugGUI:Range('View Distance', {DefValue = 0, Min = 1.0, Max = 2500.0, Step = 1}, function(p_Value)
+			self:GenericCallback("cameraParams.viewDistance", p_Value)
+		end)
+
+		DebugGUI:Range('Near Plane', {DefValue = 0, Min = 0.0, Max = 1000, Step = 1}, function(p_Value)
+			self:GenericCallback("cameraParams.nearPlane", p_Value)
+		end)
+
+		DebugGUI:Range('Sun Shadow View Distance', {DefValue = 0, Min = 0.0, Max = 2500.0, Step = 1}, function(p_Value)
+			self:GenericCallback("cameraParams.sunShadowmapViewDistance", p_Value)
+		end)
+
+	end)
+
 	-- Character Lighting
 	DebugGUI:Folder('Character Lighting (currently broken)', function ()
 
@@ -465,7 +703,7 @@ function CinematicTools:CreateGUI()
 	-- Utilities
 	DebugGUI:Folder("Utilities", function ()
 
-		DebugGUI:Text('(WIP) Preset name', 'New Preset', function(p_PresetName)
+		DebugGUI:Text('Preset name', 'New Preset', function(p_PresetName)
 			self.m_PresetName = p_PresetName
 		end)
 

@@ -406,7 +406,7 @@ function VEManagerClient:LoadPresets()
 								
 								elseif s_Type == "TextureAsset" then
 									
-									if s_FieldName == "PanoramicTexture" then
+									if s_FieldName == "PanoramicTexture" then -- will be changed later
 										--s_Class[firstToLower(s_FieldName)] = nil
 										s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
 									elseif s_FieldName == "PanoramicAlphaTexture" then
@@ -417,6 +417,8 @@ function VEManagerClient:LoadPresets()
 										s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
 									elseif s_FieldName == "CloudLayer2Texture" then
 										s_Class[firstToLower(s_FieldName)] = TextureAsset(_G['g_Stars'])
+									elseif s_FieldName == "texture" then 
+										s_Class[firstToLower(s_FieldName)] = TextureAsset(ResourceManager:FindInstanceByGuid(Guid'44AF771F-23D2-11E0-9C90-B6CDFDA832F1', Guid('1FD2F223-0137-2A0F-BC43-D974C2BD07B4')))
 									else
 										--print("Added FieldName: " .. s_FieldName)
 										s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
