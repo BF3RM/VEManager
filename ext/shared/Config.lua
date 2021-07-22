@@ -9,8 +9,8 @@ VEM_CONFIG = {
 	-- DEV --
 	DEV_ENABLE_CHAT_COMMANDS = false,
 	DEV_ENABLE_TEST_KEYS = false,
-	DEV_LOAD_CUSTOM_PRESET = false,
-	DEV_LOAD_CINEMATIC_TOOLS = false,
+	DEV_LOAD_CUSTOM_PRESET = true,
+	DEV_LOAD_CINEMATIC_TOOLS = true,
 
 	-- PRINT --
 	PRINT_DN_TIME_AND_VISIBILITIES = true,	-- Print current time every hour along with the visibilities of the 4 presets

@@ -182,7 +182,7 @@ end
 -- ADD TIME TO MAP
 -- Add(Map name, starting hour (24h), day length (min))
 function Time:Add(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
-	if self.m_SystemRunning == true then
+	if self.m_SystemRunning == true or self.m_FirstRun == true then
 		self:RegisterVars()
 	end
 

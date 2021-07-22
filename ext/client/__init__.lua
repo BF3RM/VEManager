@@ -169,10 +169,10 @@ function VEManagerClient:SetSingleValue(id, priority, class, property, value)
 end
 
 function VEManagerClient:FadeIn(id, time)
-	self:FadeTo(id, 1, time)
+	self:FadeTo(id, 0, 1, time)
 end
 
-function VEManagerClient:FadeTo(id, visibility, time)
+function VEManagerClient:FadeTo(id, startVisibility, endVisibility, time)
 	if self.m_Presets[id] == nil then
 		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(id))
 		return
@@ -180,8 +180,8 @@ function VEManagerClient:FadeTo(id, visibility, time)
 
 	self.m_Presets[id]['time'] = time
 	self.m_Presets[id]['startTime'] = SharedUtils:GetTimeMS()
-	self.m_Presets[id]['startValue'] = 0 -- Fade in should always start from 0
-	self.m_Presets[id]['EndValue'] = visibility -- this doesn't allow for a preset to have a visibility ~= 0. The basic visibility of each preset needs to be indipendent of the current visibility (aka opacity).
+	self.m_Presets[id]['startValue'] = startVisibility 
+	self.m_Presets[id]['EndValue'] = endVisibility -- this doesn't allow for a preset to have a visibility ~= 0. The basic visibility of each preset needs to be indipendent of the current visibility (aka opacity).
 	self.m_Lerping[#self.m_Lerping + 1] = id
 end
 
@@ -406,7 +406,7 @@ function VEManagerClient:LoadPresets()
 								
 								elseif s_Type == "TextureAsset" then
 									
-									if s_FieldName == "PanoramicTexture" then
+									if s_FieldName == "PanoramicTexture" then -- will be changed later
 										--s_Class[firstToLower(s_FieldName)] = nil
 										s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
 									elseif s_FieldName == "PanoramicAlphaTexture" then
@@ -417,6 +417,8 @@ function VEManagerClient:LoadPresets()
 										s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
 									elseif s_FieldName == "CloudLayer2Texture" then
 										s_Class[firstToLower(s_FieldName)] = TextureAsset(_G['g_Stars'])
+									elseif s_FieldName == "texture" then 
+										s_Class[firstToLower(s_FieldName)] = TextureAsset(ResourceManager:FindInstanceByGuid(Guid'44AF771F-23D2-11E0-9C90-B6CDFDA832F1', Guid('1FD2F223-0137-2A0F-BC43-D974C2BD07B4')))
 									else
 										--print("Added FieldName: " .. s_FieldName)
 										s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
