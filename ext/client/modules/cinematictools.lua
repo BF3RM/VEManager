@@ -422,19 +422,19 @@ function CinematicTools:CreateGUI()
 			self:GenericCallback("fog.fogColor.z", p_Value)
 		end)
 
-		DebugGUI:Range('Curve X', {DefValue = 1.0, Min = -1, Max = 50, Step = 0.001}, function(p_Value)
+		DebugGUI:Range('Curve X', {DefValue = 1.0, Min = -10, Max = 10, Step = 0.001}, function(p_Value)
 			self:GenericCallback("fog.curve.x", p_Value)
 		end)
 
-		DebugGUI:Range('Curve Y', {DefValue = 1.0, Min = -1, Max = 50, Step = 0.001}, function(p_Value)
+		DebugGUI:Range('Curve Y', {DefValue = 1.0, Min = -10, Max = 10, Step = 0.001}, function(p_Value)
 			self:GenericCallback("fog.curve.y", p_Value)
 		end)
 
-		DebugGUI:Range('Curve Z', {DefValue = 1.0, Min = -1, Max = 50, Step = 0.001}, function(p_Value)
+		DebugGUI:Range('Curve Z', {DefValue = 1.0, Min = -10, Max = 10, Step = 0.001}, function(p_Value)
 			self:GenericCallback("fog.curve.z", p_Value)
 		end)
 
-		DebugGUI:Range('Curve W', {DefValue = 1.0, Min = -1, Max = 50, Step = 0.001}, function(p_Value)
+		DebugGUI:Range('Curve W', {DefValue = 1.0, Min = -10, Max = 10, Step = 0.001}, function(p_Value)
 			self:GenericCallback("fog.curve.w", p_Value)
 		end)
 
