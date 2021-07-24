@@ -21,11 +21,11 @@ function WeatherServer:RegisterVars()
 	self.m_LastWeatherGenTime = SharedUtils:GetTime()
 
 	self.fogValues = {}
-	self.fogValues.startValue = MathUtils:GetRandom(0.1, 1.0)
-	self.fogValues.EndValue = 0.0
+	self.fogValues.startValue = 1.0
+	self.fogValues.EndValue = 1.0
 	self.fogValues.startTime = 0
 	self.fogValues.time = 0
-	self.fogValues.lastEndValue = 0
+	self.fogValues.lastEndValue = 1.0
 end
 
 function WeatherServer:RegisterEvents()
