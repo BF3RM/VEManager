@@ -142,11 +142,12 @@ function VEManagerClient:UpdateVisibility(id, priority, visibilityFactor) -- Jac
 	self.m_Presets[id]["ve"].visibility = visibilityFactor
 
 	local s_states = VisualEnvironmentManager:GetStates()
-	local s_fixedPriority = 10000000 + priority
+	local s_fixedPriority = priority
 
 	for _, state in pairs(s_states) do
 		if state.priority == s_fixedPriority then
 			state.visibility = visibilityFactor
+			print("Visibility: " .. visibilityFactor)
 			VisualEnvironmentManager:SetDirty(true)
 			return
 		end
@@ -157,9 +158,9 @@ function VEManagerClient:SetSingleValue(priority, class, property, value)
 	local s_states = VisualEnvironmentManager:GetStates()
 	local s_fixedPriority = priority
 
-	if priority ~= 1 then
-		s_fixedPriority = 10000000 + priority
-	end
+	-- if priority ~= 1 then
+	-- 	s_fixedPriority = 10000000 + priority
+	-- end
 
 	for _, state in pairs(s_states) do
 		if state.priority == s_fixedPriority then
@@ -308,7 +309,7 @@ function VEManagerClient:LoadPresets()
 			s_Preset.Priority = 1
 		else
 			s_Preset.Priority = tonumber(s_Preset.Priority)
-			if s_Preset.Priority >= 11 and s_Preset.Priority <= 14 then
+			if s_Preset.Priority >= 11 and s_Preset.Priority <= 14 and ~= string.find() then
 				s_Preset.Priority = s_Preset.Priority + 5
 			end
 		end
@@ -585,6 +586,7 @@ function VEManagerClient:UpdateLerp(percentage)
 		end
 
 		local lerpValue = easing[transition](t,b,c,d)
+		print("Lerping: " .. lerpvalue)
 
 		if(PercentageComplete >= 1 or PercentageComplete < 0) then
 			self:SetVisibility(preset, self.m_Presets[preset].EndValue)
@@ -632,7 +634,7 @@ function VEManagerClient:UpdateSingleValueLerp(percentage)
 				g_VEManagerClient:SetSingleValue(14, valueTable.class, value, g_VEManagerClient.m_RawPresets.DefaultEvening[firstToUpper(valueTable.class)][firstToUpper(value)] * valueTable.EndValue)
 			end
 
-			self.m_LerpingSingleValues[i] = nils
+			self.m_LerpingSingleValues[k] = nil
 		else
 			for k,value in pairs(valueTable.values) do
 				g_VEManagerClient:SetSingleValue(1, valueTable.class, value, valueTable.standardFogEndValue * lerpValue)

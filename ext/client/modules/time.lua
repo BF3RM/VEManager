@@ -77,7 +77,7 @@ function Time:RemoveTime()
 	print("Reset Time System")
 end
 
-function Time:ServerSync(p_ServerWeatherTime, p_TotalServerTime)
+function Time:ServerSync(p_ServerDayTime, p_TotalServerTime)
 	if p_ServerDayTime == nil or p_TotalServerTime == nil then
 		return
 	
