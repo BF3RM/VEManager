@@ -45,6 +45,7 @@ function VEManagerClient:RegisterVars()
 		"Wind"}
 	self.m_Presets = {}
 	self.m_Lerping = {}
+	self.m_LerpingSingleValues = {}
 	self.m_Instances = {}
 	self.m_VisibilityUpdateThreshold = 0.000001
 end
@@ -71,6 +72,8 @@ end
 function VEManagerClient:RegisterModules()
 	easing = require "modules/easing"
 	require 'modules/time'
+	require 'modules/weather'
+
 	require '__shared/DebugGUI'
 	
 	if VEM_CONFIG.DEV_LOAD_CINEMATIC_TOOLS then
@@ -158,8 +161,14 @@ function VEManagerClient:SetSingleValue(id, priority, class, property, value)
 		return
 	end
 
+function VEManagerClient:SetSingleValue(priority, class, property, value)
 	local s_states = VisualEnvironmentManager:GetStates()
 	local s_fixedPriority = 10000000 + priority
+	local s_fixedPriority = priority
+
+	if priority ~= 1 then
+		s_fixedPriority = 10000000 + priority
+	end
 
 	for _, state in pairs(s_states) do
 		if state.priority == s_fixedPriority then
@@ -599,6 +608,56 @@ function VEManagerClient:UpdateLerp(percentage)
 end
 
 function VEManagerClient:SetLerpPriority(id)
+function VEManagerClient:UpdateSingleValueLerp(percentage)
+
+		local TimeSinceStarted = SharedUtils:GetTimeMS() - valueTable.startTime
+		local PercentageComplete = TimeSinceStarted / valueTable.time
+		--local lerpValue = self.m_Presets[preset].startValue + (self.m_Presets[preset].EndValue - self.m_Presets[preset].startValue) * PercentageComplete
+
+		-- t = elapsed time
+		-- b = begin
+		-- c = change == ending - beginning
+		-- d = duration (total time)
+		local t = TimeSinceStarted
+		local b = valueTable.startValue
+		local c = valueTable.EndValue - valueTable.startValue
+		local d = valueTable.time
+
+		local transition = "linear"
+		if(valueTable.transition ~= nil) then
+			transition = valueTable.transition
+		end
+
+		local lerpValue = easing[transition](t,b,c,d)
+		
+		--self.m_RawPresets["DefaultNight"] = json.decode(night:GetPreset())
+		--self.m_RawPresets["DefaultMorning"] = json.decode(morning:GetPreset())
+		--self.m_RawPresets["DefaultNoon"] = json.decode(noon:GetPreset())
+		--self.m_RawPresets["DefaultEvening"] = json.decode(evening:GetPreset())
+
+		if(PercentageComplete >= 1 or PercentageComplete < 0) then
+			for k,value in pairs(valueTable.values) do
+				g_VEManagerClient:SetSingleValue(1, valueTable.class, value, valueTable.standardFogEndValue * valueTable.EndValue)
+				g_VEManagerClient:SetSingleValue(11, valueTable.class, value, g_VEManagerClient.m_RawPresets.DefaultNight[firstToUpper(valueTable.class)][firstToUpper(value)] * valueTable.EndValue)
+				g_VEManagerClient:SetSingleValue(12, valueTable.class, value, g_VEManagerClient.m_RawPresets.DefaultMorning[firstToUpper(valueTable.class)][firstToUpper(value)] * valueTable.EndValue)
+				g_VEManagerClient:SetSingleValue(13, valueTable.class, value, g_VEManagerClient.m_RawPresets.DefaultNoon[firstToUpper(valueTable.class)][firstToUpper(value)] * valueTable.EndValue)
+				g_VEManagerClient:SetSingleValue(14, valueTable.class, value, g_VEManagerClient.m_RawPresets.DefaultEvening[firstToUpper(valueTable.class)][firstToUpper(value)] * valueTable.EndValue)
+			end
+
+			self.m_LerpingSingleValues[i] = nils
+		else
+			for k,value in pairs(valueTable.values) do
+				g_VEManagerClient:SetSingleValue(1, valueTable.class, value, valueTable.standardFogEndValue * lerpValue)
+				g_VEManagerClient:SetSingleValue(11, valueTable.class, value, g_VEManagerClient.m_RawPresets.DefaultNight[firstToUpper(valueTable.class)][firstToUpper(value)] * lerpValue)
+				g_VEManagerClient:SetSingleValue(12, valueTable.class, value, g_VEManagerClient.m_RawPresets.DefaultMorning[firstToUpper(valueTable.class)][firstToUpper(value)] * lerpValue)
+				g_VEManagerClient:SetSingleValue(13, valueTable.class, value, g_VEManagerClient.m_RawPresets.DefaultNoon[firstToUpper(valueTable.class)][firstToUpper(value)] * lerpValue)
+				g_VEManagerClient:SetSingleValue(14, valueTable.class, value, g_VEManagerClient.m_RawPresets.DefaultEvening[firstToUpper(valueTable.class)][firstToUpper(value)] * lerpValue)
+			end
+		end
+	end
+end
+
+function VEManagerClient:SetLerpPriority(id) -- remove
 	if self.m_Presets[id].type ~= 'Time' then
 		return
 	end
@@ -625,6 +684,11 @@ function VEManagerClient:OnUpdateInput(p_Delta, p_SimulationDelta)
 	if #self.m_Lerping > 0 then
 		self:UpdateLerp(p_Delta)
 	end
+
+	if #self.m_LerpingSingleValues > 0 then
+		self:UpdateSingleValueLerp(p_Delta)
+	end
+
 end
 
 

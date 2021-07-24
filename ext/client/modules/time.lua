@@ -77,7 +77,7 @@ function Time:RemoveTime()
 	print("Reset Time System")
 end
 
-function Time:ServerSync(p_ServerDayTime, p_TotalServerTime)
+function Time:ServerSync(p_ServerWeatherTime, p_TotalServerTime)
 	if p_ServerDayTime == nil or p_TotalServerTime == nil then
 		return
 	
@@ -325,14 +325,14 @@ function Time:Run()
 		g_VEManagerClient:SetVisibility(self.m_currentEveningPreset, s_factorEvening)
 		self.m_FirstRun = false
 	else
-		g_VEManagerClient:UpdateVisibility(self.m_currentNightPreset, self.m_nightPriority, s_factorNight)
-		g_VEManagerClient:UpdateVisibility(self.m_currentMorningPreset, self.m_morningPriority, s_factorMorning)
-		g_VEManagerClient:UpdateVisibility(self.m_currentNoonPreset, self.m_noonPriority, s_factorNoon)
-		g_VEManagerClient:UpdateVisibility(self.m_currentEveningPreset, self.m_eveningPriority, s_factorEvening)
-		g_VEManagerClient:SetSingleValue(self.m_currentNightPreset, self.m_nightPriority, 'sky', 'cloudLayer1Speed', self.m_CloudSpeed)
-		g_VEManagerClient:SetSingleValue(self.m_currentMorningPreset, self.m_morningPriority, 'sky', 'cloudLayer1Speed', self.m_CloudSpeed)
-		g_VEManagerClient:SetSingleValue(self.m_currentNoonPreset, self.m_noonPriority, 'sky', 'cloudLayer1Speed', self.m_CloudSpeed)
-		g_VEManagerClient:SetSingleValue(self.m_currentEveningPreset, self.m_eveningPriority, 'sky', 'cloudLayer1Speed', self.m_CloudSpeed)
+		g_VEManagerClient:UpdateVisibility(self.m_nightPriority, s_factorNight)
+		g_VEManagerClient:UpdateVisibility(self.m_morningPriority, s_factorMorning)
+		g_VEManagerClient:UpdateVisibility(self.m_noonPriority, s_factorNoon)
+		g_VEManagerClient:UpdateVisibility(self.m_eveningPriority, s_factorEvening)
+		g_VEManagerClient:SetSingleValue(self.m_nightPriority, 'sky', 'cloudLayer1Speed', self.m_CloudSpeed)
+		g_VEManagerClient:SetSingleValue(self.m_morningPriority, 'sky', 'cloudLayer1Speed', self.m_CloudSpeed)
+		g_VEManagerClient:SetSingleValue(self.m_noonPriority, 'sky', 'cloudLayer1Speed', self.m_CloudSpeed)
+		g_VEManagerClient:SetSingleValue(self.m_eveningPriority, 'sky', 'cloudLayer1Speed', self.m_CloudSpeed)
 	end
 
 	self:SetSunPosition(self.m_ClientTime)
