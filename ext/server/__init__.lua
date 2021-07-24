@@ -24,11 +24,15 @@ end
 function TimeServer:RegisterEvents()
 	print('[Time-Server]: Registered Events')
 	Events:Subscribe('TimeServer:AddTime', self, self.AddTime)
+	NetEvents:Subscribe('TimeServer:AddTimeNet', self, self.AddTimeViaNet)
 	Events:Subscribe('TimeServer:Pause', self, self.PauseContinue)
 	Events:Subscribe('TimeServer:Disable', self, self.DisableDynamicCycle)
+	NetEvents:Subscribe('TimeServer:DisableNet', self, self.DisableDynamicCycleViaNet)
 	self.m_EngineUpdateEvent = Events:Subscribe('Engine:Update', self, self.Run)
 	self.m_LevelLoadedEvent = Events:Subscribe('Level:Loaded', self, self.OnLevelLoaded)
 	--self.m_LevelDestroyEvent = Events:Subscribe('Level:Destroy', self, self.OnLevelDestroy)
+	--self.m_LevelLoadedEvent = Events:Subscribe('Level:Loaded', self, self.OnLevelLoaded)
+	self.m_LevelDestroyEvent = Events:Subscribe('Level:Destroy', self, self.OnLevelDestroy)
 	self.m_PlayerRequestEvent = NetEvents:Subscribe('TimeServer:PlayerRequest', self, self.OnPlayerRequest)
 	
 	if VEM_CONFIG.DEV_ENABLE_CHAT_COMMANDS then
@@ -37,11 +41,15 @@ function TimeServer:RegisterEvents()
 end
 
 function TimeServer:OnLevelLoaded()
-	self:AddTime(MathUtils:GetRandomInt(6, 18), 60)
+
 end
 
 function TimeServer:OnLevelDestroy()
 	self.m_SystemRunning = false
+end
+
+function TimeServer:AddTimeViaNet(player, p_StartingTime, p_LengthOfDayInMinutes)
+	self:AddTime(p_StartingTime, p_LengthOfDayInMinutes)
 end
 
 function TimeServer:AddTime(p_StartingTime, p_LengthOfDayInMinutes)
@@ -113,6 +121,11 @@ end
 
 function TimeServer:DisableDynamicCycle()
 	self.m_SystemRunning = false
+	NetEvents:Broadcast('ClientTime:Disable')
+end
+
+function TimeServer:DisableDynamicCycleViaNet()
+	self.m_Systemrunning = false
 	NetEvents:Broadcast('ClientTime:Disable')
 end
 

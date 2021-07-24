@@ -53,7 +53,6 @@ end
 function VEManagerClient:RegisterEvents()
 	self.m_OnUpdateInputEvent = Events:Subscribe('Client:UpdateInput', self, self.OnUpdateInput)
 	Events:Subscribe('Level:Loaded', self, self.OnLevelLoaded)
-	Events:Subscribe('Level:LoadResources', self, self.OnLoadResources)
 	Events:Subscribe('Level:Destroy', self, self.RegisterVars)
 
 	Events:Subscribe('VEManager:RegisterPreset', self, self.RegisterPreset)
@@ -66,7 +65,6 @@ function VEManagerClient:RegisterEvents()
 	Events:Subscribe('VEManager:FadeOut', self, self.FadeOut)
 	Events:Subscribe('VEManager:Lerp', self, self.Lerp)
 	Events:Subscribe('VEManager:Crossfade', self, self.Crossfade)
-	NetEvents:Subscribe('VEManager:CreateCinematicTools', self, self.CreateCinematicTools)
 end
 
 function VEManagerClient:RegisterModules()
@@ -75,7 +73,7 @@ function VEManagerClient:RegisterModules()
 	require 'modules/weather'
 
 	require '__shared/DebugGUI'
-	
+
 	if VEM_CONFIG.DEV_LOAD_CINEMATIC_TOOLS then
 		require 'modules/cinematictools'
 	end
@@ -180,10 +178,10 @@ function VEManagerClient:SetSingleValue(priority, class, property, value)
 end
 
 function VEManagerClient:FadeIn(id, time)
-	self:FadeTo(id, 1, time)
+	self:FadeTo(id, 0, 1, time)
 end
 
-function VEManagerClient:FadeTo(id, visibility, time)
+function VEManagerClient:FadeTo(id, startVisibility, endVisibility, time)
 	if self.m_Presets[id] == nil then
 		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(id))
 		return
@@ -191,8 +189,8 @@ function VEManagerClient:FadeTo(id, visibility, time)
 
 	self.m_Presets[id]['time'] = time
 	self.m_Presets[id]['startTime'] = SharedUtils:GetTimeMS()
-	self.m_Presets[id]['startValue'] = 0 -- Fade in should always start from 0
-	self.m_Presets[id]['EndValue'] = visibility -- this doesn't allow for a preset to have a visibility ~= 0. The basic visibility of each preset needs to be indipendent of the current visibility (aka opacity).
+	self.m_Presets[id]['startValue'] = startVisibility 
+	self.m_Presets[id]['EndValue'] = endVisibility -- this doesn't allow for a preset to have a visibility ~= 0. The basic visibility of each preset needs to be indipendent of the current visibility (aka opacity).
 	self.m_Lerping[#self.m_Lerping + 1] = id
 end
 
@@ -250,7 +248,7 @@ end
 
 ]]
 
-function VEManagerClient:GetMapPresets(mapName) -- gets all Main Map Environments for Day-Night Cycle
+function VEManagerClient:GetMapPresets(mapName) -- gets all Main Map Environments for Day-Night Cycle -- remove
 	local map = mapName:match('/[^/]+'):sub(2)
 	for i, s_Preset in pairs(VEManagerClient.m_Presets) do
 		if s_Preset.Map[map] then
@@ -417,7 +415,7 @@ function VEManagerClient:LoadPresets()
 								
 								elseif s_Type == "TextureAsset" then
 									
-									if s_FieldName == "PanoramicTexture" then
+									if s_FieldName == "PanoramicTexture" then -- will be changed later
 										--s_Class[firstToLower(s_FieldName)] = nil
 										s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
 									elseif s_FieldName == "PanoramicAlphaTexture" then
@@ -428,6 +426,8 @@ function VEManagerClient:LoadPresets()
 										s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
 									elseif s_FieldName == "CloudLayer2Texture" then
 										s_Class[firstToLower(s_FieldName)] = TextureAsset(_G['g_Stars'])
+									elseif s_FieldName == "texture" then 
+										s_Class[firstToLower(s_FieldName)] = TextureAsset(ResourceManager:FindInstanceByGuid(Guid'44AF771F-23D2-11E0-9C90-B6CDFDA832F1', Guid('1FD2F223-0137-2A0F-BC43-D974C2BD07B4')))
 									else
 										--print("Added FieldName: " .. s_FieldName)
 										s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
@@ -514,15 +514,11 @@ function VEManagerClient:LoadPresets()
 	print("Presets loaded")
 end
 
-function VEManagerClient:OnLoadResources(p_LevelName, p_GameMode, p_IsDedicatedServer)
-	if VEM_CONFIG.DEV_LOAD_CINEMATIC_TOOLS then
-		self:CreateCinematicTools()
-	end
-end
 
 function VEManagerClient:OnLevelLoaded(p_MapPath, p_GameModeName)
 	self:LoadPresets()
 end
+
 
 function VEManagerClient:GetDefaultValue(p_Class, p_Field)
 	if p_Field.typeInfo.enum then
@@ -607,7 +603,6 @@ function VEManagerClient:UpdateLerp(percentage)
 
 end
 
-function VEManagerClient:SetLerpPriority(id)
 function VEManagerClient:UpdateSingleValueLerp(percentage)
 
 		local TimeSinceStarted = SharedUtils:GetTimeMS() - valueTable.startTime
@@ -666,10 +661,6 @@ end
 function VEManagerClient:OnUpdateInput(p_Delta, p_SimulationDelta)
 
 	if VEM_CONFIG.DEV_ENABLE_TEST_KEYS then
-		if InputManager:WentKeyDown(InputDeviceKeys.IDK_F1) then
-			print("DEV KEY: Create cinematic tools")
-			self:CreateCinematicTools()
-		end
 
 		if InputManager:WentKeyDown(InputDeviceKeys.IDK_F2) then
 			print("DEV KEY: Show VE states: name, priority, visibility")
