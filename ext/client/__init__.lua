@@ -153,15 +153,8 @@ function VEManagerClient:UpdateVisibility(id, priority, visibilityFactor) -- Jac
 	end
 end
 
-function VEManagerClient:SetSingleValue(id, priority, class, property, value)
-	if self.m_Presets[id] == nil then
-		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(id))
-		return
-	end
-
 function VEManagerClient:SetSingleValue(priority, class, property, value)
 	local s_states = VisualEnvironmentManager:GetStates()
-	local s_fixedPriority = 10000000 + priority
 	local s_fixedPriority = priority
 
 	if priority ~= 1 then
@@ -604,7 +597,7 @@ function VEManagerClient:UpdateLerp(percentage)
 end
 
 function VEManagerClient:UpdateSingleValueLerp(percentage)
-
+	for k,valueTable in pairs(self.m_LerpingSingleValues) do
 		local TimeSinceStarted = SharedUtils:GetTimeMS() - valueTable.startTime
 		local PercentageComplete = TimeSinceStarted / valueTable.time
 		--local lerpValue = self.m_Presets[preset].startValue + (self.m_Presets[preset].EndValue - self.m_Presets[preset].startValue) * PercentageComplete
