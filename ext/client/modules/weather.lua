@@ -1,8 +1,5 @@
 class 'Weather'
 
-basicshit = require("modules/basicshitthatshouldbeineveryfuckingprogramminglanguage")
-
-
 function Weather:__init()
 	print('Initializing Weather Module')
 	Weather:RegisterVars()
@@ -41,7 +38,7 @@ function Weather:RegisterVars()
 	self.fogValues.startTime = 0
 	self.fogValues.time = 0
 	self.fogValues.class = "fog"
-	self.fogValues.values = {"start", "endValue", "fogColorStart", "fogColorEnd"}
+	self.fogValues.values = {"start", "endValue", "fogColorStart", "fogColorEnd", "transparencyFadeStart", "transparencyFadeEnd"}
 	self.fogValues.lastEndValue = 0
 	self.fogValues.standardFogEndValue = 0
 end
