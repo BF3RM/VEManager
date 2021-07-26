@@ -309,7 +309,7 @@ function VEManagerClient:LoadPresets()
 			s_Preset.Priority = 1
 		else
 			s_Preset.Priority = tonumber(s_Preset.Priority)
-			if s_Preset.Priority >= 11 and s_Preset.Priority <= 14 and ~= string.find() then
+			if s_Preset.Priority >= 11 and s_Preset.Priority <= 14 then
 				s_Preset.Priority = s_Preset.Priority + 5
 			end
 		end
@@ -647,11 +647,11 @@ function VEManagerClient:UpdateSingleValueLerp(percentage)
 	end
 end
 
-function VEManagerClient:SetLerpPriority(id) -- remove
-	if self.m_Presets[id].type ~= 'Time' then
-		return
-	end
-end
+-- function VEManagerClient:SetLerpPriority(id) -- remove
+-- 	if self.m_Presets[id].type ~= 'Time' then
+-- 		return
+-- 	end
+-- end
 
 function VEManagerClient:OnUpdateInput(p_Delta, p_SimulationDelta)
 

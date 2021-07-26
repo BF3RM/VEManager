@@ -84,18 +84,11 @@ end
 
 function Weather:OnLevelDestroy()
 	self.m_ServerSyncEvent = NetEvents:Unsubscribe('WeatherServer:Sync') -- Server Sync
-	self:RemoveTime()
 end
 
 function Weather:RequestWeather()
 	print('[Weather-System] Request WeatherSync')
 	NetEvents:Send('WeatherServer:PlayerRequest')
-end
-
-function Weather:RemoveTime()
-	self:RegisterVars()
-	self:ResetSunPosition()
-	print("Reset Time System")
 end
 
 function Weather:ServerSync(p_EndValue, p_Time, p_StartValue)
