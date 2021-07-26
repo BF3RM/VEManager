@@ -715,27 +715,27 @@ function CinematicTools:CreateGUI()
 	-- Ambient Occlusion
 	DebugGUI:Folder('Ambient Occlusion', function ()
 
-		DebugGUI:Range('HBAO Radius', {DefValue = 0, Min = 0.0, Max = 1.0, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('HBAO Radius', {DefValue = 0, Min = 0.0, Max = 10.0, Step = 0.01}, function(p_Value)
 			self:GenericCallback("dynamicAO.hbaoRadius", p_Value)
 		end)
 
-		DebugGUI:Range('HBAO Attentuation', {DefValue = 0, Min = 0.0, Max = 1.0, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('HBAO Attentuation', {DefValue = 0, Min = 0.0, Max = 10.0, Step = 0.01}, function(p_Value)
 			self:GenericCallback("dynamicAO.hbaoAttenuation", p_Value)
 		end)
 
-		DebugGUI:Range('HBAO Angle Bias', {DefValue = 0, Min = 0.0, Max = 1.0, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('HBAO Angle Bias', {DefValue = 0, Min = 0.0, Max = 10.0, Step = 0.01}, function(p_Value)
 			self:GenericCallback("dynamicAO.hbaoAngleBias", p_Value)
 		end)
 
-		DebugGUI:Range('HBAO Power Exponent', {DefValue = 0, Min = 0.0, Max = 1.0, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('HBAO Power Exponent', {DefValue = 0, Min = 0.0, Max = 10.0, Step = 0.01}, function(p_Value)
 			self:GenericCallback("dynamicAO.hbaoPowerExponent", p_Value)
 		end)
 
-		DebugGUI:Range('HBAO Contrast', {DefValue = 0, Min = 0.0, Max = 1.0, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('HBAO Contrast', {DefValue = 0, Min = 0.0, Max = 10.0, Step = 0.01}, function(p_Value)
 			self:GenericCallback("dynamicAO.hbaoContrast", p_Value)
 		end)
 
-		DebugGUI:Range('HBAO Max Footprint Radius', {DefValue = 0, Min = 0.0, Max = 1.0, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('HBAO Max Footprint Radius', {DefValue = 0, Min = 0.0, Max = 10.0, Step = 0.01}, function(p_Value)
 			self:GenericCallback("dynamicAO.hbaoMaxFootprintRadius", p_Value)
 		end)
 
