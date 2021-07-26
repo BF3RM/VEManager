@@ -142,7 +142,7 @@ function VEManagerClient:UpdateVisibility(id, priority, visibilityFactor) -- Jac
 	self.m_Presets[id]["ve"].visibility = visibilityFactor
 
 	local s_states = VisualEnvironmentManager:GetStates()
-	local s_fixedPriority = priority
+	local s_fixedPriority = 10000000 + priority
 
 	for _, state in pairs(s_states) do
 		if state.priority == s_fixedPriority then
