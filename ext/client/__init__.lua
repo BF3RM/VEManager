@@ -158,9 +158,9 @@ function VEManagerClient:SetSingleValue(priority, class, property, value)
 	local s_states = VisualEnvironmentManager:GetStates()
 	local s_fixedPriority = priority
 
-	-- if priority ~= 1 then
-	-- 	s_fixedPriority = 10000000 + priority
-	-- end
+	if priority ~= 1 then
+		s_fixedPriority = 10000000 + priority
+	end
 
 	for _, state in pairs(s_states) do
 		if state.priority == s_fixedPriority then
