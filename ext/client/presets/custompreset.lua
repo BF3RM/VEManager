@@ -157,7 +157,7 @@ local table = [[
 		"SkyEnvmap8BitTexScale":"5.0",
 		"CustomEnvmapScale":"1.0",
 		"CustomEnvmapAmbient":"1.0",
-		"SkyVisibilityExponent":"0.0"
+		"SkyVisibilityExponent":"1.0"
 	},
 	"SunFlare":{
 		"Enable":"true",
