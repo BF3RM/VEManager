@@ -48,20 +48,7 @@ local table = [[
 		"HbaoPowerExponent":"1.0"
 	},
 	"Enlighten":{
-		"Enable":"false",
-		"BounceScale":"0.10000000149012",
-		"SunScale":"0.0",
-		"TerrainColor":"(0.0, 0.0, 0.0)",
-		"CullDistance":"-1.0",
-		"SkyBoxEnable":"false",
-		"SkyBoxSkyColor":"(0.0, 0.0, 0.0)",
-		"SkyBoxGroundColor":"(0.0, 0.0, 0.0)",
-		"SkyBoxSunLightColor":"(0.0, 0.0, 0.0)",
-		"SkyBoxSunLightColorSize":"0.0",
-		"SkyBoxBackLightColor":"(0.0, 0.0, 0.0)",
-		"SkyBoxBackLightColorSize":"0.10000000149012",
-		"SkyBoxBackLightRotationX":"171.95899963379",
-		"SkyBoxBackLightRotationY":"26.563999176025"
+		"Enable":"false"
 	},
 	"FilmGrain":{
 		"Enable":"true",
@@ -157,7 +144,7 @@ local table = [[
 		"SkyEnvmap8BitTexScale":"5.0",
 		"CustomEnvmapScale":"1.0",
 		"CustomEnvmapAmbient":"1.0",
-		"SkyVisibilityExponent":"0.0"
+		"SkyVisibilityExponent":"1.0"
 	},
 	"SunFlare":{
 		"Enable":"true",
