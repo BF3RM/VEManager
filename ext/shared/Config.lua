@@ -1,5 +1,6 @@
 VEM_CONFIG = {
-	-- CLOUDS --
+	-- WEATHER ---
+	WEATHER_SYSTEM_ENABLED = true,							-- Enable the dynamic weather system
 	CLOUDS_DEFAULT_SPEED = -0.0005, 						-- TODO: this needs to be based on the presets not in VEManager config.
 
 	-- DAY-NIGHT --

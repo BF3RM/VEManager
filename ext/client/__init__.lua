@@ -626,20 +626,20 @@ function VEManagerClient:UpdateSingleValueLerp(percentage)
 		if(PercentageComplete >= 1 or PercentageComplete < 0) then
 			for k,value in pairs(valueTable.values) do
 				g_VEManagerClient:SetSingleValue(1, valueTable.class, value, valueTable.standardFogEndValue * valueTable.EndValue)
-				--g_VEManagerClient:SetSingleValue(11, valueTable.class, value, g_VEManagerClient.m_RawPresets.DefaultNight[firstToUpper(valueTable.class)][firstToUpper(value)] * valueTable.EndValue)
+				g_VEManagerClient:SetSingleValue(11, valueTable.class, value, g_VEManagerClient.m_RawPresets.DefaultNight[firstToUpper(valueTable.class)][firstToUpper(value)] * valueTable.EndValue)
 				g_VEManagerClient:SetSingleValue(12, valueTable.class, value, g_VEManagerClient.m_RawPresets.DefaultMorning[firstToUpper(valueTable.class)][firstToUpper(value)] * valueTable.EndValue)
-				--g_VEManagerClient:SetSingleValue(13, valueTable.class, value, g_VEManagerClient.m_RawPresets.DefaultNoon[firstToUpper(valueTable.class)][firstToUpper(value)] * valueTable.EndValue)
-				--g_VEManagerClient:SetSingleValue(14, valueTable.class, value, g_VEManagerClient.m_RawPresets.DefaultEvening[firstToUpper(valueTable.class)][firstToUpper(value)] * valueTable.EndValue)
+				g_VEManagerClient:SetSingleValue(13, valueTable.class, value, g_VEManagerClient.m_RawPresets.DefaultNoon[firstToUpper(valueTable.class)][firstToUpper(value)] * valueTable.EndValue)
+				g_VEManagerClient:SetSingleValue(14, valueTable.class, value, g_VEManagerClient.m_RawPresets.DefaultEvening[firstToUpper(valueTable.class)][firstToUpper(value)] * valueTable.EndValue)
 			end
 
 			self.m_LerpingSingleValues[k] = nil
 		else
 			for k,value in pairs(valueTable.values) do
 				g_VEManagerClient:SetSingleValue(1, valueTable.class, value, valueTable.standardFogEndValue * lerpValue)
-				--g_VEManagerClient:SetSingleValue(11, valueTable.class, value, g_VEManagerClient.m_RawPresets.DefaultNight[firstToUpper(valueTable.class)][firstToUpper(value)] * lerpValue)
+				g_VEManagerClient:SetSingleValue(11, valueTable.class, value, g_VEManagerClient.m_RawPresets.DefaultNight[firstToUpper(valueTable.class)][firstToUpper(value)] * lerpValue)
 				g_VEManagerClient:SetSingleValue(12, valueTable.class, value, g_VEManagerClient.m_RawPresets.DefaultMorning[firstToUpper(valueTable.class)][firstToUpper(value)] * lerpValue)
-				--g_VEManagerClient:SetSingleValue(13, valueTable.class, value, g_VEManagerClient.m_RawPresets.DefaultNoon[firstToUpper(valueTable.class)][firstToUpper(value)] * lerpValue)
-				--g_VEManagerClient:SetSingleValue(14, valueTable.class, value, g_VEManagerClient.m_RawPresets.DefaultEvening[firstToUpper(valueTable.class)][firstToUpper(value)] * lerpValue)
+				g_VEManagerClient:SetSingleValue(13, valueTable.class, value, g_VEManagerClient.m_RawPresets.DefaultNoon[firstToUpper(valueTable.class)][firstToUpper(value)] * lerpValue)
+				g_VEManagerClient:SetSingleValue(14, valueTable.class, value, g_VEManagerClient.m_RawPresets.DefaultEvening[firstToUpper(valueTable.class)][firstToUpper(value)] * lerpValue)
 			end
 		end
 	end

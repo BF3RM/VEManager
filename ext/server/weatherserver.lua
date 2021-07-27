@@ -17,7 +17,7 @@ function WeatherServer:RegisterVars()
 	self.m_ServerTickrate = SharedUtils:GetTickrate()
 	self.m_SyncTickrate = VEM_CONFIG.SERVER_SYNC_CLIENT_EVERY_TICKS / self.m_ServerTickrate --[Hz]
 	self.m_SystemRunning = false
-	self.m_WeatherGenTime = 60
+	self.m_WeatherGenTime = 300
 	self.m_LastWeatherGenTime = SharedUtils:GetTime()
 
 	self.fogValues = {}
@@ -38,45 +38,38 @@ function WeatherServer:RegisterEvents()
 	--self.m_LevelDestroyEvent = Events:Subscribe('Level:Destroy', self, self.OnLevelDestroy)
 	self.m_PlayerRequestEvent = NetEvents:Subscribe('WeatherServer:PlayerRequest', self, self.OnPlayerRequest)
 	self.Sync = NetEvents:Subscribe('ClientWeather:m_ServerSyncEvent', self, self.Fog)
-
-	--if VEM_CONFIG.DEV_ENABLE_CHAT_COMMANDS then
-		--Events:Subscribe('Player:Chat', self, self.ChatCommands) -- Uncomment to enable chat commands in VEManager
-	--end
 end
 
 function WeatherServer:RunWeather()
-    --if self.m_SystemRunning == true and self.m_IsStatic == false then
+    if VEM_CONFIG.WEATHER_SYSTEM_ENABLED == true and self.m_SystemRunning then
         if self.m_LastWeatherGenTime + self.m_WeatherGenTime <= SharedUtils:GetTime() then
 			print('[Weather-Server]: New weather cycle')
             self:Fog()
 
             self.m_LastWeatherGenTime = SharedUtils:GetTime()
         end
-    --end
+    end
 end
 
 function WeatherServer:Fog()
 	self.fogValues.startTime = SharedUtils:GetTimeMS()
 	self.fogValues.startValue = self.fogValues.EndValue
-	self.fogValues.EndValue = MathUtils:GetRandom(0.1, 1.0)
+	self.fogValues.EndValue = MathUtils:GetRandom(0.05, 1.0)
 	self.fogValues.time = self.m_WeatherGenTime * 1000
 
 	if(PlayerManager:GetPlayerCount() > 0) then
-		local sentSyncs = 0
 		for k,player in pairs(PlayerManager:GetPlayers()) do
 			NetEvents:SendTo('WeatherServer:Sync', player, self.fogValues.EndValue, self.fogValues.time, self.fogValues.startValue)
-			sentSyncs = sentSyncs + 1
 		end
-		--print("[Weather-Server] Sent sync event to " .. tostring(sentSyncs) .. " out of " .. tostring(PlayerManager:GetPlayerCount()) .. " players!")
 	end
 end
 
 function WeatherServer:OnPlayerRequest(player)
-	--if self.m_SystemRunning == true or self.m_IsStatic == true then
+	if VEM_CONFIG.WEATHER_SYSTEM_ENABLED == true and self.m_SystemRunning then
 		print('[Weather-Server]: Received Request by player: ' .. tostring(player.name))
 		print('[Weather-Server]: Calling Sync Broadcast')
 		NetEvents:SendTo('WeatherServer:Sync', player, self.fogValues.EndValue, ((self.m_LastWeatherGenTime + self.m_WeatherGenTime) - SharedUtils:GetTime()) * 1000, self.fogValues.startValue)
-	--end
+	end
 end
 
 function WeatherServer:OnLevelLoaded()
