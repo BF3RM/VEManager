@@ -251,7 +251,32 @@ function Time:Run()
 
 	local s_SunPosX, s_SunPosY = self:SetSunPosition(p_ClientTime)
 
-	if 
+	if s_SunPosY <= 5 then
+		local s_FactorMorning = s_SunPosY / 5
+		local s_FactorNight = 1 - s_FactorMorning
+		g_VEManagerClient:UpdateVisibility(self.m_currentMorningPreset, self.m_morningPriority, s_FactorMorning)
+		g_VEManagerClient:UpdateVisibility(self.m_currentNightPreset, self.m_nightPriority, s_FactorNight)
+	elseif s_SunPosY <= 15 then
+		local s_FactorNoon = s_SunPosY / 15
+		local s_FactorMorning = 1 - s_FactorNoon
+		g_VEManagerClient:UpdateVisibility(self.m_currentNoonPreset, self.m_noonPriority, s_FactorNoon)
+		g_VEManagerClient:UpdateVisibility(self.m_currentMorningPreset, self.m_morningPriority, s_FactorNight)
+	elseif s_SunPosY <= 160 then
+		return
+	elseif s_SunPosY <= 165 then
+		local s_FactorEvening = (s_SunPosY - 160) / 15
+		local s_FactorNoon = 1 - s_FactorEvening
+		g_VEManagerClient:UpdateVisibility(self.m_currentEveningPreset, self.m_eveningPriority, s_FactorEvening)
+		g_VEManagerClient:UpdateVisibility(self.m_currentNoonPreset, self.m_noonPriority, s_FactorNoon)
+	elseif s_SunPosY <= 170 then
+		return
+	elseif s_SunPosY <= 175 then
+		local s_FactorNight = (s_SunPosY - 170) / 5
+		local s_FactorEvening = 1 - s_FactorNight
+		g_VEManagerClient:UpdateVisibility(self.m_currentNightPreset, self.m_nightPriority, s_FactorNight)
+		g_VEManagerClient:UpdateVisibility(self.m_currentEveningPreset, self.m_eveningPriority, s_FactorEvening)
+	end
+
 
 	if s_print_enabled and VEM_CONFIG.PRINT_DN_TIME_AND_VISIBILITIES then
 		print("Visibilities (Night, Morning, Noon, Evening): " .. MathUtils:Round(s_factorNight*100) .. "%, " .. MathUtils:Round(s_factorMorning*100) .. "%, " .. MathUtils:Round(s_factorNoon*100) .. "%, " .. MathUtils:Round(s_factorEvening*100) .. "% | Current time: " .. s_h_time .. "h")
@@ -276,7 +301,6 @@ function Time:Run()
 		g_VEManagerClient:SetSingleValue(self.m_currentEveningPreset, self.m_eveningPriority, 'sky', 'cloudLayer1Speed', self.m_CloudSpeed)
 	end
 
-	self:SetSunPosition(self.m_ClientTime)
 end
 
 -- Singleton.
