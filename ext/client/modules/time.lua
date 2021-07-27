@@ -249,7 +249,7 @@ function Time:Run()
 	local s_factorEvening = 0
 	local s_timeToChange = -1
 
-	local s_SunPosX, s_SunPosY = self:SetSunPosition(p_ClientTime)
+	local s_SunPosX, s_SunPosY = self:SetSunPosition(self.m_ClientTime)
 
 	if s_SunPosY <= 5 then
 		local s_FactorMorning = s_SunPosY / 5
