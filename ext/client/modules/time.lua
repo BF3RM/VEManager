@@ -249,7 +249,7 @@ function Time:Run()
 	local s_factorEvening = 0
 	local s_timeToChange = -1
 
-	local s_SunPosX, s_SunPosY = self:SetSunPosition(p_ClientTime)
+	local s_SunPosX, s_SunPosY = self:SetSunPosition(self.m_ClientTime)
 
 	if s_print_enabled and VEM_CONFIG.PRINT_DN_TIME_AND_VISIBILITIES then
 		print("Visibilities (Night, Morning, Noon, Evening): " .. MathUtils:Round(s_factorNight*100) .. "%, " .. MathUtils:Round(s_factorMorning*100) .. "%, " .. MathUtils:Round(s_factorNoon*100) .. "%, " .. MathUtils:Round(s_factorEvening*100) .. "% | Current time: " .. s_h_time .. "h")
