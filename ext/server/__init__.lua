@@ -125,7 +125,7 @@ end
 function TimeServer:ChatCommands(p_Player, recipientMask, message)
 	if message == '!settime' then
 		print('[Time-Server]: Time Event called by ' .. p_Player.name)
-		self:AddTime(9, 0.5)
+		self:AddTime(9, 1)
 	elseif message == '!setnight' then
 		print('[Time-Server]: Time Event called by ' .. p_Player.name)
 		self:AddTime(0, nil)
