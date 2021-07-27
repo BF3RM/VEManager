@@ -102,13 +102,13 @@ function Time:SetSunPosition(p_ClientTime) -- for smoother sun relative to time
 	local s_SunPosX = 275
 	local s_SunPosY = 0
 	if s_Factor <= VEM_CONFIG.DN_SUN_TIMINGS[1] and s_Factor > VEM_CONFIG.DN_SUN_TIMINGS[5] then
-		s_SunPosY = (-360 * VEM_CONFIG.DN_SUN_TIMINGS[2]) + (360 * s_Factor)
+		s_SunPosY = (-360 * VEM_CONFIG.DN_SUN_TIMINGS[2]) + (360 * (s_Factor / VEM_CONFIG.DN_SUN_TIMINGS[4]))
 	elseif s_Factor <= VEM_CONFIG.DN_SUN_TIMINGS[2] then
-		s_SunPosY = (-360 * VEM_CONFIG.DN_SUN_TIMINGS[2]) + (360 * s_Factor)
+		s_SunPosY = (-360 * VEM_CONFIG.DN_SUN_TIMINGS[2]) + (360 * (s_Factor / VEM_CONFIG.DN_SUN_TIMINGS[4]))
 	elseif s_Factor <= VEM_CONFIG.DN_SUN_TIMINGS[3] then
-		s_SunPosY = (-360 * VEM_CONFIG.DN_SUN_TIMINGS[2]) + (360 * s_Factor)
+		s_SunPosY = (-360 * VEM_CONFIG.DN_SUN_TIMINGS[2]) + (360 * (s_Factor / VEM_CONFIG.DN_SUN_TIMINGS[4]))
 	elseif s_Factor <= VEM_CONFIG.DN_SUN_TIMINGS[4] then
-		s_SunPosY = (-360 * VEM_CONFIG.DN_SUN_TIMINGS[2]) + (360 * s_Factor)
+		s_SunPosY = (-360 * VEM_CONFIG.DN_SUN_TIMINGS[2]) + (360 * (s_Factor / VEM_CONFIG.DN_SUN_TIMINGS[4]))
 	elseif s_Factor >= VEM_CONFIG.DN_SUN_TIMINGS[4] then
 		s_SunPosX = 275 * (1 - s_Factor)
 		s_SunPosY = 70
@@ -251,14 +251,12 @@ function Time:Run()
 
 	local s_SunPosX, s_SunPosY = self:SetSunPosition(p_ClientTime)
 
-	if 
-
 	if s_print_enabled and VEM_CONFIG.PRINT_DN_TIME_AND_VISIBILITIES then
 		print("Visibilities (Night, Morning, Noon, Evening): " .. MathUtils:Round(s_factorNight*100) .. "%, " .. MathUtils:Round(s_factorMorning*100) .. "%, " .. MathUtils:Round(s_factorNoon*100) .. "%, " .. MathUtils:Round(s_factorEvening*100) .. "% | Current time: " .. s_h_time .. "h")
 		--print("Time Till Switch: " .. MathUtils:Round(s_timeToChange) .. "sec")
 	end
 
-	-- Apply visibility factor
+	--[[ Apply visibility factor
 	if self.m_FirstRun then
 		g_VEManagerClient:SetVisibility(self.m_currentNightPreset, s_factorNight)
 		g_VEManagerClient:SetVisibility(self.m_currentMorningPreset, s_factorMorning)
@@ -274,9 +272,8 @@ function Time:Run()
 		g_VEManagerClient:SetSingleValue(self.m_currentMorningPreset, self.m_morningPriority, 'sky', 'cloudLayer1Speed', self.m_CloudSpeed)
 		g_VEManagerClient:SetSingleValue(self.m_currentNoonPreset, self.m_noonPriority, 'sky', 'cloudLayer1Speed', self.m_CloudSpeed)
 		g_VEManagerClient:SetSingleValue(self.m_currentEveningPreset, self.m_eveningPriority, 'sky', 'cloudLayer1Speed', self.m_CloudSpeed)
-	end
+	end]]
 
-	self:SetSunPosition(self.m_ClientTime)
 end
 
 -- Singleton.
