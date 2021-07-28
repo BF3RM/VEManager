@@ -100,7 +100,7 @@ function CinematicTools:GenericCallback(p_Path, p_Value, p_Net)
 	VisualEnvironmentManager:SetDirty(true)
 	if p_Net ~= true then
 		self:SendForCollaboration(p_Path, p_Value)
-		print('Sending: ' .. p_Path .. ' with Value: ' .. p_Value)
+		print('Sending: ' .. p_Path .. ' with Value: ' .. tostring(p_Value))
 	end
 end
 
