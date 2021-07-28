@@ -821,7 +821,7 @@ function CinematicTools:CreateGUI()
 	DebugGUI:Folder('Textures (must be loaded)', function ()
 
 		DebugGUI:Text('Texture GUID', 'Enter GUID here', function(p_TextureGUID)
-			self.selectedTexture = TextureAsset(ResourceManager:SearchForInstanceByGuid(Guid(p_TextureGUID))
+			self.selectedTexture = TextureAsset(ResourceManager:SearchForInstanceByGuid(Guid(p_TextureGUID)))
 		end)
 
 		DebugGUI:Text('Texture Destination', 'sky.panoramicTexture', function(p_Destination)
@@ -846,7 +846,7 @@ function CinematicTools:CreateGUI()
 
 		DebugGUI:Checkbox('Enable', false, function(p_Value)
 			if p_Value == true then
-				s_Enabled = true 
+				s_Enabled = true
 				g_Time:Add(43200, true, 86400)
 			elseif p_Value == false and s_Enabled == true then
 				s_Enabled = false
