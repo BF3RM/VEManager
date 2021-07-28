@@ -190,6 +190,34 @@ function CinematicTools:CreateGUI()
 			self:GenericCallback("sky.cloudLayer1AlphaMul", p_Value)
 		end)
 
+		DebugGUI:Range('Cloud Layer 2 Altitude', {DefValue = 500000, Min = 0, Max = 500000, Step = 1}, function(p_Value)
+			self:GenericCallback("sky.cloudLayer2Altitude", p_Value)
+		end)
+
+		DebugGUI:Range('Cloud Layer 2 Tile Factor', {DefValue = 1, Min = 0, Max = 5, Step = 0.1}, function(p_Value)
+			self:GenericCallback("sky.cloudLayer2TileFactor", p_Value)
+		end)
+
+		DebugGUI:Range('Cloud Layer 2 Rotation', {DefValue = 0, Min = 0, Max = 359, Step = 1}, function(p_Value)
+			self:GenericCallback("sky.cloudLayer2Rotation", p_Value)
+		end)
+
+		DebugGUI:Range('Cloud Layer 2 Speed', {DefValue = VEM_CONFIG.CLOUDS_DEFAULT_SPEED, Min = -1, Max = 1, Step = 0.0001}, function(p_Value)
+			self:GenericCallback("sky.cloudLayer2Speed", p_Value)
+		end)
+
+		DebugGUI:Range('Cloud Layer 2 Sunlight Intensity', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
+			self:GenericCallback("sky.cloudLayer2SunLightIntensity", p_Value)
+		end)
+
+		DebugGUI:Range('Cloud Layer 2 Ambientlight Intensity', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
+			self:GenericCallback("sky.cloudLayer2AmbientLightIntensity", p_Value)
+		end)
+
+		DebugGUI:Range('Cloud Layer 2 Alpha Multiplicator', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
+			self:GenericCallback("sky.cloudLayer2AlphaMul", p_Value)
+		end)
+
 	end)
 
 	-- Enlighten
@@ -199,7 +227,7 @@ function CinematicTools:CreateGUI()
 			self:GenericCallback("enlighten.enable", p_Value)
 		end)
 
-		DebugGUI:Checkbox('Skybox Enlighten Enable', true, function(p_Value)
+		--[[DebugGUI:Checkbox('Skybox Enlighten Enable', true, function(p_Value)
 			self:GenericCallback("enlighten.skyBoxEnable", p_Value)
 		end)
 
@@ -289,7 +317,7 @@ function CinematicTools:CreateGUI()
 
 		DebugGUI:Range('Skybox Backlight Color Size', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
 			self:GenericCallback("enlighten.skyBoxBackLightColorSize", p_Value)
-		end)
+		end)]]
 
 	end)
 
@@ -458,7 +486,10 @@ function CinematicTools:CreateGUI()
 
 		DebugGUI:Checkbox('DoF Enable', false, function(p_Value)
 			self:GenericCallback("dof.enable", p_Value)
-			self:GenericCallback("dof.blurFilter", 6)
+		end)
+
+		DebugGUI:Range('Blur Filter', {DefValue = 6, Min = 0, Max = 6, Step = 1}, function(p_Value)
+			self:GenericCallback("dof.blurFilter", p_Value)
 		end)
 
 		DebugGUI:Range('Scale', {DefValue = 100.0, Min = 0.0, Max = 500.0, Step = 1.0}, function(p_Value)
@@ -766,12 +797,33 @@ function CinematicTools:CreateGUI()
 
 	end)]]
 
+	-- Textures
+	DebugGUI:Folder('Textures', function ()
+
+		DebugGUI:Text('Texture GUID', 'Enter GUID here', function(p_TextureGUID)
+			self.selectedTexture = TextureAsset(ResourceManager:SearchForInstanceByGuid(p_TextureGUID))
+		end)
+
+		DebugGUI:Text('Texture Destination', 'sky.panoramicTexture', function(p_Destination)
+			self.selectedTextureDestination = p_Destination
+		end)
+
+		DebugGUI:Button('Apply Texture', function(value)
+			if self.selectedTextureDestination == nil or self.selectedTexture == nil then
+				print('Texture not Valid')
+				return
+			end
+			self:GenericCallback(self.selectedTextureDestination, self.selectedTexture)
+		end)
+
+	end)
+
 	-- Time Control
 	DebugGUI:Folder('Time Control', function ()
 
 		local s_Enabled = false
 		local s_SyncChangesWithServer = false
-		
+
 		DebugGUI:Checkbox('Enable', false, function(p_Value)
 			if p_Value == true then
 				s_Enabled = true 
@@ -835,7 +887,7 @@ function CinematicTools:ParseJSON()
 
 			-- Foreach field in class
 			for _, l_Field in ipairs(s_Class.typeInfo.fields) do
-				
+
 				-- Fix lua types
 				local s_FieldName = l_Field.name
 
@@ -869,7 +921,7 @@ function CinematicTools:ParseJSON()
 				end
 
 			end
-			
+
 			if s_Rows ~= nil then
 				table.insert(s_Result, "\"" .. l_Class .. "\" : {" .. table.concat(s_Rows, ",") .. "}")
 			end
