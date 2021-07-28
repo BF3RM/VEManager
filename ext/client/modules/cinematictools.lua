@@ -31,7 +31,9 @@ end
 
 
 function CinematicTools:OnDataFromServer(p_Path, p_Value, p_Net)
-	self:GenericCallback(p_Path, p_Value, p_Net)
+	if self.m_CollaborationEnabled == true then
+		self:GenericCallback(p_Path, p_Value, p_Net)
+	end
 end
 
 
@@ -98,6 +100,7 @@ function CinematicTools:GenericCallback(p_Path, p_Value, p_Net)
 	VisualEnvironmentManager:SetDirty(true)
 	if p_Net ~= true then
 		self:SendForCollaboration(p_Path, p_Value)
+		print('Sending: ' .. p_Path .. ' with Value: ' .. p_Value)
 	end
 end
 
