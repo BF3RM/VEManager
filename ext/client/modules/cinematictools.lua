@@ -19,6 +19,7 @@ end
 function CinematicTools:RegisterEvents()
 	--self.m_VisualStateAddedEvent = Events:Subscribe('VE:StateAdded', self, self.OnVisualStateAdded)
 	self.m_LevelLoadEvent = Events:Subscribe('Level:Loaded', self, self.OnLevelLoaded)
+	self.m_DataFromServer = NetEvents:Subscribe('CinematicTools:DataToClient', self, self.OnDataFromServer)
 end
 
 
@@ -26,6 +27,11 @@ function CinematicTools:OnLevelLoaded()
 	if VEM_CONFIG.DEV_LOAD_CUSTOM_PRESET then
 		g_VEManagerClient:EnablePreset("CinematicTools")  -- Load custom preset
 	end
+end
+
+
+function CinematicTools:OnDataFromServer(p_Path, p_Value, p_Net)
+	self:GenericCallback(p_Path, p_Value, p_Net)
 end
 
 
@@ -65,7 +71,7 @@ function CinematicTools:GetVisualEnvironmentState(...)
 end
 
 
-function CinematicTools:GenericCallback(p_Path, p_Value)
+function CinematicTools:GenericCallback(p_Path, p_Value, p_Net)
 	if self.m_CineState == nil then
 		self.m_CineState = self:GetVisualEnvironmentState(self.m_CinePriority)
 		print('CineState Name: ' .. self.m_CineState.entityName)
@@ -90,7 +96,18 @@ function CinematicTools:GenericCallback(p_Path, p_Value)
 	end
 
 	VisualEnvironmentManager:SetDirty(true)
+	if p_Net ~= true then
+		self:SendForCollaboration(p_Path, p_Value)
+	end
 end
+
+
+function CinematicTools:SendForCollaboration(p_Path, p_Value)
+	if self.m_CollaborationEnabled == true then
+		NetEvents:Send('CinematicTools:CollaborationData', p_Path, p_Value)
+	end
+end
+
 
 function CinematicTools:CreateGUI()
 	print("*Creating GUI for Cinematic Tools")
@@ -853,6 +870,10 @@ function CinematicTools:CreateGUI()
 
 	-- Utilities
 	DebugGUI:Folder("Utilities", function ()
+
+		DebugGUI:Checkbox('Enable Collaboration Mode', false, function(p_Value)
+			self.m_CollaborationEnabled = p_Value
+		end)
 
 		DebugGUI:Text('Preset name', 'New Preset', function(p_PresetName)
 			self.m_PresetName = p_PresetName
