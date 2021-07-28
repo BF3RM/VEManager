@@ -798,7 +798,7 @@ function CinematicTools:CreateGUI()
 	end)]]
 
 	-- Textures
-	DebugGUI:Folder('Textures', function ()
+	DebugGUI:Folder('Textures (must be loaded)', function ()
 
 		DebugGUI:Text('Texture GUID', 'Enter GUID here', function(p_TextureGUID)
 			self.selectedTexture = TextureAsset(ResourceManager:SearchForInstanceByGuid(p_TextureGUID))
