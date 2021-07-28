@@ -20,6 +20,7 @@ end
 
 
 function CinetoolsServer:SendToClients(p_Path, p_Value)
+	print('Received Collab Data: .. ' .. p_Path ' with Value: ' .. p_Value)
     NetEvents:Broadcast('CinematicTools:DataToClient', p_Path, p_Value, true)
 end
 
