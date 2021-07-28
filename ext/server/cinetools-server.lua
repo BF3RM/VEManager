@@ -9,12 +9,12 @@ end
 
 function CinetoolsServer:RegisterVars()
 	-- Initialise variables
-	print('[Time-Server]: Registered Vars')
+	print('[Cinetools-Server]: Registered Vars')
 end
 
 
 function CinetoolsServer:RegisterEvents()
-	print('[Time-Server]: Registered Events')
+	print('[Cinetools-Server]: Registered Events')
     self.m_DataClientToServer = NetEvents:Subscribe('CinematicTools:CollaborationData', self, self.SendToClients)
 end
 
