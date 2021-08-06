@@ -226,12 +226,6 @@ end
 
 end]]
 
-function VEManagerClient:CreateCinematicTools()
-	if VEM_CONFIG.DEV_LOAD_CINEMATIC_TOOLS then
-		CinematicTools:__init()
-	end
-end
-
 
 --[[
 
