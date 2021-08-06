@@ -14,19 +14,18 @@ function Time:RegisterVars()
 	self.m_SystemRunning = false
 	self.m_IsStatic = nil
 	self.m_ClientTime = 0
-	self.m_totalClientTime = 0
-	self.m_totalDayLength = 0
-	self.m_originalSunX = nil
-	self.m_originalSunY = nil
-	self.m_mapPresets = {}
-	self.m_nightPriority = 11
-	self.m_morningPriority = 12
-	self.m_noonPriority = 13
-	self.m_eveningPriority = 14
-	self.m_currentNightPreset = nil
-	self.m_currentMorningPreset = nil
-	self.m_currentNoonPreset = nil
-	self.m_currentEveningPreset = nil
+	self.m_TotalClientTime = 0
+	self.m_TotalDayLength = 0
+	self.m_OriginalSunX = nil
+	self.m_OriginalSunY = nil
+	self.m_NightPriority = 11
+	self.m_MorningPriority = 12
+	self.m_NoonPriority = 13
+	self.m_EveningPriority = 14
+	self.m_CurrentNightPreset = nil
+	self.m_CurrentMorningPreset = nil
+	self.m_CurrentNoonPreset = nil
+	self.m_CurrentEveningPreset = nil
 	self.m_LastPrintHours = -1
 	self.m_FirstRun = false
 	self.m_CurrentPresetTable = {}
@@ -46,11 +45,11 @@ function Time:RegisterEvents()
 	NetEvents:Subscribe('ClientTime:Disable', self, self.Disable)
 end
 
-function Time:OnPartitionLoad(partition)
-	Patches:Components(partition)
+function Time:OnPartitionLoad(p_Partition)
+	Patches:Components(p_Partition)
 
-	if partition.guid == Guid('6E5D35D9-D9D5-11DE-ADB5-9D4DBC23632A') then
-		for _, instance in pairs(partition.instances) do
+	if p_Partition.guid == Guid('6E5D35D9-D9D5-11DE-ADB5-9D4DBC23632A') then
+		for _, instance in pairs(p_Partition.instances) do
 			if instance.instanceGuid == Guid('32CE96BB-E578-9589-7B11-B670661DF2DF') then
 				g_Stars = instance
 			end
@@ -86,7 +85,7 @@ function Time:ServerSync(p_ServerDayTime, p_TotalServerTime)
 	elseif self.m_SystemRunning == true then
 		--print('Server Sync:' .. 'Current Time: ' .. p_ServerDayTime .. ' | ' .. 'Total Time:' .. p_TotalServerTime)
 		self.m_ClientTime = p_ServerDayTime
-		self.m_totalClientTime = p_TotalServerTime
+		self.m_TotalClientTime = p_TotalServerTime
 		self:Run()
 	end
 end
@@ -97,7 +96,7 @@ function Time:AddTimeToClient(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds
 end
 
 function Time:GetSunPosition(p_ClientTime) -- for smoother sun relative to time
-	local s_DayFactor = p_ClientTime / self.m_totalDayLength
+	local s_DayFactor = p_ClientTime / self.m_TotalDayLength
 	local s_SunPosX = 275
 	local s_SunPosY = 0
 
@@ -147,7 +146,7 @@ end
 
 function Time:SetCloudSpeed()
 	if VEM_CONFIG.DN_CHANGE_CLOUDS_SPEED_BASED_ON_DAY_LENGTH then
-		self.m_CloudSpeed = 1 / (self.m_totalDayLength / 60 * 0.5)
+		self.m_CloudSpeed = 1 / (self.m_TotalDayLength / 60 * 0.5)
 		print('Set Cloud Speed = ' .. tostring(self.m_CloudSpeed))
 	end
 end
@@ -184,25 +183,25 @@ function Time:Add(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 	end
 
 	-- Get all dynamic presets
-	for id, s_Preset in pairs(g_VEManagerClient.m_Presets) do
+	for l_ID, l_Preset in pairs(g_VEManagerClient.m_Presets) do
 
-		if g_VEManagerClient.m_Presets[id].type == 'dynamic' then
-			self.m_CurrentPresetTable[id] = {}
-			self.m_CurrentPresetTable[id]['sun'] = self.m_RawPresets[id].Sky.SunPosY
+		if g_VEManagerClient.m_Presets[l_ID].type == 'dynamic' then
+			self.m_CurrentPresetTable[l_ID] = {}
+			self.m_CurrentPresetTable[l_ID]['sun'] = self.m_RawPresets[l_ID].Sky.SunPosY
 		end
 	end
 
 	-- Save dayLength in Class (minutes -> seconds)
-	self.m_totalDayLength = p_LengthOfDayInSeconds
-	print('[Time-Client]: Length of Day: ' .. self.m_totalDayLength .. ' Seconds')
+	self.m_TotalDayLength = p_LengthOfDayInSeconds
+	print('[Time-Client]: Length of Day: ' .. self.m_TotalDayLength .. ' Seconds')
 	self.m_ClientTime = p_StartingTime
-	print('[Time-Client]: Starting at Time: ' .. p_StartingTime / 3600 / (self.m_totalDayLength / 86000) .. ' Hours ('.. p_StartingTime ..' Seconds)')
+	print('[Time-Client]: Starting at Time: ' .. p_StartingTime / 3600 / (self.m_TotalDayLength / 86000) .. ' Hours ('.. p_StartingTime ..' Seconds)')
 
 	--[[ Set Priorities
-	g_VEManagerClient.m_Presets[self.m_currentNightPreset]["ve"].priority = self.m_nightPriority
-	g_VEManagerClient.m_Presets[self.m_currentMorningPreset]["ve"].priority = self.m_morningPriority
-	g_VEManagerClient.m_Presets[self.m_currentNoonPreset]["ve"].priority = self.m_noonPriority
-	g_VEManagerClient.m_Presets[self.m_currentEveningPreset]["ve"].priority = self.m_eveningPriority]]
+	g_VEManagerClient.m_Presets[self.m_CurrentNightPreset]["ve"].priority = self.m_NightPriority
+	g_VEManagerClient.m_Presets[self.m_CurrentMorningPreset]["ve"].priority = self.m_MorningPriority
+	g_VEManagerClient.m_Presets[self.m_CurrentNoonPreset]["ve"].priority = self.m_NoonPriority
+	g_VEManagerClient.m_Presets[self.m_CurrentEveningPreset]["ve"].priority = self.m_EveningPriority]]
 
 	self.m_FirstRun = true
 	self:Run()
@@ -220,7 +219,6 @@ end
 
 -- ALSO LOOP THIS CODE PLEASE
 function Time:Run()
-
 	if self.m_SystemRunning ~= true and not self.m_FirstRun then
 		--print("System Running: " .. tostring(self.m_SystemRunning))
 		return
@@ -231,8 +229,8 @@ function Time:Run()
 		return
 	end
 
-	local s_print_enabled = false
-	local s_h_time = MathUtils:Round(self.m_ClientTime / self.m_totalDayLength * 24)
+	local s_print_enabled = false --todo change syntax
+	local s_h_time = MathUtils:Round(self.m_ClientTime / self.m_TotalDayLength * 24)
 
 	if s_h_time ~= self.m_LastPrintHours  then
 		s_print_enabled = true
@@ -240,7 +238,6 @@ function Time:Run()
 	end
 
 	local s_SunPosX, s_SunPosY = self:GetSunPosition(self.m_ClientTime)
-
 	local s_VisibilityFactorFadeIn = 0
 	local s_VisibilityFactorFadeOut = 0
 	local s_VisibilityFadeInID = nil
@@ -254,7 +251,7 @@ function Time:Run()
 				s_VisibilityFadeInID = l_ID
 			end
 		end
-	end
+	end --todo differentiate between day and night values
 
 	if s_LowestValue == nil or s_VisibilityFadeInID == nil or s_VisibilityFadeOutID == nil then
 		print('Visibility Calculation Error')
@@ -276,20 +273,20 @@ function Time:Run()
 
 	-- Apply visibility factor
 	if self.m_FirstRun then
-		g_VEManagerClient:SetVisibility(self.m_currentNightPreset, s_FactorNight)
-		g_VEManagerClient:SetVisibility(self.m_currentMorningPreset, s_FactorMorning)
-		g_VEManagerClient:SetVisibility(self.m_currentNoonPreset, s_FactorNoon)
-		g_VEManagerClient:SetVisibility(self.m_currentEveningPreset, s_FactorEvening)
+		g_VEManagerClient:SetVisibility(self.m_CurrentNightPreset, s_FactorNight)
+		g_VEManagerClient:SetVisibility(self.m_CurrentMorningPreset, s_FactorMorning)
+		g_VEManagerClient:SetVisibility(self.m_CurrentNoonPreset, s_FactorNoon)
+		g_VEManagerClient:SetVisibility(self.m_CurrentEveningPreset, s_FactorEvening)
 		self.m_FirstRun = false
 	else
-		g_VEManagerClient:UpdateVisibility(self.m_currentNightPreset, self.m_nightPriority, s_FactorNight)
-		g_VEManagerClient:UpdateVisibility(self.m_currentMorningPreset, self.m_morningPriority, s_FactorMorning)
-		g_VEManagerClient:UpdateVisibility(self.m_currentNoonPreset, self.m_noonPriority, s_FactorNoon)
-		g_VEManagerClient:UpdateVisibility(self.m_currentEveningPreset, self.m_eveningPriority, s_FactorEvening)
-		g_VEManagerClient:SetSingleValue(self.m_currentNightPreset, self.m_nightPriority, 'sky', 'cloudLayer1Speed', self.m_CloudSpeed)
-		g_VEManagerClient:SetSingleValue(self.m_currentMorningPreset, self.m_morningPriority, 'sky', 'cloudLayer1Speed', self.m_CloudSpeed)
-		g_VEManagerClient:SetSingleValue(self.m_currentNoonPreset, self.m_noonPriority, 'sky', 'cloudLayer1Speed', self.m_CloudSpeed)
-		g_VEManagerClient:SetSingleValue(self.m_currentEveningPreset, self.m_eveningPriority, 'sky', 'cloudLayer1Speed', self.m_CloudSpeed)
+		g_VEManagerClient:UpdateVisibility(self.m_CurrentNightPreset, self.m_NightPriority, s_FactorNight)
+		g_VEManagerClient:UpdateVisibility(self.m_CurrentMorningPreset, self.m_MorningPriority, s_FactorMorning)
+		g_VEManagerClient:UpdateVisibility(self.m_CurrentNoonPreset, self.m_NoonPriority, s_FactorNoon)
+		g_VEManagerClient:UpdateVisibility(self.m_CurrentEveningPreset, self.m_EveningPriority, s_FactorEvening)
+		g_VEManagerClient:SetSingleValue(self.m_CurrentNightPreset, self.m_NightPriority, 'sky', 'cloudLayer1Speed', self.m_CloudSpeed)
+		g_VEManagerClient:SetSingleValue(self.m_CurrentMorningPreset, self.m_MorningPriority, 'sky', 'cloudLayer1Speed', self.m_CloudSpeed)
+		g_VEManagerClient:SetSingleValue(self.m_CurrentNoonPreset, self.m_NoonPriority, 'sky', 'cloudLayer1Speed', self.m_CloudSpeed)
+		g_VEManagerClient:SetSingleValue(self.m_CurrentEveningPreset, self.m_EveningPriority, 'sky', 'cloudLayer1Speed', self.m_CloudSpeed)
 	end
 
 end
