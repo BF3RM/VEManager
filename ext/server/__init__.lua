@@ -20,6 +20,5 @@ if g_VEManagerServer == nil then
 	g_VEManagerServer = VEManagerServer()
 end
 
+
 return g_VEManagerServer
-
-

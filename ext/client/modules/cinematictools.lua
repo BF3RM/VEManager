@@ -9,7 +9,6 @@ end
 
 function CinematicTools:RegisterVars()
 	self.m_CineState = nil
-	self.m_PendingDirty = false
 	self.m_CinePriority = 10000010
 	self.m_PresetName = nil
 	self.m_PresetPriority = nil

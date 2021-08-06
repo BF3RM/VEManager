@@ -80,7 +80,7 @@ end
 function Time:ServerSync(p_ServerDayTime, p_TotalServerTime)
 	if p_ServerDayTime == nil or p_TotalServerTime == nil then
 		return
-	
+
 	elseif self.m_SystemRunning == true then
 		--print('Server Sync:' .. 'Current Time: ' .. p_ServerDayTime .. ' | ' .. 'Total Time:' .. p_TotalServerTime)
 		self.m_ClientTime = p_ServerDayTime
@@ -95,53 +95,34 @@ function Time:AddTimeToClient(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds
 end
 
 function Time:SetSunPosition(p_ClientTime) -- for smoother sun relative to time
-	local factor = p_ClientTime / self.m_totalDayLength
-	VisualEnvironmentManager:SetDirty(true)
-	VisualEnvironmentManager:SetSunRotationX(275)
+	local s_Factor = p_ClientTime / self.m_totalDayLength
+	s_Factor = MathUtils:Clamp(s_Factor, 0, 1)
+	local s_DaylightValue = 360 * (s_Factor / VEM_CONFIG.DN_SUN_TIMINGS[2])
+	local s_SunOffset = -360 * VEM_CONFIG.DN_SUN_TIMINGS[1]
+	local s_MoonX = 200 * s_Factor / 1
 
+	local s_SunPosX = 275
 	local s_SunPosY = 0
-	if factor <= VEM_CONFIG.DN_PRESET_TIMINGS[1] then -- 00:00 to 6:00
-		-- set visibility preset night
-		local s_factorNight = factor  / VEM_CONFIG.DN_PRESET_TIMINGS[1]
-		s_SunPosY = 90 - s_factorNight * 90
-	
-	elseif factor <= VEM_CONFIG.DN_PRESET_TIMINGS[2] then -- 6:00 to 9:00
-		-- calculate visibility preset morning
-		local s_factorMorning = (factor - VEM_CONFIG.DN_PRESET_TIMINGS[1]) / (VEM_CONFIG.DN_PRESET_TIMINGS[2] - VEM_CONFIG.DN_PRESET_TIMINGS[1])
-		s_SunPosY = s_factorMorning * 45
-	
-	elseif factor <= VEM_CONFIG.DN_PRESET_TIMINGS[3] then -- 9:00 to 12:00
-		-- calculate visibility preset noon
-		local s_factorNoon = (factor - VEM_CONFIG.DN_PRESET_TIMINGS[2]) / (VEM_CONFIG.DN_PRESET_TIMINGS[3] - VEM_CONFIG.DN_PRESET_TIMINGS[2])
-		s_SunPosY = 45 + s_factorNoon * 45
-	
-	elseif factor <= VEM_CONFIG.DN_PRESET_TIMINGS[4] then -- 12:00 to 18:00
-		-- calculate visibility preset evening
-		local s_factorEvening = (factor - VEM_CONFIG.DN_PRESET_TIMINGS[3]) / (VEM_CONFIG.DN_PRESET_TIMINGS[4] - VEM_CONFIG.DN_PRESET_TIMINGS[3])
-		s_SunPosY = 90 + s_factorEvening * 45
-	
-	elseif factor <= VEM_CONFIG.DN_PRESET_TIMINGS[5] then -- 18:00 to 21:00
-		-- Night preset has a lower visibility, thus we change evening visibility back to 0
-		-- calculate visibility preset evening
-		local s_factorEvening = (factor - VEM_CONFIG.DN_PRESET_TIMINGS[4]) / (VEM_CONFIG.DN_PRESET_TIMINGS[5] - VEM_CONFIG.DN_PRESET_TIMINGS[4])
-		s_SunPosY = 135 + s_factorEvening * 45
-	
-	elseif factor > VEM_CONFIG.DN_PRESET_TIMINGS[#VEM_CONFIG.DN_PRESET_TIMINGS] then -- 21:00 to 00:00
-		-- set visibility preset night
-		local s_factorNight = (factor - VEM_CONFIG.DN_PRESET_TIMINGS[5]) / (1 - VEM_CONFIG.DN_PRESET_TIMINGS[5])
-		s_SunPosY = 180 - s_factorNight * 90
-	
+	if s_Factor <= VEM_CONFIG.DN_SUN_TIMINGS[1] and s_Factor > VEM_CONFIG.DN_SUN_TIMINGS[3] then
+		s_SunPosY = s_SunOffset + s_DaylightValue
+	elseif s_Factor <= VEM_CONFIG.DN_SUN_TIMINGS[2] then
+		s_SunPosY = s_SunOffset + s_DaylightValue
+	elseif s_Factor >= VEM_CONFIG.DN_SUN_TIMINGS[2] then
+		s_SunPosX = s_MoonX
+		s_SunPosY = 35 
+	elseif s_Factor <= VEM_CONFIG.DN_SUN_TIMINGS[3] then
+		s_SunPosX = s_MoonX
+		s_SunPosY = 35 
 	else
 		print("Faulty ClientTime: " .. p_ClientTime)
 	end
 
-	-- Avoid crashes
 	s_SunPosY = MathUtils:Round(s_SunPosY * 100) / 100
-    if s_SunPosY < 0 or s_SunPosY > 180 then 
-        return 
-    end 
-
+	s_SunPosY = MathUtils:Clamp(s_SunPosY, 0, 180)
+	VisualEnvironmentManager:SetSunRotationX(s_SunPosX)
 	VisualEnvironmentManager:SetSunRotationY(s_SunPosY)
+	VisualEnvironmentManager:SetDirty(true)
+	return s_SunPosX, s_SunPosY
 end
 
 function Time:SetCloudSpeed()
@@ -261,81 +242,75 @@ function Time:Run()
 	end
 
 	-- Default visibility factors
-	local s_factorNight = 0
-	local s_factorMorning = 0
-	local s_factorNoon = 0
-	local s_factorEvening = 0
+	local s_FactorNight = 0
+	local s_FactorMorning = 0
+	local s_FactorNoon = 0
+	local s_FactorEvening = 0
 	local s_timeToChange = -1
 
-	if self.m_ClientTime <= self.m_totalDayLength * VEM_CONFIG.DN_PRESET_TIMINGS[1] or self.m_ClientTime > VEM_CONFIG.DN_PRESET_TIMINGS[#VEM_CONFIG.DN_PRESET_TIMINGS] * self.m_totalDayLength then -- 00:00 to 6:00 or 21:00 to 00:00
-		-- set visibility preset night
-		s_factorNight = 1
+	local s_SunPosX, s_SunPosY = self:SetSunPosition(self.m_ClientTime)
 
-		s_timeToChange = self.m_totalDayLength * VEM_CONFIG.DN_PRESET_TIMINGS[1] - self.m_ClientTime
-	
-	elseif self.m_ClientTime <= ( self.m_totalDayLength * VEM_CONFIG.DN_PRESET_TIMINGS[2] ) then -- 6:00 to 9:00
-		-- calculate visibility preset morning
-		s_factorMorning = ( self.m_ClientTime - ( self.m_totalDayLength * VEM_CONFIG.DN_PRESET_TIMINGS[1] )) / ( self.m_totalDayLength * ( VEM_CONFIG.DN_PRESET_TIMINGS[2] - VEM_CONFIG.DN_PRESET_TIMINGS[1] )) --todo change these multiplication values to variables later to calculate automatically
-		-- calculate visibility preset night
-		s_factorNight = 1
-
-		s_timeToChange = self.m_totalDayLength * VEM_CONFIG.DN_PRESET_TIMINGS[2] - self.m_ClientTime -- 9:00 to 12:00
-	
-	elseif self.m_ClientTime <= ( self.m_totalDayLength * VEM_CONFIG.DN_PRESET_TIMINGS[3] ) then
-		-- calculate visibility preset noon
-		s_factorNoon = ( self.m_ClientTime - ( self.m_totalDayLength * VEM_CONFIG.DN_PRESET_TIMINGS[2] )) / ( self.m_totalDayLength * ( VEM_CONFIG.DN_PRESET_TIMINGS[3] - VEM_CONFIG.DN_PRESET_TIMINGS[2] ))
-		-- calculate visibility preset morning
-		s_factorMorning = 1
-
-		s_timeToChange = self.m_totalDayLength * VEM_CONFIG.DN_PRESET_TIMINGS[3] - self.m_ClientTime
-	
-	elseif self.m_ClientTime <= ( self.m_totalDayLength * VEM_CONFIG.DN_PRESET_TIMINGS[4] ) then -- 12:00 to 18:00
-
-		-- calculate visibility preset evening
-		s_factorEvening = ( self.m_ClientTime - ( self.m_totalDayLength * VEM_CONFIG.DN_PRESET_TIMINGS[3] )) / ( self.m_totalDayLength * ( VEM_CONFIG.DN_PRESET_TIMINGS[4] - VEM_CONFIG.DN_PRESET_TIMINGS[3] ))
-		-- calculate visibility preset noon
-		s_factorNoon = 1
-
-		s_timeToChange = self.m_totalDayLength * VEM_CONFIG.DN_PRESET_TIMINGS[4] - self.m_ClientTime
-	
-	elseif self.m_ClientTime <= self.m_totalDayLength * VEM_CONFIG.DN_PRESET_TIMINGS[5] then-- 18:00 to 21:00
-		-- Night preset has a lower visibility, thus we change evening visibility back to 0
-		-- calculate visibility preset night
-		s_factorNight = 1
-		-- calculate visibility preset evening
-		s_factorEvening = 1 - ( self.m_ClientTime - ( self.m_totalDayLength * VEM_CONFIG.DN_PRESET_TIMINGS[4] )) / ( self.m_totalDayLength * ( VEM_CONFIG.DN_PRESET_TIMINGS[5] - VEM_CONFIG.DN_PRESET_TIMINGS[4] ))
-
-		s_timeToChange = self.m_totalDayLength * VEM_CONFIG.DN_PRESET_TIMINGS[5] - self.m_ClientTime 
-	
-	else
-		print("Faulty ClientTime: " .. self.m_ClientTime)
-		self.m_ClientTime = 1.0
+	if s_SunPosY == 0 or s_SunPosY == 180 then
+		s_FactorNight = 1
+		s_FactorEvening = 0
+		--print('Factor Night: ' .. s_FactorNight)
+		--print('Factor Evening: ' .. s_FactorEvening)
+	elseif s_SunPosY <= 10 then
+		s_FactorMorning = s_SunPosY / 10
+		s_FactorNight = 1 - s_FactorMorning
+		--print('Factor Morning: ' .. s_FactorMorning)
+		--print('Factor Night: ' .. s_FactorNight)
+	elseif s_SunPosY <= 15 then 
+		s_FactorMorning = 1
+	elseif s_SunPosY <= 25 then
+		s_FactorNoon = (s_SunPosY - 15) / 10
+		s_FactorMorning = 1 - s_FactorNoon
+		--print('Factor Noon: ' .. s_FactorNoon)
+		--print('Factor Morning: ' .. s_FactorMorning)
+	elseif s_SunPosY <= 160 then
+		s_FactorNoon = 1
+	elseif s_SunPosY <= 170 then
+		s_FactorEvening = (s_SunPosY - 160) / 10
+		s_FactorNoon = 1 - s_FactorEvening
+		--print('Factor Evening: ' .. s_FactorEvening)
+		--print('Factor Noon: ' .. s_FactorNoon)
+	elseif s_SunPosY <= 165 then
+		s_FactorEvening = 1
+	elseif s_SunPosY < 180 then
+		s_FactorNight = (s_SunPosY - 165) / 15
+		s_FactorEvening = 1 - s_FactorNight
+		--print('Factor Night: ' .. s_FactorNight)
+		--print('Factor Evening: ' .. s_FactorEvening)
 	end
 
+	s_FactorNight = MathUtils:Clamp(s_SunPosY, 0, 1)
+	s_FactorMorning = MathUtils:Clamp(s_FactorMorning, 0, 1)
+	s_FactorNoon = MathUtils:Clamp(s_FactorNoon, 0, 1)
+	s_FactorEvening = MathUtils:Clamp(s_FactorEvening, 0, 1)
+
 	if s_print_enabled and VEM_CONFIG.PRINT_DN_TIME_AND_VISIBILITIES then
-		print("Visibilities (Night, Morning, Noon, Evening): " .. MathUtils:Round(s_factorNight*100) .. "%, " .. MathUtils:Round(s_factorMorning*100) .. "%, " .. MathUtils:Round(s_factorNoon*100) .. "%, " .. MathUtils:Round(s_factorEvening*100) .. "% | Current time: " .. s_h_time .. "h")
+		print("Visibilities (Night, Morning, Noon, Evening): " .. MathUtils:Round(s_FactorNight*100) .. "%, " .. MathUtils:Round(s_FactorMorning*100) .. "%, " .. MathUtils:Round(s_FactorNoon*100) .. "%, " .. MathUtils:Round(s_FactorEvening*100) .. "% | Current time: " .. s_h_time .. "h")
 		--print("Time Till Switch: " .. MathUtils:Round(s_timeToChange) .. "sec")
 	end
 
 	-- Apply visibility factor
 	if self.m_FirstRun then
-		g_VEManagerClient:SetVisibility(self.m_currentNightPreset, s_factorNight)
-		g_VEManagerClient:SetVisibility(self.m_currentMorningPreset, s_factorMorning)
-		g_VEManagerClient:SetVisibility(self.m_currentNoonPreset, s_factorNoon)
-		g_VEManagerClient:SetVisibility(self.m_currentEveningPreset, s_factorEvening)
+		g_VEManagerClient:SetVisibility(self.m_currentNightPreset, s_FactorNight)
+		g_VEManagerClient:SetVisibility(self.m_currentMorningPreset, s_FactorMorning)
+		g_VEManagerClient:SetVisibility(self.m_currentNoonPreset, s_FactorNoon)
+		g_VEManagerClient:SetVisibility(self.m_currentEveningPreset, s_FactorEvening)
 		self.m_FirstRun = false
 	else
-		g_VEManagerClient:UpdateVisibility(self.m_currentNightPreset, self.m_nightPriority, s_factorNight)
-		g_VEManagerClient:UpdateVisibility(self.m_currentMorningPreset, self.m_morningPriority, s_factorMorning)
-		g_VEManagerClient:UpdateVisibility(self.m_currentNoonPreset, self.m_noonPriority, s_factorNoon)
-		g_VEManagerClient:UpdateVisibility(self.m_currentEveningPreset, self.m_eveningPriority, s_factorEvening)
+		g_VEManagerClient:UpdateVisibility(self.m_currentNightPreset, self.m_nightPriority, s_FactorNight)
+		g_VEManagerClient:UpdateVisibility(self.m_currentMorningPreset, self.m_morningPriority, s_FactorMorning)
+		g_VEManagerClient:UpdateVisibility(self.m_currentNoonPreset, self.m_noonPriority, s_FactorNoon)
+		g_VEManagerClient:UpdateVisibility(self.m_currentEveningPreset, self.m_eveningPriority, s_FactorEvening)
 		g_VEManagerClient:SetSingleValue(self.m_currentNightPreset, self.m_nightPriority, 'sky', 'cloudLayer1Speed', self.m_CloudSpeed)
 		g_VEManagerClient:SetSingleValue(self.m_currentMorningPreset, self.m_morningPriority, 'sky', 'cloudLayer1Speed', self.m_CloudSpeed)
 		g_VEManagerClient:SetSingleValue(self.m_currentNoonPreset, self.m_noonPriority, 'sky', 'cloudLayer1Speed', self.m_CloudSpeed)
 		g_VEManagerClient:SetSingleValue(self.m_currentEveningPreset, self.m_eveningPriority, 'sky', 'cloudLayer1Speed', self.m_CloudSpeed)
 	end
 
-	self:SetSunPosition(self.m_ClientTime)
 end
 
 -- Singleton.
