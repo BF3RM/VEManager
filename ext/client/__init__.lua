@@ -409,9 +409,9 @@ function VEManagerClient:LoadPresets()
 									elseif s_FieldName == "StaticEnvmapTexture" then
 										--s_Class[firstToLower(s_FieldName)] = nil
 										s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
-									elseif s_FieldName == "CloudLayer2Texture" then
+									elseif s_FieldName == "CloudLayer2Texture" and _G['g_Stars'] ~= nil then
 										s_Class[firstToLower(s_FieldName)] = TextureAsset(_G['g_Stars'])
-									elseif s_FieldName == "texture" then 
+									elseif s_FieldName == "texture" then -- fix filmgrain texture
 										s_Class[firstToLower(s_FieldName)] = TextureAsset(ResourceManager:FindInstanceByGuid(Guid'44AF771F-23D2-11E0-9C90-B6CDFDA832F1', Guid('1FD2F223-0137-2A0F-BC43-D974C2BD07B4')))
 									else
 										--print("Added FieldName: " .. s_FieldName)
@@ -460,7 +460,7 @@ function VEManagerClient:LoadPresets()
 								elseif s_FieldName == "StaticEnvmapTexture" then
 									--s_Class[firstToLower(s_FieldName)] = nil
 									s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
-								elseif s_FieldName == "CloudLayer2Texture" then
+								elseif s_FieldName == "CloudLayer2Texture" and _G['g_Stars'] ~= nil then
 									s_Class[firstToLower(s_FieldName)] = TextureAsset(_G['g_Stars'])
 								else
 								--print("Added FieldName: " .. s_FieldName)
