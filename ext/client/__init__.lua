@@ -325,7 +325,7 @@ function VEManagerClient:LoadPresets()
 		self.m_Presets[l_Preset.Name]["type"] = l_Preset.Type
 
 		--Foreach class
-		local componentCount = 0
+		local s_ComponentCount = 0
 		for _, l_Class in pairs(self.m_SupportedClasses) do
 			if l_Preset[l_Class] ~= nil  then
 
@@ -336,7 +336,7 @@ function VEManagerClient:LoadPresets()
 				s_Class.excluded = false
 				s_Class.isEventConnectionTarget = 3
 				s_Class.isPropertyConnectionTarget = 3
-				s_Class.indexInBlueprint = componentCount
+				s_Class.indexInBlueprint = s_ComponentCount
 				s_Class.transform = LinearTransform()
 
 				-- Foreach field in class
@@ -361,13 +361,13 @@ function VEManagerClient:LoadPresets()
 						elseif l_Field.typeInfo.enum then
 							s_Value = tonumber(l_Preset[l_Class][s_FieldName])
 						elseif l_Field.typeInfo.array then
-							error("\tFound unexpected array")
+							error("\tFound unexpected array") -- TODO: Instead of error (that breaks the code), a continue should be used (unfortunatelly with goto), or set an "errorFound" true/false parameter to true and skip the component addition
 							return
 						elseif s_Type == "TextureAsset" then
 							print("\tTextureAsset is not yet supported.")
 							s_Value = nil -- Make sure this value is nil so the saved value is not saved
 						else
-							error("\tFound unexpected DataContainer: " .. s_Type)
+							error("\tFound unexpected DataContainer: " .. s_Type) -- TODO: Instead of error (that breaks the code), a continue should be used (unfortunatelly with goto), or set an "errorFound" true/false parameter to true and skip the component addition
 							return
 						end
 
@@ -434,8 +434,10 @@ function VEManagerClient:LoadPresets()
 							-- print("Setting default value for field " .. s_FieldName .. " of class " .. l_Class .. " | " ..  tostring(s_Value))
 							if IsBasicType(s_Type) then
 								s_Class[firstToLower(s_FieldName)] = s_Value
+							
 							elseif l_Field.typeInfo.enum then
 								s_Class[firstToLower(s_FieldName)] = tonumber(s_Value)
+							
 							elseif s_Type == "TextureAsset" then
 								if s_FieldName == "PanoramicTexture" then
 									--s_Class[firstToLower(s_FieldName)] = nil
@@ -452,6 +454,7 @@ function VEManagerClient:LoadPresets()
 								--print("\tAdded FieldName: " .. s_FieldName)
 								s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
 								end
+							
 							elseif l_Field.typeInfo.array then
 								print("\tFound unexpected array, ignoring")
 							else
@@ -461,11 +464,11 @@ function VEManagerClient:LoadPresets()
 						end
 					end
 				end
-				componentCount = componentCount + 1
+				s_ComponentCount = s_ComponentCount + 1
 				s_VE.components:add(s_Class)
 			end
 		end
-		s_VE.runtimeComponentCount = componentCount
+		s_VE.runtimeComponentCount = s_ComponentCount
 		s_VE.visibility = 0
 		s_VE.enabled = false
 		s_LVEED.visibility = 0
