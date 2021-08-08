@@ -252,17 +252,19 @@ function VEManagerClient:GetState(...)
 end
 
 function VEManagerClient:InitializePresets()
+	print("Spawned Presets:")
 	for l_Index, l_Preset in pairs(self.m_Presets) do
 		l_Preset["entity"] = EntityManager:CreateEntity(l_Preset["logic"], LinearTransform())
 
 		if l_Preset["entity"] == nil then
-			print("Could not spawn preset.")
+			print("- " .. tostring(l_Index) .. ", could not be spawned.")
 			return
 		end
 
 		l_Preset["entity"]:Init(Realm.Realm_Client, true)
 		VisualEnvironmentManager:SetDirty(true)
-		print("Spawned Preset: " .. i)
+
+		print("- " .. tostring(l_Index))
 	end
 end
 
@@ -272,26 +274,32 @@ function VEManagerClient:Reload(p_ID)
 end
 
 function VEManagerClient:LoadPresets()
-	print("Loading presets....")
+	print("Loading presets... (Name, Type, Priority)")
 	--Foreach preset
 	for l_Index, l_Preset in pairs(self.m_RawPresets) do
+
+		-- Variables check
+		if l_Preset.Name == nil then
+			l_Preset.Name = 'Unknown_Preset_' .. tostring(#self.m_Presets)
+		end
 
 		if l_Preset.Type == nil then
 			l_Preset.Type = 'generic'
 		end
 
-		-- Generate our VisualEnvironment
-		local s_IsBasePreset = l_Preset.Priority == 1
-
-		-- Restrict using day-night cycle priorities
 		if l_Preset.Priority == nil then
 			l_Preset.Priority = 1
 		else
 			l_Preset.Priority = tonumber(l_Preset.Priority)
+			-- Restrict using day-night cycle priorities
+			-- TODO: This should be somehow adjusted tot he new dynamic system
 			if l_Preset.Priority >= 11 and l_Preset.Priority <= 14 then
 				l_Preset.Priority = l_Preset.Priority + 5
 			end
 		end
+
+		-- Generate our VisualEnvironment
+		local s_IsBasePreset = l_Preset.Priority == 1
 
 		--Not sure if we need the LogicelVEEntity, but :shrug:
 		local s_LVEED = self:CreateEntity("LogicVisualEnvironmentEntityData")
@@ -307,7 +315,7 @@ function VEManagerClient:LoadPresets()
 		local s_VE = self:CreateEntity("VisualEnvironmentEntityData")
 		s_VEB.object = s_VE
 
-		print("Preset (Name, Type, Priority): " .. l_Preset.Name .. ", " .. l_Preset.Type .. ", " .. tostring(l_Preset.Priority))
+		print("- " .. l_Preset.Name .. ", " .. l_Preset.Type .. ", " .. tostring(l_Preset.Priority))
 
 		s_VE.enabled = true
 		s_VE.priority = l_Preset.Priority
@@ -317,9 +325,9 @@ function VEManagerClient:LoadPresets()
 		self.m_Presets[l_Preset.Name]["type"] = l_Preset.Type
 
 		--Foreach class
-		local componentCount = 0
+		local s_ComponentCount = 0
 		for _, l_Class in pairs(self.m_SupportedClasses) do
-			if(s_Preset[l_Class] ~= nil) then
+			if l_Preset[l_Class] ~= nil  then
 
 				-- Create class and add it to the VE entity.
 				local s_Class =  _G[l_Class.."ComponentData"]()
@@ -328,7 +336,7 @@ function VEManagerClient:LoadPresets()
 				s_Class.excluded = false
 				s_Class.isEventConnectionTarget = 3
 				s_Class.isPropertyConnectionTarget = 3
-				s_Class.indexInBlueprint = componentCount
+				s_Class.indexInBlueprint = s_ComponentCount
 				s_Class.transform = LinearTransform()
 
 				-- Foreach field in class
@@ -351,15 +359,15 @@ function VEManagerClient:LoadPresets()
 						if IsBasicType(s_Type) then
 							s_Value = self:ParseValue(s_Type, l_Preset[l_Class][s_FieldName])
 						elseif l_Field.typeInfo.enum then
-							s_Value = tonumber(s_Preset[l_Class][s_FieldName])
+							s_Value = tonumber(l_Preset[l_Class][s_FieldName])
 						elseif l_Field.typeInfo.array then
-							error("Found unexpected array")
+							error("\tFound unexpected array") -- TODO: Instead of error (that breaks the code), a continue should be used (unfortunatelly with goto), or set an "errorFound" true/false parameter to true and skip the component addition
 							return
 						elseif s_Type == "TextureAsset" then
-							print("TextureAsset is not yet supported.")
+							print("\tTextureAsset is not yet supported.")
 							s_Value = nil -- Make sure this value is nil so the saved value is not saved
 						else
-							error("Found unexpected DataContainer: " .. s_Type)
+							error("\tFound unexpected DataContainer: " .. s_Type) -- TODO: Instead of error (that breaks the code), a continue should be used (unfortunatelly with goto), or set an "errorFound" true/false parameter to true and skip the component addition
 							return
 						end
 
@@ -369,7 +377,7 @@ function VEManagerClient:LoadPresets()
 						else
 							local s_Value = self:GetDefaultValue(l_Class, l_Field)
 							if s_Value == nil then
-								print("Failed to fetch original value: " .. tostring(l_Class) .. " | " .. tostring(s_FieldName) .. " [1]")
+								print("\tFailed to fetch original value: " .. tostring(l_Class) .. " | " .. tostring(s_FieldName) .. " [1]")
 								--s_Class[firstToLower(s_FieldName)] = nil -- Crashes
 							else
 								-- print("Setting default value for field " .. s_FieldName .. " of class " .. l_Class .. " | " ..  tostring(s_Value))
@@ -400,7 +408,7 @@ function VEManagerClient:LoadPresets()
 									end
 
 								elseif l_Field.typeInfo.array then
-									print("Found unexpected array, ignoring")
+									print("\tFound unexpected array, ignoring")
 								else
 									-- Its a DataContainer
 									s_Class[firstToLower(s_FieldName)] = _G[s_Type](s_Value)
@@ -413,11 +421,11 @@ function VEManagerClient:LoadPresets()
 					else
 						--print("Getting Default Value for: " .. tostring(l_Class) .. " | " .. tostring(s_FieldName))
 						local s_Value = self:GetDefaultValue(l_Class, l_Field)
-						if (s_Value == nil) then
-							print("Failed to fetch original value: " .. tostring(l_Class) .. " | " .. tostring(s_FieldName) .. " [2]")
+						if s_Value == nil then
+							print("\tFailed to fetch original value: " .. tostring(l_Class) .. " | " .. tostring(s_FieldName) .. " [2]")
 
 							if s_FieldName == "CloudLayer2Texture" then
-								print("CloudTexture")
+								print("\tCloudTexture")
 								s_Class[firstToLower(s_FieldName)] = TextureAsset(_G['g_Stars'])
 							else
 								--s_Class[firstToLower(s_FieldName)] = nil -- Crashes
@@ -426,8 +434,10 @@ function VEManagerClient:LoadPresets()
 							-- print("Setting default value for field " .. s_FieldName .. " of class " .. l_Class .. " | " ..  tostring(s_Value))
 							if IsBasicType(s_Type) then
 								s_Class[firstToLower(s_FieldName)] = s_Value
+							
 							elseif l_Field.typeInfo.enum then
 								s_Class[firstToLower(s_FieldName)] = tonumber(s_Value)
+							
 							elseif s_Type == "TextureAsset" then
 								if s_FieldName == "PanoramicTexture" then
 									--s_Class[firstToLower(s_FieldName)] = nil
@@ -441,11 +451,12 @@ function VEManagerClient:LoadPresets()
 								elseif s_FieldName == "CloudLayer2Texture" and _G['g_Stars'] ~= nil then
 									s_Class[firstToLower(s_FieldName)] = TextureAsset(_G['g_Stars'])
 								else
-								--print("Added FieldName: " .. s_FieldName)
+								--print("\tAdded FieldName: " .. s_FieldName)
 								s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
 								end
+							
 							elseif l_Field.typeInfo.array then
-								print("Found unexpected array, ignoring")
+								print("\tFound unexpected array, ignoring")
 							else
 								-- Its a DataContainer
 								s_Class[firstToLower(s_FieldName)] = _G[s_Type](s_Value)
@@ -453,11 +464,11 @@ function VEManagerClient:LoadPresets()
 						end
 					end
 				end
-			componentCount = componentCount + 1
-			s_VE.components:add(s_Class)
+				s_ComponentCount = s_ComponentCount + 1
+				s_VE.components:add(s_Class)
 			end
 		end
-		s_VE.runtimeComponentCount = componentCount
+		s_VE.runtimeComponentCount = s_ComponentCount
 		s_VE.visibility = 0
 		s_VE.enabled = false
 		s_LVEED.visibility = 0

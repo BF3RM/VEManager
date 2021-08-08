@@ -67,7 +67,6 @@ end
 
 function TimeServer:Run(p_DeltaTime, p_SimulationDeltaTime)
 	if self.m_SystemRunning == true and self.m_IsStatic == false then
-
 		self.m_ServerDayTime = self.m_ServerDayTime + p_DeltaTime
 		self.m_EngineUpdateTimer = self.m_EngineUpdateTimer + p_DeltaTime
 
@@ -87,7 +86,6 @@ function TimeServer:Run(p_DeltaTime, p_SimulationDeltaTime)
 			print('[Time-Server]: New day cycle')
 			self.m_ServerDayTime = 0
 		end
-
 	end
 end
 
@@ -123,24 +121,40 @@ end
 
 -- Chat Commands
 function TimeServer:ChatCommands(p_Player, recipientMask, message)
-	if message == '!settime' then
+	if message:match('^!settime') then
+		local hour, duration = message:match('^!settime (%d+%.*%d*) (%d+%.*%d*)')
+
+		if hour == nil then
+			hour = 9
+		end
+
+		if duration == nil then
+			duration = 0.5
+		end
+
 		print('[Time-Server]: Time Event called by ' .. p_Player.name)
-		self:AddTime(9, 0.5)
+		self:AddTime(hour, duration)
+	
 	elseif message == '!setnight' then
 		print('[Time-Server]: Time Event called by ' .. p_Player.name)
 		self:AddTime(0, nil)
+	
 	elseif message == '!setmorning' then
 		print('[Time-Server]: Time Event called by ' .. p_Player.name)
 		self:AddTime(9, nil)
+	
 	elseif message == '!setnoon' then
 		print('[Time-Server]: Time Event called by ' .. p_Player.name)
 		self:AddTime(12, nil)
+	
 	elseif message == '!setafternoon' then
 		print('[Time-Server]: Time Event called by ' .. p_Player.name)
 		self:AddTime(15, nil)
+	
 	elseif message == '!pausetime' then
 		print('[Time-Server]: Time Pause called by ' .. p_Player.name)
 		self:PauseContinue()
+	
 	elseif message == '!disabletime' then
 		print('[Time-Server]: Time Disable called by ' .. p_Player.name)
 		self:DisableDynamicCycle()

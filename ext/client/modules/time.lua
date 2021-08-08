@@ -28,8 +28,13 @@ function Time:RegisterVars()
 	self.m_CurrentEveningPreset = nil
 	self.m_LastPrintHours = -1
 	self.m_FirstRun = false
-	self.m_CurrentPresetTable = {}
 	self.m_IsDay = nil
+
+	self.m_SunPosX = 0
+	self.m_SunPosY = 0
+
+	self.m_CurrentPresetTable = {}
+	self.m_SortedDynamicPresetsTable = {}
 
 	self.m_CloudSpeed = VEM_CONFIG.CLOUDS_DEFAULT_SPEED
 end
@@ -95,39 +100,39 @@ function Time:AddTimeToClient(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds
 	self:Add(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 end
 
-function Time:GetSunPosition(p_ClientTime) -- for smoother sun relative to time
+function Time:UpdateSunPosition(p_ClientTime) -- for smoother sun relative to time
 	local s_DayFactor = p_ClientTime / self.m_TotalDayLength
 	local s_SunPosX = 275
 	local s_SunPosY = 0
 
 	if s_DayFactor <= VEM_CONFIG.DN_PRESET_TIMINGS[1] then -- ~00:00 to ~6:00
-		local s_FactorNight = factor  / VEM_CONFIG.DN_PRESET_TIMINGS[1]
+		local s_FactorNight = s_DayFactor  / VEM_CONFIG.DN_PRESET_TIMINGS[1]
 		s_SunPosY = 90 - s_FactorNight * 90
 		self.m_IsDay = false
 
 	elseif s_DayFactor <= VEM_CONFIG.DN_PRESET_TIMINGS[2] then -- ~6:00 to ~9:00
-		local s_FactorMorning = (factor - VEM_CONFIG.DN_PRESET_TIMINGS[1]) / (VEM_CONFIG.DN_PRESET_TIMINGS[2] - VEM_CONFIG.DN_PRESET_TIMINGS[1])
+		local s_FactorMorning = (s_DayFactor - VEM_CONFIG.DN_PRESET_TIMINGS[1]) / (VEM_CONFIG.DN_PRESET_TIMINGS[2] - VEM_CONFIG.DN_PRESET_TIMINGS[1])
 		s_SunPosY = s_FactorMorning * 45
 		self.m_IsDay = true
 
 	elseif s_DayFactor <= VEM_CONFIG.DN_PRESET_TIMINGS[3] then -- ~9:00 to ~12:00
-		local s_FactorNoon = (factor - VEM_CONFIG.DN_PRESET_TIMINGS[2]) / (VEM_CONFIG.DN_PRESET_TIMINGS[3] - VEM_CONFIG.DN_PRESET_TIMINGS[2])
+		local s_FactorNoon = (s_DayFactor - VEM_CONFIG.DN_PRESET_TIMINGS[2]) / (VEM_CONFIG.DN_PRESET_TIMINGS[3] - VEM_CONFIG.DN_PRESET_TIMINGS[2])
 		s_SunPosY = 45 + s_FactorNoon * 45
 		self.m_IsDay = true
 
 	elseif s_DayFactor <= VEM_CONFIG.DN_PRESET_TIMINGS[4] then -- ~12:00 to ~18:00
-		local s_FactorEvening = (factor - VEM_CONFIG.DN_PRESET_TIMINGS[3]) / (VEM_CONFIG.DN_PRESET_TIMINGS[4] - VEM_CONFIG.DN_PRESET_TIMINGS[3])
+		local s_FactorEvening = (s_DayFactor - VEM_CONFIG.DN_PRESET_TIMINGS[3]) / (VEM_CONFIG.DN_PRESET_TIMINGS[4] - VEM_CONFIG.DN_PRESET_TIMINGS[3])
 		s_SunPosY = 90 + s_FactorEvening * 45
 		self.m_IsDay = true
 
 	elseif s_DayFactor <= VEM_CONFIG.DN_PRESET_TIMINGS[5] then -- ~18:00 to ~21:00
-		local s_FactorEvening = (factor - VEM_CONFIG.DN_PRESET_TIMINGS[4]) / (VEM_CONFIG.DN_PRESET_TIMINGS[5] - VEM_CONFIG.DN_PRESET_TIMINGS[4])
+		local s_FactorEvening = (s_DayFactor - VEM_CONFIG.DN_PRESET_TIMINGS[4]) / (VEM_CONFIG.DN_PRESET_TIMINGS[5] - VEM_CONFIG.DN_PRESET_TIMINGS[4])
 		s_SunPosY = 135 + s_FactorEvening * 45
 		self.m_IsDay = true
 
 	elseif s_DayFactor > VEM_CONFIG.DN_PRESET_TIMINGS[#VEM_CONFIG.DN_PRESET_TIMINGS] then -- 21:00 to 00:00
 		-- set visibility preset night
-		local s_FactorNight = (factor - VEM_CONFIG.DN_PRESET_TIMINGS[5]) / (1 - VEM_CONFIG.DN_PRESET_TIMINGS[5])
+		local s_FactorNight = (s_DayFactor - VEM_CONFIG.DN_PRESET_TIMINGS[5]) / (1 - VEM_CONFIG.DN_PRESET_TIMINGS[5])
 		s_SunPosY = 180 - s_FactorNight * 90
 		self.m_IsDay = false
 
@@ -137,11 +142,13 @@ function Time:GetSunPosition(p_ClientTime) -- for smoother sun relative to time
 
 	-- Avoid crashes
 	s_SunPosY = MathUtils:Round(s_SunPosY * 100) / 100
-    if s_SunPosY < 0 or s_SunPosY > 180 then
-        return
-    end
+	if s_SunPosY < 0 or s_SunPosY > 180 then
+		return
+	end
 
-	return s_SunPosX, s_SunPosY
+	-- Update class variables
+	self.m_SunPosX = s_SunPosX
+	self.m_SunPosY = s_SunPosY
 end
 
 function Time:SetCloudSpeed()
@@ -183,13 +190,19 @@ function Time:Add(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 	end
 
 	-- Get all dynamic presets
+	
 	for l_ID, l_Preset in pairs(g_VEManagerClient.m_Presets) do
 
 		if g_VEManagerClient.m_Presets[l_ID].type == 'dynamic' then
 			self.m_CurrentPresetTable[l_ID] = {}
 			self.m_CurrentPresetTable[l_ID]['sun'] = self.m_RawPresets[l_ID].Sky.SunPosY
+			table.insert(self.m_SortedDynamicPresetsTable, {l_ID, self.m_RawPresets[l_ID].Sky.SunPosY})
 		end
 	end
+
+	-- Table Sort
+	table.sort(self.m_SortedDynamicPresetsTable, easing[compare])
+	print(self.m_SortedDynamicPresetsTable)
 
 	-- Save dayLength in Class (minutes -> seconds)
 	self.m_TotalDayLength = p_LengthOfDayInSeconds
@@ -211,9 +224,9 @@ function Time:Add(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 		print("Time System Activated")
 	end
 
-	local s_SunPosX, s_SunPosY = self:GetSunPosition(self.m_ClientTime)
-	VisualEnvironmentManager:SetSunRotationX(s_SunPosX)
-	VisualEnvironmentManager:SetSunRotationY(s_SunPosY)
+	self:UpdateSunPosition(self.m_ClientTime)
+	VisualEnvironmentManager:SetSunRotationX(self.m_SunPosX)
+	VisualEnvironmentManager:SetSunRotationY(self.m_SunPosY)
 	self:SetCloudSpeed()
 end
 
@@ -237,15 +250,15 @@ function Time:Run()
 		self.m_LastPrintHours = s_h_time
 	end
 
-	self:GetSunPosition(self.m_ClientTime)
+	self:UpdateSunPosition(self.m_ClientTime)
 	local s_VisibilityFactorFadeIn = 0
 	local s_VisibilityFactorFadeOut = 0
 	local s_VisibilityFadeInID = nil
 	local s_VisibilityFadeOutID = nil
 	local s_LowestValue = nil
 
-	for l_ID, l_Value in pairs(self.m_CurrentPresetTable) do -- get lowest value in table to find next preset to "lerp" to -- TODO: find the preset below that value to lerp
-		if s_SunPosY < l_Value then
+	for l_ID, l_Value in pairs(self.m_CurrentPresetTable) do -- get lowest value in table to find next preset to "lerp" to --TODO: find the preset below that value to lerp
+		if self.m_SunPosY < l_Value then
 			if l_Value < s_LowestValue or s_LowestValue == nil then
 				s_LowestValue = l_Value
 				s_VisibilityFadeInID = l_ID
@@ -258,10 +271,10 @@ function Time:Run()
 		return
 	end
 
-	s_VisibilityFactorFadeIn = s_SunPosY / s_LowestValue
+	s_VisibilityFactorFadeIn = self.m_SunPosY / s_LowestValue
 	s_VisibilityFactorFadeOut = 1 - s_VisibilityFactorFadeIn
 
-	s_FactorNight = MathUtils:Clamp(s_SunPosY, 0, 1)
+	s_FactorNight = MathUtils:Clamp(self.m_SunPosY, 0, 1)
 	s_FactorMorning = MathUtils:Clamp(s_FactorMorning, 0, 1)
 	s_FactorNoon = MathUtils:Clamp(s_FactorNoon, 0, 1)
 	s_FactorEvening = MathUtils:Clamp(s_FactorEvening, 0, 1)
