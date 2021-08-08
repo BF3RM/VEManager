@@ -229,7 +229,7 @@ function Time:Run()
 		return
 	end
 
-	local s_print_enabled = false --todo change syntax
+	local s_print_enabled = false -- TODO: change syntax
 	local s_h_time = MathUtils:Round(self.m_ClientTime / self.m_TotalDayLength * 24)
 
 	if s_h_time ~= self.m_LastPrintHours  then
@@ -237,21 +237,21 @@ function Time:Run()
 		self.m_LastPrintHours = s_h_time
 	end
 
-	local s_SunPosX, s_SunPosY = self:GetSunPosition(self.m_ClientTime)
+	self:GetSunPosition(self.m_ClientTime)
 	local s_VisibilityFactorFadeIn = 0
 	local s_VisibilityFactorFadeOut = 0
 	local s_VisibilityFadeInID = nil
 	local s_VisibilityFadeOutID = nil
 	local s_LowestValue = nil
 
-	for l_ID, l_Value in pairs(self.m_CurrentPresetTable) do -- get lowest value in table to find next preset to "lerp" to --todo find the preset below that value to lerp
+	for l_ID, l_Value in pairs(self.m_CurrentPresetTable) do -- get lowest value in table to find next preset to "lerp" to -- TODO: find the preset below that value to lerp
 		if s_SunPosY < l_Value then
 			if l_Value < s_LowestValue or s_LowestValue == nil then
 				s_LowestValue = l_Value
 				s_VisibilityFadeInID = l_ID
 			end
 		end
-	end --todo differentiate between day and night values
+	end -- TODO: differentiate between day and night values
 
 	if s_LowestValue == nil or s_VisibilityFadeInID == nil or s_VisibilityFadeOutID == nil then
 		print('Visibility Calculation Error')

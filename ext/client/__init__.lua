@@ -381,7 +381,7 @@ function VEManagerClient:LoadPresets()
 
 								elseif s_Type == "TextureAsset" then
 
-									if s_FieldName == "PanoramicTexture" then -- process will be changed later | this works but is dirty (this is how you change textures tho)
+									if s_FieldName == "PanoramicTexture" then -- TODO: process will be changed later | this works but is dirty (this is how you change textures tho)
 										--s_Class[firstToLower(s_FieldName)] = nil
 										s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
 									elseif s_FieldName == "PanoramicAlphaTexture" then
