@@ -123,9 +123,19 @@ end
 
 -- Chat Commands
 function TimeServer:ChatCommands(p_Player, recipientMask, message)
-	if message == '!settime' then
+	if message:match('^!settime') then
+		local hour, duration = message:match('^!settime (%d+%.*%d*) (%d+%.*%d*)')
+
+		if hour == nil then
+			hour = 9
+		end
+
+		if duration == nil then
+			duration = 0.5
+		end
+
 		print('[Time-Server]: Time Event called by ' .. p_Player.name)
-		self:AddTime(9, 0.5)
+		self:AddTime(hour, duration)
 	elseif message == '!setnight' then
 		print('[Time-Server]: Time Event called by ' .. p_Player.name)
 		self:AddTime(0, nil)
