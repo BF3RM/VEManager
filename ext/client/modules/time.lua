@@ -105,37 +105,17 @@ function Time:UpdateSunPosition(p_ClientTime) -- for smoother sun relative to ti
 	local s_SunPosX = 275
 	local s_SunPosY = 0
 
-	if s_DayFactor <= VEM_CONFIG.DN_PRESET_TIMINGS[1] then -- ~00:00 to ~6:00
-		local s_FactorNight = s_DayFactor  / VEM_CONFIG.DN_PRESET_TIMINGS[1]
-		s_SunPosY = 90 - s_FactorNight * 90
+	if s_DayFactor >= VEM_CONFIG.DN_SUN_TIMINGS[3] then -- Moon
+		local s_FactorNight = s_DayFactor  / 1
+		s_SunPosY = 180 - s_FactorNight * 45
 		self.m_IsDay = false
-
-	elseif s_DayFactor <= VEM_CONFIG.DN_PRESET_TIMINGS[2] then -- ~6:00 to ~9:00
-		local s_FactorMorning = (s_DayFactor - VEM_CONFIG.DN_PRESET_TIMINGS[1]) / (VEM_CONFIG.DN_PRESET_TIMINGS[2] - VEM_CONFIG.DN_PRESET_TIMINGS[1])
-		s_SunPosY = s_FactorMorning * 45
-		self.m_IsDay = true
-
-	elseif s_DayFactor <= VEM_CONFIG.DN_PRESET_TIMINGS[3] then -- ~9:00 to ~12:00
-		local s_FactorNoon = (s_DayFactor - VEM_CONFIG.DN_PRESET_TIMINGS[2]) / (VEM_CONFIG.DN_PRESET_TIMINGS[3] - VEM_CONFIG.DN_PRESET_TIMINGS[2])
-		s_SunPosY = 45 + s_FactorNoon * 45
-		self.m_IsDay = true
-
-	elseif s_DayFactor <= VEM_CONFIG.DN_PRESET_TIMINGS[4] then -- ~12:00 to ~18:00
-		local s_FactorEvening = (s_DayFactor - VEM_CONFIG.DN_PRESET_TIMINGS[3]) / (VEM_CONFIG.DN_PRESET_TIMINGS[4] - VEM_CONFIG.DN_PRESET_TIMINGS[3])
-		s_SunPosY = 90 + s_FactorEvening * 45
-		self.m_IsDay = true
-
-	elseif s_DayFactor <= VEM_CONFIG.DN_PRESET_TIMINGS[5] then -- ~18:00 to ~21:00
-		local s_FactorEvening = (s_DayFactor - VEM_CONFIG.DN_PRESET_TIMINGS[4]) / (VEM_CONFIG.DN_PRESET_TIMINGS[5] - VEM_CONFIG.DN_PRESET_TIMINGS[4])
-		s_SunPosY = 135 + s_FactorEvening * 45
-		self.m_IsDay = true
-
-	elseif s_DayFactor > VEM_CONFIG.DN_PRESET_TIMINGS[#VEM_CONFIG.DN_PRESET_TIMINGS] then -- 21:00 to 00:00
-		-- set visibility preset night
-		local s_FactorNight = (s_DayFactor - VEM_CONFIG.DN_PRESET_TIMINGS[5]) / (1 - VEM_CONFIG.DN_PRESET_TIMINGS[5])
-		s_SunPosY = 180 - s_FactorNight * 90
+	elseif s_DayFactor >= VEM_CONFIG.DN_SUN_TIMINGS[3] and s_DayFactor <= VEM_CONFIG.DN_SUN_TIMINGS[1] then -- Moon
+		local s_FactorNight = s_DayFactor  / VEM_CONFIG.DN_SUN_TIMINGS[1]
+		s_SunPosY = 135 - s_FactorNight * 135
 		self.m_IsDay = false
-
+	elseif s_DayFactor >= VEM_CONFIG.DN_SUN_TIMINGS[1] and s_DayFactor <= VEM_CONFIG.DN_SUN_TIMINGS[2] then -- Day
+		local s_FactorNight = (s_DayFactor - VEM_CONFIG.DN_SUN_TIMINGS[2]) / VEM_CONFIG.DN_SUN_TIMINGS[3]
+		s_SunPosY = 180 * s_FactorNight
 	else
 		print("Faulty ClientTime: " .. p_ClientTime)
 	end
@@ -190,7 +170,7 @@ function Time:Add(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 	end
 
 	-- Get all dynamic presets
-	
+
 	for l_ID, l_Preset in pairs(g_VEManagerClient.m_Presets) do
 
 		if g_VEManagerClient.m_Presets[l_ID].type == 'dynamic' then
