@@ -36,6 +36,8 @@ function Time:RegisterVars()
 	self.m_CurrentPresetTable = {}
 	self.m_SortedDynamicPresetsTable = {}
 
+	self.m_CurrentPreset = 1
+
 	self.m_CloudSpeed = VEM_CONFIG.CLOUDS_DEFAULT_SPEED
 end
 
@@ -116,6 +118,7 @@ function Time:UpdateSunPosition(p_ClientTime) -- for smoother sun relative to ti
 	elseif s_DayFactor >= VEM_CONFIG.DN_SUN_TIMINGS[1] and s_DayFactor <= VEM_CONFIG.DN_SUN_TIMINGS[2] then -- Day
 		local s_FactorNight = (s_DayFactor - VEM_CONFIG.DN_SUN_TIMINGS[2]) / VEM_CONFIG.DN_SUN_TIMINGS[3]
 		s_SunPosY = 180 * s_FactorNight
+		self.m_IsDay = true
 	else
 		print("Faulty ClientTime: " .. p_ClientTime)
 	end
@@ -169,20 +172,29 @@ function Time:Add(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 		self:RegisterVars()
 	end
 
-	-- Get all dynamic presets
-
-	for l_ID, l_Preset in pairs(g_VEManagerClient.m_Presets) do
-
-		if g_VEManagerClient.m_Presets[l_ID].type == 'dynamic' then
-			self.m_CurrentPresetTable[l_ID] = {}
-			self.m_CurrentPresetTable[l_ID]['sun'] = self.m_RawPresets[l_ID].Sky.SunPosY
-			table.insert(self.m_SortedDynamicPresetsTable, {l_ID, self.m_RawPresets[l_ID].Sky.SunPosY})
+	local s_Types = {'Dynamic', 'DefaultDynamic'}
+	
+	for _, l_type in pairs(s_Types) do
+		-- Get all dynamic presets
+		-- (if no Dynamic presets, DefaultDynamic presets will be loaded)
+		if #self.m_SortedDynamicPresetsTable < 2 then
+			for l_ID, l_Preset in pairs(g_VEManagerClient.m_Presets) do
+				if g_VEManagerClient.m_Presets[l_ID].type == l_type then
+					--print(g_VEManagerClient.m_RawPresets[l_ID].OutdoorLight.SunRotationY)
+					table.insert(self.m_SortedDynamicPresetsTable, {l_ID, tonumber(g_VEManagerClient.m_RawPresets[l_ID].OutdoorLight.SunRotationY)})
+				end
+			end
 		end
 	end
-
+	
 	-- Table Sort
-	table.sort(self.m_SortedDynamicPresetsTable, easing[compare])
-	print(self.m_SortedDynamicPresetsTable)
+	table.sort(self.m_SortedDynamicPresetsTable, function(a,b) return tonumber(a[2]) < tonumber(b[2]) end)
+
+	-- Set Priorities
+	for l_Index, l_Preset in ipairs(self.m_SortedDynamicPresetsTable) do
+		local s_ID = l_Preset[1]
+		g_VEManagerClient.m_Presets[s_ID]["ve"].priority = l_Index + 10
+	end
 
 	-- Save dayLength in Class (minutes -> seconds)
 	self.m_TotalDayLength = p_LengthOfDayInSeconds
@@ -190,17 +202,12 @@ function Time:Add(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 	self.m_ClientTime = p_StartingTime
 	print('[Time-Client]: Starting at Time: ' .. p_StartingTime / 3600 / (self.m_TotalDayLength / 86000) .. ' Hours ('.. p_StartingTime ..' Seconds)')
 
-	--[[ Set Priorities
-	g_VEManagerClient.m_Presets[self.m_CurrentNightPreset]["ve"].priority = self.m_NightPriority
-	g_VEManagerClient.m_Presets[self.m_CurrentMorningPreset]["ve"].priority = self.m_MorningPriority
-	g_VEManagerClient.m_Presets[self.m_CurrentNoonPreset]["ve"].priority = self.m_NoonPriority
-	g_VEManagerClient.m_Presets[self.m_CurrentEveningPreset]["ve"].priority = self.m_EveningPriority]]
 
 	self.m_FirstRun = true
 	self:Run()
 
 	if p_IsStatic ~= true then
-		self.m_SystemRunning = true
+		--self.m_SystemRunning = true
 		print("Time System Activated")
 	end
 
@@ -231,29 +238,76 @@ function Time:Run()
 	end
 
 	self:UpdateSunPosition(self.m_ClientTime)
-	local s_VisibilityFactorFadeIn = 0
-	local s_VisibilityFactorFadeOut = 0
-	local s_VisibilityFadeInID = nil
-	local s_VisibilityFadeOutID = nil
-	local s_LowestValue = nil
-
-	for l_ID, l_Value in pairs(self.m_CurrentPresetTable) do -- get lowest value in table to find next preset to "lerp" to --TODO: find the preset below that value to lerp
-		if self.m_SunPosY < l_Value then
-			if l_Value < s_LowestValue or s_LowestValue == nil then
-				s_LowestValue = l_Value
-				s_VisibilityFadeInID = l_ID
-			end
+	local s_SunPosY = self.m_SunPosY
+	if not self.m_IsDay then
+		-- Night (180 - 360)
+		s_SunPosY = 360 - s_SunPosY
+	end
+	
+	-- Check if still in curent presets
+	if self.m_CurrentPreset + 1 > #self.m_SortedDynamicPresetsTable then
+		if s_SunPosY >= 360 then
+			self.m_CurrentPreset = 1
 		end
-	end -- TODO: differentiate between day and night values
+	else
+		if s_SunPosY >= self.m_SortedDynamicPresetsTable[self.m_CurrentPreset+1][2] then
+			self.m_CurrentPreset = self.m_CurrentPreset+1
+		end
+	end
+	-- Calc next preset
+	local s_NextPreset = self.m_CurrentPreset % #self.m_SortedDynamicPresetsTable + 1
 
-	if s_LowestValue == nil or s_VisibilityFadeInID == nil or s_VisibilityFadeOutID == nil then
-		print('Visibility Calculation Error')
-		return
+	--local s_VisibilityFadeInID = self.m_SortedDynamicPresetsTable[s_NextPreset][1]
+	--local s_VisibilityFadeOutID = self.m_SortedDynamicPresetsTable[self.m_CurrentPreset][1]
+	local s_VisibilityFactorFadeIn = nil
+	if s_NextPreset == 1 then
+		s_VisibilityFactorFadeIn = (s_SunPosY - self.m_SortedDynamicPresetsTable[self.m_CurrentPreset][2])  / (360 + self.m_SortedDynamicPresetsTable[s_NextPreset][2] - self.m_SortedDynamicPresetsTable[self.m_CurrentPreset][2])
+	else
+		s_VisibilityFactorFadeIn = (s_SunPosY - self.m_SortedDynamicPresetsTable[self.m_CurrentPreset][2])  / (self.m_SortedDynamicPresetsTable[s_NextPreset][2] - self.m_SortedDynamicPresetsTable[self.m_CurrentPreset][2])
+	end
+	if s_VisibilityFactorFadeIn > 1 then
+		s_VisibilityFactorFadeIn = 1
 	end
 
-	s_VisibilityFactorFadeIn = self.m_SunPosY / s_LowestValue
-	s_VisibilityFactorFadeOut = 1 - s_VisibilityFactorFadeIn
+	local s_VisibilityFactorFadeOut = 1 - s_VisibilityFactorFadeIn
 
+	print(s_VisibilityFactorFadeIn)
+	print(s_VisibilityFactorFadeOut)
+
+	for l_Index, l_Preset in ipairs(self.m_SortedDynamicPresetsTable) do
+		local s_ID = l_Preset[1]
+		print(s_ID)
+		local s_Factor = 0
+		if l_Index == self.m_CurrentPreset then
+			if s_NextPreset == 1 then
+				s_Factor = s_VisibilityFactorFadeOut
+			else
+				s_Factor = 1
+			end
+		elseif l_Index == s_NextPreset then
+			if s_NextPreset == 1 then
+				s_Factor = 1
+			else
+				s_Factor = s_VisibilityFactorFadeIn
+			end
+		end
+		
+		if self.m_FirstRun then
+			print(s_Factor)
+			g_VEManagerClient:SetVisibility(s_ID, s_Factor)
+		else
+			g_VEManagerClient:UpdateVisibility(s_ID, l_Index + 10, s_Factor)
+			if s_Factor ~= 0 then
+				g_VEManagerClient:SetSingleValue(s_ID, l_Index + 10, 'sky', 'cloudLayer1Speed', self.m_CloudSpeed)
+			end
+		end
+	end
+	
+	if self.m_FirstRun then
+		self.m_FirstRun = false
+	end
+
+	--[[
 	s_FactorNight = MathUtils:Clamp(self.m_SunPosY, 0, 1)
 	s_FactorMorning = MathUtils:Clamp(s_FactorMorning, 0, 1)
 	s_FactorNoon = MathUtils:Clamp(s_FactorNoon, 0, 1)
@@ -281,6 +335,7 @@ function Time:Run()
 		g_VEManagerClient:SetSingleValue(self.m_CurrentNoonPreset, self.m_NoonPriority, 'sky', 'cloudLayer1Speed', self.m_CloudSpeed)
 		g_VEManagerClient:SetSingleValue(self.m_CurrentEveningPreset, self.m_EveningPriority, 'sky', 'cloudLayer1Speed', self.m_CloudSpeed)
 	end
+	]]
 
 end
 

@@ -66,7 +66,7 @@ local table = [[
         "SkyColor": "(0.08, 0.08, 0.08)",
         "GroundColor": "(0.08, 0.08, 0.08)",
         "SunRotationX": "0",
-        "SunRotationY": "0"
+        "SunRotationY": "130"
     },
     "Sky": {
         "Realm": "0",
@@ -124,7 +124,7 @@ local table = [[
         "WindStrength": "1.7"
     },
     "Name": "DefaultEvening",
-    "Type": "DefaultEvening",
+    "Type": "DefaultDynamic",
     "Priority": "10",
     "Visibility": "1"
 }

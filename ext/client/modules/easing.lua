@@ -408,10 +408,6 @@ local function tableHasValue(tab, val)
     return false
 end
 
-local function compare(a,b)
-	return a[1] < b[1]
-end
-
 
 
 return {
@@ -458,5 +454,4 @@ return {
   outInBounce = outInBounce,
   hasValue = hasValue,
   tableGetIndex = tableGetIndex,
-  compare = compare,
 }
