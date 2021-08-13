@@ -1,5 +1,7 @@
 class "TimeServer"
 
+require "weatherserver"
+
 function TimeServer:__init()
 	print('Initializing Time-Server')
 	self:RegisterVars()
@@ -27,6 +29,8 @@ function TimeServer:RegisterEvents()
 	Events:Subscribe('TimeServer:Disable', self, self.DisableDynamicCycle)
 	NetEvents:Subscribe('TimeServer:DisableNet', self, self.DisableDynamicCycleViaNet)
 	self.m_EngineUpdateEvent = Events:Subscribe('Engine:Update', self, self.Run)
+	self.m_LevelLoadedEvent = Events:Subscribe('Level:Loaded', self, self.OnLevelLoaded)
+	--self.m_LevelDestroyEvent = Events:Subscribe('Level:Destroy', self, self.OnLevelDestroy)
 	--self.m_LevelLoadedEvent = Events:Subscribe('Level:Loaded', self, self.OnLevelLoaded)
 	self.m_LevelDestroyEvent = Events:Subscribe('Level:Destroy', self, self.OnLevelDestroy)
 	self.m_PlayerRequestEvent = NetEvents:Subscribe('TimeServer:PlayerRequest', self, self.OnPlayerRequest)
@@ -34,6 +38,10 @@ function TimeServer:RegisterEvents()
 	if VEM_CONFIG.DEV_ENABLE_CHAT_COMMANDS then
 		Events:Subscribe('Player:Chat', self, self.ChatCommands) -- Uncomment to enable chat commands in VEManager
 	end
+end
+
+function TimeServer:OnLevelLoaded()
+
 end
 
 function TimeServer:OnLevelDestroy()
@@ -125,13 +133,13 @@ end
 function TimeServer:ChatCommands(p_Player, recipientMask, message)
 	if message == '!settime' then
 		print('[Time-Server]: Time Event called by ' .. p_Player.name)
-		self:AddTime(9, 0.5)
+		self:AddTime(9, 15)
 	elseif message == '!setnight' then
 		print('[Time-Server]: Time Event called by ' .. p_Player.name)
 		self:AddTime(0, nil)
 	elseif message == '!setmorning' then
 		print('[Time-Server]: Time Event called by ' .. p_Player.name)
-		self:AddTime(9, nil)
+		self:AddTime(8.9, nil)
 	elseif message == '!setnoon' then
 		print('[Time-Server]: Time Event called by ' .. p_Player.name)
 		self:AddTime(12, nil)

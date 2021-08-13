@@ -1,5 +1,6 @@
 VEM_CONFIG = {
-	-- CLOUDS --
+	-- WEATHER ---
+	WEATHER_SYSTEM_ENABLED = true,							-- Enable the dynamic weather system
 	CLOUDS_DEFAULT_SPEED = -0.0005, 						-- TODO: this needs to be based on the presets not in VEManager config.
 
 	-- DAY-NIGHT --
@@ -7,7 +8,7 @@ VEM_CONFIG = {
 	DN_CHANGE_CLOUDS_SPEED_BASED_ON_DAY_LENGTH = false, 	-- TODO: Equation should also be according to clouds speed
 
 	-- DEV --
-	DEV_ENABLE_CHAT_COMMANDS = false,
+	DEV_ENABLE_CHAT_COMMANDS = true,
 	DEV_ENABLE_TEST_KEYS = false,
 	DEV_LOAD_CUSTOM_PRESET = false,
 	DEV_LOAD_CINEMATIC_TOOLS = false,

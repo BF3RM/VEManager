@@ -38,20 +38,17 @@ local table = [[
     },
     "Enlighten": {
         "Realm": "0",
-        "Enable": "false",
+        "Enable": "true",
         "BounceScale": "0.1",
         "SunScale": "0",
         "TerrainColor": "(0.0, 0.0, 0.0)",
-        "CullDistance": "-1.0",
-        "SkyBoxEnable": "false",
-        "SkyBoxSkyColor": "(0.022000, 0.078000, 0.177000)",
-        "SkyBoxGroundColor": "(0.085000, 0.206000, 0.394000)",
-        "SkyBoxSunLightColor": "(0.282000, 0.991000, 3.000000)",
+        "SkyBoxEnable": "true",
+        "SkyBoxSkyColor": "(0, 0, 0)",
+        "SkyBoxGroundColor": "(0, 0, 0)",
+        "SkyBoxSunLightColor": "(0, 0, 0)",
         "SkyBoxSunLightColorSize": "0.0",
-        "SkyBoxBackLightColor": "(0.022000, 0.078000, 0.177000)",
-        "SkyBoxBackLightColorSize": "0.1",
-        "SkyBoxBackLightRotationX": "171.95899963379",
-        "SkyBoxBackLightRotationY": "26.563999176025"
+        "SkyBoxBackLightColor": "(0, 0, 0)",
+        "SkyBoxBackLightColorSize": "0"
     },
     "Fog": {
         "Realm": "0",
@@ -108,7 +105,7 @@ local table = [[
         "CloudLayer2Color": "1:1:1:",
         "CloudLayer2AlphaMul": "0.3",
         "StaticEnvmapScale": "0",
-        "SkyVisibilityExponent": "0",
+        "SkyVisibilityExponent": "1.0",
         "SkyEnvmap8BitTexScale": "5",
         "CustomEnvmapScale": "1",
         "CustomEnvmapAmbient": "1"
