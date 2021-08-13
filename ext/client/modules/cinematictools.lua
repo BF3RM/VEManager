@@ -9,7 +9,6 @@ end
 
 function CinematicTools:RegisterVars()
 	self.m_CineState = nil
-	self.m_PendingDirty = false
 	self.m_CinePriority = 10000010
 	self.m_PresetName = nil
 	self.m_PresetPriority = nil
@@ -19,12 +18,20 @@ end
 function CinematicTools:RegisterEvents()
 	--self.m_VisualStateAddedEvent = Events:Subscribe('VE:StateAdded', self, self.OnVisualStateAdded)
 	self.m_LevelLoadEvent = Events:Subscribe('Level:Loaded', self, self.OnLevelLoaded)
+	self.m_DataFromServer = NetEvents:Subscribe('CinematicTools:DataToClient', self, self.OnDataFromServer)
 end
 
 
 function CinematicTools:OnLevelLoaded()
 	if VEM_CONFIG.DEV_LOAD_CUSTOM_PRESET then
 		g_VEManagerClient:EnablePreset("CinematicTools")  -- Load custom preset
+	end
+end
+
+
+function CinematicTools:OnDataFromServer(p_Path, p_Value, p_Net)
+	if self.m_CollaborationEnabled == true then
+		self:GenericCallback(p_Path, p_Value, p_Net)
 	end
 end
 
@@ -65,7 +72,7 @@ function CinematicTools:GetVisualEnvironmentState(...)
 end
 
 
-function CinematicTools:GenericCallback(p_Path, p_Value)
+function CinematicTools:GenericCallback(p_Path, p_Value, p_Net)
 	if self.m_CineState == nil then
 		self.m_CineState = self:GetVisualEnvironmentState(self.m_CinePriority)
 		print('CineState Name: ' .. self.m_CineState.entityName)
@@ -90,7 +97,19 @@ function CinematicTools:GenericCallback(p_Path, p_Value)
 	end
 
 	VisualEnvironmentManager:SetDirty(true)
+	if p_Net ~= true then
+		self:SendForCollaboration(p_Path, p_Value)
+		print('Sending: ' .. p_Path .. ' with Value: ' .. tostring(p_Value))
+	end
 end
+
+
+function CinematicTools:SendForCollaboration(p_Path, p_Value)
+	if self.m_CollaborationEnabled == true then
+		NetEvents:Send('CinematicTools:CollaborationData', p_Path, p_Value)
+	end
+end
+
 
 function CinematicTools:CreateGUI()
 	print("*Creating GUI for Cinematic Tools")
@@ -190,6 +209,34 @@ function CinematicTools:CreateGUI()
 			self:GenericCallback("sky.cloudLayer1AlphaMul", p_Value)
 		end)
 
+		DebugGUI:Range('Cloud Layer 2 Altitude', {DefValue = 500000, Min = 0, Max = 500000, Step = 1}, function(p_Value)
+			self:GenericCallback("sky.cloudLayer2Altitude", p_Value)
+		end)
+
+		DebugGUI:Range('Cloud Layer 2 Tile Factor', {DefValue = 1, Min = 0, Max = 5, Step = 0.1}, function(p_Value)
+			self:GenericCallback("sky.cloudLayer2TileFactor", p_Value)
+		end)
+
+		DebugGUI:Range('Cloud Layer 2 Rotation', {DefValue = 0, Min = 0, Max = 359, Step = 1}, function(p_Value)
+			self:GenericCallback("sky.cloudLayer2Rotation", p_Value)
+		end)
+
+		DebugGUI:Range('Cloud Layer 2 Speed', {DefValue = VEM_CONFIG.CLOUDS_DEFAULT_SPEED, Min = -1, Max = 1, Step = 0.0001}, function(p_Value)
+			self:GenericCallback("sky.cloudLayer2Speed", p_Value)
+		end)
+
+		DebugGUI:Range('Cloud Layer 2 Sunlight Intensity', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
+			self:GenericCallback("sky.cloudLayer2SunLightIntensity", p_Value)
+		end)
+
+		DebugGUI:Range('Cloud Layer 2 Ambientlight Intensity', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
+			self:GenericCallback("sky.cloudLayer2AmbientLightIntensity", p_Value)
+		end)
+
+		DebugGUI:Range('Cloud Layer 2 Alpha Multiplicator', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
+			self:GenericCallback("sky.cloudLayer2AlphaMul", p_Value)
+		end)
+
 	end)
 
 	-- Enlighten
@@ -199,7 +246,7 @@ function CinematicTools:CreateGUI()
 			self:GenericCallback("enlighten.enable", p_Value)
 		end)
 
-		DebugGUI:Checkbox('Skybox Enlighten Enable', true, function(p_Value)
+		--[[DebugGUI:Checkbox('Skybox Enlighten Enable', true, function(p_Value)
 			self:GenericCallback("enlighten.skyBoxEnable", p_Value)
 		end)
 
@@ -289,7 +336,7 @@ function CinematicTools:CreateGUI()
 
 		DebugGUI:Range('Skybox Backlight Color Size', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
 			self:GenericCallback("enlighten.skyBoxBackLightColorSize", p_Value)
-		end)
+		end)]]
 
 	end)
 
@@ -422,19 +469,19 @@ function CinematicTools:CreateGUI()
 			self:GenericCallback("fog.fogColor.z", p_Value)
 		end)
 
-		DebugGUI:Range('Curve X', {DefValue = 1.0, Min = -1, Max = 50, Step = 0.001}, function(p_Value)
+		DebugGUI:Range('Curve X', {DefValue = 1.0, Min = -10, Max = 10, Step = 0.001}, function(p_Value)
 			self:GenericCallback("fog.curve.x", p_Value)
 		end)
 
-		DebugGUI:Range('Curve Y', {DefValue = 1.0, Min = -1, Max = 50, Step = 0.001}, function(p_Value)
+		DebugGUI:Range('Curve Y', {DefValue = 1.0, Min = -10, Max = 10, Step = 0.001}, function(p_Value)
 			self:GenericCallback("fog.curve.y", p_Value)
 		end)
 
-		DebugGUI:Range('Curve Z', {DefValue = 1.0, Min = -1, Max = 50, Step = 0.001}, function(p_Value)
+		DebugGUI:Range('Curve Z', {DefValue = 1.0, Min = -10, Max = 10, Step = 0.001}, function(p_Value)
 			self:GenericCallback("fog.curve.z", p_Value)
 		end)
 
-		DebugGUI:Range('Curve W', {DefValue = 1.0, Min = -1, Max = 50, Step = 0.001}, function(p_Value)
+		DebugGUI:Range('Curve W', {DefValue = 1.0, Min = -10, Max = 10, Step = 0.001}, function(p_Value)
 			self:GenericCallback("fog.curve.w", p_Value)
 		end)
 
@@ -458,7 +505,10 @@ function CinematicTools:CreateGUI()
 
 		DebugGUI:Checkbox('DoF Enable', false, function(p_Value)
 			self:GenericCallback("dof.enable", p_Value)
-			self:GenericCallback("dof.blurFilter", 6)
+		end)
+
+		DebugGUI:Range('Blur Filter', {DefValue = 6, Min = 0, Max = 6, Step = 1}, function(p_Value)
+			self:GenericCallback("dof.blurFilter", p_Value)
 		end)
 
 		DebugGUI:Range('Scale', {DefValue = 100.0, Min = 0.0, Max = 500.0, Step = 1.0}, function(p_Value)
@@ -715,27 +765,27 @@ function CinematicTools:CreateGUI()
 	-- Ambient Occlusion
 	DebugGUI:Folder('Ambient Occlusion', function ()
 
-		DebugGUI:Range('HBAO Radius', {DefValue = 0, Min = 0.0, Max = 1.0, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('HBAO Radius', {DefValue = 0, Min = 0.0, Max = 10.0, Step = 0.01}, function(p_Value)
 			self:GenericCallback("dynamicAO.hbaoRadius", p_Value)
 		end)
 
-		DebugGUI:Range('HBAO Attentuation', {DefValue = 0, Min = 0.0, Max = 1.0, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('HBAO Attentuation', {DefValue = 0, Min = 0.0, Max = 10.0, Step = 0.01}, function(p_Value)
 			self:GenericCallback("dynamicAO.hbaoAttenuation", p_Value)
 		end)
 
-		DebugGUI:Range('HBAO Angle Bias', {DefValue = 0, Min = 0.0, Max = 1.0, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('HBAO Angle Bias', {DefValue = 0, Min = 0.0, Max = 10.0, Step = 0.01}, function(p_Value)
 			self:GenericCallback("dynamicAO.hbaoAngleBias", p_Value)
 		end)
 
-		DebugGUI:Range('HBAO Power Exponent', {DefValue = 0, Min = 0.0, Max = 1.0, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('HBAO Power Exponent', {DefValue = 0, Min = 0.0, Max = 10.0, Step = 0.01}, function(p_Value)
 			self:GenericCallback("dynamicAO.hbaoPowerExponent", p_Value)
 		end)
 
-		DebugGUI:Range('HBAO Contrast', {DefValue = 0, Min = 0.0, Max = 1.0, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('HBAO Contrast', {DefValue = 0, Min = 0.0, Max = 10.0, Step = 0.01}, function(p_Value)
 			self:GenericCallback("dynamicAO.hbaoContrast", p_Value)
 		end)
 
-		DebugGUI:Range('HBAO Max Footprint Radius', {DefValue = 0, Min = 0.0, Max = 1.0, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('HBAO Max Footprint Radius', {DefValue = 0, Min = 0.0, Max = 10.0, Step = 0.01}, function(p_Value)
 			self:GenericCallback("dynamicAO.hbaoMaxFootprintRadius", p_Value)
 		end)
 
@@ -766,15 +816,36 @@ function CinematicTools:CreateGUI()
 
 	end)]]
 
+	-- Textures
+	DebugGUI:Folder('Textures (must be loaded)', function ()
+
+		DebugGUI:Text('Texture GUID', 'Enter GUID here', function(p_TextureGUID)
+			self.selectedTexture = TextureAsset(ResourceManager:SearchForInstanceByGuid(Guid(p_TextureGUID)))
+		end)
+
+		DebugGUI:Text('Texture Destination', 'sky.panoramicTexture', function(p_Destination)
+			self.selectedTextureDestination = p_Destination
+		end)
+
+		DebugGUI:Button('Apply Texture', function(value)
+			if self.selectedTextureDestination == nil or self.selectedTexture == nil then
+				print('Texture not Valid')
+				return
+			end
+			self:GenericCallback(self.selectedTextureDestination, self.selectedTexture)
+		end)
+
+	end)
+
 	-- Time Control
 	DebugGUI:Folder('Time Control', function ()
 
 		local s_Enabled = false
 		local s_SyncChangesWithServer = false
-		
+
 		DebugGUI:Checkbox('Enable', false, function(p_Value)
 			if p_Value == true then
-				s_Enabled = true 
+				s_Enabled = true
 				g_Time:Add(43200, true, 86400)
 			elseif p_Value == false and s_Enabled == true then
 				s_Enabled = false
@@ -801,6 +872,10 @@ function CinematicTools:CreateGUI()
 
 	-- Utilities
 	DebugGUI:Folder("Utilities", function ()
+
+		DebugGUI:Checkbox('Enable Collaboration Mode', false, function(p_Value)
+			self.m_CollaborationEnabled = p_Value
+		end)
 
 		DebugGUI:Text('Preset name', 'New Preset', function(p_PresetName)
 			self.m_PresetName = p_PresetName
@@ -835,7 +910,7 @@ function CinematicTools:ParseJSON()
 
 			-- Foreach field in class
 			for _, l_Field in ipairs(s_Class.typeInfo.fields) do
-				
+
 				-- Fix lua types
 				local s_FieldName = l_Field.name
 
@@ -869,7 +944,7 @@ function CinematicTools:ParseJSON()
 				end
 
 			end
-			
+
 			if s_Rows ~= nil then
 				table.insert(s_Result, "\"" .. l_Class .. "\" : {" .. table.concat(s_Rows, ",") .. "}")
 			end
