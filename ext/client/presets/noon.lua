@@ -38,20 +38,7 @@ local table = [[
     },
     "Enlighten": {
         "Realm": "0",
-        "Enable": "false",
-        "BounceScale": "0.1",
-        "SunScale": "0",
-        "TerrainColor": "(0.0, 0.0, 0.0)",
-        "CullDistance": "-1.0",
-        "SkyBoxEnable": "true",
-        "SkyBoxSkyColor": "(0.0, 0.0, 0.0)",
-        "SkyBoxGroundColor": "(0.0, 0.0, 0.0)",
-        "SkyBoxSunLightColor": "(0.0, 0.0, 0.0)",
-        "SkyBoxSunLightColorSize": "0.0",
-        "SkyBoxBackLightColor": "(0.0, 0.0, 0.0)",
-        "SkyBoxBackLightColorSize": "0.1",
-        "SkyBoxBackLightRotationX": "171.95899963379",
-        "SkyBoxBackLightRotationY": "26.563999176025"
+        "Enable": "true"
     },
     "Fog": {
         "Realm": "0",
@@ -78,7 +65,7 @@ local table = [[
         "SkyColor": "(0.7, 0.7, 0.7)",
         "GroundColor": "(0.7, 0.7, 0.7)",
         "SunRotationX": "0",
-        "SunRotationY": "0"
+        "SunRotationY": "90"
     },
     "Sky": {
         "Realm": "0",
@@ -129,7 +116,7 @@ local table = [[
         "WindStrength": "1.7"
     },
     "Name": "DefaultNoon",
-    "Type": "DefaultNoon",
+    "Type": "DefaultDynamic",
     "Priority": "10",
     "Visibility": "1"
 }
