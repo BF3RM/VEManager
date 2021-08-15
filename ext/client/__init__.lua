@@ -119,8 +119,8 @@ function VEManagerClient:SetVisibility(p_ID, p_Visibility)
 		return
 	end
 
-	self.m_Presets[p_ID]["logic"].visibility = visibility
-	self.m_Presets[p_ID]["ve"].visibility = visibility
+	self.m_Presets[p_ID]["logic"].visibility = p_Visibility
+	self.m_Presets[p_ID]["ve"].visibility = p_Visibility
 
 	self:Reload(p_ID)
 end
@@ -139,7 +139,7 @@ function VEManagerClient:UpdateVisibility(p_ID, p_Priority, p_Visibility) -- Jac
 	self.m_Presets[p_ID]["ve"].visibility = p_Visibility
 
 	local s_States = VisualEnvironmentManager:GetStates()
-	local s_FixedPriority = 10000000 + priority
+	local s_FixedPriority = 10000000 + p_Priority
 
 	for _, l_State in pairs(s_States) do
 		if l_State.priority == s_FixedPriority then
@@ -157,7 +157,7 @@ function VEManagerClient:SetSingleValue(p_ID, p_Priority, p_Class, p_Property, p
 	end
 
 	local s_States = VisualEnvironmentManager:GetStates()
-	local s_FixedPriority = 10000000 + priority
+	local s_FixedPriority = 10000000 + p_Priority
 
 	for _, l_State in pairs(s_States) do
 		if l_State.priority == s_FixedPriority then
