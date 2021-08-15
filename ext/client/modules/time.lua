@@ -129,9 +129,15 @@ function Time:UpdateSunPosition(p_ClientTime) -- for smoother sun relative to ti
 		return
 	end
 
-	-- Update class variables
-	self.m_SunPosX = s_SunPosX
-	self.m_SunPosY = s_SunPosY
+	-- Update position (if needed)
+	if self.m_SunPosY ~= s_SunPosY or self.m_SunPosY ~= s_SunPosY then
+		-- Update class variables
+		self.m_SunPosX = s_SunPosX
+		self.m_SunPosY = s_SunPosY
+
+		VisualEnvironmentManager:SetSunRotationX(self.m_SunPosX)
+		VisualEnvironmentManager:SetSunRotationY(self.m_SunPosY)
+	end
 end
 
 function Time:SetCloudSpeed()
@@ -168,20 +174,30 @@ end
 -- ADD TIME TO MAP
 -- Add(Map name, starting hour (24h), day length (min))
 function Time:Add(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
-	if self.m_SystemRunning == true or self.m_FirstRun == true then
+	if self.m_SystemRunning or self.m_FirstRun then
 		self:RegisterVars()
 	end
 
 	local s_Types = {'Dynamic', 'DefaultDynamic'}
-	
+	print("Searching for dynamic presets:")
+
 	for _, l_type in pairs(s_Types) do
 		-- Get all dynamic presets
 		-- (if no Dynamic presets, DefaultDynamic presets will be loaded)
 		if #self.m_SortedDynamicPresetsTable < 2 then
 			for l_ID, l_Preset in pairs(g_VEManagerClient.m_Presets) do
-				if g_VEManagerClient.m_Presets[l_ID].type == l_type then
-					--print(g_VEManagerClient.m_RawPresets[l_ID].OutdoorLight.SunRotationY)
-					table.insert(self.m_SortedDynamicPresetsTable, {l_ID, tonumber(g_VEManagerClient.m_RawPresets[l_ID].OutdoorLight.SunRotationY)})
+				local s_SkyBrightness = tonumber(g_VEManagerClient.m_RawPresets[l_ID].Sky.BrightnessScale)
+				local s_SunRotationY = tonumber(g_VEManagerClient.m_RawPresets[l_ID].OutdoorLight.SunRotationY)
+				
+				if g_VEManagerClient.m_Presets[l_ID].type == l_type and s_SunRotationY ~= nil then
+					-- Check if night mode (moon enabled)
+					if s_SkyBrightness ~= nil and s_SkyBrightness < 0.01 then
+						s_SunRotationY = 360 - s_SunRotationY
+					end
+
+					print(" - " .. tostring(l_ID) .. " (sun: " .. tostring(s_SunRotationY) .. ")")
+					
+					table.insert(self.m_SortedDynamicPresetsTable, {l_ID, s_SunRotationY})
 				end
 			end
 		end
@@ -191,9 +207,13 @@ function Time:Add(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 	table.sort(self.m_SortedDynamicPresetsTable, function(a,b) return tonumber(a[2]) < tonumber(b[2]) end)
 
 	-- Set Priorities
+	print("Found dynamic presets:")
 	for l_Index, l_Preset in ipairs(self.m_SortedDynamicPresetsTable) do
 		local s_ID = l_Preset[1]
 		g_VEManagerClient.m_Presets[s_ID]["ve"].priority = l_Index + 10
+		
+		local s_SunRotationY = l_Preset[2]
+		print(" - " .. tostring(s_ID) .. " (sun: " .. tostring(s_SunRotationY) .. ")")
 	end
 
 	-- Save dayLength in Class (minutes -> seconds)
@@ -202,19 +222,34 @@ function Time:Add(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 	self.m_ClientTime = p_StartingTime
 	print('[Time-Client]: Starting at Time: ' .. p_StartingTime / 3600 / (self.m_TotalDayLength / 86000) .. ' Hours ('.. p_StartingTime ..' Seconds)')
 
+	-- Update sun & clouds
+	self:UpdateSunPosition(self.m_ClientTime)
+	self:SetCloudSpeed()
+	
+	-- Sun/Moon position fix
+	local s_SunMoonPos = self.m_SunPosY
+	if not self.m_IsDay then
+		-- Moon visible (from 180 to 360) but actual moon position in VE is 0 to 180
+		s_SunMoonPos = 360 - s_SunMoonPos
+	end
 
+	-- Find starting preset
+	for l_Index, l_Preset in ipairs(self.m_SortedDynamicPresetsTable) do
+		local s_SunPosY = l_Preset[2]
+		if s_SunPosY < s_SunMoonPos then
+			self.m_CurrentPreset = l_Index
+		end
+	end
+	
+	-- Initialise
 	self.m_FirstRun = true
 	self:Run()
 
 	if p_IsStatic ~= true then
-		--self.m_SystemRunning = true
+		self.m_SystemRunning = true
 		print("Time System Activated")
 	end
 
-	self:UpdateSunPosition(self.m_ClientTime)
-	VisualEnvironmentManager:SetSunRotationX(self.m_SunPosX)
-	VisualEnvironmentManager:SetSunRotationY(self.m_SunPosY)
-	self:SetCloudSpeed()
 end
 
 -- ALSO LOOP THIS CODE PLEASE
@@ -238,66 +273,73 @@ function Time:Run()
 	end
 
 	self:UpdateSunPosition(self.m_ClientTime)
-	local s_SunPosY = self.m_SunPosY
+
+	-- Sun/Moon position fix
+	local s_SunMoonPos = self.m_SunPosY
 	if not self.m_IsDay then
-		-- Night (180 - 360)
-		s_SunPosY = 360 - s_SunPosY
+		-- Moon visible (from 180 to 360) but actual moon position in VE is 0 to 180
+		s_SunMoonPos = 360 - s_SunMoonPos
 	end
-	
-	-- Check if still in curent presets
-	if self.m_CurrentPreset + 1 > #self.m_SortedDynamicPresetsTable then
-		if s_SunPosY >= 360 then
-			self.m_CurrentPreset = 1
-		end
-	else
-		if s_SunPosY >= self.m_SortedDynamicPresetsTable[self.m_CurrentPreset+1][2] then
-			self.m_CurrentPreset = self.m_CurrentPreset+1
-		end
-	end
-	-- Calc next preset
+
+	-- Get sun positions for each preset
+	local s_CurrentPresetSunPosY = self.m_SortedDynamicPresetsTable[self.m_CurrentPreset][2]
 	local s_NextPreset = self.m_CurrentPreset % #self.m_SortedDynamicPresetsTable + 1
-
-	--local s_VisibilityFadeInID = self.m_SortedDynamicPresetsTable[s_NextPreset][1]
-	--local s_VisibilityFadeOutID = self.m_SortedDynamicPresetsTable[self.m_CurrentPreset][1]
-	local s_VisibilityFactorFadeIn = nil
-	if s_NextPreset == 1 then
-		s_VisibilityFactorFadeIn = (s_SunPosY - self.m_SortedDynamicPresetsTable[self.m_CurrentPreset][2])  / (360 + self.m_SortedDynamicPresetsTable[s_NextPreset][2] - self.m_SortedDynamicPresetsTable[self.m_CurrentPreset][2])
-	else
-		s_VisibilityFactorFadeIn = (s_SunPosY - self.m_SortedDynamicPresetsTable[self.m_CurrentPreset][2])  / (self.m_SortedDynamicPresetsTable[s_NextPreset][2] - self.m_SortedDynamicPresetsTable[self.m_CurrentPreset][2])
-	end
-	if s_VisibilityFactorFadeIn > 1 then
-		s_VisibilityFactorFadeIn = 1
+	local s_NextPresetSunPosY = self.m_SortedDynamicPresetsTable[s_NextPreset][2]
+	if s_NextPresetSunPosY < s_CurrentPresetSunPosY then -- fix when next preset on next day
+		s_NextPresetSunPosY = 360 + s_NextPresetSunPosY
 	end
 
-	local s_VisibilityFactorFadeOut = 1 - s_VisibilityFactorFadeIn
+	-- Check if still in curent presets
+	if s_SunMoonPos >= s_NextPresetSunPosY then
+		self.m_CurrentPreset = s_NextPreset
+		s_CurrentPresetSunPosY = self.m_SortedDynamicPresetsTable[self.m_CurrentPreset][2]
 
-	print(s_VisibilityFactorFadeIn)
-	print(s_VisibilityFactorFadeOut)
+		s_NextPreset = self.m_CurrentPreset % #self.m_SortedDynamicPresetsTable + 1
+		s_NextPresetSunPosY = self.m_SortedDynamicPresetsTable[s_NextPreset][2]
+		if s_NextPresetSunPosY < s_CurrentPresetSunPosY then -- fix when next preset on next day
+			s_NextPresetSunPosY = 360 + s_NextPresetSunPosY
+		end
+	end
+
+	--print("Current preset: " .. tostring(self.m_CurrentPreset))
+	--print("Next preset: " .. tostring(s_NextPreset))
+
+	-- Calculate visibility fade factor
+	local s_VisibilityFactor = (s_SunMoonPos - s_CurrentPresetSunPosY)  / (s_NextPresetSunPosY - s_CurrentPresetSunPosY)
+	--[[if s_VisibilityFactor > 1 then -- Safe check -- TODO: Remove. It should work correctly without this
+		s_VisibilityFactor = 1
+	end]]
+	local s_NextPresetVisibilityFactor = nil
+	local s_CurrentPresetVisibilityFactor = nil -- Current preset
+
+	if s_NextPreset ~= 1 then
+		s_NextPresetVisibilityFactor = (s_SunMoonPos - s_CurrentPresetSunPosY)  / (s_NextPresetSunPosY - s_CurrentPresetSunPosY)
+		--								330 or 10    - 310                      /      20              -  310
+		s_CurrentPresetVisibilityFactor = 1.0
+	else -- Invert visibilities because next preset's priority is less than previous preset's priority
+		s_NextPresetVisibilityFactor = 1.0
+		s_CurrentPresetVisibilityFactor = (s_SunMoonPos - s_CurrentPresetSunPosY)  / (s_NextPresetSunPosY - s_CurrentPresetSunPosY)
+	end
+
+	print("Sun/Moon: " .. tostring(s_SunMoonPos) .. ", visibility: " .. tostring(s_VisibilityFactor))
+	--print("Visibility Factor: " .. tostring(s_VisibilityFactor))
 
 	for l_Index, l_Preset in ipairs(self.m_SortedDynamicPresetsTable) do
 		local s_ID = l_Preset[1]
-		print(s_ID)
+		--print("Preset ID: " .. tostring(s_ID))
 		local s_Factor = 0
 		if l_Index == self.m_CurrentPreset then
-			if s_NextPreset == 1 then
-				s_Factor = s_VisibilityFactorFadeOut
-			else
-				s_Factor = 1
-			end
+			s_Factor = s_CurrentPresetVisibilityFactor
 		elseif l_Index == s_NextPreset then
-			if s_NextPreset == 1 then
-				s_Factor = 1
-			else
-				s_Factor = s_VisibilityFactorFadeIn
-			end
+			s_Factor = s_NextPresetVisibilityFactor
 		end
 		
 		if self.m_FirstRun then
-			print(s_Factor)
+			--print(s_Factor)
 			g_VEManagerClient:SetVisibility(s_ID, s_Factor)
 		else
 			g_VEManagerClient:UpdateVisibility(s_ID, l_Index + 10, s_Factor)
-			if s_Factor ~= 0 then
+			if s_Factor ~= 0 then -- TODO: CHeck if cloud speed works
 				g_VEManagerClient:SetSingleValue(s_ID, l_Index + 10, 'sky', 'cloudLayer1Speed', self.m_CloudSpeed)
 			end
 		end
