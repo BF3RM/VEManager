@@ -107,18 +107,18 @@ function Time:UpdateSunPosition(p_ClientTime) -- for smoother sun relative to ti
 	local s_SunPosX = 275
 	local s_SunPosY = 0
 
-	if s_DayFactor >= VEM_CONFIG.DN_SUN_TIMINGS[3] then -- Moon
-		local s_FactorNight = s_DayFactor  / 1
-		s_SunPosY = 180 - s_FactorNight * 45
-		self.m_IsDay = false
-	elseif s_DayFactor >= VEM_CONFIG.DN_SUN_TIMINGS[3] and s_DayFactor <= VEM_CONFIG.DN_SUN_TIMINGS[1] then -- Moon
+	if s_DayFactor <= VEM_CONFIG.DN_SUN_TIMINGS[1] then -- Moon
 		local s_FactorNight = s_DayFactor  / VEM_CONFIG.DN_SUN_TIMINGS[1]
 		s_SunPosY = 135 - s_FactorNight * 135
 		self.m_IsDay = false
-	elseif s_DayFactor >= VEM_CONFIG.DN_SUN_TIMINGS[1] and s_DayFactor <= VEM_CONFIG.DN_SUN_TIMINGS[2] then -- Day
-		local s_FactorNight = (s_DayFactor - VEM_CONFIG.DN_SUN_TIMINGS[2]) / VEM_CONFIG.DN_SUN_TIMINGS[3]
-		s_SunPosY = 180 * s_FactorNight
+	elseif s_DayFactor >= VEM_CONFIG.DN_SUN_TIMINGS[1] and s_DayFactor <= VEM_CONFIG.DN_SUN_TIMINGS[3] then -- Day
+		local s_FactorDay = (s_DayFactor - VEM_CONFIG.DN_SUN_TIMINGS[1]) / VEM_CONFIG.DN_SUN_TIMINGS[3]
+		s_SunPosY = 180 * s_FactorDay
 		self.m_IsDay = true
+	elseif s_DayFactor >= VEM_CONFIG.DN_SUN_TIMINGS[3] then -- Moon
+		local s_FactorNight = s_DayFactor  / VEM_CONFIG.DN_SUN_TIMINGS[1]
+		s_SunPosY = 180 - s_FactorNight * 45
+		self.m_IsDay = false
 	else
 		print("Faulty ClientTime: " .. p_ClientTime)
 	end
