@@ -39,6 +39,8 @@ function Time:RegisterVars()
 	self.m_CurrentPreset = 1
 
 	self.m_CloudSpeed = VEM_CONFIG.CLOUDS_DEFAULT_SPEED
+	self.m_Sunrise = VEM_CONFIG.DN_SUN_TIMINGS[1] / 24
+	self.m_Sunset = VEM_CONFIG.DN_SUN_TIMINGS[2] / 24
 end
 
 function Time:RegisterEvents()
@@ -107,20 +109,20 @@ function Time:UpdateSunPosition(p_ClientTime) -- for smoother sun relative to ti
 	local s_SunPosX = 275
 	local s_SunPosY = 0
 
-	if s_DayFactor <= VEM_CONFIG.DN_SUN_TIMINGS[1] then -- Moon
-		local s_FactorNight = s_DayFactor  / VEM_CONFIG.DN_SUN_TIMINGS[1]
-		s_SunPosY = 135 - s_FactorNight * 135
+	if s_DayFactor <= self.m_Sunrise then -- Moon
+		local s_FactorNight = (s_DayFactor + 1 - self.m_Sunset) / (self.m_Sunrise + 1 - self.m_Sunset)
+		s_SunPosY = 180 * (1 - s_FactorNight)
 		self.m_IsDay = false
-	elseif s_DayFactor >= VEM_CONFIG.DN_SUN_TIMINGS[1] and s_DayFactor <= VEM_CONFIG.DN_SUN_TIMINGS[3] then -- Day
-		local s_FactorDay = (s_DayFactor - VEM_CONFIG.DN_SUN_TIMINGS[1]) / VEM_CONFIG.DN_SUN_TIMINGS[3]
+	elseif s_DayFactor <= self.m_Sunset then -- Day
+		local s_FactorDay = (s_DayFactor - self.m_Sunrise) / (self.m_Sunset - self.m_Sunrise)
 		s_SunPosY = 180 * s_FactorDay
 		self.m_IsDay = true
-	elseif s_DayFactor >= VEM_CONFIG.DN_SUN_TIMINGS[3] then -- Moon
-		local s_FactorNight = s_DayFactor  / VEM_CONFIG.DN_SUN_TIMINGS[1]
-		s_SunPosY = 180 - s_FactorNight * 45
+	else -- Moon
+		local s_FactorNight = (s_DayFactor - self.m_Sunset) / (self.m_Sunrise + 1 - self.m_Sunset)
+		s_SunPosY = 180 * (1 - s_FactorNight)
 		self.m_IsDay = false
-	else
-		print("Faulty ClientTime: " .. p_ClientTime)
+	--else
+	--	print("Faulty ClientTime: " .. p_ClientTime)
 	end
 
 	-- Avoid crashes
@@ -212,6 +214,19 @@ function Time:Add(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 		local s_ID = l_Preset[1]
 		g_VEManagerClient.m_Presets[s_ID]["ve"].priority = l_Index + 10
 		
+		-- Patch Sun Positions
+		for l_Index, l_Class in pairs(g_VEManagerClient.m_Presets[s_ID]["ve"].components) do
+			if l_Class.typeInfo.name == "OutdoorLightComponentData"  then
+				local s_Class =  _G[l_Class.typeInfo.name]()
+				s_Class:MakeWritable()
+				-- They need to be reverted to 0
+				s_Class.sunRotationX = 0.0
+				s_Class.sunRotationY = 0.0
+
+				g_VEManagerClient.m_Presets[s_ID]["ve"].components[l_Index] = s_Class
+			end
+		end
+
 		local s_SunRotationY = l_Preset[2]
 		print(" - " .. tostring(s_ID) .. " (sun: " .. tostring(s_SunRotationY) .. ")")
 	end
