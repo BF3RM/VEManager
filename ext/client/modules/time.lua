@@ -121,8 +121,6 @@ function Time:UpdateSunPosition(p_ClientTime) -- for smoother sun relative to ti
 		local s_FactorNight = (s_DayFactor - self.m_Sunset) / (self.m_Sunrise + 1 - self.m_Sunset)
 		s_SunPosY = 180 * (1 - s_FactorNight)
 		self.m_IsDay = false
-	--else
-	--	print("Faulty ClientTime: " .. p_ClientTime)
 	end
 
 	-- Avoid crashes
@@ -300,43 +298,44 @@ function Time:Run()
 	local s_CurrentPresetSunPosY = self.m_SortedDynamicPresetsTable[self.m_CurrentPreset][2]
 	local s_NextPreset = self.m_CurrentPreset % #self.m_SortedDynamicPresetsTable + 1
 	local s_NextPresetSunPosY = self.m_SortedDynamicPresetsTable[s_NextPreset][2]
-	if s_NextPresetSunPosY < s_CurrentPresetSunPosY then -- fix when next preset on next day
-		s_NextPresetSunPosY = 360 + s_NextPresetSunPosY
-	end
 
 	-- Check if still in curent presets
-	if s_SunMoonPos >= s_NextPresetSunPosY then
+	if s_SunMoonPos >= s_NextPresetSunPosY and (
+		s_CurrentPresetSunPosY < s_NextPresetSunPosY or
+		(s_NextPresetSunPosY < s_CurrentPresetSunPosY and s_SunMoonPos < s_CurrentPresetSunPosY)
+		) then
 		self.m_CurrentPreset = s_NextPreset
 		s_CurrentPresetSunPosY = self.m_SortedDynamicPresetsTable[self.m_CurrentPreset][2]
 
 		s_NextPreset = self.m_CurrentPreset % #self.m_SortedDynamicPresetsTable + 1
 		s_NextPresetSunPosY = self.m_SortedDynamicPresetsTable[s_NextPreset][2]
-		if s_NextPresetSunPosY < s_CurrentPresetSunPosY then -- fix when next preset on next day
-			s_NextPresetSunPosY = 360 + s_NextPresetSunPosY
-		end
 	end
 
 	--print("Current preset: " .. tostring(self.m_CurrentPreset))
 	--print("Next preset: " .. tostring(s_NextPreset))
 
-	-- Calculate visibility fade factor
-	local s_VisibilityFactor = (s_SunMoonPos - s_CurrentPresetSunPosY)  / (s_NextPresetSunPosY - s_CurrentPresetSunPosY)
-	--[[if s_VisibilityFactor > 1 then -- Safe check -- TODO: Remove. It should work correctly without this
-		s_VisibilityFactor = 1
-	end]]
+	-- Calculate visibility factor
+	local s_VisibilityFactor = nil
+	if s_SunMoonPos <= s_NextPresetSunPosY and s_SunMoonPos <= s_CurrentPresetSunPosY then -- When changing from 360 to 0 with s_SunMoonPos after 0
+		s_VisibilityFactor = (s_SunMoonPos + 360 - s_CurrentPresetSunPosY) / (s_NextPresetSunPosY + 360 - s_CurrentPresetSunPosY)
+	elseif s_SunMoonPos <= s_NextPresetSunPosY then -- Normal case
+		s_VisibilityFactor = (s_SunMoonPos - s_CurrentPresetSunPosY) / (s_NextPresetSunPosY - s_CurrentPresetSunPosY)
+	else -- When changing from 360 to 0 with s_SunMoonPos before 360
+		s_VisibilityFactor = (s_SunMoonPos - s_CurrentPresetSunPosY) / (s_NextPresetSunPosY + 360 - s_CurrentPresetSunPosY)
+	end
+
 	local s_NextPresetVisibilityFactor = nil
 	local s_CurrentPresetVisibilityFactor = nil -- Current preset
 
 	if s_NextPreset ~= 1 then
-		s_NextPresetVisibilityFactor = (s_SunMoonPos - s_CurrentPresetSunPosY)  / (s_NextPresetSunPosY - s_CurrentPresetSunPosY)
-		--								330 or 10    - 310                      /      20              -  310
+		s_NextPresetVisibilityFactor = s_VisibilityFactor
 		s_CurrentPresetVisibilityFactor = 1.0
 	else -- Invert visibilities because next preset's priority is less than previous preset's priority
 		s_NextPresetVisibilityFactor = 1.0
-		s_CurrentPresetVisibilityFactor = (s_SunMoonPos - s_CurrentPresetSunPosY)  / (s_NextPresetSunPosY - s_CurrentPresetSunPosY)
+		s_CurrentPresetVisibilityFactor = 1 - s_VisibilityFactor
 	end
 
-	print("Sun/Moon: " .. tostring(s_SunMoonPos) .. ", visibility: " .. tostring(s_VisibilityFactor))
+	print("Sun/Moon: " .. tostring(s_SunMoonPos) .. " ( " .. self.m_CurrentPreset .. " -> " .. s_NextPreset .. " ), visibility: " .. tostring(s_VisibilityFactor))
 	--print("Visibility Factor: " .. tostring(s_VisibilityFactor))
 
 	for l_Index, l_Preset in ipairs(self.m_SortedDynamicPresetsTable) do
