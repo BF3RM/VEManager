@@ -172,41 +172,42 @@ function VEManagerClient:FadeIn(p_ID, p_Time)
 	self:FadeTo(p_ID, 0, 1, p_Time)
 end
 
-function VEManagerClient:FadeTo(p_ID, p_VisibilityStart, p_VisibilityEnd, p_Time)
-	if self.m_Presets[p_ID] == nil then
-		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(p_ID))
-		return
-	end
-
-	self.m_Presets[id]['time'] = p_Time
-	self.m_Presets[id]['startTime'] = SharedUtils:GetTimeMS()
-	self.m_Presets[id]['startValue'] = p_VisibilityStart
-	self.m_Presets[id]['EndValue'] = p_VisibilityEnd
-	self.m_Lerping[#self.m_Lerping + 1] = p_ID
-end
-
 function VEManagerClient:FadeOut(p_ID, p_Time)
 	if self.m_Presets[p_ID] == nil then
 		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(p_ID))
 		return
 	end
 
-	self.m_Presets[p_ID]['time'] = p_Time
-	self.m_Presets[p_ID]['startTime'] = SharedUtils:GetTimeMS()
-	self.m_Presets[p_ID]['startValue'] = self.m_Presets[id]["logic"].visibility
-	self.m_Presets[p_ID]['EndValue'] = 0
-
-	self.m_Lerping[#self.m_Lerping +1] = p_ID
+	local s_VisibilityStart = self.m_Presets[p_ID]["logic"].visibility
+	self:FadeTo(p_ID, s_VisibilityStart, 0, p_Time)
 end
 
-function VEManagerClient:Lerp(p_ID, p_Value, p_Time)
+function VEManagerClient:FadeTo(p_ID, p_VisibilityStart, p_VisibilityEnd, p_Time)
 	if self.m_Presets[p_ID] == nil then
 		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(p_ID))
 		return
 	end
+
+	self.m_Presets[p_ID]['time'] = tonumber(p_Time)
+	self.m_Presets[p_ID]['startTime'] = SharedUtils:GetTimeMS()
+	self.m_Presets[p_ID]['startValue'] = tonumber(p_VisibilityStart)
+	self.m_Presets[p_ID]['EndValue'] = tonumber(p_VisibilityEnd)
+	self.m_Lerping[#self.m_Lerping + 1] = p_ID
+end
+
+
+function VEManagerClient:Lerp(p_ID, p_Value, p_Time)
+	if p_ID == nil then
+		error("The preset name provided is nil.")
+		return
+	elseif self.m_Presets[p_ID] == nil then
+		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(p_ID))
+		return
+	end
+
 	self.m_Presets[p_ID]['time'] = p_Time
 	self.m_Presets[p_ID]['startTime'] = SharedUtils:GetTimeMS()
-	self.m_Presets[p_ID]['startValue'] = self.m_Presets[id]["logic"].visibility
+	self.m_Presets[p_ID]['startValue'] = self.m_Presets[p_ID]["logic"].visibility
 	self.m_Presets[p_ID]['EndValue'] = p_Value
 
 	self.m_Lerping[#self.m_Lerping +1] = p_ID
