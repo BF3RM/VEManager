@@ -181,25 +181,30 @@ function Time:Add(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 	local s_Types = {'Dynamic', 'DefaultDynamic'}
 	print("Searching for dynamic presets:")
 
-	for _, l_type in pairs(s_Types) do
+	for _, l_Type in pairs(s_Types) do
+		print("Found for Type: " .. l_Type)
 		-- Get all dynamic presets
 		-- (if no Dynamic presets, DefaultDynamic presets will be loaded)
 		if #self.m_SortedDynamicPresetsTable < 2 then
 			for l_ID, l_Preset in pairs(g_VEManagerClient.m_Presets) do
 
 				if g_VEManagerClient.m_RawPresets[l_ID] ~= nil then
-					local s_SkyBrightness = tonumber(g_VEManagerClient.m_RawPresets[l_ID].Sky.BrightnessScale)
-					local s_SunRotationY = tonumber(g_VEManagerClient.m_RawPresets[l_ID].OutdoorLight.SunRotationY)
 
-					if g_VEManagerClient.m_Presets[l_ID].type == l_type and s_SunRotationY ~= nil then
-						-- Check if night mode (moon enabled)
-						if s_SkyBrightness ~= nil and s_SkyBrightness < 0.01 then
-							s_SunRotationY = 360 - s_SunRotationY
+					if g_VEManagerClient.m_RawPresets[l_ID].Sky ~= nil and g_VEManagerClient.m_RawPresets[l_ID].OutdoorLight ~= nil then
+
+						local s_SunRotationY = tonumber(g_VEManagerClient.m_RawPresets[l_ID].OutdoorLight.SunRotationY)
+						local s_SkyBrightness = tonumber(g_VEManagerClient.m_RawPresets[l_ID].Sky.BrightnessScale)
+
+						if g_VEManagerClient.m_Presets[l_ID].type == l_Type and s_SunRotationY ~= nil then
+							-- Check if night mode (moon enabled)
+							if s_SkyBrightness ~= nil and s_SkyBrightness < 0.01 then
+								s_SunRotationY = 360 - s_SunRotationY
+							end
+
+							print(" - " .. tostring(l_ID) .. " (sun: " .. tostring(s_SunRotationY) .. ")")
+
+							table.insert(self.m_SortedDynamicPresetsTable, {l_ID, s_SunRotationY})
 						end
-
-						print(" - " .. tostring(l_ID) .. " (sun: " .. tostring(s_SunRotationY) .. ")")
-
-						table.insert(self.m_SortedDynamicPresetsTable, {l_ID, s_SunRotationY})
 					end
 				end
 			end
@@ -210,11 +215,11 @@ function Time:Add(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 	table.sort(self.m_SortedDynamicPresetsTable, function(a,b) return tonumber(a[2]) < tonumber(b[2]) end)
 
 	-- Set Priorities
-	print("Found dynamic presets:")
+	print("Sorted dynamic presets:")
 	for l_Index, l_Preset in ipairs(self.m_SortedDynamicPresetsTable) do
 		local s_ID = l_Preset[1]
 		g_VEManagerClient.m_Presets[s_ID]["ve"].priority = l_Index + 10
-		
+
 		-- Patch Sun Positions
 		for l_Index, l_Class in pairs(g_VEManagerClient.m_Presets[s_ID]["ve"].components) do
 			if l_Class.typeInfo.name == "OutdoorLightComponentData"  then
@@ -222,7 +227,7 @@ function Time:Add(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 				s_Class:MakeWritable()
 				-- They need to be reverted to 0
 				s_Class.sunRotationX = 0.0
-				s_Class.sunRotationY = 0.0
+				s_Class.sunRotationY = 0.0 --TODO: Reset later
 
 				g_VEManagerClient.m_Presets[s_ID]["ve"].components[l_Index] = s_Class
 			end
