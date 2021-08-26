@@ -186,23 +186,26 @@ function Time:Add(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 		-- (if no Dynamic presets, DefaultDynamic presets will be loaded)
 		if #self.m_SortedDynamicPresetsTable < 2 then
 			for l_ID, l_Preset in pairs(g_VEManagerClient.m_Presets) do
-				local s_SkyBrightness = tonumber(g_VEManagerClient.m_RawPresets[l_ID].Sky.BrightnessScale)
-				local s_SunRotationY = tonumber(g_VEManagerClient.m_RawPresets[l_ID].OutdoorLight.SunRotationY)
-				
-				if g_VEManagerClient.m_Presets[l_ID].type == l_type and s_SunRotationY ~= nil then
-					-- Check if night mode (moon enabled)
-					if s_SkyBrightness ~= nil and s_SkyBrightness < 0.01 then
-						s_SunRotationY = 360 - s_SunRotationY
-					end
 
-					print(" - " .. tostring(l_ID) .. " (sun: " .. tostring(s_SunRotationY) .. ")")
-					
-					table.insert(self.m_SortedDynamicPresetsTable, {l_ID, s_SunRotationY})
+				if g_VEManagerClient.m_RawPresets[l_ID] ~= nil then
+					local s_SkyBrightness = tonumber(g_VEManagerClient.m_RawPresets[l_ID].Sky.BrightnessScale)
+					local s_SunRotationY = tonumber(g_VEManagerClient.m_RawPresets[l_ID].OutdoorLight.SunRotationY)
+
+					if g_VEManagerClient.m_Presets[l_ID].type == l_type and s_SunRotationY ~= nil then
+						-- Check if night mode (moon enabled)
+						if s_SkyBrightness ~= nil and s_SkyBrightness < 0.01 then
+							s_SunRotationY = 360 - s_SunRotationY
+						end
+
+						print(" - " .. tostring(l_ID) .. " (sun: " .. tostring(s_SunRotationY) .. ")")
+
+						table.insert(self.m_SortedDynamicPresetsTable, {l_ID, s_SunRotationY})
+					end
 				end
 			end
 		end
 	end
-	
+
 	-- Table Sort
 	table.sort(self.m_SortedDynamicPresetsTable, function(a,b) return tonumber(a[2]) < tonumber(b[2]) end)
 
@@ -238,7 +241,7 @@ function Time:Add(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 	-- Update sun & clouds
 	self:UpdateSunPosition(self.m_ClientTime)
 	self:SetCloudSpeed()
-	
+
 	-- Sun/Moon position fix
 	local s_SunMoonPos = self.m_SunPosY
 	if not self.m_IsDay then
@@ -253,7 +256,7 @@ function Time:Add(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 			self.m_CurrentPreset = l_Index
 		end
 	end
-	
+
 	-- Initialise
 	self.m_FirstRun = true
 	self:Run()
