@@ -197,9 +197,9 @@ function Time:Add(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 
 						if g_VEManagerClient.m_Presets[l_ID].type == l_Type and s_SunRotationY ~= nil then
 							-- Check if night mode (moon enabled)
-							if s_SkyBrightness ~= nil and s_SkyBrightness < 0.01 then
+							if s_SkyBrightness ~= nil and s_SkyBrightness <= 0.01 then
 								s_SunRotationY = 360 - s_SunRotationY
-							end
+							end 
 
 							print(" - " .. tostring(l_ID) .. " (sun: " .. tostring(s_SunRotationY) .. ")")
 
