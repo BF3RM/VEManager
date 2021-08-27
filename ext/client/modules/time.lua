@@ -233,7 +233,7 @@ function Time:Add(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 			end
 
 			-- Patch Star Cloudlayer
-			if l_CLass.typeInfo.name == "SkyComponentData" then
+			if l_Class.typeInfo.name == "SkyComponentData" then
 				local s_Class = _G[l_Class.typeInfo.name]()
 				s_Class:MakeWritable()
 				s_Class.cloudLayer2Altitude = 5000000.0
