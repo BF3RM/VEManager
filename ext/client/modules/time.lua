@@ -222,12 +222,24 @@ function Time:Add(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 
 		-- Patch Sun Positions
 		for l_Index, l_Class in pairs(g_VEManagerClient.m_Presets[s_ID]["ve"].components) do
-			if l_Class.typeInfo.name == "OutdoorLightComponentData"  then
+			if l_Class.typeInfo.name == "OutdoorLightComponentData" then
 				local s_Class =  _G[l_Class.typeInfo.name]()
 				s_Class:MakeWritable()
 				-- They need to be reverted to 0
 				s_Class.sunRotationX = 0.0
 				s_Class.sunRotationY = 0.0 --TODO: Reset later
+
+				g_VEManagerClient.m_Presets[s_ID]["ve"].components[l_Index] = s_Class
+			end
+
+			-- Patch Star Cloudlayer
+			if l_CLass.typeInfo.name == "SkyComponentData" then
+				local s_Class = _G[l_Class.typeInfo.name]()
+				s_Class:MakeWritable()
+				s_Class.cloudLayer2Altitude = 5000000.0
+				s_Class.cloudLayer2TileFactor = 0.60000002384186
+				s_Class.cloudLayer2Rotation = 237.07299804688
+				s_Class.cloudLayer2Speed = -0.0010000000474975
 
 				g_VEManagerClient.m_Presets[s_ID]["ve"].components[l_Index] = s_Class
 			end
