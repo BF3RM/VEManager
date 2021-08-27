@@ -238,6 +238,8 @@ function Time:Add(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 				--local s_Class = _G[l_Class.typeInfo.name]()
 				local s_Class = SkyComponentData(l_Class)
 				s_Class:MakeWritable()
+				s_Class.sunSize = 0.01
+				s_Class.sunScale = 1.5
 				s_Class.cloudLayer2Altitude = 5000000.0
 				s_Class.cloudLayer2TileFactor = 0.60000002384186
 				s_Class.cloudLayer2Rotation = 237.07299804688
@@ -321,7 +323,7 @@ function Time:Run()
 	local s_NextPreset = self.m_CurrentPreset % #self.m_SortedDynamicPresetsTable + 1
 	local s_NextPresetSunPosY = self.m_SortedDynamicPresetsTable[s_NextPreset][2]
 
-	-- Check if still in curent presets
+	-- Check if still in current presets
 	if s_SunMoonPos >= s_NextPresetSunPosY and (
 		s_CurrentPresetSunPosY < s_NextPresetSunPosY or
 		(s_NextPresetSunPosY < s_CurrentPresetSunPosY and s_SunMoonPos < s_CurrentPresetSunPosY)
@@ -375,7 +377,7 @@ function Time:Run()
 			g_VEManagerClient:SetVisibility(s_ID, s_Factor)
 		else
 			g_VEManagerClient:UpdateVisibility(s_ID, l_Index + 10, s_Factor)
-			if s_Factor ~= 0 then -- TODO: CHeck if cloud speed works
+			if s_Factor ~= 0 then -- TODO: Check if cloud speed works
 				g_VEManagerClient:SetSingleValue(s_ID, l_Index + 10, 'sky', 'cloudLayer1Speed', self.m_CloudSpeed)
 			end
 		end
