@@ -83,133 +83,134 @@ end
 
 ]]
 
-function VEManagerClient:RegisterPreset(id, preset)
-	self.m_RawPresets[id] = json.decode(preset)
+function VEManagerClient:RegisterPreset(p_ID, p_Preset)
+	self.m_RawPresets[p_ID] = json.decode(p_Preset)
 end
 
-function VEManagerClient:EnablePreset(id)
-	if self.m_Presets[id] == nil then
-		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(id))
+function VEManagerClient:EnablePreset(p_ID)
+	if self.m_Presets[p_ID] == nil then
+		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(p_ID))
 		return
 	end
 
-	print("Enabling preset: " .. tostring(id))
-	self.m_Presets[id]["logic"].visibility = 1
-	self.m_Presets[id]["ve"].visibility = 1
-	self.m_Presets[id]["ve"].enabled = true
-	self.m_Presets[id].entity:FireEvent("Enable")
+	print("Enabling preset: " .. tostring(p_ID))
+	self.m_Presets[p_ID]["logic"].visibility = 1
+	self.m_Presets[p_ID]["ve"].visibility = 1
+	self.m_Presets[p_ID]["ve"].enabled = true
+	self.m_Presets[p_ID].entity:FireEvent("Enable")
 end
 
-function VEManagerClient:DisablePreset(id)
-	if self.m_Presets[id] == nil then
-		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(id))
+function VEManagerClient:DisablePreset(p_ID)
+	if self.m_Presets[p_ID] == nil then
+		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(p_ID))
 		return
 	end
 
-	print("Disabling preset: " .. tostring(id))
-	self.m_Presets[id]["logic"].visibility = 1
-	self.m_Presets[id]["ve"].visibility = 0
-	self.m_Presets[id]["ve"].enabled = false
-	self.m_Presets[id].entity:FireEvent("Disable")
+	print("Disabling preset: " .. tostring(p_ID))
+	self.m_Presets[p_ID]["logic"].visibility = 1
+	self.m_Presets[p_ID]["ve"].visibility = 0
+	self.m_Presets[p_ID]["ve"].enabled = false
+	self.m_Presets[p_ID].entity:FireEvent("Disable")
 end
 
-function VEManagerClient:SetVisibility(id, visibility)
-	if self.m_Presets[id] == nil then
-		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(id))
+function VEManagerClient:SetVisibility(p_ID, p_Visibility)
+	if self.m_Presets[p_ID] == nil then
+		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(p_ID))
 		return
 	end
 
-	self.m_Presets[id]["logic"].visibility = visibility
-	self.m_Presets[id]["ve"].visibility = visibility
+	self.m_Presets[p_ID]["logic"].visibility = p_Visibility
+	self.m_Presets[p_ID]["ve"].visibility = p_Visibility
 
-	self:Reload(id)
+	self:Reload(p_ID)
 end
 
-function VEManagerClient:UpdateVisibility(id, priority, visibilityFactor) -- Jack to APO: These changes directly affect the VE States - while the other one reloads the entity which makes the cycle kill my eyes (on/off/on/off 30 times a sec)
-	if self.m_Presets[id] == nil then
-		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(id))
+function VEManagerClient:UpdateVisibility(p_ID, p_Priority, p_Visibility) -- Jack to APO: These changes directly affect the VE States - while the other one reloads the entity which makes the cycle kill my eyes (on/off/on/off 30 times a sec)
+	if self.m_Presets[p_ID] == nil then
+		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(p_ID))
 		return
 	end
 
-	if math.abs(self.m_Presets[id]["logic"].visibility - visibilityFactor) < self.m_VisibilityUpdateThreshold then
+	if math.abs(self.m_Presets[p_ID]["logic"].visibility - p_Visibility) < self.m_VisibilityUpdateThreshold then
 		return
 	end
 
-	self.m_Presets[id]["logic"].visibility = visibilityFactor
-	self.m_Presets[id]["ve"].visibility = visibilityFactor
+	self.m_Presets[p_ID]["logic"].visibility = p_Visibility
+	self.m_Presets[p_ID]["ve"].visibility = p_Visibility
 
-	local s_states = VisualEnvironmentManager:GetStates()
-	local s_fixedPriority = 10000000 + priority
+	local s_States = VisualEnvironmentManager:GetStates()
+	local s_FixedPriority = 10000000 + p_Priority
 
-	for _, state in pairs(s_states) do
-		if state.priority == s_fixedPriority then
-			state.visibility = visibilityFactor
+	for _, l_State in pairs(s_States) do
+		if l_State.priority == s_FixedPriority then
+			l_State.visibility = p_Visibility
 			VisualEnvironmentManager:SetDirty(true)
 			return
 		end
 	end
 end
 
-function VEManagerClient:SetSingleValue(id, priority, class, property, value)
-	if self.m_Presets[id] == nil then
-		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(id))
+function VEManagerClient:SetSingleValue(p_ID, p_Priority, p_Class, p_Property, p_Value)
+	if self.m_Presets[p_ID] == nil then
+		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(p_ID))
 		return
 	end
 
-	local s_states = VisualEnvironmentManager:GetStates()
-	local s_fixedPriority = 10000000 + priority
+	local s_States = VisualEnvironmentManager:GetStates()
+	local s_FixedPriority = 10000000 + p_Priority
 
-	for _, state in pairs(s_states) do
-		if state.priority == s_fixedPriority then
-			state[class][property] = value
+	for _, l_State in pairs(s_States) do
+		if l_State.priority == s_FixedPriority then
+			l_State[p_Class][p_Property] = p_Value
 			VisualEnvironmentManager:SetDirty(true)
 			return
 		end
 	end
 end
 
-function VEManagerClient:FadeIn(id, time)
-	self:FadeTo(id, 0, 1, time)
+function VEManagerClient:FadeIn(p_ID, p_Time)
+	self:FadeTo(p_ID, 0, 1, p_Time)
 end
 
-function VEManagerClient:FadeTo(id, startVisibility, endVisibility, time)
-	if self.m_Presets[id] == nil then
-		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(id))
+function VEManagerClient:FadeOut(p_ID, p_Time)
+	if self.m_Presets[p_ID] == nil then
+		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(p_ID))
 		return
 	end
 
-	self.m_Presets[id]['time'] = time
-	self.m_Presets[id]['startTime'] = SharedUtils:GetTimeMS()
-	self.m_Presets[id]['startValue'] = startVisibility 
-	self.m_Presets[id]['EndValue'] = endVisibility -- this doesn't allow for a preset to have a visibility ~= 0. The basic visibility of each preset needs to be indipendent of the current visibility (aka opacity).
-	self.m_Lerping[#self.m_Lerping + 1] = id
+	local s_VisibilityStart = self.m_Presets[p_ID]["logic"].visibility
+	self:FadeTo(p_ID, s_VisibilityStart, 0, p_Time)
 end
 
-function VEManagerClient:FadeOut(id, time)
-	if self.m_Presets[id] == nil then
-		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(id))
+function VEManagerClient:FadeTo(p_ID, p_VisibilityStart, p_VisibilityEnd, p_Time)
+	if self.m_Presets[p_ID] == nil then
+		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(p_ID))
 		return
 	end
 
-	self.m_Presets[id]['time'] = time
-	self.m_Presets[id]['startTime'] = SharedUtils:GetTimeMS()
-	self.m_Presets[id]['startValue'] = self.m_Presets[id]["logic"].visibility
-	self.m_Presets[id]['EndValue'] = 0
-
-	self.m_Lerping[#self.m_Lerping +1] = id
+	self.m_Presets[p_ID]['time'] = tonumber(p_Time)
+	self.m_Presets[p_ID]['startTime'] = SharedUtils:GetTimeMS()
+	self.m_Presets[p_ID]['startValue'] = tonumber(p_VisibilityStart)
+	self.m_Presets[p_ID]['EndValue'] = tonumber(p_VisibilityEnd)
+	self.m_Lerping[#self.m_Lerping + 1] = p_ID
 end
 
-function VEManagerClient:Lerp(id, value, time)
-	if self.m_Presets[id] == nil then
-		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(id))
+
+function VEManagerClient:Lerp(p_ID, p_Value, p_Time)
+	if p_ID == nil then
+		error("The preset name provided is nil.")
+		return
+	elseif self.m_Presets[p_ID] == nil then
+		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(p_ID))
 		return
 	end
-	self.m_Presets[id]['time'] = time
-	self.m_Presets[id]['startTime'] = SharedUtils:GetTimeMS()
-	self.m_Presets[id]['startValue'] = self.m_Presets[id]["logic"].visibility
-	self.m_Presets[id]['EndValue'] = value
 
-	self.m_Lerping[#self.m_Lerping +1] = id
+	self.m_Presets[p_ID]['time'] = p_Time
+	self.m_Presets[p_ID]['startTime'] = SharedUtils:GetTimeMS()
+	self.m_Presets[p_ID]['startValue'] = self.m_Presets[p_ID]["logic"].visibility
+	self.m_Presets[p_ID]['EndValue'] = p_Value
+
+	self.m_Lerping[#self.m_Lerping +1] = p_ID
 end
 
 --[[function VEManagerClient:Crossfade(id1, id2, time)
@@ -226,12 +227,6 @@ end
 
 end]]
 
-function VEManagerClient:CreateCinematicTools()
-	if VEM_CONFIG.DEV_LOAD_CINEMATIC_TOOLS then
-		CinematicTools:__init()
-	end
-end
-
 
 --[[
 
@@ -239,110 +234,101 @@ end
 
 ]]
 
-function VEManagerClient:GetMapPresets(mapName) -- gets all Main Map Environments for Day-Night Cycle -- remove
-	local map = mapName:match('/[^/]+'):sub(2)
-	for i, s_Preset in pairs(VEManagerClient.m_Presets) do
-		if s_Preset.Map[map] then
-			print(i)
-			return i
-		end
-	end
-end
-
 function VEManagerClient:GetState(...)
 	--Get all visual environment states
-	local args = { ... }
-	local states = VisualEnvironmentManager:GetStates()
-	
+	local s_Args = { ... }
+	local s_States = VisualEnvironmentManager:GetStates()
+
 	--Loop through all states
-	for _, state in pairs(states) do
+	for _, l_State in pairs(s_States) do
 
-		for i,priority in pairs(args) do
+		for l_Index, l_Priority in pairs(s_Args) do
 
-			if state.priority == priority then
-				return state
+			if l_State.priority == l_Priority then
+				return l_State
 			end
-
 		end
-
 	end
 	return nil
 end
 
 function VEManagerClient:InitializePresets()
-	for i, s_Preset in pairs(self.m_Presets) do
-		s_Preset["entity"] = EntityManager:CreateEntity(s_Preset["logic"], LinearTransform())
+	print("Spawned Presets:")
+	for l_Index, l_Preset in pairs(self.m_Presets) do
+		l_Preset["entity"] = EntityManager:CreateEntity(l_Preset["logic"], LinearTransform())
 
-		if s_Preset["entity"] == nil then
-			print("Could not spawn preset.")
+		if l_Preset["entity"] == nil then
+			print("- " .. tostring(l_Index) .. ", could not be spawned.")
 			return
 		end
 
-		s_Preset["entity"]:Init(Realm.Realm_Client, true)
+		l_Preset["entity"]:Init(Realm.Realm_Client, true)
 		VisualEnvironmentManager:SetDirty(true)
-		print("Spawned Preset: " .. i)
+
+		print("- " .. tostring(l_Index))
 	end
 end
 
-function VEManagerClient:Reload(id)
-	self.m_Presets[id].entity:FireEvent("Disable")
-	self.m_Presets[id].entity:FireEvent("Enable")
+function VEManagerClient:Reload(p_ID)
+	self.m_Presets[p_ID].entity:FireEvent("Disable")
+	self.m_Presets[p_ID].entity:FireEvent("Enable")
 end
 
 function VEManagerClient:LoadPresets()
-	print("Loading presets....")
+	print("Loading presets... (Name, Type, Priority)")
 	--Foreach preset
-	for i, s_Preset in pairs(self.m_RawPresets) do
+	for l_Index, l_Preset in pairs(self.m_RawPresets) do
 
-		if s_Preset.Type == nil then
-			s_Preset.Type = 'generic'
+		-- Variables check
+		if l_Preset.Name == nil then
+			l_Preset.Name = 'Unknown_Preset_' .. tostring(#self.m_Presets)
 		end
 
-		-- Generate our VisualEnvironment
-		local s_IsBasePreset = s_Preset.Priority == 1
+		if l_Preset.Type == nil then
+			l_Preset.Type = 'generic'
+		end
 
-		-- Restrict using day-night cycle priorities
-		if s_Preset.Priority == nil then
-			s_Preset.Priority = 1
+		if l_Preset.Priority == nil then
+			l_Preset.Priority = 1
 		else
-			s_Preset.Priority = tonumber(s_Preset.Priority)
-			if s_Preset.Priority >= 11 and s_Preset.Priority <= 14 then
-				s_Preset.Priority = s_Preset.Priority + 5
+			l_Preset.Priority = tonumber(l_Preset.Priority)
+			-- Restrict using day-night cycle priorities
+			-- TODO: This should be somehow adjusted tot he new dynamic system
+			if l_Preset.Priority >= 11 and l_Preset.Priority <= 14 then
+				l_Preset.Priority = l_Preset.Priority + 5
 			end
 		end
 
+		-- Generate our VisualEnvironment
+		local s_IsBasePreset = l_Preset.Priority == 1
+
 		--Not sure if we need the LogicelVEEntity, but :shrug:
 		local s_LVEED = self:CreateEntity("LogicVisualEnvironmentEntityData")
-		self.m_Presets[s_Preset.Name] = {}
-		self.m_Presets[s_Preset.Name]["logic"] = s_LVEED
+		self.m_Presets[l_Preset.Name] = {}
+		self.m_Presets[l_Preset.Name]["logic"] = s_LVEED
 		s_LVEED.visibility = 1
 
 		local s_VEB = self:CreateEntity("VisualEnvironmentBlueprint")
-		s_VEB.name = s_Preset.Name
+		s_VEB.name = l_Preset.Name
 		s_LVEED.visualEnvironment = s_VEB
-		self.m_Presets[s_Preset.Name]["blueprint"] = s_VEB
+		self.m_Presets[l_Preset.Name]["blueprint"] = s_VEB
 
 		local s_VE = self:CreateEntity("VisualEnvironmentEntityData")
 		s_VEB.object = s_VE
-		
-		print("Preset (Name, Type, Priority): " .. s_Preset.Name .. ", " .. s_Preset.Type .. ", " .. tostring(s_Preset.Priority))
-		
+
+		print("- " .. l_Preset.Name .. ", " .. l_Preset.Type .. ", " .. tostring(l_Preset.Priority))
+
 		s_VE.enabled = true
-		s_VE.priority = s_Preset.Priority
+		s_VE.priority = l_Preset.Priority
 		s_VE.visibility = 1
 
-		self.m_Presets[s_Preset.Name]["ve"] = s_VE
-		self.m_Presets[s_Preset.Name]["type"] = s_Preset.Type
-
-		if s_Preset.Map ~= nil then
-			self.m_Presets[s_Preset.Name]["map"] = s_Preset.Map
-		end
+		self.m_Presets[l_Preset.Name]["ve"] = s_VE
+		self.m_Presets[l_Preset.Name]["type"] = l_Preset.Type
 
 		--Foreach class
-		local componentCount = 0
+		local s_ComponentCount = 0
 		for _, l_Class in pairs(self.m_SupportedClasses) do
-
-			if(s_Preset[l_Class] ~= nil) then
+			if l_Preset[l_Class] ~= nil  then
 
 				-- Create class and add it to the VE entity.
 				local s_Class =  _G[l_Class.."ComponentData"]()
@@ -351,12 +337,11 @@ function VEManagerClient:LoadPresets()
 				s_Class.excluded = false
 				s_Class.isEventConnectionTarget = 3
 				s_Class.isPropertyConnectionTarget = 3
-				s_Class.indexInBlueprint = componentCount
+				s_Class.indexInBlueprint = s_ComponentCount
 				s_Class.transform = LinearTransform()
 
 				-- Foreach field in class
 				for _, l_Field in ipairs(s_Class.typeInfo.fields) do
-
 					-- Fix lua types
 					local s_FieldName = l_Field.name
 
@@ -369,44 +354,43 @@ function VEManagerClient:LoadPresets()
 					-- print("Field: " .. tostring(s_FieldName) .. " | " .. " Type: " .. tostring(s_Type))
 
 					-- If the preset contains that field
-					if s_Preset[l_Class][s_FieldName] ~= nil then
-
+					if l_Preset[l_Class][s_FieldName] ~= nil then
 						local s_Value
 
 						if IsBasicType(s_Type) then
-							s_Value = self:ParseValue(s_Type, s_Preset[l_Class][s_FieldName])
+							s_Value = self:ParseValue(s_Type, l_Preset[l_Class][s_FieldName])
 						elseif l_Field.typeInfo.enum then
-							s_Value = tonumber(s_Preset[l_Class][s_FieldName])
+							s_Value = tonumber(l_Preset[l_Class][s_FieldName])
 						elseif l_Field.typeInfo.array then
-							error("Found unexpected array")
+							error("\tFound unexpected array") -- TODO: Instead of error (that breaks the code), a continue should be used (unfortunatelly with goto), or set an "errorFound" true/false parameter to true and skip the component addition
 							return
 						elseif s_Type == "TextureAsset" then
-							print("TextureAsset is not yet supported.")
+							print("\tTextureAsset is not yet supported.")
 							s_Value = nil -- Make sure this value is nil so the saved value is not saved
 						else
-							error("Found unexpected DataContainer: " .. s_Type)
+							error("\tFound unexpected DataContainer: " .. s_Type) -- TODO: Instead of error (that breaks the code), a continue should be used (unfortunatelly with goto), or set an "errorFound" true/false parameter to true and skip the component addition
 							return
 						end
 
 						if s_Value ~= nil then
 							s_Class[firstToLower(s_FieldName)] = s_Value
-						
+
 						else
 							local s_Value = self:GetDefaultValue(l_Class, l_Field)
 							if s_Value == nil then
-								print("Failed to fetch original value: " .. tostring(l_Class) .. " | " .. tostring(s_FieldName) .. " [1]")
+								print("\tFailed to fetch original value: " .. tostring(l_Class) .. " | " .. tostring(s_FieldName) .. " [1]")
 								--s_Class[firstToLower(s_FieldName)] = nil -- Crashes
 							else
 								-- print("Setting default value for field " .. s_FieldName .. " of class " .. l_Class .. " | " ..  tostring(s_Value))
 								if IsBasicType(s_Type) then
 									s_Class[firstToLower(s_FieldName)] = self:ParseValue(s_Type, s_Value)
-								
+
 								elseif (l_Field.typeInfo.enum) then
 									s_Class[firstToLower(s_FieldName)] = tonumber(s_Value)
-								
+
 								elseif s_Type == "TextureAsset" then
-									
-									if s_FieldName == "PanoramicTexture" then -- will be changed later
+
+									if s_FieldName == "PanoramicTexture" then -- TODO: process will be changed later | this works but is dirty (this is how you change textures tho)
 										--s_Class[firstToLower(s_FieldName)] = nil
 										s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
 									elseif s_FieldName == "PanoramicAlphaTexture" then
@@ -415,17 +399,17 @@ function VEManagerClient:LoadPresets()
 									elseif s_FieldName == "StaticEnvmapTexture" then
 										--s_Class[firstToLower(s_FieldName)] = nil
 										s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
-									elseif s_FieldName == "CloudLayer2Texture" then
+									elseif s_FieldName == "CloudLayer2Texture" and _G['g_Stars'] ~= nil then
 										s_Class[firstToLower(s_FieldName)] = TextureAsset(_G['g_Stars'])
-									elseif s_FieldName == "texture" then 
+									elseif s_FieldName == "texture" then -- fix filmgrain texture
 										s_Class[firstToLower(s_FieldName)] = TextureAsset(ResourceManager:FindInstanceByGuid(Guid'44AF771F-23D2-11E0-9C90-B6CDFDA832F1', Guid('1FD2F223-0137-2A0F-BC43-D974C2BD07B4')))
 									else
 										--print("Added FieldName: " .. s_FieldName)
 										s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
 									end
-								
+
 								elseif l_Field.typeInfo.array then
-									print("Found unexpected array, ignoring")
+									print("\tFound unexpected array, ignoring")
 								else
 									-- Its a DataContainer
 									s_Class[firstToLower(s_FieldName)] = _G[s_Type](s_Value)
@@ -438,11 +422,11 @@ function VEManagerClient:LoadPresets()
 					else
 						--print("Getting Default Value for: " .. tostring(l_Class) .. " | " .. tostring(s_FieldName))
 						local s_Value = self:GetDefaultValue(l_Class, l_Field)
-						if (s_Value == nil) then
-							print("Failed to fetch original value: " .. tostring(l_Class) .. " | " .. tostring(s_FieldName) .. " [2]")
-							
+						if s_Value == nil then
+							print("\tFailed to fetch original value: " .. tostring(l_Class) .. " | " .. tostring(s_FieldName) .. " [2]")
+
 							if s_FieldName == "CloudLayer2Texture" then
-								print("CloudTexture")
+								print("\tCloudTexture")
 								s_Class[firstToLower(s_FieldName)] = TextureAsset(_G['g_Stars'])
 							else
 								--s_Class[firstToLower(s_FieldName)] = nil -- Crashes
@@ -456,7 +440,6 @@ function VEManagerClient:LoadPresets()
 								s_Class[firstToLower(s_FieldName)] = tonumber(s_Value)
 							
 							elseif s_Type == "TextureAsset" then
-								
 								if s_FieldName == "PanoramicTexture" then
 									--s_Class[firstToLower(s_FieldName)] = nil
 									s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
@@ -466,40 +449,31 @@ function VEManagerClient:LoadPresets()
 								elseif s_FieldName == "StaticEnvmapTexture" then
 									--s_Class[firstToLower(s_FieldName)] = nil
 									s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
-								elseif s_FieldName == "CloudLayer2Texture" then
+								elseif s_FieldName == "CloudLayer2Texture" and _G['g_Stars'] ~= nil then
 									s_Class[firstToLower(s_FieldName)] = TextureAsset(_G['g_Stars'])
 								else
-								--print("Added FieldName: " .. s_FieldName)
+								--print("\tAdded FieldName: " .. s_FieldName)
 								s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
 								end
 							
 							elseif l_Field.typeInfo.array then
-								print("Found unexpected array, ignoring")
-							
+								print("\tFound unexpected array, ignoring")
 							else
 								-- Its a DataContainer
 								s_Class[firstToLower(s_FieldName)] = _G[s_Type](s_Value)
 							end
-
 						end
-
 					end
-
 				end
-
-			componentCount = componentCount + 1
-			s_VE.components:add(s_Class)
+				s_ComponentCount = s_ComponentCount + 1
+				s_VE.components:add(s_Class)
 			end
-
 		end
-
-		s_VE.runtimeComponentCount = componentCount
+		s_VE.runtimeComponentCount = s_ComponentCount
 		s_VE.visibility = 0
 		s_VE.enabled = false
 		s_LVEED.visibility = 0
-
 	end
-
 	self:InitializePresets()
 	Events:Dispatch("VEManager:PresetsLoaded")
 	print("Presets loaded")
@@ -558,7 +532,6 @@ function VEManagerClient:CreateEntity(p_Class, p_Guid)
 	else
 		return _G[p_Class](s_Entity:Clone(p_Guid))
 	end
-
 end
 
 function VEManagerClient:UpdateLerp(percentage)
@@ -591,7 +564,6 @@ function VEManagerClient:UpdateLerp(percentage)
 			self:SetVisibility(preset, lerpValue)
 		end
 	end
-
 end
 
 function VEManagerClient:SetLerpPriority(id) -- remove
@@ -607,7 +579,7 @@ function VEManagerClient:OnUpdateInput(p_Delta, p_SimulationDelta)
 		if InputManager:WentKeyDown(InputDeviceKeys.IDK_F2) then
 			print("DEV KEY: Show VE states: name, priority, visibility")
 			local s_states = VisualEnvironmentManager:GetStates()
-		
+
 			for _, state in pairs(s_states) do
 				print(" - " .. tostring(entityName) .. ", " .. tostring(state.priority) .. ", " .. tostring(state.visibility))
 			end

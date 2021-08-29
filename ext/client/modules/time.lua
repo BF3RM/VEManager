@@ -14,23 +14,33 @@ function Time:RegisterVars()
 	self.m_SystemRunning = false
 	self.m_IsStatic = nil
 	self.m_ClientTime = 0
-	self.m_totalClientTime = 0
-	self.m_totalDayLength = 0
-	self.m_originalSunX = nil
-	self.m_originalSunY = nil
-	self.m_mapPresets = {}
-	self.m_nightPriority = 11
-	self.m_morningPriority = 12
-	self.m_noonPriority = 13
-	self.m_eveningPriority = 14
-	self.m_currentNightPreset = nil
-	self.m_currentMorningPreset = nil
-	self.m_currentNoonPreset = nil
-	self.m_currentEveningPreset = nil
+	self.m_TotalClientTime = 0
+	self.m_TotalDayLength = 0
+	self.m_OriginalSunX = nil
+	self.m_OriginalSunY = nil
+	self.m_NightPriority = 11
+	self.m_MorningPriority = 12
+	self.m_NoonPriority = 13
+	self.m_EveningPriority = 14
+	self.m_CurrentNightPreset = nil
+	self.m_CurrentMorningPreset = nil
+	self.m_CurrentNoonPreset = nil
+	self.m_CurrentEveningPreset = nil
 	self.m_LastPrintHours = -1
 	self.m_FirstRun = false
+	self.m_IsDay = nil
+
+	self.m_SunPosX = 0
+	self.m_SunPosY = 0
+
+	self.m_CurrentPresetTable = {}
+	self.m_SortedDynamicPresetsTable = {}
+
+	self.m_CurrentPreset = 1
 
 	self.m_CloudSpeed = VEM_CONFIG.CLOUDS_DEFAULT_SPEED
+	self.m_Sunrise = VEM_CONFIG.DN_SUN_TIMINGS[1] / 24
+	self.m_Sunset = VEM_CONFIG.DN_SUN_TIMINGS[2] / 24
 end
 
 function Time:RegisterEvents()
@@ -44,11 +54,11 @@ function Time:RegisterEvents()
 	NetEvents:Subscribe('ClientTime:Disable', self, self.Disable)
 end
 
-function Time:OnPartitionLoad(partition)
-	Patches:Components(partition)
+function Time:OnPartitionLoad(p_Partition)
+	Patches:Components(p_Partition)
 
-	if partition.guid == Guid('6E5D35D9-D9D5-11DE-ADB5-9D4DBC23632A') then
-		for _, instance in pairs(partition.instances) do
+	if p_Partition.guid == Guid('6E5D35D9-D9D5-11DE-ADB5-9D4DBC23632A') then
+		for _, instance in pairs(p_Partition.instances) do
 			if instance.instanceGuid == Guid('32CE96BB-E578-9589-7B11-B670661DF2DF') then
 				g_Stars = instance
 			end
@@ -80,11 +90,11 @@ end
 function Time:ServerSync(p_ServerDayTime, p_TotalServerTime)
 	if p_ServerDayTime == nil or p_TotalServerTime == nil then
 		return
-	
+
 	elseif self.m_SystemRunning == true then
 		--print('Server Sync:' .. 'Current Time: ' .. p_ServerDayTime .. ' | ' .. 'Total Time:' .. p_TotalServerTime)
 		self.m_ClientTime = p_ServerDayTime
-		self.m_totalClientTime = p_TotalServerTime
+		self.m_TotalClientTime = p_TotalServerTime
 		self:Run()
 	end
 end
@@ -94,59 +104,45 @@ function Time:AddTimeToClient(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds
 	self:Add(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 end
 
-function Time:SetSunPosition(p_ClientTime) -- for smoother sun relative to time
-	local factor = p_ClientTime / self.m_totalDayLength
-	VisualEnvironmentManager:SetDirty(true)
-	VisualEnvironmentManager:SetSunRotationX(275)
-
+function Time:UpdateSunPosition(p_ClientTime) -- for smoother sun relative to time
+	local s_DayFactor = p_ClientTime / self.m_TotalDayLength
+	local s_SunPosX = 275
 	local s_SunPosY = 0
-	if factor <= VEM_CONFIG.DN_PRESET_TIMINGS[1] then -- 00:00 to 6:00
-		-- set visibility preset night
-		local s_factorNight = factor  / VEM_CONFIG.DN_PRESET_TIMINGS[1]
-		s_SunPosY = 90 - s_factorNight * 90
-	
-	elseif factor <= VEM_CONFIG.DN_PRESET_TIMINGS[2] then -- 6:00 to 9:00
-		-- calculate visibility preset morning
-		local s_factorMorning = (factor - VEM_CONFIG.DN_PRESET_TIMINGS[1]) / (VEM_CONFIG.DN_PRESET_TIMINGS[2] - VEM_CONFIG.DN_PRESET_TIMINGS[1])
-		s_SunPosY = s_factorMorning * 45
-	
-	elseif factor <= VEM_CONFIG.DN_PRESET_TIMINGS[3] then -- 9:00 to 12:00
-		-- calculate visibility preset noon
-		local s_factorNoon = (factor - VEM_CONFIG.DN_PRESET_TIMINGS[2]) / (VEM_CONFIG.DN_PRESET_TIMINGS[3] - VEM_CONFIG.DN_PRESET_TIMINGS[2])
-		s_SunPosY = 45 + s_factorNoon * 45
-	
-	elseif factor <= VEM_CONFIG.DN_PRESET_TIMINGS[4] then -- 12:00 to 18:00
-		-- calculate visibility preset evening
-		local s_factorEvening = (factor - VEM_CONFIG.DN_PRESET_TIMINGS[3]) / (VEM_CONFIG.DN_PRESET_TIMINGS[4] - VEM_CONFIG.DN_PRESET_TIMINGS[3])
-		s_SunPosY = 90 + s_factorEvening * 45
-	
-	elseif factor <= VEM_CONFIG.DN_PRESET_TIMINGS[5] then -- 18:00 to 21:00
-		-- Night preset has a lower visibility, thus we change evening visibility back to 0
-		-- calculate visibility preset evening
-		local s_factorEvening = (factor - VEM_CONFIG.DN_PRESET_TIMINGS[4]) / (VEM_CONFIG.DN_PRESET_TIMINGS[5] - VEM_CONFIG.DN_PRESET_TIMINGS[4])
-		s_SunPosY = 135 + s_factorEvening * 45
-	
-	elseif factor > VEM_CONFIG.DN_PRESET_TIMINGS[#VEM_CONFIG.DN_PRESET_TIMINGS] then -- 21:00 to 00:00
-		-- set visibility preset night
-		local s_factorNight = (factor - VEM_CONFIG.DN_PRESET_TIMINGS[5]) / (1 - VEM_CONFIG.DN_PRESET_TIMINGS[5])
-		s_SunPosY = 180 - s_factorNight * 90
-	
-	else
-		print("Faulty ClientTime: " .. p_ClientTime)
+
+	if s_DayFactor <= self.m_Sunrise then -- Moon
+		local s_FactorNight = (s_DayFactor + 1 - self.m_Sunset) / (self.m_Sunrise + 1 - self.m_Sunset)
+		s_SunPosY = 180 * (1 - s_FactorNight)
+		self.m_IsDay = false
+	elseif s_DayFactor <= self.m_Sunset then -- Day
+		local s_FactorDay = (s_DayFactor - self.m_Sunrise) / (self.m_Sunset - self.m_Sunrise)
+		s_SunPosY = 180 * s_FactorDay
+		self.m_IsDay = true
+	else -- Moon
+		local s_FactorNight = (s_DayFactor - self.m_Sunset) / (self.m_Sunrise + 1 - self.m_Sunset)
+		s_SunPosY = 180 * (1 - s_FactorNight)
+		self.m_IsDay = false
 	end
 
 	-- Avoid crashes
 	s_SunPosY = MathUtils:Round(s_SunPosY * 100) / 100
-    if s_SunPosY < 0 or s_SunPosY > 180 then 
-        return 
-    end 
+	if s_SunPosY < 0 or s_SunPosY > 180 then
+		return
+	end
 
-	VisualEnvironmentManager:SetSunRotationY(s_SunPosY)
+	-- Update position (if needed)
+	if self.m_SunPosY ~= s_SunPosY or self.m_SunPosY ~= s_SunPosY then
+		-- Update class variables
+		self.m_SunPosX = s_SunPosX
+		self.m_SunPosY = s_SunPosY
+
+		VisualEnvironmentManager:SetSunRotationX(self.m_SunPosX)
+		VisualEnvironmentManager:SetSunRotationY(self.m_SunPosY)
+	end
 end
 
 function Time:SetCloudSpeed()
 	if VEM_CONFIG.DN_CHANGE_CLOUDS_SPEED_BASED_ON_DAY_LENGTH then
-		self.m_CloudSpeed = 1 / (self.m_totalDayLength / 60 * 0.5)
+		self.m_CloudSpeed = 1 / (self.m_TotalDayLength / 60 * 0.5)
 		print('Set Cloud Speed = ' .. tostring(self.m_CloudSpeed))
 	end
 end
@@ -162,10 +158,7 @@ end
 
 function Time:Disable()
 	-- Check if presets exist
-	if self.m_currentNightPreset == nil or
-		self.m_currentMorningPreset == nil or
-		self.m_currentNoonPreset == nil or
-		self.m_currentEveningPreset == nil then
+	if #self.m_CurrentPresetTable < 1 then
 		return
 	end
 
@@ -173,60 +166,120 @@ function Time:Disable()
 	self.m_SystemRunning = false
 
 	-- Hide Presets
-	g_VEManagerClient:SetVisibility(self.m_currentNightPreset, 0)
-	g_VEManagerClient:SetVisibility(self.m_currentMorningPreset, 0)
-	g_VEManagerClient:SetVisibility(self.m_currentNoonPreset, 0)
-	g_VEManagerClient:SetVisibility(self.m_currentEveningPreset, 0)
+	for l_ID, l_Value in pairs(self.m_CurrentPresetTable) do
+		g_VEManagerClient:SetVisibility(l_ID, 0)
+	end
 end
 
 -- ADD TIME TO MAP
 -- Add(Map name, starting hour (24h), day length (min))
 function Time:Add(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
-	if self.m_SystemRunning == true or self.m_FirstRun == true then
+	if self.m_SystemRunning or self.m_FirstRun then
 		self:RegisterVars()
 	end
 
-	-- Get all dynamic presets (TODO: associated with map)
-	for id, s_Preset in pairs(g_VEManagerClient.m_Presets) do
+	local s_Types = {'Dynamic', 'DefaultDynamic'}
+	print("Searching for dynamic presets:")
 
-		if g_VEManagerClient.m_Presets[id].type == 'Night' or
-		(g_VEManagerClient.m_Presets[id].type == 'DefaultNight' and self.m_currentNightPreset == nil) then
-			self.m_currentNightPreset = id
+	for _, l_Type in pairs(s_Types) do
+		print("Found for Type: " .. l_Type)
+		-- Get all dynamic presets
+		-- (if no Dynamic presets, DefaultDynamic presets will be loaded)
+		if #self.m_SortedDynamicPresetsTable < 2 then
+			for l_ID, l_Preset in pairs(g_VEManagerClient.m_Presets) do
 
-		elseif g_VEManagerClient.m_Presets[id].type == 'Morning' or
-		(g_VEManagerClient.m_Presets[id].type == 'DefaultMorning' and self.m_currentMorningPreset == nil) then
-			self.m_currentMorningPreset = id
+				if g_VEManagerClient.m_RawPresets[l_ID] ~= nil then
 
-		elseif g_VEManagerClient.m_Presets[id].type == 'Noon' or
-		(g_VEManagerClient.m_Presets[id].type == 'DefaultNoon' and self.m_currentNoonPreset == nil) then
-			self.m_currentNoonPreset = id
+					if g_VEManagerClient.m_RawPresets[l_ID].Sky ~= nil and g_VEManagerClient.m_RawPresets[l_ID].OutdoorLight ~= nil then
 
-		elseif g_VEManagerClient.m_Presets[id].type == 'Evening' or
-		(g_VEManagerClient.m_Presets[id].type == 'DefaultEvening' and self.m_currentEveningPreset == nil) then
-			self.m_currentEveningPreset = id
+						local s_SunRotationY = tonumber(g_VEManagerClient.m_RawPresets[l_ID].OutdoorLight.SunRotationY)
+						local s_SkyBrightness = tonumber(g_VEManagerClient.m_RawPresets[l_ID].Sky.BrightnessScale)
+
+						if g_VEManagerClient.m_Presets[l_ID].type == l_Type and s_SunRotationY ~= nil then
+							--print('*ID: ' .. l_ID .. ' *Sun Rotation: ' .. s_SunRotationY .. ' *Sky Brightness: ' .. s_SkyBrightness)
+							-- Check if night mode (moon enabled)
+							if s_SkyBrightness ~= nil and s_SkyBrightness <= 0.01 then
+								s_SunRotationY = 360 - s_SunRotationY
+							end 
+
+							print(" - " .. tostring(l_ID) .. " (sun: " .. tostring(s_SunRotationY) .. ")")
+
+							table.insert(self.m_SortedDynamicPresetsTable, {l_ID, s_SunRotationY})
+						end
+					end
+				end
+			end
 		end
 	end
 
-	if self.m_currentNightPreset == nil or
-		self.m_currentMorningPreset == nil or
-		self.m_currentNoonPreset == nil or
-		self.m_currentEveningPreset == nil then
-		print('Failed to Load Presets for Time')
-		return
+	-- Table Sort
+	table.sort(self.m_SortedDynamicPresetsTable, function(a,b) return tonumber(a[2]) < tonumber(b[2]) end)
+
+	-- Set Priorities
+	print("Sorted dynamic presets:")
+	for l_Index, l_Preset in ipairs(self.m_SortedDynamicPresetsTable) do
+		local s_ID = l_Preset[1]
+		g_VEManagerClient.m_Presets[s_ID]["ve"].priority = l_Index + 10
+
+		-- Patch Sun Positions
+		for l_Index, l_Class in pairs(g_VEManagerClient.m_Presets[s_ID]["ve"].components) do
+			if l_Class.typeInfo.name == "OutdoorLightComponentData" then
+				--local s_Class = _G[l_Class.typeInfo.name]()
+				local s_Class = OutdoorLightComponentData(l_Class)
+				s_Class:MakeWritable()
+				-- They need to be reverted to 0
+				s_Class.sunRotationX = 0.0
+				s_Class.sunRotationY = 0.0 --TODO: Reset later
+
+				--g_VEManagerClient.m_Presets[s_ID]["ve"].components[l_Index] = s_Class -- no need to replace
+			end
+
+			-- Patch Star Cloudlayer
+			if l_Class.typeInfo.name == "SkyComponentData" then
+				--local s_Class = _G[l_Class.typeInfo.name]()
+				local s_Class = SkyComponentData(l_Class)
+				s_Class:MakeWritable()
+				s_Class.sunSize = 0.01
+				s_Class.sunScale = 1.5
+				s_Class.cloudLayer2Altitude = 5000000.0
+				s_Class.cloudLayer2TileFactor = 0.60000002384186
+				s_Class.cloudLayer2Rotation = 237.07299804688
+				s_Class.cloudLayer2Speed = -0.0010000000474975
+
+				--g_VEManagerClient.m_Presets[s_ID]["ve"].components[l_Index] = s_Class
+			end
+		end
+
+		local s_SunRotationY = l_Preset[2]
+		print(" - " .. tostring(s_ID) .. " (sun: " .. tostring(s_SunRotationY) .. ")")
 	end
 
 	-- Save dayLength in Class (minutes -> seconds)
-	self.m_totalDayLength = p_LengthOfDayInSeconds
-	print('[Time-Client]: Length of Day: ' .. self.m_totalDayLength .. ' Seconds')
+	self.m_TotalDayLength = p_LengthOfDayInSeconds
+	print('[Time-Client]: Length of Day: ' .. self.m_TotalDayLength .. ' Seconds')
 	self.m_ClientTime = p_StartingTime
-	print('[Time-Client]: Starting at Time: ' .. p_StartingTime / 3600 / (self.m_totalDayLength / 86000) .. ' Hours ('.. p_StartingTime ..' Seconds)')
+	print('[Time-Client]: Starting at Time: ' .. p_StartingTime / 3600 / (self.m_TotalDayLength / 86000) .. ' Hours ('.. p_StartingTime ..' Seconds)')
 
-	-- Set Priorities
-	g_VEManagerClient.m_Presets[self.m_currentNightPreset]["ve"].priority = self.m_nightPriority
-	g_VEManagerClient.m_Presets[self.m_currentMorningPreset]["ve"].priority = self.m_morningPriority
-	g_VEManagerClient.m_Presets[self.m_currentNoonPreset]["ve"].priority = self.m_noonPriority
-	g_VEManagerClient.m_Presets[self.m_currentEveningPreset]["ve"].priority = self.m_eveningPriority
+	-- Update sun & clouds
+	self:UpdateSunPosition(self.m_ClientTime)
+	self:SetCloudSpeed()
 
+	-- Sun/Moon position fix
+	local s_SunMoonPos = self.m_SunPosY
+	if not self.m_IsDay then
+		-- Moon visible (from 180 to 360) but actual moon position in VE is 0 to 180
+		s_SunMoonPos = 360 - s_SunMoonPos
+	end
+
+	-- Find starting preset
+	for l_Index, l_Preset in ipairs(self.m_SortedDynamicPresetsTable) do
+		local s_SunPosY = l_Preset[2]
+		if s_SunPosY < s_SunMoonPos then
+			self.m_CurrentPreset = l_Index
+		end
+	end
+
+	-- Initialise
 	self.m_FirstRun = true
 	self:Run()
 
@@ -235,13 +288,10 @@ function Time:Add(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 		print("Time System Activated")
 	end
 
-	self:SetSunPosition(self.m_ClientTime)
-	self:SetCloudSpeed()
 end
 
 -- ALSO LOOP THIS CODE PLEASE
 function Time:Run()
-
 	if self.m_SystemRunning ~= true and not self.m_FirstRun then
 		--print("System Running: " .. tostring(self.m_SystemRunning))
 		return
@@ -252,90 +302,122 @@ function Time:Run()
 		return
 	end
 
-	local s_print_enabled = false
-	local s_h_time = MathUtils:Round(self.m_ClientTime / self.m_totalDayLength * 24)
+	local s_print_enabled = false -- TODO: change syntax
+	local s_h_time = MathUtils:Round(self.m_ClientTime / self.m_TotalDayLength * 24)
 
 	if s_h_time ~= self.m_LastPrintHours  then
 		s_print_enabled = true
 		self.m_LastPrintHours = s_h_time
 	end
 
-	-- Default visibility factors
-	local s_factorNight = 0
-	local s_factorMorning = 0
-	local s_factorNoon = 0
-	local s_factorEvening = 0
-	local s_timeToChange = -1
+	self:UpdateSunPosition(self.m_ClientTime)
 
-	if self.m_ClientTime <= self.m_totalDayLength * VEM_CONFIG.DN_PRESET_TIMINGS[1] or self.m_ClientTime > VEM_CONFIG.DN_PRESET_TIMINGS[#VEM_CONFIG.DN_PRESET_TIMINGS] * self.m_totalDayLength then -- 00:00 to 6:00 or 21:00 to 00:00
-		-- set visibility preset night
-		s_factorNight = 1
-
-		s_timeToChange = self.m_totalDayLength * VEM_CONFIG.DN_PRESET_TIMINGS[1] - self.m_ClientTime
-	
-	elseif self.m_ClientTime <= ( self.m_totalDayLength * VEM_CONFIG.DN_PRESET_TIMINGS[2] ) then -- 6:00 to 9:00
-		-- calculate visibility preset morning
-		s_factorMorning = ( self.m_ClientTime - ( self.m_totalDayLength * VEM_CONFIG.DN_PRESET_TIMINGS[1] )) / ( self.m_totalDayLength * ( VEM_CONFIG.DN_PRESET_TIMINGS[2] - VEM_CONFIG.DN_PRESET_TIMINGS[1] )) --todo change these multiplication values to variables later to calculate automatically
-		-- calculate visibility preset night
-		s_factorNight = 1
-
-		s_timeToChange = self.m_totalDayLength * VEM_CONFIG.DN_PRESET_TIMINGS[2] - self.m_ClientTime -- 9:00 to 12:00
-	
-	elseif self.m_ClientTime <= ( self.m_totalDayLength * VEM_CONFIG.DN_PRESET_TIMINGS[3] ) then
-		-- calculate visibility preset noon
-		s_factorNoon = ( self.m_ClientTime - ( self.m_totalDayLength * VEM_CONFIG.DN_PRESET_TIMINGS[2] )) / ( self.m_totalDayLength * ( VEM_CONFIG.DN_PRESET_TIMINGS[3] - VEM_CONFIG.DN_PRESET_TIMINGS[2] ))
-		-- calculate visibility preset morning
-		s_factorMorning = 1
-
-		s_timeToChange = self.m_totalDayLength * VEM_CONFIG.DN_PRESET_TIMINGS[3] - self.m_ClientTime
-	
-	elseif self.m_ClientTime <= ( self.m_totalDayLength * VEM_CONFIG.DN_PRESET_TIMINGS[4] ) then -- 12:00 to 18:00
-
-		-- calculate visibility preset evening
-		s_factorEvening = ( self.m_ClientTime - ( self.m_totalDayLength * VEM_CONFIG.DN_PRESET_TIMINGS[3] )) / ( self.m_totalDayLength * ( VEM_CONFIG.DN_PRESET_TIMINGS[4] - VEM_CONFIG.DN_PRESET_TIMINGS[3] ))
-		-- calculate visibility preset noon
-		s_factorNoon = 1
-
-		s_timeToChange = self.m_totalDayLength * VEM_CONFIG.DN_PRESET_TIMINGS[4] - self.m_ClientTime
-	
-	elseif self.m_ClientTime <= self.m_totalDayLength * VEM_CONFIG.DN_PRESET_TIMINGS[5] then-- 18:00 to 21:00
-		-- Night preset has a lower visibility, thus we change evening visibility back to 0
-		-- calculate visibility preset night
-		s_factorNight = 1
-		-- calculate visibility preset evening
-		s_factorEvening = 1 - ( self.m_ClientTime - ( self.m_totalDayLength * VEM_CONFIG.DN_PRESET_TIMINGS[4] )) / ( self.m_totalDayLength * ( VEM_CONFIG.DN_PRESET_TIMINGS[5] - VEM_CONFIG.DN_PRESET_TIMINGS[4] ))
-
-		s_timeToChange = self.m_totalDayLength * VEM_CONFIG.DN_PRESET_TIMINGS[5] - self.m_ClientTime 
-	
-	else
-		print("Faulty ClientTime: " .. self.m_ClientTime)
-		self.m_ClientTime = 1.0
+	-- Sun/Moon position fix
+	local s_SunMoonPos = self.m_SunPosY
+	if not self.m_IsDay then
+		-- Moon visible (from 180 to 360) but actual moon position in VE is 0 to 180
+		s_SunMoonPos = 360 - s_SunMoonPos
 	end
 
+	-- Get sun positions for each preset
+	local s_CurrentPresetSunPosY = self.m_SortedDynamicPresetsTable[self.m_CurrentPreset][2]
+	local s_NextPreset = self.m_CurrentPreset % #self.m_SortedDynamicPresetsTable + 1
+	local s_NextPresetSunPosY = self.m_SortedDynamicPresetsTable[s_NextPreset][2]
+
+	-- Check if still in current presets
+	if s_SunMoonPos >= s_NextPresetSunPosY and (
+		s_CurrentPresetSunPosY < s_NextPresetSunPosY or
+		(s_NextPresetSunPosY < s_CurrentPresetSunPosY and s_SunMoonPos < s_CurrentPresetSunPosY)
+		) then
+		self.m_CurrentPreset = s_NextPreset
+		s_CurrentPresetSunPosY = self.m_SortedDynamicPresetsTable[self.m_CurrentPreset][2]
+
+		s_NextPreset = self.m_CurrentPreset % #self.m_SortedDynamicPresetsTable + 1
+		s_NextPresetSunPosY = self.m_SortedDynamicPresetsTable[s_NextPreset][2]
+	end
+
+	--print("Current preset: " .. tostring(self.m_CurrentPreset))
+	--print("Next preset: " .. tostring(s_NextPreset))
+
+	-- Calculate visibility factor
+	local s_VisibilityFactor = nil
+	if s_SunMoonPos <= s_NextPresetSunPosY and s_SunMoonPos <= s_CurrentPresetSunPosY then -- When changing from 360 to 0 with s_SunMoonPos after 0
+		s_VisibilityFactor = (s_SunMoonPos + 360 - s_CurrentPresetSunPosY) / (s_NextPresetSunPosY + 360 - s_CurrentPresetSunPosY)
+	elseif s_SunMoonPos <= s_NextPresetSunPosY then -- Normal case
+		s_VisibilityFactor = (s_SunMoonPos - s_CurrentPresetSunPosY) / (s_NextPresetSunPosY - s_CurrentPresetSunPosY)
+	else -- When changing from 360 to 0 with s_SunMoonPos before 360
+		s_VisibilityFactor = (s_SunMoonPos - s_CurrentPresetSunPosY) / (s_NextPresetSunPosY + 360 - s_CurrentPresetSunPosY)
+	end
+
+	local s_NextPresetVisibilityFactor = nil
+	local s_CurrentPresetVisibilityFactor = nil -- Current preset
+
+	if s_NextPreset ~= 1 then
+		s_NextPresetVisibilityFactor = s_VisibilityFactor
+		s_CurrentPresetVisibilityFactor = 1.0
+	else -- Invert visibilities because next preset's priority is less than previous preset's priority
+		s_NextPresetVisibilityFactor = 1.0
+		s_CurrentPresetVisibilityFactor = 1 - s_VisibilityFactor
+	end
+
+	--print("Sun/Moon: " .. tostring(s_SunMoonPos) .. " ( " .. self.m_CurrentPreset .. " -> " .. s_NextPreset .. " ), visibility: " .. tostring(s_VisibilityFactor))
+	--print("Visibility Factor: " .. tostring(s_VisibilityFactor))
+
+	for l_Index, l_Preset in ipairs(self.m_SortedDynamicPresetsTable) do
+		local s_ID = l_Preset[1]
+		--print("Preset ID: " .. tostring(s_ID))
+		local s_Factor = 0
+		if l_Index == self.m_CurrentPreset then
+			s_Factor = s_CurrentPresetVisibilityFactor
+		elseif l_Index == s_NextPreset then
+			s_Factor = s_NextPresetVisibilityFactor
+		end
+		
+		if self.m_FirstRun then
+			--print(s_Factor)
+			g_VEManagerClient:SetVisibility(s_ID, s_Factor)
+		else
+			g_VEManagerClient:UpdateVisibility(s_ID, l_Index + 10, s_Factor)
+			if s_Factor ~= 0 then -- TODO: Check if cloud speed works
+				g_VEManagerClient:SetSingleValue(s_ID, l_Index + 10, 'sky', 'cloudLayer1Speed', self.m_CloudSpeed)
+			end
+		end
+	end
+	
+	if self.m_FirstRun then
+		self.m_FirstRun = false
+	end
+
+	--[[
+	s_FactorNight = MathUtils:Clamp(self.m_SunPosY, 0, 1)
+	s_FactorMorning = MathUtils:Clamp(s_FactorMorning, 0, 1)
+	s_FactorNoon = MathUtils:Clamp(s_FactorNoon, 0, 1)
+	s_FactorEvening = MathUtils:Clamp(s_FactorEvening, 0, 1)
+
 	if s_print_enabled and VEM_CONFIG.PRINT_DN_TIME_AND_VISIBILITIES then
-		print("Visibilities (Night, Morning, Noon, Evening): " .. MathUtils:Round(s_factorNight*100) .. "%, " .. MathUtils:Round(s_factorMorning*100) .. "%, " .. MathUtils:Round(s_factorNoon*100) .. "%, " .. MathUtils:Round(s_factorEvening*100) .. "% | Current time: " .. s_h_time .. "h")
+		print("Visibilities (Night, Morning, Noon, Evening): " .. MathUtils:Round(s_FactorNight*100) .. "%, " .. MathUtils:Round(s_FactorMorning*100) .. "%, " .. MathUtils:Round(s_FactorNoon*100) .. "%, " .. MathUtils:Round(s_FactorEvening*100) .. "% | Current time: " .. s_h_time .. "h")
 		--print("Time Till Switch: " .. MathUtils:Round(s_timeToChange) .. "sec")
 	end
 
 	-- Apply visibility factor
 	if self.m_FirstRun then
-		g_VEManagerClient:SetVisibility(self.m_currentNightPreset, s_factorNight)
-		g_VEManagerClient:SetVisibility(self.m_currentMorningPreset, s_factorMorning)
-		g_VEManagerClient:SetVisibility(self.m_currentNoonPreset, s_factorNoon)
-		g_VEManagerClient:SetVisibility(self.m_currentEveningPreset, s_factorEvening)
+		g_VEManagerClient:SetVisibility(self.m_CurrentNightPreset, s_FactorNight)
+		g_VEManagerClient:SetVisibility(self.m_CurrentMorningPreset, s_FactorMorning)
+		g_VEManagerClient:SetVisibility(self.m_CurrentNoonPreset, s_FactorNoon)
+		g_VEManagerClient:SetVisibility(self.m_CurrentEveningPreset, s_FactorEvening)
 		self.m_FirstRun = false
 	else
-		g_VEManagerClient:UpdateVisibility(self.m_currentNightPreset, self.m_nightPriority, s_factorNight)
-		g_VEManagerClient:UpdateVisibility(self.m_currentMorningPreset, self.m_morningPriority, s_factorMorning)
-		g_VEManagerClient:UpdateVisibility(self.m_currentNoonPreset, self.m_noonPriority, s_factorNoon)
-		g_VEManagerClient:UpdateVisibility(self.m_currentEveningPreset, self.m_eveningPriority, s_factorEvening)
-		g_VEManagerClient:SetSingleValue(self.m_currentNightPreset, self.m_nightPriority, 'sky', 'cloudLayer1Speed', self.m_CloudSpeed)
-		g_VEManagerClient:SetSingleValue(self.m_currentMorningPreset, self.m_morningPriority, 'sky', 'cloudLayer1Speed', self.m_CloudSpeed)
-		g_VEManagerClient:SetSingleValue(self.m_currentNoonPreset, self.m_noonPriority, 'sky', 'cloudLayer1Speed', self.m_CloudSpeed)
-		g_VEManagerClient:SetSingleValue(self.m_currentEveningPreset, self.m_eveningPriority, 'sky', 'cloudLayer1Speed', self.m_CloudSpeed)
+		g_VEManagerClient:UpdateVisibility(self.m_CurrentNightPreset, self.m_NightPriority, s_FactorNight)
+		g_VEManagerClient:UpdateVisibility(self.m_CurrentMorningPreset, self.m_MorningPriority, s_FactorMorning)
+		g_VEManagerClient:UpdateVisibility(self.m_CurrentNoonPreset, self.m_NoonPriority, s_FactorNoon)
+		g_VEManagerClient:UpdateVisibility(self.m_CurrentEveningPreset, self.m_EveningPriority, s_FactorEvening)
+		g_VEManagerClient:SetSingleValue(self.m_CurrentNightPreset, self.m_NightPriority, 'sky', 'cloudLayer1Speed', self.m_CloudSpeed)
+		g_VEManagerClient:SetSingleValue(self.m_CurrentMorningPreset, self.m_MorningPriority, 'sky', 'cloudLayer1Speed', self.m_CloudSpeed)
+		g_VEManagerClient:SetSingleValue(self.m_CurrentNoonPreset, self.m_NoonPriority, 'sky', 'cloudLayer1Speed', self.m_CloudSpeed)
+		g_VEManagerClient:SetSingleValue(self.m_CurrentEveningPreset, self.m_EveningPriority, 'sky', 'cloudLayer1Speed', self.m_CloudSpeed)
 	end
+	]]
 
-	self:SetSunPosition(self.m_ClientTime)
 end
 
 -- Singleton.
