@@ -196,6 +196,7 @@ function Time:Add(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 						local s_SkyBrightness = tonumber(g_VEManagerClient.m_RawPresets[l_ID].Sky.BrightnessScale)
 
 						if g_VEManagerClient.m_Presets[l_ID].type == l_Type and s_SunRotationY ~= nil then
+							--print('*ID: ' .. l_ID .. ' *Sun Rotation: ' .. s_SunRotationY .. ' *Sky Brightness: ' .. s_SkyBrightness)
 							-- Check if night mode (moon enabled)
 							if s_SkyBrightness ~= nil and s_SkyBrightness <= 0.01 then
 								s_SunRotationY = 360 - s_SunRotationY
@@ -359,7 +360,7 @@ function Time:Run()
 		s_CurrentPresetVisibilityFactor = 1 - s_VisibilityFactor
 	end
 
-	print("Sun/Moon: " .. tostring(s_SunMoonPos) .. " ( " .. self.m_CurrentPreset .. " -> " .. s_NextPreset .. " ), visibility: " .. tostring(s_VisibilityFactor))
+	--print("Sun/Moon: " .. tostring(s_SunMoonPos) .. " ( " .. self.m_CurrentPreset .. " -> " .. s_NextPreset .. " ), visibility: " .. tostring(s_VisibilityFactor))
 	--print("Visibility Factor: " .. tostring(s_VisibilityFactor))
 
 	for l_Index, l_Preset in ipairs(self.m_SortedDynamicPresetsTable) do
