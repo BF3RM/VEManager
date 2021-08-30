@@ -33,7 +33,6 @@ function Time:RegisterVars()
 	self.m_SunPosX = 0
 	self.m_SunPosY = 0
 
-	self.m_CurrentPresetTable = {}
 	self.m_SortedDynamicPresetsTable = {}
 
 	self.m_CurrentPreset = 1
@@ -158,7 +157,7 @@ end
 
 function Time:Disable()
 	-- Check if presets exist
-	if #self.m_CurrentPresetTable < 1 then
+	if #self.m_SortedDynamicPresetsTable < 1 then
 		return
 	end
 
@@ -166,8 +165,8 @@ function Time:Disable()
 	self.m_SystemRunning = false
 
 	-- Hide Presets
-	for l_ID, l_Value in pairs(self.m_CurrentPresetTable) do
-		g_VEManagerClient:SetVisibility(l_ID, 0)
+	for l_ID, l_ValueTable in pairs(self.m_SortedDynamicPresetsTable) do
+		g_VEManagerClient:SetVisibility(l_Value[1], 0)
 	end
 end
 
