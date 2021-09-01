@@ -166,7 +166,7 @@ function Time:Disable()
 
 	-- Hide Presets
 	for l_ID, l_ValueTable in pairs(self.m_SortedDynamicPresetsTable) do
-		g_VEManagerClient:SetVisibility(l_Value[1], 0)
+		g_VEManagerClient:SetVisibility(l_ValueTable[1], 0)
 	end
 end
 
