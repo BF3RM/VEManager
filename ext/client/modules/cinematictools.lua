@@ -181,6 +181,10 @@ function CinematicTools:CreateGUI()
 			self:GenericCallback("outdoorLight.skyLightAngleFactor", p_Value)
 		end)
 
+		DebugGUI:Range('Sun Specular Scale', {DefValue = 1, Min = 0, Max = 5, Step = 0.001}, function(p_Value)
+			self:GenericCallback("outdoorLight.sunSpecularScale", p_Value)
+		end)
+
 		DebugGUI:Range('Cloud Layer 1 Altitude', {DefValue = 500000, Min = 0, Max = 500000, Step = 1}, function(p_Value)
 			self:GenericCallback("sky.cloudLayer1Altitude", p_Value)
 		end)
