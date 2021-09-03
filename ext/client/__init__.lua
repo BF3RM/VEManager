@@ -1,11 +1,11 @@
 class 'VEManagerClient'
 
 -- Default Dynamic day-night cycle Presets
-night = require "presets/night"
-morning = require "presets/morning"
-noon = require "presets/noon"
-evening = require "presets/evening"
-ve_cinematic_tools = require "presets/custompreset"
+night = require "Presets/DefaultNight"
+morning = require "Presets/DefaultMorning"
+noon = require "Presets/DefaultNoon"
+evening = require "Presets/DefaultEvening"
+ve_cinematic_tools = require "Presets/CustomPreset"
 
 function VEManagerClient:__init()
 	print('Initializing VEManagerClient')
@@ -67,13 +67,13 @@ function VEManagerClient:RegisterEvents()
 end
 
 function VEManagerClient:RegisterModules()
-	easing = require "modules/easing"
-	require 'modules/time'
-	require '__shared/DebugGUI'
-	require 'debuggui'
+	easing = require "Modules/Easing"
+	require 'Modules/Time'
+	require '__Shared/DebugGUI'
+	require 'DebugGui'
 
 	if VEM_CONFIG.DEV_LOAD_CINEMATIC_TOOLS then
-		require 'modules/cinematictools'
+		require 'Modules/CinematicTools'
 	end
 end
 

@@ -1,4 +1,4 @@
-require "__shared/GuiConfig"
+require "__Shared/GuiConfig"
 
 local mouseDisabled = true
 
