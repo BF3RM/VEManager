@@ -1,4 +1,4 @@
-require "__Shared/GuiConfig"
+require "__shared/GuiConfig"
 
 local mouseDisabled = true
 
@@ -47,5 +47,15 @@ function OnShow(clear, data)
   WebUI:ExecuteJS("vext.addControls(" .. json.encode(data) ..")")
 end
 
+function ShowUI()
+  WebUI:ExecuteJS("vext.showUI()")
+end
+
+function HideUI()
+  WebUI:ExecuteJS("vext.hideUI()")
+end
+
+Events:Subscribe("DBGUI:ShowUI", ShowUI)
+Events:Subscribe("DBGUI:HideUI", HideUI)
 Events:Subscribe("DBGUI:Show", OnShow)
 

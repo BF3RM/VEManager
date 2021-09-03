@@ -19,11 +19,13 @@ function CinematicTools:RegisterEvents()
 	--self.m_VisualStateAddedEvent = Events:Subscribe('VE:StateAdded', self, self.OnVisualStateAdded)
 	self.m_LevelLoadEvent = Events:Subscribe('Level:Loaded', self, self.OnLevelLoaded)
 	self.m_DataFromServer = NetEvents:Subscribe('CinematicTools:DataToClient', self, self.OnDataFromServer)
+	self.m_ShowUIEvent = NetEvents:Subscribe('CinematicTools:ShowUI', self, self.ShowUI)
+	self.m_HideUIEvent = NetEvents:Subscribe('CinematicTools:HideUI', self, self.HideUI)
 end
 
 
 function CinematicTools:OnLevelLoaded()
-	if VEM_CONFIG.DEV_LOAD_CUSTOM_PRESET then
+	if VEM_CONFIG.DEV_LOAD_CINEMATIC_TOOLS then
 		g_VEManagerClient:EnablePreset("CinematicTools")  -- Load custom preset
 	end
 end
@@ -33,6 +35,16 @@ function CinematicTools:OnDataFromServer(p_Path, p_Value, p_Net)
 	if self.m_CollaborationEnabled == true then
 		self:GenericCallback(p_Path, p_Value, p_Net)
 	end
+end
+
+
+function CinematicTools:ShowUI()
+	DebugGUI:ShowUI()
+end
+
+
+function CinematicTools:HideUI()
+	DebugGUI:HideUI()
 end
 
 
@@ -84,7 +96,11 @@ function CinematicTools:GenericCallback(p_Path, p_Value, p_Net)
 	--print(s_PathTable)
 	--print(#s_PathTable)
 
-	if self.m_CineState[p_Path] == p_Value then
+	if #s_PathTable == 1 and self.m_CineState[s_PathTable[1]] == p_Value then
+		return
+	elseif #s_PathTable == 2 and self.m_CineState[s_PathTable[1]][s_PathTable[2]] == p_Value then
+		return
+	elseif #s_PathTable == 3 and self.m_CineState[s_PathTable[1]][s_PathTable[2]][s_PathTable[3]] == p_Value then
 		return
 	end
 
@@ -863,9 +879,16 @@ function CinematicTools:CreateGUI()
 
 		DebugGUI:Range('Time', {DefValue = 12, Min = 0, Max = 23, Step = 0.5}, function(p_Value)
 			local s_Rounded = MathUtils:Round(p_Value)
+
 			if s_SyncChangesWithServer == true and s_Enabled == true then 
 				print('Dispatching Time: ' .. p_Value)
-				NetEvents:Send('TimeServer:AddTimeNet', s_Rounded)
+
+				if p_Value == self.m_CurrentSyncedTimeValue then
+					return
+				else
+					self.m_CurrentSyncedTimeValue = p_Value
+					NetEvents:Send('TimeServer:AddTimeNet', s_Rounded)
+				end
 			elseif s_Enabled == true then
 				local s_Hour = s_Rounded * 3600
 				g_Time:Add(s_Hour, true, 86400)

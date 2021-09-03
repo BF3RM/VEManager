@@ -17,6 +17,7 @@ DebugGUIControlType = {
 }
 
 function SetDefaultNumOpts(numOpts, skipDefault)
+  numOpts = numOpts or {}
   numOpts.Min = (numOpts.Min ~= nil and numOpts.Min) or 0
   numOpts.Max = (numOpts.Max ~= nil and numOpts.Max) or 1
   numOpts.Step = numOpts.Step
@@ -35,6 +36,15 @@ function resolveVecOpts(options, defVector)
     return {defValue = options}
   else
     return options
+  end
+end
+
+function emitEvent(...)
+  local args = {...}
+  if SharedUtils:IsClientModule() then
+    Events:Dispatch(table.unpack(args))
+  else
+    NetEvents:Broadcast(table.unpack(args))
   end
 end
 
@@ -125,12 +135,12 @@ end
 
 function DebugGUIManager:RegisterEvents()
   Events:Subscribe("DBGUI:RequestControls", self, self.OnRequestControls)
-  Events:Subscribe("DBGUI:RequestControls.Net", self, self.OnRequestControls)
+  NetEvents:Subscribe("DBGUI:RequestControls.Net", self, self.OnRequestControls)
 
   if SharedUtils:IsClientModule() then
     Events:Subscribe("DBGUI:OnChange", self, self.OnChange)
   else
-    Events:Subscribe("DBGUI:OnChange.Net", self, self.OnChangeNet)
+    NetEvents:Subscribe("DBGUI:OnChange.Net", self, self.OnChangeNet)
   end
 end
 
@@ -217,10 +227,18 @@ function DebugGUIManager:Show(clear)
   end
 
   if SharedUtils:IsClientModule() then
-    Events:DispatchLocal("DBGUI:Show", clear, data)
+    Events:Dispatch("DBGUI:Show", clear, data)
   else
-    Events:Broadcast("DBGUI:Show.Net", clear, data)
+    NetEvents:Broadcast("DBGUI:Show.Net", clear, data)
   end
+end
+
+function DebugGUIManager:ShowUI()
+  emitEvent("DBGUI:ShowUI")
+end
+
+function DebugGUIManager:HideUI()
+  emitEvent("DBGUI:HideUI")
 end
 
 local debugGUIManager = DebugGUIManager()
@@ -377,4 +395,12 @@ end
 
 function DebugGUI.static:Show(clear)
   debugGUIManager:Show(clear)
+end
+
+function DebugGUI.static:ShowUI()
+  debugGUIManager:ShowUI()
+end
+
+function DebugGUI.static:HideUI()
+  debugGUIManager:HideUI()
 end
