@@ -125,12 +125,12 @@ end
 
 function DebugGUIManager:RegisterEvents()
   Events:Subscribe("DBGUI:RequestControls", self, self.OnRequestControls)
-  NetEvents:Subscribe("DBGUI:RequestControls.Net", self, self.OnRequestControls)
+  Events:Subscribe("DBGUI:RequestControls.Net", self, self.OnRequestControls)
 
   if SharedUtils:IsClientModule() then
     Events:Subscribe("DBGUI:OnChange", self, self.OnChange)
   else
-    NetEvents:Subscribe("DBGUI:OnChange.Net", self, self.OnChangeNet)
+    Events:Subscribe("DBGUI:OnChange.Net", self, self.OnChangeNet)
   end
 end
 
@@ -217,9 +217,9 @@ function DebugGUIManager:Show(clear)
   end
 
   if SharedUtils:IsClientModule() then
-    Events:Dispatch("DBGUI:Show", clear, data)
+    Events:DispatchLocal("DBGUI:Show", clear, data)
   else
-    NetEvents:Broadcast("DBGUI:Show.Net", clear, data)
+    Events:Broadcast("DBGUI:Show.Net", clear, data)
   end
 end
 

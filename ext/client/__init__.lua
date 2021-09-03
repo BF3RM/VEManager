@@ -70,6 +70,7 @@ function VEManagerClient:RegisterModules()
 	easing = require "modules/easing"
 	require 'modules/time'
 	require '__shared/DebugGUI'
+	require 'debuggui'
 
 	if VEM_CONFIG.DEV_LOAD_CINEMATIC_TOOLS then
 		require 'modules/cinematictools'
