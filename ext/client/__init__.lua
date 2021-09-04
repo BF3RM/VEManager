@@ -52,7 +52,7 @@ end
 function VEManagerClient:RegisterEvents()
 	self.m_OnUpdateInputEvent = Events:Subscribe('Client:UpdateInput', self, self.OnUpdateInput)
 	Events:Subscribe('Level:Loaded', self, self.OnLevelLoaded)
-	Events:Subscribe('Level:Destroy', self, self.RegisterVars)
+	Events:Subscribe('Level:Destroy', self, self.OnLevelDestroy)
 
 	Events:Subscribe('VEManager:RegisterPreset', self, self.RegisterPreset)
 	Events:Subscribe('VEManager:EnablePreset', self, self.EnablePreset)
@@ -482,6 +482,10 @@ function VEManagerClient:OnLevelLoaded(p_MapPath, p_GameModeName)
 	self:LoadPresets()
 end
 
+function VEManagerClient:OnLevelDestroy()
+	self:RegisterVars()
+	collectgarbage('collect')
+end
 
 function VEManagerClient:GetDefaultValue(p_Class, p_Field)
 	if p_Field.typeInfo.enum then
