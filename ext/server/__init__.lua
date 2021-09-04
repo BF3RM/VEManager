@@ -7,10 +7,10 @@ end
 
 
 function VEManagerServer:RequireModules()
-	require 'time-server'
+	require 'TimeServer'
 
 	if VEM_CONFIG.DEV_LOAD_CINEMATIC_TOOLS == true then
-		require 'cinetools-server'
+		require 'CinetoolsServer'
 	end
 end
 

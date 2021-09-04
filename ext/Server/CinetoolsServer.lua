@@ -16,12 +16,25 @@ end
 function CinetoolsServer:RegisterEvents()
 	print('[Cinetools-Server]: Registered Events')
     self.m_DataClientToServer = NetEvents:Subscribe('CinematicTools:CollaborationData', self, self.SendToClients)
+
+	if VEM_CONFIG.DEV_ENABLE_CHAT_COMMANDS then
+		Events:Subscribe('Player:Chat', self, self.ChatCommands) -- Uncomment to enable chat commands in VEManager
+	end
 end
 
 
 function CinetoolsServer:SendToClients(p_Player, p_Path, p_Value)
 	print('Received Collab Data: .. ' .. p_Path .. ' with Value: ' .. tostring(p_Value))
     NetEvents:Broadcast('CinematicTools:DataToClient', p_Path, p_Value, true)
+end
+
+
+function CinetoolsServer:ChatCommands(p_Player, recipientMask, message)
+	if message:match('^!cinetools show') then
+		NetEvents:SendTo('CinematicTools:ShowUI', p_Player)
+	elseif message:match('^!cinetools hide') then
+		NetEvents:SendTo('CinematicTools:HideUI', p_Player)
+	end
 end
 
 -- Singleton.

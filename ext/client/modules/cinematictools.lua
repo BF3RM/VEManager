@@ -19,12 +19,14 @@ function CinematicTools:RegisterEvents()
 	--self.m_VisualStateAddedEvent = Events:Subscribe('VE:StateAdded', self, self.OnVisualStateAdded)
 	self.m_LevelLoadEvent = Events:Subscribe('Level:Loaded', self, self.OnLevelLoaded)
 	self.m_DataFromServer = NetEvents:Subscribe('CinematicTools:DataToClient', self, self.OnDataFromServer)
+	self.m_ShowUIEvent = NetEvents:Subscribe('CinematicTools:ShowUI', self, self.ShowUI)
+	self.m_HideUIEvent = NetEvents:Subscribe('CinematicTools:HideUI', self, self.HideUI)
 end
 
 
 function CinematicTools:OnLevelLoaded()
-	if VEM_CONFIG.DEV_LOAD_CUSTOM_PRESET then
-		g_VEManagerClient:EnablePreset("CinematicTools")  -- Load custom preset
+	if VEM_CONFIG.DEV_SHOW_CINEMATIC_TOOLS_ON_LEVEL_LOAD then
+		self:ShowUI()
 	end
 end
 
@@ -33,6 +35,18 @@ function CinematicTools:OnDataFromServer(p_Path, p_Value, p_Net)
 	if self.m_CollaborationEnabled == true then
 		self:GenericCallback(p_Path, p_Value, p_Net)
 	end
+end
+
+
+function CinematicTools:ShowUI()
+	g_VEManagerClient:EnablePreset("CinematicTools")
+	DebugGUI:ShowUI()
+end
+
+
+function CinematicTools:HideUI()
+	g_VEManagerClient:DisablePreset("CinematicTools")
+	DebugGUI:HideUI()
 end
 
 
@@ -84,7 +98,11 @@ function CinematicTools:GenericCallback(p_Path, p_Value, p_Net)
 	--print(s_PathTable)
 	--print(#s_PathTable)
 
-	if self.m_CineState[p_Path] == p_Value then
+	if #s_PathTable == 1 and self.m_CineState[s_PathTable[1]] == p_Value then
+		return
+	elseif #s_PathTable == 2 and self.m_CineState[s_PathTable[1]][s_PathTable[2]] == p_Value then
+		return
+	elseif #s_PathTable == 3 and self.m_CineState[s_PathTable[1]][s_PathTable[2]][s_PathTable[3]] == p_Value then
 		return
 	end
 
@@ -110,11 +128,16 @@ function CinematicTools:SendForCollaboration(p_Path, p_Value)
 	end
 end
 
+-- TODO Automate through typeInfo
 
 function CinematicTools:CreateGUI()
 	print("*Creating GUI for Cinematic Tools")
 	-- Sky
 	DebugGUI:Folder("Sky", function ()
+
+		DebugGUI:Checkbox('Enable', true, function(p_Value)
+			self:GenericCallback("sky.enable", p_Value)
+		end)
 
 		DebugGUI:Range('Sky Brightness', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
 			self:GenericCallback("sky.brightnessScale", p_Value)
@@ -148,32 +171,115 @@ function CinematicTools:CreateGUI()
 			self:GenericCallback("outdoorLight.sunColor.z", p_Value)
 		end)
 
+		DebugGUI:Range('Panoramic UV Min X', {DefValue = 0, Min = -5, Max = 5, Step = 0.01}, function(p_Value)
+			self:GenericCallback("sky.panoramicUVMinX.x", p_Value)
+		end)
+
+		DebugGUI:Range('Panoramic UV Max X', {DefValue = 0, Min = -5, Max = 5, Step = 0.01}, function(p_Value)
+			self:GenericCallback("sky.panoramicUVMaxX.x", p_Value)
+		end)
+
+		DebugGUI:Range('Panoramic UV Min Y', {DefValue = 0, Min = -5, Max = 5, Step = 0.01}, function(p_Value)
+			self:GenericCallback("sky.panoramicUVMinY.y", p_Value)
+		end)
+
+		DebugGUI:Range('Panoramic UV Max Y', {DefValue = 0, Min = -5, Max = 5, Step = 0.01}, function(p_Value)
+			self:GenericCallback("sky.panoramicUVMaxY.y", p_Value)
+		end)
+
+		DebugGUI:Range('Panoramic Tile Factor', {DefValue = 0.25, Min = 0, Max = 100, Step = 0.01}, function(p_Value)
+			self:GenericCallback("sky.panoramicTileFactor", p_Value)
+		end)
+
+		DebugGUI:Range('Panoramic Rotation', {DefValue = 0, Min = 0, Max = 360, Step = 1}, function(p_Value)
+			self:GenericCallback("sky.panoramicRotation", p_Value)
+		end)
+
+	end)
+
+	-- Sun Flare
+	DebugGUI:Folder("Sun Flare", function ()
+
+		DebugGUI:Checkbox('Enable', true, function(p_Value)
+			self:GenericCallback("sunFlare.enable", p_Value)
+		end)
+
+		DebugGUI:Checkbox('Element 1 Enable', true, function(p_Value)
+			self:GenericCallback("sunFlare.element1Enable", p_Value)
+		end)
+
+		DebugGUI:Checkbox('Element 2 Enable', true, function(p_Value)
+			self:GenericCallback("sunFlare.element2Enable", p_Value)
+		end)
+
+		DebugGUI:Checkbox('Element 3 Enable', true, function(p_Value)
+			self:GenericCallback("sunFlare.element3Enable", p_Value)
+		end)
+
+		DebugGUI:Checkbox('Element 4 Enable', true, function(p_Value)
+			self:GenericCallback("sunFlare.element4Enable", p_Value)
+		end)
+
+		DebugGUI:Checkbox('Element 5 Enable', true, function(p_Value)
+			self:GenericCallback("sunFlare.element5Enable", p_Value)
+		end)
+
+		-- TODO IN AUTOMATION LATER.
+
 	end)
 
 	-- Environment
 	DebugGUI:Folder("Environment", function ()
 
-		DebugGUI:Range('Ground Color Red', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Static Envmap Scale', {DefValue = 1, Min = 0, Max = 10, Step = 0.01}, function(p_Value)
+			self:GenericCallback("sky.staticEnvmapScale", p_Value)
+		end)
+
+		DebugGUI:Range('Custom Envmap Scale', {DefValue = 1, Min = 0, Max = 10, Step = 0.01}, function(p_Value)
+			self:GenericCallback("sky.customEnvmapScale", p_Value)
+		end)
+
+		DebugGUI:Range('Custom Envmap Ambient', {DefValue = 1, Min = 0, Max = 10, Step = 0.01}, function(p_Value)
+			self:GenericCallback("sky.customEnvmapAmbient", p_Value)
+		end)
+
+		DebugGUI:Range('Sky Envmap Shadow Scale', {DefValue = 1, Min = 0, Max = 10, Step = 0.01}, function(p_Value)
+			self:GenericCallback("outdoorLight.skyEnvmapShadowScale", p_Value)
+		end)
+
+		DebugGUI:Range('Sun Shadow Height Scale', {DefValue = 1, Min = 0, Max = 10, Step = 0.01}, function(p_Value)
+			self:GenericCallback("outdoorLight.sunShadowHeightScale", p_Value)
+		end)
+
+		DebugGUI:Range('Translucency Distortion', {DefValue = 1, Min = 0, Max = 10, Step = 0.01}, function(p_Value)
+			self:GenericCallback("sky.translucencyDistortion", p_Value)
+		end)
+
+		DebugGUI:Range('Translucency Ambient', {DefValue = 1, Min = 0, Max = 10, Step = 0.01}, function(p_Value)
+			self:GenericCallback("sky.translucencyAmbient", p_Value)
+		end)
+
+		DebugGUI:Range('Ground Color Red (if Enlighten Off)', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
 			self:GenericCallback("outdoorLight.groundColor.x", p_Value)
 		end)
 
-		DebugGUI:Range('Ground Color Green', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Ground Color Green (if Enlighten Off)', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
 			self:GenericCallback("outdoorLight.groundColor.y", p_Value)
 		end)
 
-		DebugGUI:Range('Ground Color Blue', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Ground Color Blue (if Enlighten Off)', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
 			self:GenericCallback("outdoorLight.groundColor.z", p_Value)
 		end)
 
-		DebugGUI:Range('Sky Color Red', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Sky Color Red (if Enlighten Off)', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
 			self:GenericCallback("outdoorLight.skyColor.x", p_Value)
 		end)
 
-		DebugGUI:Range('Sky Color Green', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Sky Color Green (if Enlighten Off)', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
 			self:GenericCallback("outdoorLight.skyColor.y", p_Value)
 		end)
 
-		DebugGUI:Range('Sky Color Blue', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Sky Color Blue (if Enlighten Off)', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
 			self:GenericCallback("outdoorLight.skyColor.z", p_Value)
 		end)
 
@@ -241,13 +347,37 @@ function CinematicTools:CreateGUI()
 			self:GenericCallback("sky.cloudLayer2AlphaMul", p_Value)
 		end)
 
+		DebugGUI:Checkbox('Cloud Shadow Enable', true, function(p_Value)
+			self:GenericCallback("outdoorLight.cloudShadowEnable", p_Value)
+		end)
+
+		DebugGUI:Range('Cloud Shadow Coverage', {DefValue = 1, Min = 0, Max = 5, Step = 0.1}, function(p_Value)
+			self:GenericCallback("outdoorLight.cloudShadowCoverage", p_Value)
+		end)
+
+		DebugGUI:Range('Cloud Shadow Size', {DefValue = 1, Min = 0, Max = 100, Step = 0.1}, function(p_Value)
+			self:GenericCallback("outdoorLight.cloudShadowSize", p_Value)
+		end)
+
+		DebugGUI:Range('Cloud Shadow Speed', {DefValue = VEM_CONFIG.CLOUDS_DEFAULT_SPEED, Min = -1, Max = 1, Step = 0.0001}, function(p_Value)
+			self:GenericCallback("outdoorLight.cloudShadowSpeed", p_Value)
+		end)
+
+		DebugGUI:Range('Cloud Shadow Exponent', {DefValue = 1, Min = 0, Max = 10, Step = 0.1}, function(p_Value)
+			self:GenericCallback("outdoorLight.cloudShadowExponent", p_Value)
+		end)
+
 	end)
 
 	-- Enlighten
 	DebugGUI:Folder("Enlighten", function ()
 
-		DebugGUI:Checkbox('Enlighten Enable', true, function(p_Value)
+		DebugGUI:Checkbox('Enable', true, function(p_Value)
 			self:GenericCallback("enlighten.enable", p_Value)
+		end)
+
+		DebugGUI:Range('Sky Visibility Exponent', {DefValue = 0, Min = 0, Max = 1, Step = 0.01}, function(p_Value)
+			self:GenericCallback("sky.skyVisibilityExponent", p_Value)
 		end)
 
 		--[[DebugGUI:Checkbox('Skybox Enlighten Enable', true, function(p_Value)
@@ -347,8 +477,12 @@ function CinematicTools:CreateGUI()
 	-- Color Correction
 	DebugGUI:Folder("Color Correction", function ()
 
-		DebugGUI:Checkbox('Color Correction Enable', true, function(p_Value)
+		DebugGUI:Checkbox('Enable', true, function(p_Value)
 			self:GenericCallback("colorCorrection.enable", p_Value)
+		end)
+
+		DebugGUI:Checkbox('Color Grading Enable', true, function(p_Value)
+			self:GenericCallback("colorCorrection.colorGradingEnable", p_Value)
 		end)
 
 		DebugGUI:Range('Brightness Red', {DefValue = 1.0, Min = 0.0, Max = 1.5, Step = 0.01}, function(p_Value)
@@ -385,6 +519,10 @@ function CinematicTools:CreateGUI()
 
 		DebugGUI:Range('Saturation Blue', {DefValue = 1.0, Min = 0.0, Max = 1.5, Step = 0.01}, function(p_Value)
 			self:GenericCallback("colorCorrection.saturation.z", p_Value)
+		end)
+
+		DebugGUI:Range('Hue', {DefValue = 0, Min = -1, Max = 1, Step = 0.001}, function(p_Value)
+			self:GenericCallback("colorCorrection.hue", p_Value)
 		end)
 
 	end)
@@ -424,6 +562,18 @@ function CinematicTools:CreateGUI()
 			self:GenericCallback("tonemap.bloomScale.z", p_Value)
 		end)
 
+		DebugGUI:Checkbox('Chromostereopsis Enable', false, function(p_Value)
+			self:GenericCallback("tonemap.chromostereopsisEnable", p_Value)
+		end)
+
+		DebugGUI:Range('Chromostereopsis Scale', {DefValue = 0.0, Min = 0.0, Max = 100.0, Step = 0.1}, function(p_Value)
+			self:GenericCallback("tonemap.chromostereopsisScale", p_Value)
+		end)
+
+		DebugGUI:Range('Chromostereopsis Offset', {DefValue = 0, Min = 0.0, Max = 100.0, Step = 0.1}, function(p_Value)
+			self:GenericCallback("tonemap.chromostereopsisOffset", p_Value)
+		end)
+
 	end)
 
 	-- Fog
@@ -435,6 +585,22 @@ function CinematicTools:CreateGUI()
 
 		DebugGUI:Range('Fog End', {DefValue = 5000.0, Min = 0.0, Max = 15000.0, Step = 10.0}, function(p_Value)
 			self:GenericCallback("fog.endValue", p_Value)
+		end)
+
+		DebugGUI:Range('Curve X', {DefValue = 1.0, Min = -10, Max = 10, Step = 0.001}, function(p_Value)
+			self:GenericCallback("fog.curve.x", p_Value)
+		end)
+
+		DebugGUI:Range('Curve Y', {DefValue = 1.0, Min = -10, Max = 10, Step = 0.001}, function(p_Value)
+			self:GenericCallback("fog.curve.y", p_Value)
+		end)
+
+		DebugGUI:Range('Curve Z', {DefValue = 1.0, Min = -10, Max = 10, Step = 0.001}, function(p_Value)
+			self:GenericCallback("fog.curve.z", p_Value)
+		end)
+
+		DebugGUI:Range('Curve W', {DefValue = 1.0, Min = -10, Max = 10, Step = 0.001}, function(p_Value)
+			self:GenericCallback("fog.curve.w", p_Value)
 		end)
 
 		DebugGUI:Range('Fog Distance Multiplier [doesn´t work on all maps]', {DefValue = 1.0, Min = 0.0, Max = 5.0, Step = 0.2}, function(p_Value)
@@ -473,20 +639,20 @@ function CinematicTools:CreateGUI()
 			self:GenericCallback("fog.fogColor.z", p_Value)
 		end)
 
-		DebugGUI:Range('Curve X', {DefValue = 1.0, Min = -10, Max = 10, Step = 0.001}, function(p_Value)
-			self:GenericCallback("fog.curve.x", p_Value)
+		DebugGUI:Range('Fog Color Curve X', {DefValue = 1.0, Min = -10, Max = 10, Step = 0.001}, function(p_Value)
+			self:GenericCallback("fog.fogColorCurve.x", p_Value)
 		end)
 
-		DebugGUI:Range('Curve Y', {DefValue = 1.0, Min = -10, Max = 10, Step = 0.001}, function(p_Value)
-			self:GenericCallback("fog.curve.y", p_Value)
+		DebugGUI:Range('Fog Color Curve Y', {DefValue = 1.0, Min = -10, Max = 10, Step = 0.001}, function(p_Value)
+			self:GenericCallback("fog.fogColorCurve.y", p_Value)
 		end)
 
-		DebugGUI:Range('Curve Z', {DefValue = 1.0, Min = -10, Max = 10, Step = 0.001}, function(p_Value)
-			self:GenericCallback("fog.curve.z", p_Value)
+		DebugGUI:Range('Fog Color Curve Z', {DefValue = 1.0, Min = -10, Max = 10, Step = 0.001}, function(p_Value)
+			self:GenericCallback("fog.fogColorCurve.z", p_Value)
 		end)
 
-		DebugGUI:Range('Curve W', {DefValue = 1.0, Min = -10, Max = 10, Step = 0.001}, function(p_Value)
-			self:GenericCallback("fog.curve.w", p_Value)
+		DebugGUI:Range('Fog Color Curve W', {DefValue = 1.0, Min = -10, Max = 10, Step = 0.001}, function(p_Value)
+			self:GenericCallback("fog.fogColorCurve.w", p_Value)
 		end)
 
 	end)
@@ -507,7 +673,7 @@ function CinematicTools:CreateGUI()
 	-- Depth of Field
 	DebugGUI:Folder("Depth of Field", function ()
 
-		DebugGUI:Checkbox('DoF Enable', false, function(p_Value)
+		DebugGUI:Checkbox('Enable', false, function(p_Value)
 			self:GenericCallback("dof.enable", p_Value)
 		end)
 
@@ -539,11 +705,11 @@ function CinematicTools:CreateGUI()
 			self:GenericCallback("dof.diffusionDofEnable", p_Value)
 		end)
 
-		DebugGUI:Range('DoF Diffusion Aperture (broken)', {DefValue = 1.0, Min = 0.6, Max = 20.0, Step = 0.2}, function(p_Value)
+		DebugGUI:Range('DoF Diffusion Aperture', {DefValue = 1.0, Min = 0.6, Max = 20.0, Step = 0.2}, function(p_Value)
 			self:GenericCallback("dof.diffusionDofAperture", p_Value)
 		end)
 
-		DebugGUI:Range('DoF Diffusion Focal Length (broken)', {DefValue = 1.0, Min = 10.0, Max = 135.0, Step = 1.0}, function(p_Value)
+		DebugGUI:Range('DoF Diffusion Focal Length', {DefValue = 1.0, Min = 10.0, Max = 135.0, Step = 1.0}, function(p_Value)
 			self:GenericCallback("dof.diffusionDofFocalLength", p_Value)
 		end)
 
@@ -552,7 +718,7 @@ function CinematicTools:CreateGUI()
 	-- Vignette
 	DebugGUI:Folder("Vignette", function ()
 
-		DebugGUI:Checkbox('Vignette Enable', false, function(p_Value)
+		DebugGUI:Checkbox('Enable', false, function(p_Value)
 			self:GenericCallback("vignette.enable", p_Value)
 		end)
 
@@ -572,12 +738,24 @@ function CinematicTools:CreateGUI()
 			self:GenericCallback("vignette.scale.y", p_Value)
 		end)
 
+		DebugGUI:Range('Vignette Color X', {DefValue = 0, Min = 0.0, Max = 5.0, Step = 0.1}, function(p_Value)
+			self:GenericCallback("vignette.color.x", p_Value)
+		end)
+
+		DebugGUI:Range('Vignette Color Y', {DefValue = 0, Min = 0.0, Max = 5.0, Step = 0.1}, function(p_Value)
+			self:GenericCallback("vignette.color.y", p_Value)
+		end)
+
+		DebugGUI:Range('Vignette Color Y', {DefValue = 0, Min = 0.0, Max = 5.0, Step = 0.1}, function(p_Value)
+			self:GenericCallback("vignette.color.z", p_Value)
+		end)
+
 	end)
 
 	-- FilmGrain
 	DebugGUI:Folder("Film Grain", function ()
 
-		DebugGUI:Checkbox('Film Grain Enable', false, function(p_Value)
+		DebugGUI:Checkbox('Enable', false, function(p_Value)
 			self:GenericCallback("filmGrain.enable", p_Value)
 		end)
 
@@ -614,7 +792,7 @@ function CinematicTools:CreateGUI()
 	-- LensScope
 	DebugGUI:Folder("Lens Scope", function ()
 
-		DebugGUI:Checkbox('Lens Scope Enable', false, function(p_Value)
+		DebugGUI:Checkbox('Enable', false, function(p_Value)
 			self:GenericCallback("lensScope.enable", p_Value)
 		end)
 
@@ -708,7 +886,7 @@ function CinematicTools:CreateGUI()
 	-- Character Lighting
 	DebugGUI:Folder('Character Lighting (Only with Enlighten ON)', function ()
 
-		DebugGUI:Checkbox('Character Lighting Enable', false, function(p_Value)
+		DebugGUI:Checkbox('Enable', false, function(p_Value)
 			self:GenericCallback("characterLighting.characterLightEnable", p_Value)
 		end)
 
@@ -863,9 +1041,16 @@ function CinematicTools:CreateGUI()
 
 		DebugGUI:Range('Time', {DefValue = 12, Min = 0, Max = 23, Step = 0.5}, function(p_Value)
 			local s_Rounded = MathUtils:Round(p_Value)
+
 			if s_SyncChangesWithServer == true and s_Enabled == true then 
 				print('Dispatching Time: ' .. p_Value)
-				NetEvents:Send('TimeServer:AddTimeNet', s_Rounded)
+
+				if p_Value == self.m_CurrentSyncedTimeValue then
+					return
+				else
+					self.m_CurrentSyncedTimeValue = p_Value
+					NetEvents:Send('TimeServer:AddTimeNet', s_Rounded)
+				end
 			elseif s_Enabled == true then
 				local s_Hour = s_Rounded * 3600
 				g_Time:Add(s_Hour, true, 86400)

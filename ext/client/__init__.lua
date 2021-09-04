@@ -1,11 +1,11 @@
 class 'VEManagerClient'
 
 -- Default Dynamic day-night cycle Presets
-night = require "presets/night"
-morning = require "presets/morning"
-noon = require "presets/noon"
-evening = require "presets/evening"
-ve_cinematic_tools = require "presets/custompreset"
+night = require "Presets/DefaultNight"
+morning = require "Presets/DefaultMorning"
+noon = require "Presets/DefaultNoon"
+evening = require "Presets/DefaultEvening"
+ve_cinematic_tools = require "Presets/CustomPreset"
 
 function VEManagerClient:__init()
 	print('Initializing VEManagerClient')
@@ -52,7 +52,7 @@ end
 function VEManagerClient:RegisterEvents()
 	self.m_OnUpdateInputEvent = Events:Subscribe('Client:UpdateInput', self, self.OnUpdateInput)
 	Events:Subscribe('Level:Loaded', self, self.OnLevelLoaded)
-	Events:Subscribe('Level:Destroy', self, self.RegisterVars)
+	Events:Subscribe('Level:Destroy', self, self.OnLevelDestroy)
 
 	Events:Subscribe('VEManager:RegisterPreset', self, self.RegisterPreset)
 	Events:Subscribe('VEManager:EnablePreset', self, self.EnablePreset)
@@ -67,13 +67,11 @@ function VEManagerClient:RegisterEvents()
 end
 
 function VEManagerClient:RegisterModules()
-	easing = require "modules/easing"
-	require 'modules/time'
+	easing = require "Modules/Easing"
+	require 'Modules/Time'
 	require '__shared/DebugGUI'
-
-	if VEM_CONFIG.DEV_LOAD_CINEMATIC_TOOLS then
-		require 'modules/cinematictools'
-	end
+	require 'DebugGui'
+	require 'Modules/CinematicTools'
 end
 
 
@@ -484,6 +482,10 @@ function VEManagerClient:OnLevelLoaded(p_MapPath, p_GameModeName)
 	self:LoadPresets()
 end
 
+function VEManagerClient:OnLevelDestroy()
+	self:RegisterVars()
+	collectgarbage('collect')
+end
 
 function VEManagerClient:GetDefaultValue(p_Class, p_Field)
 	if p_Field.typeInfo.enum then

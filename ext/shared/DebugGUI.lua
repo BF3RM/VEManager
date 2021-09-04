@@ -17,6 +17,7 @@ DebugGUIControlType = {
 }
 
 function SetDefaultNumOpts(numOpts, skipDefault)
+  numOpts = numOpts or {}
   numOpts.Min = (numOpts.Min ~= nil and numOpts.Min) or 0
   numOpts.Max = (numOpts.Max ~= nil and numOpts.Max) or 1
   numOpts.Step = numOpts.Step
@@ -35,6 +36,15 @@ function resolveVecOpts(options, defVector)
     return {defValue = options}
   else
     return options
+  end
+end
+
+function emitEvent(...)
+  local args = {...}
+  if SharedUtils:IsClientModule() then
+    Events:Dispatch(table.unpack(args))
+  else
+    NetEvents:Broadcast(table.unpack(args))
   end
 end
 
@@ -223,6 +233,14 @@ function DebugGUIManager:Show(clear)
   end
 end
 
+function DebugGUIManager:ShowUI()
+  emitEvent("DBGUI:ShowUI")
+end
+
+function DebugGUIManager:HideUI()
+  emitEvent("DBGUI:HideUI")
+end
+
 local debugGUIManager = DebugGUIManager()
 
 -- 
@@ -377,4 +395,12 @@ end
 
 function DebugGUI.static:Show(clear)
   debugGUIManager:Show(clear)
+end
+
+function DebugGUI.static:ShowUI()
+  debugGUIManager:ShowUI()
+end
+
+function DebugGUI.static:HideUI()
+  debugGUIManager:HideUI()
 end

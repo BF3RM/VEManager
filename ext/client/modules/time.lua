@@ -34,6 +34,7 @@ function Time:RegisterVars()
 	self.m_SunPosY = 0
 
 	self.m_SortedDynamicPresetsTable = {}
+	self.m_SavedValuesForReset = {}
 
 	self.m_CurrentPreset = 1
 
@@ -81,8 +82,8 @@ function Time:RequestTime()
 end
 
 function Time:RemoveTime()
+	self:ResetForcedValues()
 	self:RegisterVars()
-	self:ResetSunPosition()
 	print("Reset Time System")
 end
 
@@ -146,9 +147,45 @@ function Time:SetCloudSpeed()
 	end
 end
 
-function Time:ResetSunPosition()
-	VisualEnvironmentManager:SetSunRotationX(0)
-	VisualEnvironmentManager:SetSunRotationY(70)
+function Time:ResetForcedValues()
+	for l_Index, l_Preset in ipairs(self.m_SortedDynamicPresetsTable) do
+		local s_ID = l_Preset[1]
+		g_VEManagerClient.m_Presets[s_ID]["ve"].priority = l_Index + 10
+
+		-- Patch Sun Positions
+		for l_Index, l_Class in pairs(g_VEManagerClient.m_Presets[s_ID]["ve"].components) do
+			if l_Class.typeInfo.name == "OutdoorLightComponentData" then
+				--local s_Class = _G[l_Class.typeInfo.name]()
+				local s_Class = OutdoorLightComponentData(l_Class)
+				s_Class:MakeWritable()
+
+				-- reset values
+				s_Class.sunRotationX = self.m_SavedValuesForReset[l_Index][l_Class.typeInfo.name].sunRotationX
+				s_Class.sunRotationY = self.m_SavedValuesForReset[l_Index][l_Class.typeInfo.name].sunRotationY
+
+				--g_VEManagerClient.m_Presets[s_ID]["ve"].components[l_Index] = s_Class -- no need to replace
+			end
+
+			-- Patch Star Cloudlayer
+			if l_Class.typeInfo.name == "SkyComponentData" then
+				--local s_Class = _G[l_Class.typeInfo.name]()
+				local s_Class = SkyComponentData(l_Class)
+				s_Class:MakeWritable()
+				-- reset values
+				s_Class.sunSize = self.m_SavedValuesForReset[l_Index][l_Class.typeInfo.name].sunSize
+				s_Class.sunScale = self.m_SavedValuesForReset[l_Index][l_Class.typeInfo.name].sunScale
+				s_Class.cloudLayer2Altitude = self.m_SavedValuesForReset[l_Index][l_Class.typeInfo.name].cloudLayer2Altitude
+				s_Class.cloudLayer2TileFactor = self.m_SavedValuesForReset[l_Index][l_Class.typeInfo.name].cloudLayer2TileFactor
+				s_Class.cloudLayer2Rotation = self.m_SavedValuesForReset[l_Index][l_Class.typeInfo.name].cloudLayer2Rotation
+				s_Class.cloudLayer2Speed = self.m_SavedValuesForReset[l_Index][l_Class.typeInfo.name].cloudLayer2Speed
+
+				--g_VEManagerClient.m_Presets[s_ID]["ve"].components[l_Index] = s_Class
+			end
+		end
+
+		local s_SunRotationY = l_Preset[2]
+		print(" - " .. tostring(s_ID) .. " (sun: " .. tostring(s_SunRotationY) .. ")")
+	end
 end
 
 function Time:PauseContinue(p_SystemRunning)
@@ -222,13 +259,19 @@ function Time:Add(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 
 		-- Patch Sun Positions
 		for l_Index, l_Class in pairs(g_VEManagerClient.m_Presets[s_ID]["ve"].components) do
+			self.m_SavedValuesForReset[l_Index] = {}
+
 			if l_Class.typeInfo.name == "OutdoorLightComponentData" then
 				--local s_Class = _G[l_Class.typeInfo.name]()
 				local s_Class = OutdoorLightComponentData(l_Class)
 				s_Class:MakeWritable()
-				-- They need to be reverted to 0
+				-- save values
+				self.m_SavedValuesForReset[l_Index][l_Class.typeInfo.name] = {}
+				self.m_SavedValuesForReset[l_Index][l_Class.typeInfo.name].sunRotationX = s_Class.sunRotationX
+				self.m_SavedValuesForReset[l_Index][l_Class.typeInfo.name].sunRotationY = s_Class.sunRotationX
+				-- replace values
 				s_Class.sunRotationX = 0.0
-				s_Class.sunRotationY = 0.0 --TODO: Reset later
+				s_Class.sunRotationY = 0.0
 
 				--g_VEManagerClient.m_Presets[s_ID]["ve"].components[l_Index] = s_Class -- no need to replace
 			end
@@ -238,6 +281,15 @@ function Time:Add(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 				--local s_Class = _G[l_Class.typeInfo.name]()
 				local s_Class = SkyComponentData(l_Class)
 				s_Class:MakeWritable()
+				-- save values
+				self.m_SavedValuesForReset[l_Index][l_Class.typeInfo.name] = {}
+				self.m_SavedValuesForReset[l_Index][l_Class.typeInfo.name].sunSize = s_Class.sunSize
+				self.m_SavedValuesForReset[l_Index][l_Class.typeInfo.name].sunScale = s_Class.sunScale
+				self.m_SavedValuesForReset[l_Index][l_Class.typeInfo.name].cloudLayer2Altitude = s_Class.cloudLayer2Altitude
+				self.m_SavedValuesForReset[l_Index][l_Class.typeInfo.name].cloudLayer2TileFactor = s_Class.cloudLayer2TileFactor
+				self.m_SavedValuesForReset[l_Index][l_Class.typeInfo.name].cloudLayer2Rotation = s_Class.cloudLayer2Rotation
+				self.m_SavedValuesForReset[l_Index][l_Class.typeInfo.name].cloudLayer2Speed = s_Class.cloudLayer2Speed
+				-- replace values
 				s_Class.sunSize = 0.01
 				s_Class.sunScale = 1.5
 				s_Class.cloudLayer2Altitude = 5000000.0
