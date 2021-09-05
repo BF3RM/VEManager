@@ -16,6 +16,7 @@ end
 function CinetoolsServer:RegisterEvents()
 	print('[Cinetools-Server]: Registered Events')
     self.m_DataClientToServer = NetEvents:Subscribe('CinematicTools:CollaborationData', self, self.SendToClients)
+	self.m_ColorCorrectionChange = Events:Subscribe('CinematicTools:ColorCorrection', self, self.ChangeColorCorrection)
 
 	if VEM_CONFIG.DEV_ENABLE_CHAT_COMMANDS then
 		Events:Subscribe('Player:Chat', self, self.ChatCommands) -- Uncomment to enable chat commands in VEManager
@@ -35,6 +36,11 @@ function CinetoolsServer:ChatCommands(p_Player, recipientMask, message)
 	elseif message:match('^!cinetools hide') then
 		NetEvents:SendTo('CinematicTools:HideUI', p_Player)
 	end
+end
+
+
+function CinetoolsServer:ChangeColorCorrection(p_Player, p_Boolean)
+	RCON:SendCommand('vu.ColorCorrectionEnabled', {tostring(p_Boolean)})
 end
 
 -- Singleton.
