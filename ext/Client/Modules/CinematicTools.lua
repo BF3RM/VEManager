@@ -12,6 +12,7 @@ function CinematicTools:RegisterVars()
 	self.m_CinePriority = 10000010
 	self.m_PresetName = nil
 	self.m_PresetPriority = nil
+	self.m_CollaborationEnabled = false
 end
 
 
@@ -91,6 +92,7 @@ function CinematicTools:GenericCallback(p_Path, p_Value, p_Net)
 		self.m_CineState = self:GetVisualEnvironmentState(self.m_CinePriority)
 		print('CineState Name: ' .. self.m_CineState.entityName)
 		print('CineState ID: ' .. self.m_CineState.stateId)
+		print('CineState Priority: ' .. self.m_CineState.priority)
 		self.m_CineState.excluded = false
 	end
 
@@ -115,7 +117,7 @@ function CinematicTools:GenericCallback(p_Path, p_Value, p_Net)
 	end
 
 	VisualEnvironmentManager:SetDirty(true)
-	if p_Net ~= true then
+	if p_Net ~= true and self.m_CollaborationEnabled then
 		self:SendForCollaboration(p_Path, p_Value)
 		print('Sending: ' .. p_Path .. ' with Value: ' .. tostring(p_Value))
 	end
@@ -123,9 +125,7 @@ end
 
 
 function CinematicTools:SendForCollaboration(p_Path, p_Value)
-	if self.m_CollaborationEnabled == true then
-		NetEvents:Send('CinematicTools:CollaborationData', p_Path, p_Value)
-	end
+	NetEvents:Send('CinematicTools:CollaborationData', p_Path, p_Value)
 end
 
 -- TODO Automate through typeInfo
