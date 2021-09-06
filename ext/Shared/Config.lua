@@ -11,7 +11,8 @@ VEM_CONFIG = {
 	DEV_ENABLE_CHAT_COMMANDS = false,
 	DEV_ENABLE_TEST_KEYS = false,
 	DEV_LOAD_CINEMATIC_TOOLS = true,
-	DEV_SHOW_CINEMATIC_TOOLS_ON_LEVEL_LOAD = false,
+	DEV_SHOW_CINEMATIC_TOOLS_ON_LEVEL_LOAD = false, 
+	-- TODO: Add config option for patches
 
 	-- PRINT --
 	PRINT_DN_TIME_AND_VISIBILITIES = false,	-- Print current time every hour along with the visibilities of the 4 presets
