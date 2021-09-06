@@ -483,7 +483,7 @@ function CinematicTools:CreateGUI()
 
 		DebugGUI:Checkbox('Color Grading Enable', false, function(p_Value)
 			--self:GenericCallback("colorCorrection.colorGradingEnable", p_Value)
-			Events:DispatchLocal('CinematicTools:ColorCorrection', p_Value)
+			NetEvents:Send('CinematicTools:ColorCorrection', p_Value)
 		end)
 
 		DebugGUI:Range('Brightness Red', {DefValue = 1.0, Min = 0.0, Max = 1.5, Step = 0.01}, function(p_Value)

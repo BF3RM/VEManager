@@ -16,7 +16,7 @@ end
 function CinetoolsServer:RegisterEvents()
 	print('[Cinetools-Server]: Registered Events')
     self.m_DataClientToServer = NetEvents:Subscribe('CinematicTools:CollaborationData', self, self.SendToClients)
-	self.m_ColorCorrectionChange = Events:Subscribe('CinematicTools:ColorCorrection', self, self.ChangeColorCorrection)
+	self.m_ColorCorrectionChange = NetEvents:Subscribe('CinematicTools:ColorCorrection', self, self.ChangeColorCorrection)
 
 	if VEM_CONFIG.DEV_ENABLE_CHAT_COMMANDS then
 		Events:Subscribe('Player:Chat', self, self.ChatCommands) -- Uncomment to enable chat commands in VEManager
