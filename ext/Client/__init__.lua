@@ -578,12 +578,12 @@ function VEManagerClient:OnUpdateInput(p_Delta, p_SimulationDelta)
 
 	if VEM_CONFIG.DEV_ENABLE_TEST_KEYS then
 
-		if InputManager:WentKeyDown(InputDeviceKeys.IDK_F2) then
-			print("DEV KEY: Show VE states: name, priority, visibility")
-			local s_states = VisualEnvironmentManager:GetStates()
+		if InputManager:WentKeyDown(VEM_CONFIG.DEV_SHOW_HIDE_CINEMATIC_TOOLS_KEY) then
 
-			for _, state in pairs(s_states) do
-				print(" - " .. tostring(entityName) .. ", " .. tostring(state.priority) .. ", " .. tostring(state.visibility))
+			if g_CinematicTools.m_Visible == true then 
+				g_CinematicTools:HideUI()
+			else
+				g_CinematicTools:ShowUI()
 			end
 		end
 	end

@@ -13,6 +13,7 @@ function CinematicTools:RegisterVars()
 	self.m_PresetName = nil
 	self.m_PresetPriority = nil
 	self.m_CollaborationEnabled = false
+	self.m_Visible = false
 end
 
 
@@ -42,12 +43,14 @@ end
 function CinematicTools:ShowUI()
 	g_VEManagerClient:EnablePreset("CinematicTools")
 	DebugGUI:ShowUI()
+	self.m_Visible = true
 end
 
 
 function CinematicTools:HideUI()
 	g_VEManagerClient:DisablePreset("CinematicTools")
 	DebugGUI:HideUI()
+	self.m_Visible = false
 end
 
 
