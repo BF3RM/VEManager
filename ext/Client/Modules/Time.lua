@@ -302,7 +302,7 @@ function Time:Add(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 		end
 
 		local s_SunRotationY = l_Preset[2]
-		print(" - " .. tostring(s_ID) .. " (sun: " .. tostring(s_SunRotationY) .. ")")
+		print(" - " .. tostring(s_ID) .. " (sun: " .. tostring(s_SunRotationY) .. " deg)")
 	end
 
 	-- Save dayLength in Class (minutes -> seconds)
@@ -439,36 +439,12 @@ function Time:Run()
 		self.m_FirstRun = false
 	end
 
-	--[[
-	s_FactorNight = MathUtils:Clamp(self.m_SunPosY, 0, 1)
-	s_FactorMorning = MathUtils:Clamp(s_FactorMorning, 0, 1)
-	s_FactorNoon = MathUtils:Clamp(s_FactorNoon, 0, 1)
-	s_FactorEvening = MathUtils:Clamp(s_FactorEvening, 0, 1)
-
+	-- Log visibilities
 	if s_print_enabled and VEM_CONFIG.PRINT_DN_TIME_AND_VISIBILITIES then
-		print("Visibilities (Night, Morning, Noon, Evening): " .. MathUtils:Round(s_FactorNight*100) .. "%, " .. MathUtils:Round(s_FactorMorning*100) .. "%, " .. MathUtils:Round(s_FactorNoon*100) .. "%, " .. MathUtils:Round(s_FactorEvening*100) .. "% | Current time: " .. s_h_time .. "h")
-		--print("Time Till Switch: " .. MathUtils:Round(s_timeToChange) .. "sec")
+		local s_NextPresetID = self.m_SortedDynamicPresetsTable[s_NextPreset][1]
+		local s_CurrentPresetID = self.m_SortedDynamicPresetsTable[self.m_CurrentPreset][1]
+		print("[" .. tostring(s_h_time) .. "h - sun:" .. tostring(s_SunMoonPos) .. "] " .. tostring(s_CurrentPresetID) .. " (" .. MathUtils:Round(s_CurrentPresetVisibilityFactor*100) .. "%) -> " .. tostring(s_NextPresetID) .. " (" .. MathUtils:Round(s_NextPresetVisibilityFactor*100) .. "%)" )
 	end
-
-	-- Apply visibility factor
-	if self.m_FirstRun then
-		g_VEManagerClient:SetVisibility(self.m_CurrentNightPreset, s_FactorNight)
-		g_VEManagerClient:SetVisibility(self.m_CurrentMorningPreset, s_FactorMorning)
-		g_VEManagerClient:SetVisibility(self.m_CurrentNoonPreset, s_FactorNoon)
-		g_VEManagerClient:SetVisibility(self.m_CurrentEveningPreset, s_FactorEvening)
-		self.m_FirstRun = false
-	else
-		g_VEManagerClient:UpdateVisibility(self.m_CurrentNightPreset, self.m_NightPriority, s_FactorNight)
-		g_VEManagerClient:UpdateVisibility(self.m_CurrentMorningPreset, self.m_MorningPriority, s_FactorMorning)
-		g_VEManagerClient:UpdateVisibility(self.m_CurrentNoonPreset, self.m_NoonPriority, s_FactorNoon)
-		g_VEManagerClient:UpdateVisibility(self.m_CurrentEveningPreset, self.m_EveningPriority, s_FactorEvening)
-		g_VEManagerClient:SetSingleValue(self.m_CurrentNightPreset, self.m_NightPriority, 'sky', 'cloudLayer1Speed', self.m_CloudSpeed)
-		g_VEManagerClient:SetSingleValue(self.m_CurrentMorningPreset, self.m_MorningPriority, 'sky', 'cloudLayer1Speed', self.m_CloudSpeed)
-		g_VEManagerClient:SetSingleValue(self.m_CurrentNoonPreset, self.m_NoonPriority, 'sky', 'cloudLayer1Speed', self.m_CloudSpeed)
-		g_VEManagerClient:SetSingleValue(self.m_CurrentEveningPreset, self.m_EveningPriority, 'sky', 'cloudLayer1Speed', self.m_CloudSpeed)
-	end
-	]]
-
 end
 
 -- Singleton.
