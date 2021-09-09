@@ -8,11 +8,11 @@ VEM_CONFIG = {
 	DN_CHANGE_CLOUDS_SPEED_BASED_ON_DAY_LENGTH = false, 			-- Synchronises cloud speed to game time (useful for timelapses)
 
 	-- DEV --
-	DEV_ENABLE_CHAT_COMMANDS = false,
-	DEV_ENABLE_TEST_KEYS = false,
+	DEV_ENABLE_CHAT_COMMANDS = true,
+	DEV_ENABLE_TEST_KEYS = true,
 	DEV_SHOW_HIDE_CINEMATIC_TOOLS_KEY = InputDeviceKeys.IDK_F8,
 	DEV_LOAD_CINEMATIC_TOOLS = true,
-	DEV_SHOW_CINEMATIC_TOOLS_ON_LEVEL_LOAD = false, 
+	DEV_SHOW_CINEMATIC_TOOLS_ON_LEVEL_LOAD = true,
 	-- TODO: Add config option for patches
 
 	-- PRINT --
