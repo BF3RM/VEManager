@@ -1,16 +1,18 @@
 class 'Time'
 
+local m_Logger = Logger("Time", false)
 local Patches = require('modules/patches')
 
+
 function Time:__init()
-	print('Initializing Time Module')
+	m_Logger:Write('Initializing Time Module')
 	self:RegisterVars()
 	self:RegisterEvents()
 end
 
 function Time:RegisterVars()
 	-- Initialise variables
-	print('[Client Time Module] Registered Vars')
+	m_Logger:Write('[Client Time Module] Registered Vars')
 	self.m_SystemRunning = false
 	self.m_IsStatic = nil
 	self.m_ClientTime = 0
@@ -77,14 +79,14 @@ function Time:OnLevelDestroy()
 end
 
 function Time:RequestTime()
-	print('Request Time')
+	m_Logger:Write('Request Time')
 	NetEvents:Send('TimeServer:PlayerRequest')
 end
 
 function Time:RemoveTime()
 	self:ResetForcedValues()
 	self:RegisterVars()
-	print("Reset Time System")
+	m_Logger:Write("Reset Time System")
 end
 
 function Time:ServerSync(p_ServerDayTime, p_TotalServerTime)
@@ -143,7 +145,7 @@ end
 function Time:SetCloudSpeed()
 	if VEM_CONFIG.DN_CHANGE_CLOUDS_SPEED_BASED_ON_DAY_LENGTH then
 		self.m_CloudSpeed = 1 / (self.m_TotalDayLength / 60 * 0.5)
-		print('Set Cloud Speed = ' .. tostring(self.m_CloudSpeed))
+		m_Logger:Write('Set Cloud Speed = ' .. tostring(self.m_CloudSpeed))
 	end
 end
 
@@ -184,7 +186,7 @@ function Time:ResetForcedValues()
 		end
 
 		local s_SunRotationY = l_Preset[2]
-		print(" - " .. tostring(s_ID) .. " (sun: " .. tostring(s_SunRotationY) .. ")")
+		m_Logger:Write(" - " .. tostring(s_ID) .. " (sun: " .. tostring(s_SunRotationY) .. ")")
 	end
 end
 
@@ -215,10 +217,10 @@ function Time:Add(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 	end
 
 	local s_Types = {'Dynamic', 'DefaultDynamic'}
-	print("Searching for dynamic presets:")
+	m_Logger:Write("Searching for dynamic presets:")
 
 	for _, l_Type in pairs(s_Types) do
-		print("Found for Type: " .. l_Type)
+		m_Logger:Write("Found for Type: " .. l_Type)
 		-- Get all dynamic presets
 		-- (if no Dynamic presets, DefaultDynamic presets will be loaded)
 		if #self.m_SortedDynamicPresetsTable < 2 then
@@ -238,7 +240,7 @@ function Time:Add(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 								s_SunRotationY = 360 - s_SunRotationY
 							end 
 
-							print(" - " .. tostring(l_ID) .. " (sun: " .. tostring(s_SunRotationY) .. ")")
+							m_Logger:Write(" - " .. tostring(l_ID) .. " (sun: " .. tostring(s_SunRotationY) .. ")")
 
 							table.insert(self.m_SortedDynamicPresetsTable, {l_ID, s_SunRotationY})
 						end
@@ -252,7 +254,7 @@ function Time:Add(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 	table.sort(self.m_SortedDynamicPresetsTable, function(a,b) return tonumber(a[2]) < tonumber(b[2]) end)
 
 	-- Set Priorities
-	print("Sorted dynamic presets:")
+	m_Logger:Write("Sorted dynamic presets:")
 	for l_Index, l_Preset in ipairs(self.m_SortedDynamicPresetsTable) do
 		local s_ID = l_Preset[1]
 		g_VEManagerClient.m_Presets[s_ID]["ve"].priority = l_Index + 10
@@ -302,14 +304,14 @@ function Time:Add(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 		end
 
 		local s_SunRotationY = l_Preset[2]
-		print(" - " .. tostring(s_ID) .. " (sun: " .. tostring(s_SunRotationY) .. " deg)")
+		m_Logger:Write(" - " .. tostring(s_ID) .. " (sun: " .. tostring(s_SunRotationY) .. " deg)")
 	end
 
 	-- Save dayLength in Class (minutes -> seconds)
 	self.m_TotalDayLength = p_LengthOfDayInSeconds
-	print('[Time-Client]: Length of Day: ' .. self.m_TotalDayLength .. ' Seconds')
+	m_Logger:Write('[Time-Client]: Length of Day: ' .. self.m_TotalDayLength .. ' Seconds')
 	self.m_ClientTime = p_StartingTime
-	print('[Time-Client]: Starting at Time: ' .. p_StartingTime / 3600 / (self.m_TotalDayLength / 86000) .. ' Hours ('.. p_StartingTime ..' Seconds)')
+	m_Logger:Write('[Time-Client]: Starting at Time: ' .. p_StartingTime / 3600 / (self.m_TotalDayLength / 86000) .. ' Hours ('.. p_StartingTime ..' Seconds)')
 
 	-- Update sun & clouds
 	self:UpdateSunPosition(self.m_ClientTime)
@@ -336,7 +338,7 @@ function Time:Add(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 
 	if p_IsStatic ~= true then
 		self.m_SystemRunning = true
-		print("Time System Activated")
+		m_Logger:Write("Time System Activated")
 	end
 
 end
@@ -349,7 +351,7 @@ function Time:Run()
 	end
 
 	if self.m_ClientTime == nil then
-		print("Nil ClientTime: " .. self.m_ClientTime)
+		m_Logger:Write("Nil ClientTime: " .. self.m_ClientTime)
 		return
 	end
 

@@ -1,7 +1,10 @@
 class "CinetoolsServer"
 
+local m_Logger = Logger("CinetoolsServer", false)
+
+
 function CinetoolsServer:__init()
-	print('Initializing Cinetools-Server')
+	m_Logger:Write('Initializing Cinetools-Server')
 	self:RegisterVars()
 	self:RegisterEvents()
 end
@@ -9,12 +12,12 @@ end
 
 function CinetoolsServer:RegisterVars()
 	-- Initialise variables
-	print('[Cinetools-Server]: Registered Vars')
+	m_Logger:Write('[Cinetools-Server]: Registered Vars')
 end
 
 
 function CinetoolsServer:RegisterEvents()
-	print('[Cinetools-Server]: Registered Events')
+	m_Logger:Write('[Cinetools-Server]: Registered Events')
     self.m_DataClientToServer = NetEvents:Subscribe('CinematicTools:CollaborationData', self, self.SendToClients)
 	self.m_ColorCorrectionChange = NetEvents:Subscribe('CinematicTools:ColorCorrection', self, self.ChangeColorCorrection)
 
@@ -25,7 +28,7 @@ end
 
 
 function CinetoolsServer:SendToClients(p_Player, p_Path, p_Value)
-	print('Received Collab Data: .. ' .. p_Path .. ' with Value: ' .. tostring(p_Value))
+	m_Logger:Write('Received Collab Data: .. ' .. p_Path .. ' with Value: ' .. tostring(p_Value))
     NetEvents:Broadcast('CinematicTools:DataToClient', p_Path, p_Value, true)
 end
 

@@ -1,14 +1,17 @@
 class "TimeServer"
 
+local m_Logger = Logger("TimeServer", false)
+
+
 function TimeServer:__init()
-	print('Initializing Time-Server')
+	m_Logger:Write('Initializing Time-Server')
 	self:RegisterVars()
 	self:RegisterEvents()
 end
 
 function TimeServer:RegisterVars()
 	-- Initialise variables
-	print('[Time-Server]: Registered Vars')
+	m_Logger:Write('[Time-Server]: Registered Vars')
 	self.m_ServerDayTime = 0.0
 	self.m_TotalServerTime = 0.0
 	self.m_EngineUpdateTimer = 0.0
@@ -20,7 +23,7 @@ function TimeServer:RegisterVars()
 end
 
 function TimeServer:RegisterEvents()
-	print('[Time-Server]: Registered Events')
+	m_Logger:Write('[Time-Server]: Registered Events')
 	Events:Subscribe('TimeServer:AddTime', self, self.AddTime)
 	NetEvents:Subscribe('TimeServer:AddTimeNet', self, self.AddTimeViaNet)
 	Events:Subscribe('TimeServer:Pause', self, self.PauseContinue)
@@ -59,7 +62,7 @@ function TimeServer:AddTime(p_StartingTime, p_LengthOfDayInMinutes)
 		self.m_IsStatic = true
 	end
 	
-	print('[Time-Server]: Received new time (Starting Time, Length of Day): ' .. p_StartingTime .. 'h, '.. self.m_TotalDayLength .. 'sec')
+	m_Logger:Write('[Time-Server]: Received new time (Starting Time, Length of Day): ' .. p_StartingTime .. 'h, '.. self.m_TotalDayLength .. 'sec')
 
 	NetEvents:Broadcast('VEManager:AddTimeToClient', self.m_ServerDayTime, self.m_IsStatic, self.m_TotalDayLength)
 	self.m_SystemRunning = true
@@ -83,7 +86,7 @@ function TimeServer:Run(p_DeltaTime, p_SimulationDeltaTime)
 		self:Broadcast(self.m_ServerDayTime, self.m_TotalServerTime)
 
 		if self.m_ServerDayTime >= self.m_TotalDayLength then
-			print('[Time-Server]: New day cycle')
+			m_Logger:Write('[Time-Server]: New day cycle')
 			self.m_ServerDayTime = 0
 		end
 	end
@@ -91,8 +94,8 @@ end
 
 function TimeServer:OnPlayerRequest(player)
 	if self.m_SystemRunning == true or self.m_IsStatic == true then
-		print('[Time-Server]: Received Request by Player')
-		print('[Time-Server]: Calling Sync Broadcast')
+		m_Logger:Write('[Time-Server]: Received Request by Player')
+		m_Logger:Write('[Time-Server]: Calling Sync Broadcast')
 		NetEvents:SendTo('VEManager:AddTimeToClient', player, self.m_ServerDayTime, self.m_IsStatic, self.m_TotalDayLength)
 	end
 end
@@ -105,7 +108,7 @@ end
 function TimeServer:PauseContinue()
 	-- Pause or Continue time
 	self.m_SystemRunning = not self.m_SystemRunning
-	print('[Time-Server]: Time system running: ' .. tostring(self.m_SystemRunning))
+	m_Logger:Write('[Time-Server]: Time system running: ' .. tostring(self.m_SystemRunning))
 	NetEvents:Broadcast('ClientTime:Pause', self.m_SystemRunning)
 end
 
@@ -132,31 +135,31 @@ function TimeServer:ChatCommands(p_Player, recipientMask, message)
 			duration = 0.5
 		end
 
-		print('[Time-Server]: Time Event called by ' .. p_Player.name)
+		m_Logger:Write('[Time-Server]: Time Event called by ' .. p_Player.name)
 		self:AddTime(hour, duration)
 	
 	elseif message == '!setnight' then
-		print('[Time-Server]: Time Event called by ' .. p_Player.name)
+		m_Logger:Write('[Time-Server]: Time Event called by ' .. p_Player.name)
 		self:AddTime(0, nil)
 	
 	elseif message == '!setmorning' then
-		print('[Time-Server]: Time Event called by ' .. p_Player.name)
+		m_Logger:Write('[Time-Server]: Time Event called by ' .. p_Player.name)
 		self:AddTime(9, nil)
 	
 	elseif message == '!setnoon' then
-		print('[Time-Server]: Time Event called by ' .. p_Player.name)
+		m_Logger:Write('[Time-Server]: Time Event called by ' .. p_Player.name)
 		self:AddTime(12, nil)
 	
 	elseif message == '!setafternoon' then
-		print('[Time-Server]: Time Event called by ' .. p_Player.name)
+		m_Logger:Write('[Time-Server]: Time Event called by ' .. p_Player.name)
 		self:AddTime(15, nil)
 	
 	elseif message == '!pausetime' then
-		print('[Time-Server]: Time Pause called by ' .. p_Player.name)
+		m_Logger:Write('[Time-Server]: Time Pause called by ' .. p_Player.name)
 		self:PauseContinue()
 	
 	elseif message == '!disabletime' then
-		print('[Time-Server]: Time Disable called by ' .. p_Player.name)
+		m_Logger:Write('[Time-Server]: Time Disable called by ' .. p_Player.name)
 		self:DisableDynamicCycle()
 	end
 end
