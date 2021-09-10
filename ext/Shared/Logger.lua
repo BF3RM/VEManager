@@ -34,7 +34,7 @@ function Logger:Write(p_Message)
 end
 
 function Logger:WriteTable(p_Table)
-	if not EM_CONFIG.LOGGER_ENABLED then
+	if not VEM_CONFIG.LOGGER_ENABLED then
 		return
 	end
 
