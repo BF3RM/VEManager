@@ -1,6 +1,9 @@
 local Patches = class('Patches')
 local PatchData = require('modules/patchdatatable')
 
+local m_Logger = Logger("Patches", false)
+
+
 function Patches:Components(partition)
     for _, instance in pairs(partition.instances) do
         if instance:Is('MeshAsset') then
@@ -86,7 +89,7 @@ local m_MenuBgGuids = {
 }
 
 function Patches:__init()
-    print("Initializing Patches")
+    m_Logger:Write("Initializing Patches")
 
 	-- Patches based on GUIDs
 	ResourceManager:RegisterInstanceLoadHandler(m_MenuBgGuids.partition, m_MenuBgGuids.instance, self, self.onMenuBgLoaded)
@@ -99,7 +102,7 @@ function Patches:onMenuBgLoaded(p_Instance)
     s_MenuBg:MakeWritable()
     s_MenuBg.priority = 100099
 	
-	print("Menu bg patched")
+	m_Logger:Write("Menu bg patched")
 end
 
 -- Singleton.

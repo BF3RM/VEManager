@@ -1,7 +1,10 @@
 class 'CinematicTools'
 
+local m_Logger = Logger("CinematicTools", false)
+
+
 function CinematicTools:__init()
-	print("Initializing Cinematic Tools")
+	m_Logger:Write("Initializing Cinematic Tools")
 	self:RegisterVars()
 	self:RegisterEvents()
 	self:CreateGUI()
@@ -93,9 +96,9 @@ end
 function CinematicTools:GenericCallback(p_Path, p_Value, p_Net)
 	if self.m_CineState == nil then
 		self.m_CineState = self:GetVisualEnvironmentState(self.m_CinePriority)
-		print('CineState Name: ' .. self.m_CineState.entityName)
-		print('CineState ID: ' .. self.m_CineState.stateId)
-		print('CineState Priority: ' .. self.m_CineState.priority)
+		m_Logger:Write('CineState Name: ' .. self.m_CineState.entityName)
+		m_Logger:Write('CineState ID: ' .. self.m_CineState.stateId)
+		m_Logger:Write('CineState Priority: ' .. self.m_CineState.priority)
 		self.m_CineState.excluded = false
 	end
 
@@ -122,7 +125,7 @@ function CinematicTools:GenericCallback(p_Path, p_Value, p_Net)
 	VisualEnvironmentManager:SetDirty(true)
 	if p_Net ~= true and self.m_CollaborationEnabled then
 		self:SendForCollaboration(p_Path, p_Value)
-		print('Sending: ' .. p_Path .. ' with Value: ' .. tostring(p_Value))
+		m_Logger:Write('Sending: ' .. p_Path .. ' with Value: ' .. tostring(p_Value))
 	end
 end
 
@@ -134,7 +137,7 @@ end
 -- TODO Automate through typeInfo
 
 function CinematicTools:CreateGUI()
-	print("*Creating GUI for Cinematic Tools")
+	m_Logger:Write("*Creating GUI for Cinematic Tools")
 	-- Sky
 	DebugGUI:Folder("Sky", function ()
 
@@ -1015,7 +1018,7 @@ function CinematicTools:CreateGUI()
 
 		DebugGUI:Button('Apply Texture', function(value)
 			if self.selectedTextureDestination == nil or self.selectedTexture == nil then
-				print('Texture not Valid')
+				m_Logger:Write('Texture not Valid')
 				return
 			end
 			self:GenericCallback(self.selectedTextureDestination, self.selectedTexture)
@@ -1047,7 +1050,7 @@ function CinematicTools:CreateGUI()
 			local s_Rounded = MathUtils:Round(p_Value)
 
 			if s_SyncChangesWithServer == true and s_Enabled == true then 
-				print('Dispatching Time: ' .. p_Value)
+				m_Logger:Write('Dispatching Time: ' .. p_Value)
 
 				if p_Value == self.m_CurrentSyncedTimeValue then
 					return
@@ -1192,7 +1195,7 @@ function CinematicTools:ParseValue(p_Type, p_Value)
 	elseif (p_Type == "Vec4") then -- Vec4
 		return "\"(" .. p_Value.x .. ", " .. p_Value.y .. ", " .. p_Value.z .. ", " .. p_Value.w .. ")\""
 	else
-		print("Unhandled type: " .. p_Type)
+		m_Logger:Write("Unhandled type: " .. p_Type)
 		return nil
 	end
 end

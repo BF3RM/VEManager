@@ -1,5 +1,6 @@
 class 'VEManagerClient'
 
+local m_Logger = Logger("VEManagerClient", false)
 -- Default Dynamic day-night cycle Presets
 night = require "Presets/DefaultNight"
 morning = require "Presets/DefaultMorning"
@@ -7,8 +8,9 @@ noon = require "Presets/DefaultNoon"
 evening = require "Presets/DefaultEvening"
 ve_cinematic_tools = require "Presets/CustomPreset"
 
+
 function VEManagerClient:__init()
-	print('Initializing VEManagerClient')
+	m_Logger:Write('Initializing VEManagerClient')
 	self:RegisterVars()
 	self:RegisterEvents()
 	self:RegisterModules()
@@ -91,7 +93,7 @@ function VEManagerClient:EnablePreset(p_ID)
 		return
 	end
 
-	print("Enabling preset: " .. tostring(p_ID))
+	m_Logger:Write("Enabling preset: " .. tostring(p_ID))
 	self.m_Presets[p_ID]["logic"].visibility = 1
 	self.m_Presets[p_ID]["ve"].visibility = 1
 	self.m_Presets[p_ID]["ve"].enabled = true
@@ -104,7 +106,7 @@ function VEManagerClient:DisablePreset(p_ID)
 		return
 	end
 
-	print("Disabling preset: " .. tostring(p_ID))
+	m_Logger:Write("Disabling preset: " .. tostring(p_ID))
 	self.m_Presets[p_ID]["logic"].visibility = 1
 	self.m_Presets[p_ID]["ve"].visibility = 0
 	self.m_Presets[p_ID]["ve"].enabled = false
@@ -251,19 +253,19 @@ function VEManagerClient:GetState(...)
 end
 
 function VEManagerClient:InitializePresets()
-	print("Spawned Presets:")
+	m_Logger:Write("Spawned Presets:")
 	for l_Index, l_Preset in pairs(self.m_Presets) do
 		l_Preset["entity"] = EntityManager:CreateEntity(l_Preset["logic"], LinearTransform())
 
 		if l_Preset["entity"] == nil then
-			print("- " .. tostring(l_Index) .. ", could not be spawned.")
+			m_Logger:Write("- " .. tostring(l_Index) .. ", could not be spawned.")
 			return
 		end
 
 		l_Preset["entity"]:Init(Realm.Realm_Client, true)
 		VisualEnvironmentManager:SetDirty(true)
 
-		print("- " .. tostring(l_Index))
+		m_Logger:Write("- " .. tostring(l_Index))
 	end
 end
 
@@ -273,7 +275,7 @@ function VEManagerClient:Reload(p_ID)
 end
 
 function VEManagerClient:LoadPresets()
-	print("Loading presets... (Name, Type, Priority)")
+	m_Logger:Write("Loading presets... (Name, Type, Priority)")
 	--Foreach preset
 	for l_Index, l_Preset in pairs(self.m_RawPresets) do
 
@@ -314,7 +316,7 @@ function VEManagerClient:LoadPresets()
 		local s_VE = self:CreateEntity("VisualEnvironmentEntityData")
 		s_VEB.object = s_VE
 
-		print("- " .. l_Preset.Name .. ", " .. l_Preset.Type .. ", " .. tostring(l_Preset.Priority))
+		m_Logger:Write("- " .. l_Preset.Name .. ", " .. l_Preset.Type .. ", " .. tostring(l_Preset.Priority))
 
 		s_VE.enabled = true
 		s_VE.priority = l_Preset.Priority
@@ -363,7 +365,7 @@ function VEManagerClient:LoadPresets()
 							error("\tFound unexpected array") -- TODO: Instead of error (that breaks the code), a continue should be used (unfortunatelly with goto), or set an "errorFound" true/false parameter to true and skip the component addition
 							return
 						elseif s_Type == "TextureAsset" then
-							print("\tTextureAsset is not yet supported.")
+							m_Logger:Write("\tTextureAsset is not yet supported.")
 							s_Value = nil -- Make sure this value is nil so the saved value is not saved
 						else
 							error("\tFound unexpected DataContainer: " .. s_Type) -- TODO: Instead of error (that breaks the code), a continue should be used (unfortunatelly with goto), or set an "errorFound" true/false parameter to true and skip the component addition
@@ -376,7 +378,7 @@ function VEManagerClient:LoadPresets()
 						else
 							local s_Value = self:GetDefaultValue(l_Class, l_Field)
 							if s_Value == nil then
-								print("\tFailed to fetch original value: " .. tostring(l_Class) .. " | " .. tostring(s_FieldName) .. " [1]")
+								m_Logger:Write("\tFailed to fetch original value: " .. tostring(l_Class) .. " | " .. tostring(s_FieldName) .. " [1]")
 								--s_Class[firstToLower(s_FieldName)] = nil -- Crashes
 							else
 								-- print("Setting default value for field " .. s_FieldName .. " of class " .. l_Class .. " | " ..  tostring(s_Value))
@@ -407,7 +409,7 @@ function VEManagerClient:LoadPresets()
 									end
 
 								elseif l_Field.typeInfo.array then
-									print("\tFound unexpected array, ignoring")
+									m_Logger:Write("\tFound unexpected array, ignoring")
 								else
 									-- Its a DataContainer
 									s_Class[firstToLower(s_FieldName)] = _G[s_Type](s_Value)
@@ -421,10 +423,10 @@ function VEManagerClient:LoadPresets()
 						--print("Getting Default Value for: " .. tostring(l_Class) .. " | " .. tostring(s_FieldName))
 						local s_Value = self:GetDefaultValue(l_Class, l_Field)
 						if s_Value == nil then
-							print("\tFailed to fetch original value: " .. tostring(l_Class) .. " | " .. tostring(s_FieldName) .. " [2]")
+							m_Logger:Write("\tFailed to fetch original value: " .. tostring(l_Class) .. " | " .. tostring(s_FieldName) .. " [2]")
 
 							if s_FieldName == "CloudLayer2Texture" then
-								print("\tCloudTexture")
+								m_Logger:Write("\tCloudTexture")
 								s_Class[firstToLower(s_FieldName)] = TextureAsset(_G['g_Stars'])
 							else
 								--s_Class[firstToLower(s_FieldName)] = nil -- Crashes
@@ -455,7 +457,7 @@ function VEManagerClient:LoadPresets()
 								end
 							
 							elseif l_Field.typeInfo.array then
-								print("\tFound unexpected array, ignoring")
+								m_Logger:Write("\tFound unexpected array, ignoring")
 							else
 								-- Its a DataContainer
 								s_Class[firstToLower(s_FieldName)] = _G[s_Type](s_Value)
@@ -474,7 +476,7 @@ function VEManagerClient:LoadPresets()
 	end
 	self:InitializePresets()
 	Events:Dispatch("VEManager:PresetsLoaded")
-	print("Presets loaded")
+	m_Logger:Write("Presets loaded")
 end
 
 
@@ -493,7 +495,7 @@ function VEManagerClient:GetDefaultValue(p_Class, p_Field)
 		if p_Field.typeInfo.name == "Realm" then
 			return Realm.Realm_Client
 		else
-			print("Found unhandled enum, " .. p_Field.typeInfo.name)
+			m_Logger:Write("Found unhandled enum, " .. p_Field.typeInfo.name)
 			return
 		end
 	end
@@ -501,7 +503,7 @@ function VEManagerClient:GetDefaultValue(p_Class, p_Field)
 	local s_States = VisualEnvironmentManager:GetStates()
 
 	for i, s_State in ipairs(s_States) do
-		--print(">>>>>> state:" .. s_State.entityName)
+		--m_Logger:Write(">>>>>> state:" .. s_State.entityName)
 
 		if s_State.entityName == "Levels/Web_Loading/Lighting/Web_Loading_VE" then
 			goto continue
@@ -638,7 +640,7 @@ function VEManagerClient:ParseValue(p_Type, p_Value)
 		local s_Vec = HandleVec(p_Value)
 		return Vec4(tonumber(s_Vec[1]), tonumber(s_Vec[2]), tonumber(s_Vec[3]), tonumber(s_Vec[4]))
 	else
-		print("Unhandled type: " .. p_Type)
+		m_Logger:Write("Unhandled type: " .. p_Type)
 		return nil
 	end
 end
@@ -689,7 +691,7 @@ end
 function dump(o)
 
 	if(o == nil) then
-		print("tried to load jack shit")
+		m_Logger:Write("tried to load jack shit")
 	end
 
 	if type(o) == 'table' then
