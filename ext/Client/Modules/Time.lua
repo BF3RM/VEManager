@@ -57,8 +57,11 @@ function Time:RegisterEvents()
 end
 
 function Time:OnPartitionLoad(p_Partition)
-	Patches:Components(p_Partition)
+	if VEM_CONFIG.DN_APPLY_PATCHES then
+		Patches:Components(p_Partition)
+	end
 
+	-- Apply Stars
 	if p_Partition.guid == Guid('6E5D35D9-D9D5-11DE-ADB5-9D4DBC23632A') then
 		for _, instance in pairs(p_Partition.instances) do
 			if instance.instanceGuid == Guid('32CE96BB-E578-9589-7B11-B670661DF2DF') then
