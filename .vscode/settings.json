@@ -1,0 +1,5 @@
+{
+    "lua.targetVersion": "5.2",
+    "todo-tree.tree.scanMode": "workspace",
+    "todo-tree.regex.regex": "((--|//|#|<!--|;|/\\*|^)\\s*($TAGS)|^\\s*- \\[ \\])"
+}
