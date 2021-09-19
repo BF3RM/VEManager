@@ -20,7 +20,7 @@ end
 
 
 function Patches:MeshAsset(instance)
-    if PatchData.meshs[instance.partition.name] then
+    if PatchData.meshes[instance.partition.name] then
         local mesh = MeshAsset(instance)
 
         for _, value in pairs(mesh.materials) do

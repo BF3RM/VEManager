@@ -23,7 +23,7 @@ local emitters = {
 }
 
 
-local meshs = {
+local meshes = {
     -- MP_Subway
     ['levels/mp_subway/objects/backdrops/mp15_smokepillar_01_mesh'] = true,
     ['levels/mp_subway/objects/backdrops/mp15_smokepillarwhite_01_mesh'] = true,
@@ -162,7 +162,7 @@ local envmaps = {
 
 return {
     emitters = emitters,
-    meshs = meshs,
+    meshes = meshes,
     variations = variations,
     effects = effects,
 }

@@ -1,13 +1,13 @@
 class 'VEManagerClient'
 
 local m_Logger = Logger("VEManagerClient", false)
+
 -- Default Dynamic day-night cycle Presets
 night = require "Presets/DefaultNight"
 morning = require "Presets/DefaultMorning"
 noon = require "Presets/DefaultNoon"
 evening = require "Presets/DefaultEvening"
 ve_cinematic_tools = require "Presets/CustomPreset"
-
 
 function VEManagerClient:__init()
 	m_Logger:Write('Initializing VEManagerClient')
@@ -125,7 +125,7 @@ function VEManagerClient:SetVisibility(p_ID, p_Visibility)
 	self:Reload(p_ID)
 end
 
-function VEManagerClient:UpdateVisibility(p_ID, p_Priority, p_Visibility) -- Jack to APO: These changes directly affect the VE States - while the other one reloads the entity which makes the cycle kill my eyes (on/off/on/off 30 times a sec)
+function VEManagerClient:UpdateVisibility(p_ID, p_Priority, p_Visibility)
 	if self.m_Presets[p_ID] == nil then
 		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(p_ID))
 		return
@@ -604,7 +604,7 @@ end
 
 
 function VEManagerClient:ParseValue(p_Type, p_Value)
-	-- This seperates Vectors. Let's just do it to everything, who cares?
+	-- This separates Vectors. Let's just do it to everything, who cares?
 	if (p_Type == "Boolean") then
 		if(p_Value == "true") then
 			return true
