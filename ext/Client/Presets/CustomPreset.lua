@@ -110,7 +110,7 @@ local table = [[
 	  "SkyColor": "(0.15299999713898, 0.23499999940395, 0.41499999165535)",
 	  "GroundColor": "(0.13500000536442, 0.15399999916553, 0.12099999934435)",
 	  "SkyLightAngleFactor": "1.0",
-	  "SunSpecularScale": "1.0",
+	  "SunSpecularScale": "0.0",
 	  "SkyEnvmapShadowScale": "1.0",
 	  "SunShadowHeightScale": "1.0",
 	  "CloudShadowEnable": "true",
