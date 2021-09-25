@@ -152,39 +152,48 @@ function Time:SetCloudSpeed()
 end
 
 function Time:ResetForcedValues()
+	if #self.m_SortedDynamicPresetsTable < 1 then
+		m_Logger:Write("No modified presets to revert.")
+		return
+	end
+
+	m_Logger:Write("Reverting dynamic presets to default values:")
 	for l_Index, l_Preset in ipairs(self.m_SortedDynamicPresetsTable) do
 		local s_ID = l_Preset[1]
 		
-		g_VEManagerClient.m_Presets[s_ID]["ve"].priority = l_Index + self.m_BaseDynamicPresetPriority -- TODO: reset to initial priorities
-
-		-- Patch Sun Positions
-		for l_Index, l_Class in pairs(g_VEManagerClient.m_Presets[s_ID]["ve"].components) do
+		m_Logger:Write(" - " .. tostring(s_ID) .. " (" .. tostring(l_Index) .. ")")
+		
+		if g_VEManagerClient.m_Presets[s_ID] ~= nil then
+			g_VEManagerClient.m_Presets[s_ID]["ve"].priority = self.m_SavedValuesForReset[l_Index].priority
 			
-			if l_Class.typeInfo.name == "OutdoorLightComponentData" then
-				local s_Class = OutdoorLightComponentData(l_Class)
-				s_Class:MakeWritable()
-				-- Reset values
-				s_Class.sunRotationX = self.m_SavedValuesForReset[l_Index][l_Class.typeInfo.name].sunRotationX
-				s_Class.sunRotationY = self.m_SavedValuesForReset[l_Index][l_Class.typeInfo.name].sunRotationY
+			for _, l_Class in pairs(g_VEManagerClient.m_Presets[s_ID]["ve"].components) do -- Remove patches
+				-- Un-patch Sun Positions
+				if l_Class.typeInfo.name == "OutdoorLightComponentData" then
+					local s_Class = OutdoorLightComponentData(l_Class)
+					s_Class:MakeWritable()
+					-- Reset values
+					s_Class.sunRotationX = self.m_SavedValuesForReset[l_Index][l_Class.typeInfo.name].sunRotationX
+					s_Class.sunRotationY = self.m_SavedValuesForReset[l_Index][l_Class.typeInfo.name].sunRotationY
+				
+				-- Un-patch Star Cloudlayer
+				elseif l_Class.typeInfo.name == "SkyComponentData" then 
+					local s_Class = SkyComponentData(l_Class)
+					s_Class:MakeWritable()
+					-- Reset values
+					s_Class.sunSize = self.m_SavedValuesForReset[l_Index][l_Class.typeInfo.name].sunSize
+					s_Class.sunScale = self.m_SavedValuesForReset[l_Index][l_Class.typeInfo.name].sunScale
+					s_Class.cloudLayer2Altitude = self.m_SavedValuesForReset[l_Index][l_Class.typeInfo.name].cloudLayer2Altitude
+					s_Class.cloudLayer2TileFactor = self.m_SavedValuesForReset[l_Index][l_Class.typeInfo.name].cloudLayer2TileFactor
+					s_Class.cloudLayer2Rotation = self.m_SavedValuesForReset[l_Index][l_Class.typeInfo.name].cloudLayer2Rotation
+					s_Class.cloudLayer2Speed = self.m_SavedValuesForReset[l_Index][l_Class.typeInfo.name].cloudLayer2Speed
+				end
 			end
-
-			-- Patch Star Cloudlayer
-			if l_Class.typeInfo.name == "SkyComponentData" then
-				local s_Class = SkyComponentData(l_Class)
-				s_Class:MakeWritable()
-				-- Reset values
-				s_Class.sunSize = self.m_SavedValuesForReset[l_Index][l_Class.typeInfo.name].sunSize
-				s_Class.sunScale = self.m_SavedValuesForReset[l_Index][l_Class.typeInfo.name].sunScale
-				s_Class.cloudLayer2Altitude = self.m_SavedValuesForReset[l_Index][l_Class.typeInfo.name].cloudLayer2Altitude
-				s_Class.cloudLayer2TileFactor = self.m_SavedValuesForReset[l_Index][l_Class.typeInfo.name].cloudLayer2TileFactor
-				s_Class.cloudLayer2Rotation = self.m_SavedValuesForReset[l_Index][l_Class.typeInfo.name].cloudLayer2Rotation
-				s_Class.cloudLayer2Speed = self.m_SavedValuesForReset[l_Index][l_Class.typeInfo.name].cloudLayer2Speed
-			end
+		else
+			m_Logger:Write("\t- Preset doesn't exist any more.")
 		end
-
-		local s_SunRotationY = l_Preset[2]
-		m_Logger:Write(" - " .. tostring(s_ID) .. " (sun: " .. tostring(s_SunRotationY) .. ")")
 	end
+
+	self.m_SortedDynamicPresetsTable = {}
 end
 
 function Time:PauseContinue(p_SystemRunning)
@@ -204,6 +213,9 @@ function Time:Disable()
 	for l_ID, l_ValueTable in pairs(self.m_SortedDynamicPresetsTable) do
 		g_VEManagerClient:SetVisibility(l_ValueTable[1], 0)
 	end
+
+	-- Reset patched values
+	self:ResetForcedValues()
 end
 
 -- ADD TIME TO MAP
@@ -253,12 +265,16 @@ function Time:Add(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 	m_Logger:Write("Sorted dynamic presets:")
 	for l_Index, l_Preset in ipairs(self.m_SortedDynamicPresetsTable) do
 		local s_ID = l_Preset[1]
+
+		-- Save default values to revert later
+		self.m_SavedValuesForReset[l_Index] = {}
+		self.m_SavedValuesForReset[l_Index].priority = g_VEManagerClient.m_Presets[s_ID]["ve"].priority
+		
 		-- Update preset priority to match it's position in the day-night cycle (morning -> night etc)
 		g_VEManagerClient.m_Presets[s_ID]["ve"].priority = l_Index + self.m_BaseDynamicPresetPriority
 
 		-- Patch Sun Positions
-		for l_Index, l_Class in pairs(g_VEManagerClient.m_Presets[s_ID]["ve"].components) do
-			self.m_SavedValuesForReset[l_Index] = {}
+		for _, l_Class in pairs(g_VEManagerClient.m_Presets[s_ID]["ve"].components) do
 
 			if l_Class.typeInfo.name == "OutdoorLightComponentData" then
 				local s_Class = OutdoorLightComponentData(l_Class)
@@ -270,10 +286,8 @@ function Time:Add(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 				-- Replace values
 				s_Class.sunRotationX = 0.0
 				s_Class.sunRotationY = 0.0
-			end
-
-			-- Patch Star Cloudlayer
-			if l_Class.typeInfo.name == "SkyComponentData" then
+			
+			elseif l_Class.typeInfo.name == "SkyComponentData" then -- Patch Star Cloudlayer
 				--local s_Class = _G[l_Class.typeInfo.name]()
 				local s_Class = SkyComponentData(l_Class)
 				s_Class:MakeWritable()
