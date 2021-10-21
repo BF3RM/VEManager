@@ -104,6 +104,7 @@ local table = [[
         "CloudLayer2AmbientLightIntensity": "1",
         "CloudLayer2Color": "1:1:1:",
         "CloudLayer2AlphaMul": "0.3",
+		"CloudLayer2Texture": "levels/testrange_lighting/sky/sky_07_starlayer_d",
         "StaticEnvmapScale": "0",
         "SkyVisibilityExponent": "1.0",
         "SkyEnvmap8BitTexScale": "5",

@@ -89,7 +89,8 @@ local table = [[
         "CloudLayer2SunLightPower": "0",
         "CloudLayer2AmbientLightIntensity": "0",
         "CloudLayer2Color": "0:0:0:",
-        "CloudLayer2AlphaMul": "0.0"
+        "CloudLayer2AlphaMul": "0.0",
+		"CloudLayer2Texture": "levels/testrange_lighting/sky/sky_07_starlayer_d"
     },
     "SunFlare": {
         "Element1Size": "0.35:0.35:",
