@@ -103,17 +103,21 @@ function CinematicTools:GenericCallback(p_Path, p_Value, p_Net)
 	end
 
 	local s_PathTable = self:GenericSeperator(p_Path, "\\.")
-	--print(s_PathTable)
-	--print(#s_PathTable)
 
+	-- Check if value is already saved
 	if #s_PathTable == 1 and self.m_CineState[s_PathTable[1]] == p_Value then
 		return
 	elseif #s_PathTable == 2 and self.m_CineState[s_PathTable[1]][s_PathTable[2]] == p_Value then
 		return
 	elseif #s_PathTable == 3 and self.m_CineState[s_PathTable[1]][s_PathTable[2]][s_PathTable[3]] == p_Value then
 		return
+	elseif #s_PathTable < 1 or #s_PathTable > 3 then
+		m_Logger:Write('Unsupported number of path categories ( ' .. p_Path .. ' -> ' .. tostring(#s_PathTable) .. ')')
+		return
 	end
-
+	
+	-- Save new value
+	VisualEnvironmentManager:SetDirty(true)
 	if #s_PathTable == 1 then
 		self.m_CineState[s_PathTable[1]] = p_Value
 	elseif #s_PathTable == 2 then
@@ -122,7 +126,15 @@ function CinematicTools:GenericCallback(p_Path, p_Value, p_Net)
 		self.m_CineState[s_PathTable[1]][s_PathTable[2]][s_PathTable[3]] = p_Value
 	end
 
-	VisualEnvironmentManager:SetDirty(true)
+	-- Reload if TextureAsset
+	if p_Value:Is('TextureAsset') then
+		m_Logger:Write('TextureAsset found')
+		-- Reload the VE somehow...
+	end
+
+	m_Logger:Write('Value saved at ' .. p_Path)
+
+	--VisualEnvironmentManager:SetDirty(true)
 	if p_Net ~= true and self.m_CollaborationEnabled then
 		self:SendForCollaboration(p_Path, p_Value)
 		m_Logger:Write('Sending: ' .. p_Path .. ' with Value: ' .. tostring(p_Value))
@@ -1012,11 +1024,42 @@ function CinematicTools:CreateGUI()
 			self.selectedTexture = TextureAsset(ResourceManager:SearchForInstanceByGuid(Guid(p_TextureGUID)))
 		end)
 
+		DebugGUI:Range('Loaded Texture index', {DefValue = 0, Min = 1, Max = 100, Step = 1}, function(p_Value)
+			-- Make sure value is int
+			p_Value = math.floor(p_Value)
+
+			-- Count saved loaded textures
+			local counter = 0
+			for _, l_Value in pairs(g_TextureAssets) do
+				counter = counter + 1
+			end
+			
+			if counter > 0 then
+				-- Find/Select a texture
+				p_Value = math.fmod(p_Value, counter)
+				
+				counter = 0
+				for l_Key, l_Value in pairs(g_TextureAssets) do
+					counter = counter + 1
+					
+					if counter == p_Value then
+						print("Selected Texture index " .. tostring(p_Value) .. " (" .. l_Key .. ")" )
+						self.selectedTexture = TextureAsset(l_Value)
+					end
+				end
+			else
+				print("No loaded textures have been saved!" )
+			end
+		end)
+
+		self.selectedTextureDestination = 'sky.panoramicTexture' -- Default value
 		DebugGUI:Text('Texture Destination', 'sky.panoramicTexture', function(p_Destination)
 			self.selectedTextureDestination = p_Destination
 		end)
 
-		DebugGUI:Button('Apply Texture', function(value)
+		DebugGUI:Button('Apply Texture', function(p_Value)
+			print(self.selectedTextureDestination)
+			print(self.selectedTexture)
 			if self.selectedTextureDestination == nil or self.selectedTexture == nil then
 				m_Logger:Write('Texture not Valid')
 				return

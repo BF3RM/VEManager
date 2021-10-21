@@ -535,7 +535,6 @@ function VEManagerClient:OnUpdateInput(p_Delta, p_SimulationDelta)
 	if VEM_CONFIG.DEV_ENABLE_TEST_KEYS then
 
 		if InputManager:WentKeyDown(VEM_CONFIG.DEV_SHOW_HIDE_CINEMATIC_TOOLS_KEY) then
-
 			if g_CinematicTools.m_Visible == true then 
 				g_CinematicTools:HideUI()
 			else
@@ -602,8 +601,8 @@ end
 
 function VEManagerClient:GetSavedTexture(p_Value)
 	-- Check if Texture has been saved
-	if _G['g_textureAssets'][p_Value:lower()] then
-		return TextureAsset(_G['g_textureAssets'][p_Value:lower()])
+	if _G['g_TextureAssets'][p_Value:lower()] then
+		return TextureAsset(_G['g_TextureAssets'][p_Value:lower()])
 	end
 
 	return

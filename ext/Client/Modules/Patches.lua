@@ -8,7 +8,7 @@ local m_MenuBgGuids = {
 	instance = Guid("F26B7ECE-A71D-93AC-6C49-B6223BF424D6", "D")
 }
 
-g_textureAssets = {}
+g_TextureAssets = {}
 
 function Patches:__init()
 	m_Logger:Write("Initializing Patches")
@@ -113,7 +113,7 @@ function Patches:LogComponents(p_Partition)
 			
 			m_Logger:Write("Loaded TextureAsset: " .. name)
 			-- Save texture in the list
-			g_textureAssets[name] = p_Partition.primaryInstance
+			g_TextureAssets[name] = p_Partition.primaryInstance
 		end
 	end
 end
