@@ -60,6 +60,9 @@ function Time:OnPartitionLoad(p_Partition)
 		Patches:Components(p_Partition)
 	end
 
+	-- Log Sky & Lighting Textures
+	Patches:LogComponents(p_Partition)
+
 	-- Apply Stars on skybox
 	if p_Partition.guid == Guid('6E5D35D9-D9D5-11DE-ADB5-9D4DBC23632A') then
 		for _, instance in pairs(p_Partition.instances) do

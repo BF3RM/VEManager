@@ -293,7 +293,7 @@ function VEManagerClient:LoadPresets()
 		else
 			l_Preset.Priority = tonumber(l_Preset.Priority)
 			-- Restrict using day-night cycle priorities
-			-- TODO: This should be somehow adjusted tot he new dynamic system
+			-- TODO: This should be somehow adjusted to the new dynamic system
 			if l_Preset.Priority >= 11 and l_Preset.Priority <= 14 then
 				l_Preset.Priority = l_Preset.Priority + 5
 			end
@@ -332,8 +332,7 @@ function VEManagerClient:LoadPresets()
 
 				-- Create class and add it to the VE entity.
 				local s_Class =  _G[l_Class.."ComponentData"]()
-				-- print("CLASS:")
-				-- print(l_Class)
+				
 				s_Class.excluded = false
 				s_Class.isEventConnectionTarget = 3
 				s_Class.isPropertyConnectionTarget = 3
@@ -352,87 +351,56 @@ function VEManagerClient:LoadPresets()
 					-- Get type
 					local s_Type = l_Field.typeInfo.name --Boolean, Int32, Vec3 etc.
 					-- print("Field: " .. tostring(s_FieldName) .. " | " .. " Type: " .. tostring(s_Type))
+					
+					-- Initialize value
+					local s_Value = nil
 
 					-- If the preset contains that field
 					if l_Preset[l_Class][s_FieldName] ~= nil then
-						local s_Value
-
+						
 						if IsBasicType(s_Type) then
 							s_Value = self:ParseValue(s_Type, l_Preset[l_Class][s_FieldName])
+						
 						elseif l_Field.typeInfo.enum then
 							s_Value = tonumber(l_Preset[l_Class][s_FieldName])
-						elseif l_Field.typeInfo.array then
-							error("\tFound unexpected array") -- TODO: Instead of error (that breaks the code), a continue should be used (unfortunatelly with goto), or set an "errorFound" true/false parameter to true and skip the component addition
-							return
+						
 						elseif s_Type == "TextureAsset" then
-							m_Logger:Write("\tTextureAsset is not yet supported.")
-							s_Value = nil -- Make sure this value is nil so the saved value is not saved
+							s_Value = self:GetSavedTexture(l_Preset[l_Class][s_FieldName])
+							if s_Value == nil then
+								m_Logger:Write("\t- TextureAsset has not been saved (" .. l_Preset[l_Class][s_FieldName] .. " | " .. tostring(l_Class) .. " | " .. tostring(s_FieldName) .. ")")
+							end
+						
+						elseif l_Field.typeInfo.array then
+							error("\t- Found unexpected array") -- TODO: Instead of error (that breaks the code), a continue should be used (unfortunately with goto), or set an "errorFound" true/false parameter to true and skip the component addition
+							return
+						
 						else
-							error("\tFound unexpected DataContainer: " .. s_Type) -- TODO: Instead of error (that breaks the code), a continue should be used (unfortunatelly with goto), or set an "errorFound" true/false parameter to true and skip the component addition
+							error("\t- Found unexpected DataContainer: " .. s_Type) -- TODO: Instead of error (that breaks the code), a continue should be used (unfortunately with goto), or set an "errorFound" true/false parameter to true and skip the component addition
 							return
 						end
-
+						
+						-- Set value
 						if s_Value ~= nil then
 							s_Class[firstToLower(s_FieldName)] = s_Value
-
-						else
-							local s_Value = self:GetDefaultValue(l_Class, l_Field)
-							if s_Value == nil then
-								m_Logger:Write("\tFailed to fetch original value: " .. tostring(l_Class) .. " | " .. tostring(s_FieldName) .. " [1]")
-								--s_Class[firstToLower(s_FieldName)] = nil -- Crashes
-							else
-								-- print("Setting default value for field " .. s_FieldName .. " of class " .. l_Class .. " | " ..  tostring(s_Value))
-								if IsBasicType(s_Type) then
-									s_Class[firstToLower(s_FieldName)] = self:ParseValue(s_Type, s_Value)
-
-								elseif (l_Field.typeInfo.enum) then
-									s_Class[firstToLower(s_FieldName)] = tonumber(s_Value)
-
-								elseif s_Type == "TextureAsset" then
-
-									if s_FieldName == "PanoramicTexture" then -- TODO: process will be changed later | this works but is dirty (this is how you change textures tho)
-										--s_Class[firstToLower(s_FieldName)] = nil
-										s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
-									elseif s_FieldName == "PanoramicAlphaTexture" then
-										--s_Class[firstToLower(s_FieldName)] = nil
-										s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
-									elseif s_FieldName == "StaticEnvmapTexture" then
-										--s_Class[firstToLower(s_FieldName)] = nil
-										s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
-									elseif s_FieldName == "CloudLayer2Texture" and _G['g_Stars'] ~= nil then
-										s_Class[firstToLower(s_FieldName)] = TextureAsset(_G['g_Stars'])
-									elseif s_FieldName == "texture" then -- fix filmgrain texture
-										s_Class[firstToLower(s_FieldName)] = TextureAsset(ResourceManager:FindInstanceByGuid(Guid'44AF771F-23D2-11E0-9C90-B6CDFDA832F1', Guid('1FD2F223-0137-2A0F-BC43-D974C2BD07B4')))
-									else
-										--print("Added FieldName: " .. s_FieldName)
-										s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
-									end
-
-								elseif l_Field.typeInfo.array then
-									m_Logger:Write("\tFound unexpected array, ignoring")
-								else
-									-- Its a DataContainer
-									s_Class[firstToLower(s_FieldName)] = _G[s_Type](s_Value)
-								end
-
-							end
-
 						end
+					end
+					
+					-- If not in the preset or incorrect value
+					if s_Value == nil then
 
-					else
-						--print("Getting Default Value for: " .. tostring(l_Class) .. " | " .. tostring(s_FieldName))
-						local s_Value = self:GetDefaultValue(l_Class, l_Field)
+						-- Try to get original value
+						-- m_Logger:Write("Setting default value for field " .. s_FieldName .. " of class " .. l_Class .. " | " ..  tostring(s_Value))
+						s_Value = self:GetDefaultValue(l_Class, l_Field)
+
 						if s_Value == nil then
-							m_Logger:Write("\tFailed to fetch original value: " .. tostring(l_Class) .. " | " .. tostring(s_FieldName) .. " [2]")
-
-							if s_FieldName == "CloudLayer2Texture" then
-								m_Logger:Write("\tCloudTexture")
-								s_Class[firstToLower(s_FieldName)] = TextureAsset(_G['g_Stars'])
-							else
-								--s_Class[firstToLower(s_FieldName)] = nil -- Crashes
+							m_Logger:Write("\t- Failed to fetch original value: " .. tostring(l_Class) .. " | " .. tostring(s_FieldName))
+							
+							if s_FieldName == "FilmGrain" then -- fix FilmGrain texture
+								m_Logger:Write("\t\t- Fixing value for field " .. s_FieldName .. " of class " .. l_Class .. " | " ..  tostring(s_Value))
+								s_Class[firstToLower(s_FieldName)] = TextureAsset(ResourceManager:FindInstanceByGuid(Guid'44AF771F-23D2-11E0-9C90-B6CDFDA832F1', Guid('1FD2F223-0137-2A0F-BC43-D974C2BD07B4')))
 							end
 						else
-							-- print("Setting default value for field " .. s_FieldName .. " of class " .. l_Class .. " | " ..  tostring(s_Value))
+							-- Applying original value
 							if IsBasicType(s_Type) then
 								s_Class[firstToLower(s_FieldName)] = s_Value
 							
@@ -440,24 +408,11 @@ function VEManagerClient:LoadPresets()
 								s_Class[firstToLower(s_FieldName)] = tonumber(s_Value)
 							
 							elseif s_Type == "TextureAsset" then
-								if s_FieldName == "PanoramicTexture" then
-									--s_Class[firstToLower(s_FieldName)] = nil
-									s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
-								elseif s_FieldName == "PanoramicAlphaTexture" then
-									--s_Class[firstToLower(s_FieldName)] = nil
-									s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
-								elseif s_FieldName == "StaticEnvmapTexture" then
-									--s_Class[firstToLower(s_FieldName)] = nil
-									s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
-								elseif s_FieldName == "CloudLayer2Texture" and _G['g_Stars'] ~= nil then
-									s_Class[firstToLower(s_FieldName)] = TextureAsset(_G['g_Stars'])
-								else
-								--print("\tAdded FieldName: " .. s_FieldName)
 								s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
-								end
-							
+
 							elseif l_Field.typeInfo.array then
-								m_Logger:Write("\tFound unexpected array, ignoring")
+								m_Logger:Write("\t- Found unexpected array, ignoring")
+							
 							else
 								-- Its a DataContainer
 								s_Class[firstToLower(s_FieldName)] = _G[s_Type](s_Value)
@@ -495,30 +450,29 @@ function VEManagerClient:GetDefaultValue(p_Class, p_Field)
 		if p_Field.typeInfo.name == "Realm" then
 			return Realm.Realm_Client
 		else
-			m_Logger:Write("Found unhandled enum, " .. p_Field.typeInfo.name)
+			m_Logger:Write("\t- Found unhandled enum, " .. p_Field.typeInfo.name)
 			return
 		end
 	end
 
 	local s_States = VisualEnvironmentManager:GetStates()
 
-	for i, s_State in ipairs(s_States) do
-		--m_Logger:Write(">>>>>> state:" .. s_State.entityName)
+	for i, l_State in ipairs(s_States) do
+		--m_Logger:Write(">>>>>> state:" .. l_State.entityName)
 
-		if s_State.entityName == "Levels/Web_Loading/Lighting/Web_Loading_VE" then
+		if l_State.entityName == "Levels/Web_Loading/Lighting/Web_Loading_VE" then
 			goto continue
 		
-		elseif s_State.entityName ~= 'EffectEntity' then
-			local s_Class = s_State[firstToLower(p_Class)] --colorCorrection
+		elseif l_State.entityName ~= 'EffectEntity' then
+			local s_Class = l_State[firstToLower(p_Class)] --colorCorrection
 
 			if s_Class == nil then
 				goto continue
 			end
 
-			-- print("Sending default value: " .. tostring(p_Class) .. " | " .. tostring(p_Field.typeInfo.name) .. " | " .. tostring(s_Class[firstToLower(p_Field.typeInfo.name)]))
+			--print("Sending default value: " .. tostring(p_Class) .. " | " .. tostring(p_Field.typeInfo.name) .. " | " .. tostring(s_Class[firstToLower(p_Field.typeInfo.name)]) .. " (" .. tostring(type(s_Class[firstToLower(p_Field.typeInfo.name)])) .. ")")
 			-- print(tostring(s_Class[firstToLower(p_Field.name)]) .. ' | ' .. tostring(p_Field.typeInfo.name))
 			return s_Class[firstToLower(p_Field.name)] --colorCorrection Contrast
-
 		end
 
 		::continue::
@@ -605,8 +559,8 @@ end
 
 function VEManagerClient:ParseValue(p_Type, p_Value)
 	-- This separates Vectors. Let's just do it to everything, who cares?
-	if (p_Type == "Boolean") then
-		if(p_Value == "true") then
+	if p_Type == "Boolean" then
+		if p_Value == "true" then
 			return true
 		else
 			return false
@@ -628,21 +582,31 @@ function VEManagerClient:ParseValue(p_Type, p_Value)
 			p_Type == "Uint64" then
 		return tonumber(p_Value)
 
-	elseif (p_Type == "Vec2") then -- Vec2
+	elseif p_Type == "Vec2" then -- Vec2
 		local s_Vec = HandleVec(p_Value)
 		return Vec2(tonumber(s_Vec[1]), tonumber(s_Vec[2]))
 
-	elseif (p_Type == "Vec3") then -- Vec3
+	elseif p_Type == "Vec3" then -- Vec3
 		local s_Vec = HandleVec(p_Value)
 		return Vec3(tonumber(s_Vec[1]), tonumber(s_Vec[2]), tonumber(s_Vec[3]))
 
-	elseif (p_Type == "Vec4") then -- Vec4
+	elseif p_Type == "Vec4" then -- Vec4
 		local s_Vec = HandleVec(p_Value)
 		return Vec4(tonumber(s_Vec[1]), tonumber(s_Vec[2]), tonumber(s_Vec[3]), tonumber(s_Vec[4]))
+	
 	else
 		m_Logger:Write("Unhandled type: " .. p_Type)
 		return nil
 	end
+end
+
+function VEManagerClient:GetSavedTexture(p_Value)
+	-- Check if Texture has been saved
+	if _G['g_textureAssets'][p_Value:lower()] then
+		return TextureAsset(_G['g_textureAssets'][p_Value:lower()])
+	end
+
+	return
 end
 
 function h()
