@@ -159,6 +159,8 @@ local envmaps = {
     ['levels/xp5_004/lighting/ve_xp5_004_02'] = true
 }
 
+-- Credit to Rierei for picking out all the paths.
+
 
 return {
     emitters = emitters,

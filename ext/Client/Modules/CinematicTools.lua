@@ -101,8 +101,10 @@ function CinematicTools:GenericCallback(p_Path, p_Value, p_Net)
 		m_Logger:Write('CineState Priority: ' .. self.m_CineState.priority)
 		self.m_CineState.excluded = false
 	end
+	VisualEnvironmentManager:SetDirty(true)
 
 	local s_PathTable = self:GenericSeperator(p_Path, "\\.")
+	--m_Logger:Write(s_PathTable)
 
 	-- Check if value is already saved
 	if #s_PathTable == 1 and self.m_CineState[s_PathTable[1]] == p_Value then
@@ -115,9 +117,10 @@ function CinematicTools:GenericCallback(p_Path, p_Value, p_Net)
 		m_Logger:Write('Unsupported number of path categories ( ' .. p_Path .. ' -> ' .. tostring(#s_PathTable) .. ')')
 		return
 	end
-	
+
 	-- Save new value
 	VisualEnvironmentManager:SetDirty(true)
+
 	if #s_PathTable == 1 then
 		self.m_CineState[s_PathTable[1]] = p_Value
 	elseif #s_PathTable == 2 then
@@ -126,15 +129,33 @@ function CinematicTools:GenericCallback(p_Path, p_Value, p_Net)
 		self.m_CineState[s_PathTable[1]][s_PathTable[2]][s_PathTable[3]] = p_Value
 	end
 
-	-- Reload if TextureAsset
-	if p_Value:Is('TextureAsset') then
+	-- if a TextureAsset - changes have to be made in the datacontainer directly. states don´t seem to support texture changes.
+	-- Check if boolean etc. else :Is() will fail
+	-- TODO: Automatically Detect Path for Loaded Texture
+	if type(p_Value) ~= 'boolean' and type(p_Value) ~= 'number' and type(p_Value) ~= 'string' and p_Value:Is('TextureAsset') then
 		m_Logger:Write('TextureAsset found')
-		-- Reload the VE somehow...
+
+		if s_PathTable[1] == 'sky' then
+			for _, l_Class in pairs(g_VEManagerClient.m_Presets["CinematicTools"]["ve"].components) do
+
+				if l_Class.typeInfo.name == "SkyComponentData" then
+					local s_Class = SkyComponentData(l_Class)
+					s_Class:MakeWritable()
+					s_Class[s_PathTable[2]] = p_Value
+				end
+				m_Logger:Write('Applying New Texture')
+			end
+		else
+			error('Faulty Texture')
+		end
+
+		-- Reload Entity -- TODO: THIS CURRENTLY SOMEHOW MAKES THE STATE UNACESSIBLE. NEEDS A FIX.
+		g_VEManagerClient:Reload('CinematicTools')
 	end
 
 	m_Logger:Write('Value saved at ' .. p_Path)
 
-	--VisualEnvironmentManager:SetDirty(true)
+	VisualEnvironmentManager:SetDirty(true)
 	if p_Net ~= true and self.m_CollaborationEnabled then
 		self:SendForCollaboration(p_Path, p_Value)
 		m_Logger:Write('Sending: ' .. p_Path .. ' with Value: ' .. tostring(p_Value))
@@ -1018,7 +1039,7 @@ function CinematicTools:CreateGUI()
 	end)]]
 
 	-- Textures
-	DebugGUI:Folder('Textures (must be loaded)', function ()
+	DebugGUI:Folder('Textures (BEWARE: EXPERIMENTAL FEATURE - SAVE BEFORE TRYING)', function ()
 
 		DebugGUI:Text('Texture GUID', 'Enter GUID here', function(p_TextureGUID)
 			self.selectedTexture = TextureAsset(ResourceManager:SearchForInstanceByGuid(Guid(p_TextureGUID)))
