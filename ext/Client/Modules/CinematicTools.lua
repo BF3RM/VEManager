@@ -132,7 +132,7 @@ function CinematicTools:GenericCallback(p_Path, p_Value, p_Net)
 	-- if a TextureAsset - changes have to be made in the datacontainer directly. states don´t seem to support texture changes.
 	-- Check if boolean etc. else :Is() will fail
 	-- TODO: Automatically Detect Path for Loaded Texture
-	if type(p_Value) ~= 'boolean' and type(p_Value) ~= 'number' and type(p_Value) ~= 'string' and p_Value:Is('TextureAsset') then
+	if p_Value.typeInfo and p_Value.typeInfo.name == 'TextureAsset' then
 		m_Logger:Write('TextureAsset found')
 
 		if s_PathTable[1] == 'sky' then
@@ -142,9 +142,9 @@ function CinematicTools:GenericCallback(p_Path, p_Value, p_Net)
 					local s_Class = SkyComponentData(l_Class)
 					s_Class:MakeWritable()
 					s_Class[s_PathTable[2]] = p_Value
+					m_Logger:Write('Applying New Texture')
 				end
 			end
-			m_Logger:Write('Applying New Texture')
 		else
 			error('Faulty Texture')
 		end
