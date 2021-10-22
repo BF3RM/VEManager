@@ -143,8 +143,8 @@ function CinematicTools:GenericCallback(p_Path, p_Value, p_Net)
 					s_Class:MakeWritable()
 					s_Class[s_PathTable[2]] = p_Value
 				end
-				m_Logger:Write('Applying New Texture')
 			end
+			m_Logger:Write('Applying New Texture')
 		else
 			error('Faulty Texture')
 		end
