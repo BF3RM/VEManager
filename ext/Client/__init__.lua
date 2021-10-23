@@ -52,7 +52,7 @@ function VEManagerClient:RegisterVars()
 end
 
 function VEManagerClient:RegisterEvents()
-	self.m_OnUpdateInputEvent = Events:Subscribe('Client:UpdateInput', self, self.OnUpdateInput)
+	Events:Subscribe('Client:UpdateInput', self, self.OnUpdateInput)
 	Events:Subscribe('Level:Loaded', self, self.OnLevelLoaded)
 	Events:Subscribe('Level:Destroy', self, self.OnLevelDestroy)
 
@@ -66,10 +66,13 @@ function VEManagerClient:RegisterEvents()
 	Events:Subscribe('VEManager:FadeOut', self, self.FadeOut)
 	Events:Subscribe('VEManager:Lerp', self, self.Lerp)
 	Events:Subscribe('VEManager:Crossfade', self, self.Crossfade)
+
+	-- Events from server
+	NetEvents:Subscribe('VEManager:EnablePreset', self, self.EnablePreset)
 end
 
 function VEManagerClient:RegisterModules()
-	easing = require "Modules/Easing"
+	self.m_Easing = require "Modules/Easing"
 	require 'Modules/Time'
 	require '__shared/DebugGUI'
 	require 'DebugGui'
@@ -88,11 +91,8 @@ function VEManagerClient:RegisterPreset(p_ID, p_Preset)
 end
 
 function VEManagerClient:EnablePreset(p_ID)
-	if self.m_Presets[p_ID] == nil then
-		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(p_ID))
-		return
-	end
-
+	self:CheckPresetID(p_ID)
+	
 	m_Logger:Write("Enabling preset: " .. tostring(p_ID))
 	self.m_Presets[p_ID]["logic"].visibility = 1
 	self.m_Presets[p_ID]["ve"].visibility = 1
@@ -101,10 +101,7 @@ function VEManagerClient:EnablePreset(p_ID)
 end
 
 function VEManagerClient:DisablePreset(p_ID)
-	if self.m_Presets[p_ID] == nil then
-		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(p_ID))
-		return
-	end
+	self:CheckPresetID(p_ID)
 
 	m_Logger:Write("Disabling preset: " .. tostring(p_ID))
 	self.m_Presets[p_ID]["logic"].visibility = 1
@@ -114,10 +111,7 @@ function VEManagerClient:DisablePreset(p_ID)
 end
 
 function VEManagerClient:SetVisibility(p_ID, p_Visibility)
-	if self.m_Presets[p_ID] == nil then
-		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(p_ID))
-		return
-	end
+	self:CheckPresetID(p_ID)
 
 	self.m_Presets[p_ID]["logic"].visibility = p_Visibility
 	self.m_Presets[p_ID]["ve"].visibility = p_Visibility
@@ -126,10 +120,7 @@ function VEManagerClient:SetVisibility(p_ID, p_Visibility)
 end
 
 function VEManagerClient:UpdateVisibility(p_ID, p_Priority, p_Visibility)
-	if self.m_Presets[p_ID] == nil then
-		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(p_ID))
-		return
-	end
+	self:CheckPresetID(p_ID)
 
 	if math.abs(self.m_Presets[p_ID]["logic"].visibility - p_Visibility) < self.m_VisibilityUpdateThreshold then
 		return
@@ -151,10 +142,7 @@ function VEManagerClient:UpdateVisibility(p_ID, p_Priority, p_Visibility)
 end
 
 function VEManagerClient:SetSingleValue(p_ID, p_Priority, p_Class, p_Property, p_Value)
-	if self.m_Presets[p_ID] == nil then
-		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(p_ID))
-		return
-	end
+	self:CheckPresetID(p_ID)
 
 	local s_States = VisualEnvironmentManager:GetStates()
 	local s_FixedPriority = 10000000 + p_Priority
@@ -173,20 +161,14 @@ function VEManagerClient:FadeIn(p_ID, p_Time)
 end
 
 function VEManagerClient:FadeOut(p_ID, p_Time)
-	if self.m_Presets[p_ID] == nil then
-		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(p_ID))
-		return
-	end
+	self:CheckPresetID(p_ID)
 
 	local s_VisibilityStart = self.m_Presets[p_ID]["logic"].visibility
 	self:FadeTo(p_ID, s_VisibilityStart, 0, p_Time)
 end
 
 function VEManagerClient:FadeTo(p_ID, p_VisibilityStart, p_VisibilityEnd, p_Time)
-	if self.m_Presets[p_ID] == nil then
-		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(p_ID))
-		return
-	end
+	self:CheckPresetID(p_ID)
 
 	self.m_Presets[p_ID]['time'] = tonumber(p_Time)
 	self.m_Presets[p_ID]['startTime'] = SharedUtils:GetTimeMS()
@@ -197,13 +179,7 @@ end
 
 
 function VEManagerClient:Lerp(p_ID, p_Value, p_Time)
-	if p_ID == nil then
-		error("The preset name provided is nil.")
-		return
-	elseif self.m_Presets[p_ID] == nil then
-		error("There isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(p_ID))
-		return
-	end
+	self:CheckPresetID(p_ID)
 
 	self.m_Presets[p_ID]['time'] = p_Time
 	self.m_Presets[p_ID]['startTime'] = SharedUtils:GetTimeMS()
@@ -211,6 +187,14 @@ function VEManagerClient:Lerp(p_ID, p_Value, p_Time)
 	self.m_Presets[p_ID]['EndValue'] = p_Value
 
 	self.m_Lerping[#self.m_Lerping +1] = p_ID
+end
+
+function VEManagerClient:CheckPresetID(p_ID)
+	if p_ID == nil then
+		error("\nThe preset ID provided is nil.")
+	elseif self.m_Presets[p_ID] == nil then
+		error("\nThere isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(p_ID))
+	end
 end
 
 --[[function VEManagerClient:Crossfade(id1, id2, time)
@@ -513,9 +497,9 @@ function VEManagerClient:UpdateLerp(percentage)
 			transition = self.m_Presets[preset].transition
 		end
 
-		local lerpValue = easing[transition](t,b,c,d)
+		local lerpValue = self.m_Easing[transition](t,b,c,d)
 
-		if(PercentageComplete >= 1 or PercentageComplete < 0) then
+		if PercentageComplete >= 1 or PercentageComplete < 0 then
 			self:SetVisibility(preset, self.m_Presets[preset].EndValue)
 			self.m_Lerping[i] = nil
 		else
@@ -531,11 +515,12 @@ function VEManagerClient:SetLerpPriority(id) -- remove
 end
 
 function VEManagerClient:OnUpdateInput(p_Delta, p_SimulationDelta)
-
+	-- Check if DEV Keys are enabled
 	if VEM_CONFIG.DEV_ENABLE_TEST_KEYS then
 
+		-- Enable DebugUI with Custom Preset
 		if InputManager:WentKeyDown(VEM_CONFIG.DEV_SHOW_HIDE_CINEMATIC_TOOLS_KEY) then
-			if g_CinematicTools.m_Visible == true then 
+			if g_CinematicTools.m_Visible then 
 				g_CinematicTools:HideUI()
 			else
 				g_CinematicTools:ShowUI()

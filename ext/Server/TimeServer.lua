@@ -24,19 +24,19 @@ end
 
 function TimeServer:RegisterEvents()
 	m_Logger:Write('[Time-Server]: Registered Events')
+	
 	Events:Subscribe('TimeServer:AddTime', self, self.AddTime)
 	NetEvents:Subscribe('TimeServer:AddTimeNet', self, self.AddTimeViaNet)
+	
 	Events:Subscribe('TimeServer:Pause', self, self.PauseContinue)
+	
 	Events:Subscribe('TimeServer:Disable', self, self.DisableDynamicCycle)
 	NetEvents:Subscribe('TimeServer:DisableNet', self, self.DisableDynamicCycleViaNet)
+	
 	self.m_EngineUpdateEvent = Events:Subscribe('Engine:Update', self, self.Run)
 	--self.m_LevelLoadedEvent = Events:Subscribe('Level:Loaded', self, self.OnLevelLoaded)
 	self.m_LevelDestroyEvent = Events:Subscribe('Level:Destroy', self, self.OnLevelDestroy)
 	self.m_PlayerRequestEvent = NetEvents:Subscribe('TimeServer:PlayerRequest', self, self.OnPlayerRequest)
-	
-	if VEM_CONFIG.DEV_ENABLE_CHAT_COMMANDS then
-		Events:Subscribe('Player:Chat', self, self.ChatCommands) -- Uncomment to enable chat commands in VEManager
-	end
 end
 
 function TimeServer:OnLevelDestroy()
@@ -123,9 +123,9 @@ function TimeServer:DisableDynamicCycleViaNet()
 end
 
 -- Chat Commands
-function TimeServer:ChatCommands(p_Player, recipientMask, message)
-	if message:match('^!settime') then
-		local hour, duration = message:match('^!settime (%d+%.*%d*) (%d+%.*%d*)')
+function TimeServer:ChatCommands(p_Player, p_RecipientMask, p_Message)
+	if p_Message:match('^!settime') then
+		local hour, duration = p_Message:match('^!settime (%d+%.*%d*) (%d+%.*%d*)')
 
 		if hour == nil then
 			hour = 9
@@ -138,27 +138,27 @@ function TimeServer:ChatCommands(p_Player, recipientMask, message)
 		m_Logger:Write('[Time-Server]: Time Event called by ' .. p_Player.name)
 		self:AddTime(hour, duration)
 	
-	elseif message == '!setnight' then
+	elseif p_Message == '!setnight' then
 		m_Logger:Write('[Time-Server]: Time Event called by ' .. p_Player.name)
 		self:AddTime(0, nil)
 	
-	elseif message == '!setmorning' then
+	elseif p_Message == '!setmorning' then
 		m_Logger:Write('[Time-Server]: Time Event called by ' .. p_Player.name)
 		self:AddTime(9, nil)
 	
-	elseif message == '!setnoon' then
+	elseif p_Message == '!setnoon' then
 		m_Logger:Write('[Time-Server]: Time Event called by ' .. p_Player.name)
 		self:AddTime(12, nil)
 	
-	elseif message == '!setafternoon' then
+	elseif p_Message == '!setafternoon' then
 		m_Logger:Write('[Time-Server]: Time Event called by ' .. p_Player.name)
 		self:AddTime(15, nil)
 	
-	elseif message == '!pausetime' then
+	elseif p_Message == '!pausetime' then
 		m_Logger:Write('[Time-Server]: Time Pause called by ' .. p_Player.name)
 		self:PauseContinue()
 	
-	elseif message == '!disabletime' then
+	elseif p_Message == '!disabletime' then
 		m_Logger:Write('[Time-Server]: Time Disable called by ' .. p_Player.name)
 		self:DisableDynamicCycle()
 	end

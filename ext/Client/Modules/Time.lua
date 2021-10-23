@@ -45,10 +45,10 @@ function Time:RegisterVars()
 end
 
 function Time:RegisterEvents()
-	self.m_PartitionLoadedEvent = Events:Subscribe('Partition:Loaded', self, self.OnPartitionLoad)
-	self.m_LevelLoadEvent = Events:Subscribe('Level:Loaded', self, self.OnLevelLoaded)
-	self.m_LevelDestroyEvent = Events:Subscribe('Level:Destroy', self, self.OnLevelDestroy)
-	self.m_AddTimeToClientEvent = NetEvents:Subscribe('VEManager:AddTimeToClient', self, self.AddTimeToClient)
+	Events:Subscribe('Partition:Loaded', self, self.OnPartitionLoad)
+	Events:Subscribe('Level:Loaded', self, self.OnLevelLoaded)
+	Events:Subscribe('Level:Destroy', self, self.OnLevelDestroy)
+	NetEvents:Subscribe('VEManager:AddTimeToClient', self, self.AddTimeToClient)
 
 	NetEvents:Subscribe('ClientTime:Pause', self, self.PauseContinue)
 	NetEvents:Subscribe('ClientTime:Disable', self, self.Disable)
