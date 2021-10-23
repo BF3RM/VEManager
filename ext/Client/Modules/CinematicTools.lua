@@ -81,7 +81,7 @@ function CinematicTools:GetVisualEnvironmentState(...)
 			state.priority = 1
 		end
 
-		--print(state.priority .. ' | ' .. state.visibility)
+		--m_Logger:Write(state.priority .. ' | ' .. state.visibility)
 
 		for i,priority in pairs(args) do
 			if state.priority == priority then
@@ -1064,12 +1064,12 @@ function CinematicTools:CreateGUI()
 					counter = counter + 1
 
 					if counter == p_Value then
-						print("Selected Texture index " .. tostring(p_Value) .. " (" .. l_Key .. ")" )
+						m_Logger:Write("Selected Texture index " .. tostring(p_Value) .. " (" .. l_Key .. ")" )
 						self.selectedTexture = TextureAsset(l_Value)
 					end
 				end
 			else
-				print("No loaded textures have been saved!" )
+				m_Logger:Write("No loaded textures have been saved!" )
 			end
 		end)
 

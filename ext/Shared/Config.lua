@@ -9,6 +9,7 @@ VEM_CONFIG = {
 	DN_APPLY_PATCHES = true,										-- Applies the needed Patches for Day-Night (removes bright meshes/textures meant for day)
 
 	-- DEV --
+	ADMINS = {"GreatApo", "IllustrisJack"},							-- Players that can use the VEM chat commands
 	DEV_ENABLE_CHAT_COMMANDS = false,								-- Enables the use of VEM Internal Chat Commands
 	DEV_ENABLE_TEST_KEYS = false,									-- Enables the use of VEM Internal Testing Keybinds
 	DEV_SHOW_HIDE_CINEMATIC_TOOLS_KEY = InputDeviceKeys.IDK_F8,		-- The Key that shows/hides the Cinematic Tools

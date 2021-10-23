@@ -101,7 +101,7 @@ function TimeServer:OnPlayerRequest(player)
 end
 
 function TimeServer:Broadcast(p_ServerDayTime, p_TotalServerTime)
-	--print('[Time-Server]: Syncing Players')
+	--m_Logger:Write('[Time-Server]: Syncing Players')
 	NetEvents:BroadcastUnreliableOrdered('TimeServer:Sync', p_ServerDayTime, p_TotalServerTime)
 end
 

@@ -355,7 +355,7 @@ end
 -- ALSO LOOP THIS CODE PLEASE
 function Time:Run()
 	if self.m_SystemRunning ~= true and not self.m_FirstRun then
-		--print("System Running: " .. tostring(self.m_SystemRunning))
+		--m_Logger:Write("System Running: " .. tostring(self.m_SystemRunning))
 		return
 	end
 
@@ -398,8 +398,8 @@ function Time:Run()
 		s_NextPresetSunPosY = self.m_SortedDynamicPresetsTable[s_NextPreset][2]
 	end
 
-	--print("Current preset: " .. tostring(self.m_CurrentPreset))
-	--print("Next preset: " .. tostring(s_NextPreset))
+	--m_Logger:Write("Current preset: " .. tostring(self.m_CurrentPreset))
+	--m_Logger:Write("Next preset: " .. tostring(s_NextPreset))
 
 	-- Calculate visibility factor
 	local s_VisibilityFactor = nil
@@ -426,8 +426,8 @@ function Time:Run()
 		s_CurrentPresetVisibilityFactor = 1 - s_VisibilityFactor
 	end
 
-	--print("Sun/Moon: " .. tostring(s_SunMoonPos) .. " ( " .. self.m_CurrentPreset .. " -> " .. s_NextPreset .. " ), visibility: " .. tostring(s_VisibilityFactor))
-	--print("Visibility Factor: " .. tostring(s_VisibilityFactor))
+	--m_Logger:Write("Sun/Moon: " .. tostring(s_SunMoonPos) .. " ( " .. self.m_CurrentPreset .. " -> " .. s_NextPreset .. " ), visibility: " .. tostring(s_VisibilityFactor))
+	--m_Logger:Write("Visibility Factor: " .. tostring(s_VisibilityFactor))
 
 	for l_Index, l_Preset in ipairs(self.m_SortedDynamicPresetsTable) do
 		local s_ID = l_Preset[1]
@@ -459,7 +459,7 @@ function Time:Run()
 		local s_NextPresetID = self.m_SortedDynamicPresetsTable[s_NextPreset][1]
 		local s_CurrentPresetID = self.m_SortedDynamicPresetsTable[self.m_CurrentPreset][1]
 		
-		print("[" .. tostring(s_h_time) .. "h - sun:" .. tostring(s_SunMoonPos) .. "] " .. tostring(s_CurrentPresetID) .. " (" .. MathUtils:Round(s_CurrentPresetVisibilityFactor*100) .. "%) -> " .. tostring(s_NextPresetID) .. " (" .. MathUtils:Round(s_NextPresetVisibilityFactor*100) .. "%)" )
+		m_Logger:Write("[" .. tostring(s_h_time) .. "h - sun:" .. tostring(s_SunMoonPos) .. "] " .. tostring(s_CurrentPresetID) .. " (" .. MathUtils:Round(s_CurrentPresetVisibilityFactor*100) .. "%) -> " .. tostring(s_NextPresetID) .. " (" .. MathUtils:Round(s_NextPresetVisibilityFactor*100) .. "%)" )
 	end
 end
 

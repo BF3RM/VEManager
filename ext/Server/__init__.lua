@@ -23,10 +23,21 @@ function VEManagerServer:RegisterEvents()
 end
 
 function VEManagerServer:ChatCommands(p_Player, p_RecipientMask, p_Message)
-	m_Logger:Write('Check message')
 	if p_Player == nil or p_Player.name == nil or p_Message == nil then
 		m_Logger:Write('Invalid message')
 	end
+
+	-- Check if admin
+	s_IsAdmin = false
+	for l_Admin in pairs(VEM_CONFIG.ADMINS) do
+		if l_Admin == p_Player then
+			s_IsAdmin = true
+		end
+	end
+
+	if not s_IsAdmin then
+		return
+	then
 
 	-- Check for commands
 	if p_Message == '!vanillapreset' then

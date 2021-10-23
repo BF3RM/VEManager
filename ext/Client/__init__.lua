@@ -2,13 +2,6 @@ class 'VEManagerClient'
 
 local m_Logger = Logger("VEManagerClient", false)
 
--- Default Dynamic day-night cycle Presets
-night = require "Presets/DefaultNight"
-morning = require "Presets/DefaultMorning"
-noon = require "Presets/DefaultNoon"
-evening = require "Presets/DefaultEvening"
-ve_cinematic_tools = require "Presets/CustomPreset"
-
 function VEManagerClient:__init()
 	m_Logger:Write('Initializing VEManagerClient')
 	self:RegisterVars()
@@ -18,11 +11,6 @@ end
 
 function VEManagerClient:RegisterVars()
 	self.m_RawPresets = {}
-	self.m_RawPresets["CinematicTools"] = json.decode(ve_cinematic_tools:GetPreset()) -- TODO: Remove when you can change presets from tools
-	self.m_RawPresets["DefaultNight"] = json.decode(night:GetPreset())
-	self.m_RawPresets["DefaultMorning"] = json.decode(morning:GetPreset())
-	self.m_RawPresets["DefaultNoon"] = json.decode(noon:GetPreset())
-	self.m_RawPresets["DefaultEvening"] = json.decode(evening:GetPreset())
     self.m_SupportedTypes = {"Vec2", "Vec3", "Vec4", "Float32", "Boolean", "Int"}
 	self.m_SupportedClasses = {
 		"CameraParams",
@@ -49,6 +37,19 @@ function VEManagerClient:RegisterVars()
 	self.m_Lerping = {}
 	self.m_Instances = {}
 	self.m_VisibilityUpdateThreshold = 0.000001
+	
+	-- Default Dynamic day-night cycle Presets
+	s_Night = require "Presets/DefaultNight"
+	s_Morning = require "Presets/DefaultMorning"
+	s_Noon = require "Presets/DefaultNoon"
+	s_Evening = require "Presets/DefaultEvening"
+	self.m_RawPresets["DefaultNight"] = json.decode(s_Night:GetPreset())
+	self.m_RawPresets["DefaultMorning"] = json.decode(s_Morning:GetPreset())
+	self.m_RawPresets["DefaultNoon"] = json.decode(s_Noon:GetPreset())
+	self.m_RawPresets["DefaultEvening"] = json.decode(s_Evening:GetPreset())
+	-- Cinematic tools preset
+	s_CinematicTools = require "Presets/CustomPreset"
+	self.m_RawPresets["CinematicTools"] = json.decode(s_CinematicTools:GetPreset()) -- TODO: Remove when you can change presets from tools
 end
 
 function VEManagerClient:RegisterEvents()
@@ -238,6 +239,7 @@ end
 
 function VEManagerClient:InitializePresets()
 	m_Logger:Write("Spawned Presets:")
+
 	for l_Index, l_Preset in pairs(self.m_Presets) do
 		l_Preset["entity"] = EntityManager:CreateEntity(l_Preset["logic"], LinearTransform())
 
@@ -334,7 +336,7 @@ function VEManagerClient:LoadPresets()
 
 					-- Get type
 					local s_Type = l_Field.typeInfo.name --Boolean, Int32, Vec3 etc.
-					-- print("Field: " .. tostring(s_FieldName) .. " | " .. " Type: " .. tostring(s_Type))
+					-- pm_Logger:Write("Field: " .. tostring(s_FieldName) .. " | " .. " Type: " .. tostring(s_Type))
 					
 					-- Initialize value
 					local s_Value = nil
@@ -454,8 +456,8 @@ function VEManagerClient:GetDefaultValue(p_Class, p_Field)
 				goto continue
 			end
 
-			--print("Sending default value: " .. tostring(p_Class) .. " | " .. tostring(p_Field.typeInfo.name) .. " | " .. tostring(s_Class[firstToLower(p_Field.typeInfo.name)]) .. " (" .. tostring(type(s_Class[firstToLower(p_Field.typeInfo.name)])) .. ")")
-			-- print(tostring(s_Class[firstToLower(p_Field.name)]) .. ' | ' .. tostring(p_Field.typeInfo.name))
+			--m_Logger:Write("Sending default value: " .. tostring(p_Class) .. " | " .. tostring(p_Field.typeInfo.name) .. " | " .. tostring(s_Class[firstToLower(p_Field.typeInfo.name)]) .. " (" .. tostring(type(s_Class[firstToLower(p_Field.typeInfo.name)])) .. ")")
+			--m_Logger:Write(tostring(s_Class[firstToLower(p_Field.name)]) .. ' | ' .. tostring(p_Field.typeInfo.name))
 			return s_Class[firstToLower(p_Field.name)] --colorCorrection Contrast
 		end
 
