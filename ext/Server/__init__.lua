@@ -37,7 +37,7 @@ function VEManagerServer:ChatCommands(p_Player, p_RecipientMask, p_Message)
 
 	if not s_IsAdmin then
 		return
-	then
+	end
 
 	-- Check for commands
 	if p_Message == '!vanillapreset' then
