@@ -107,13 +107,14 @@ function Patches:LogComponents(p_Partition)
 	if p_Partition.primaryInstance:Is('TextureAsset') then
 		local name = p_Partition.name:lower()
 		-- Save /sky/ or /Lighting/ textures
-		if string.find(name, "/sky/") or
-			string.find(name, "/lighting/") or
-			string.find(name, "/visualenviroments/") then
-			
-			m_Logger:Write("Loaded TextureAsset: " .. name)
-			-- Save texture in the list
-			g_TextureAssets[name] = p_Partition.primaryInstance
+		for _, l_Parameter in pairs(VEM_CONFIG.DEV_SEARCH_PARAMETERS_FOR_TEXTURES) do
+
+			if string.find(name, l_Parameter) then
+
+				m_Logger:Write("Loaded TextureAsset: " .. name)
+				-- Save texture in the list
+				g_TextureAssets[name] = p_Partition.primaryInstance
+			end
 		end
 	end
 end

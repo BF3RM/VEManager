@@ -149,7 +149,7 @@ function CinematicTools:GenericCallback(p_Path, p_Value, p_Net)
 			error('Faulty Texture')
 		end
 
-		-- Reload Entity -- TODO: THIS CURRENTLY SOMEHOW MAKES THE STATE UNACESSIBLE. NEEDS A FIX.
+		-- Reload Entity
 		g_VEManagerClient:Reload('CinematicTools')
 	end
 
@@ -1054,15 +1054,15 @@ function CinematicTools:CreateGUI()
 			for _, l_Value in pairs(g_TextureAssets) do
 				counter = counter + 1
 			end
-			
+
 			if counter > 0 then
 				-- Find/Select a texture
 				p_Value = math.fmod(p_Value, counter)
-				
+
 				counter = 0
 				for l_Key, l_Value in pairs(g_TextureAssets) do
 					counter = counter + 1
-					
+
 					if counter == p_Value then
 						print("Selected Texture index " .. tostring(p_Value) .. " (" .. l_Key .. ")" )
 						self.selectedTexture = TextureAsset(l_Value)
@@ -1079,8 +1079,7 @@ function CinematicTools:CreateGUI()
 		end)
 
 		DebugGUI:Button('Apply Texture', function(p_Value)
-			print(self.selectedTextureDestination)
-			print(self.selectedTexture)
+
 			if self.selectedTextureDestination == nil or self.selectedTexture == nil then
 				m_Logger:Write('Texture not Valid')
 				return
@@ -1113,7 +1112,7 @@ function CinematicTools:CreateGUI()
 		DebugGUI:Range('Time', {DefValue = 12, Min = 0, Max = 23, Step = 0.5}, function(p_Value)
 			local s_Rounded = MathUtils:Round(p_Value)
 
-			if s_SyncChangesWithServer == true and s_Enabled == true then 
+			if s_SyncChangesWithServer == true and s_Enabled == true then
 				m_Logger:Write('Dispatching Time: ' .. p_Value)
 
 				if p_Value == self.m_CurrentSyncedTimeValue then

@@ -9,11 +9,19 @@ VEM_CONFIG = {
 	DN_APPLY_PATCHES = true,										-- Applies the needed Patches for Day-Night (removes bright meshes/textures meant for day)
 
 	-- DEV --
-	DEV_ENABLE_CHAT_COMMANDS = false,
-	DEV_ENABLE_TEST_KEYS = false,
-	DEV_SHOW_HIDE_CINEMATIC_TOOLS_KEY = InputDeviceKeys.IDK_F8,
-	DEV_LOAD_CINEMATIC_TOOLS = true,
-	DEV_SHOW_CINEMATIC_TOOLS_ON_LEVEL_LOAD = false,
+	DEV_ENABLE_CHAT_COMMANDS = false,								-- Enables the use of VEM Internal Chat Commands
+	DEV_ENABLE_TEST_KEYS = false,									-- Enables the use of VEM Internal Testing Keybinds
+	DEV_SHOW_HIDE_CINEMATIC_TOOLS_KEY = InputDeviceKeys.IDK_F8,		-- The Key that shows/hides the Cinematic Tools
+	DEV_LOAD_CINEMATIC_TOOLS = true,								-- Enables/Disables Cinematic Tools
+	DEV_SHOW_CINEMATIC_TOOLS_ON_LEVEL_LOAD = false,					-- Enables/Disables Automatic Show on Level Load of Cinematic Tools
+	DEV_SEARCH_PARAMETERS_FOR_TEXTURES = {							-- Defines the Search Parameters for the Cinematic Tools Texture Tool
+		"cloud",
+		"panoramic",
+		"alpha",
+		"/visualenviroments/",
+		"/sky/",
+		"/lighting/"
+	},
 
 	-- PRINT --
 	PRINT_DN_TIME_AND_VISIBILITIES = false,							-- Print current time every hour along with the visibilities of the 4 presets
