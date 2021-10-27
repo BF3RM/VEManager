@@ -17,8 +17,8 @@ function Patches:__init()
 	ResourceManager:RegisterInstanceLoadHandler(m_MenuBgGuids.partition, m_MenuBgGuids.instance, self, self.onMenuBgLoaded)
 end
 
-function Patches:Components(p_Instance)
-	for _, l_Instance in pairs(p_Instance.instances) do
+function Patches:Components(p_Partition)
+	for _, l_Instance in pairs(p_Partition.instances) do
 		if l_Instance:Is('MeshAsset') then
 			Patches:MeshAsset(l_Instance)
 		elseif l_Instance:Is('MeshMaterialVariation') then
