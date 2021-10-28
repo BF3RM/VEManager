@@ -452,6 +452,6 @@ return {
   outBounce = outBounce,
   inOutBounce = inOutBounce,
   outInBounce = outInBounce,
-  hasValue = hasValue,
+  tableHasValue = tableHasValue,
   tableGetIndex = tableGetIndex,
 }
