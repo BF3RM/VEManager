@@ -8,6 +8,14 @@ local m_MenuBgGuids = {
 	instance = Guid("F26B7ECE-A71D-93AC-6C49-B6223BF424D6", "D")
 }
 
+local m_ExplosionGuids = {
+    Guid("0A0EB8EE-5849-4C88-B4B9-92A9C2AA6402"),
+    Guid("D9BFDE03-6E38-4638-87BD-C79A34FBE598"),
+    Guid("EB5AFBB4-ED86-421E-88AE-5E0CE8B27C85"),
+    Guid("CD2CD917-DA8F-11DF-98D7-E3FCCF5294D0"),
+    Guid("C2B0B503-7F38-4CF4-833F-0468EE51C7F2"),
+}
+
 g_TextureAssets = {}
 
 function Patches:__init()
@@ -18,19 +26,39 @@ function Patches:__init()
 end
 
 function Patches:Components(p_Partition)
+	
 	for _, l_Instance in pairs(p_Partition.instances) do
 		if l_Instance:Is('MeshAsset') then
 			Patches:MeshAsset(l_Instance)
+		
 		elseif l_Instance:Is('MeshMaterialVariation') then
 			Patches:MeshMaterialVariation(l_Instance)
+		
 		--elseif l_Instance:Is('EffectEntityData') then
 		--    Patches:EffectEntityData(l_Instance)
 		--elseif l_Instance:Is('SkyComponentData') then
 		--    Patches:SkyComponentData(l_Instance)
+		
 		elseif l_Instance:Is('LensFlareEntityData') then
 			Patches:LensFlareEntityData(l_Instance)
+		
 		elseif l_Instance:Is('LocalLightEntityData') then
 			Patches:LightSmoothening(l_Instance)
+
+		end
+	end
+end
+
+function Patches:ExplosionsVE(p_Partition)
+	
+	isExplosionGuid = g_VEManagerClient.m_Easing.tableHasValue(m_ExplosionGuids, p_Partition.guid)
+	
+	for _, l_Instance in pairs(p_Partition.instances) do
+		if isExplosionGuid and l_Instance:Is('ColorCorrectionComponentData') then
+			local s_ComponentData = ColorCorrectionComponentData(l_Instance)
+			s_ComponentData:MakeWritable()
+			s_ComponentData.enable = false
+			m_Logger:Write("*Disable Explosion CC Component")
 		end
 	end
 end

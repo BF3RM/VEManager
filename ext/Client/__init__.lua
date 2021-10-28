@@ -39,10 +39,10 @@ function VEManagerClient:RegisterVars()
 	self.m_VisibilityUpdateThreshold = 0.000001
 	
 	-- Default Dynamic day-night cycle Presets
-	s_Night = require "Presets/DefaultNight"
-	s_Morning = require "Presets/DefaultMorning"
-	s_Noon = require "Presets/DefaultNoon"
-	s_Evening = require "Presets/DefaultEvening"
+	s_Night = require("Presets/DefaultNight")
+	s_Morning = require("Presets/DefaultMorning")
+	s_Noon = require("Presets/DefaultNoon")
+	s_Evening = require("Presets/DefaultEvening")
 	self.m_RawPresets["DefaultNight"] = json.decode(s_Night:GetPreset())
 	self.m_RawPresets["DefaultMorning"] = json.decode(s_Morning:GetPreset())
 	self.m_RawPresets["DefaultNoon"] = json.decode(s_Noon:GetPreset())
@@ -54,6 +54,7 @@ end
 
 function VEManagerClient:RegisterEvents()
 	Events:Subscribe('Client:UpdateInput', self, self.OnUpdateInput)
+	Events:Subscribe('Partition:Loaded', self, self.OnPartitionLoad)
 	Events:Subscribe('Level:Loaded', self, self.OnLevelLoaded)
 	Events:Subscribe('Level:Destroy', self, self.OnLevelDestroy)
 
@@ -218,6 +219,20 @@ end]]
 	Internal functions
 
 ]]
+
+function VEManagerClient:OnPartitionLoad(p_Partition)
+
+	-- Explosion Patches
+	if VEM_CONFIG.PATCH_EXPLOSIONS_COLOR_CORRECTION then
+		g_Patches:ExplosionsVE(p_Partition)
+	end
+
+	-- Log Sky & Lighting Textures
+	g_Patches:LogComponents(p_Partition)
+
+	-- Send to Time (to apply patches)
+	g_Time:OnPartitionLoad(p_Partition)
+end
 
 function VEManagerClient:GetState(...)
 	--Get all visual environment states

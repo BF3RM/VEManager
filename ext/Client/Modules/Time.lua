@@ -45,7 +45,6 @@ function Time:RegisterVars()
 end
 
 function Time:RegisterEvents()
-	Events:Subscribe('Partition:Loaded', self, self.OnPartitionLoad)
 	Events:Subscribe('Level:Loaded', self, self.OnLevelLoaded)
 	Events:Subscribe('Level:Destroy', self, self.OnLevelDestroy)
 	NetEvents:Subscribe('VEManager:AddTimeToClient', self, self.AddTimeToClient)
@@ -60,17 +59,15 @@ function Time:OnPartitionLoad(p_Partition)
 		Patches:Components(p_Partition)
 	end
 
-	-- Log Sky & Lighting Textures
-	Patches:LogComponents(p_Partition)
-
 	-- Apply Stars on skybox
+	--[[
 	if p_Partition.guid == Guid('6E5D35D9-D9D5-11DE-ADB5-9D4DBC23632A') then
 		for _, instance in pairs(p_Partition.instances) do
 			if instance.instanceGuid == Guid('32CE96BB-E578-9589-7B11-B670661DF2DF') then
 				g_Stars = instance
 			end
 		end
-	end
+	end]]
 end
 
 function Time:OnLevelLoaded()
