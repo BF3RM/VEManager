@@ -29,13 +29,15 @@ function VEManagerServer:ChatCommands(p_Player, p_RecipientMask, p_Message)
 
 	-- Check if admin
 	s_IsAdmin = false
-	for l_Admin in pairs(VEM_CONFIG.ADMINS) do
-		if l_Admin == p_Player then
+	for _, l_Admin in pairs(VEM_CONFIG.ADMINS) do
+		if l_Admin == p_Player.name then
 			s_IsAdmin = true
+			break
 		end
 	end
 
 	if not s_IsAdmin then
+		m_Logger:Write(p_Player.name .. ' wants to apply a preset but he is not an Admin')
 		return
 	end
 
