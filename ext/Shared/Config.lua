@@ -16,7 +16,7 @@ VEM_CONFIG = {
 	DEV_ENABLE_CHAT_COMMANDS = true,								-- Enables the use of VEM Internal Chat Commands
 	DEV_ENABLE_TEST_KEYS = true,									-- Enables the use of VEM Internal Testing Keybinds
 	DEV_SHOW_HIDE_CINEMATIC_TOOLS_KEY = InputDeviceKeys.IDK_F8,		-- The Key that shows/hides the Cinematic Tools
-	DEV_LOAD_CINEMATIC_TOOLS = true,								-- Enables/Disables Cinematic Tools (should be loaded always can be called via Event)
+	DEV_LOAD_CINEMATIC_TOOLS = false,								-- Enables/Disables Cinematic Tools (should be loaded always can be called via Event)
 	DEV_SHOW_CINEMATIC_TOOLS_ON_LEVEL_LOAD = false,					-- Enables/Disables Automatic Show on Level Load of Cinematic Tools
 	DEV_SEARCH_PARAMETERS_FOR_TEXTURES = {							-- Defines the Search Parameters for the Cinematic Tools Texture Tool
 		"cloud",
