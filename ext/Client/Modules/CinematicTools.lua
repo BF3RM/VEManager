@@ -132,25 +132,27 @@ function CinematicTools:GenericCallback(p_Path, p_Value, p_Net)
 	-- if a TextureAsset - changes have to be made in the datacontainer directly. states don´t seem to support texture changes.
 	-- Check if boolean etc. else :Is() will fail
 	-- TODO: Automatically Detect Path for Loaded Texture
-	if p_Value.typeInfo and p_Value.typeInfo.name == 'TextureAsset' then
-		m_Logger:Write('TextureAsset found')
+	if type(p_Value) ~= "number" or type(p_Value) ~= "boolean" then
+		if p_Value.typeInfo and p_Value.typeInfo.name == 'TextureAsset' then
+			m_Logger:Write('TextureAsset found')
 
-		if s_PathTable[1] == 'sky' then
-			for _, l_Class in pairs(g_VEManagerClient.m_Presets["CinematicTools"]["ve"].components) do
+			if s_PathTable[1] == 'sky' then
+				for _, l_Class in pairs(g_VEManagerClient.m_Presets["CinematicTools"]["ve"].components) do
 
-				if l_Class.typeInfo.name == "SkyComponentData" then
-					local s_Class = SkyComponentData(l_Class)
-					s_Class:MakeWritable()
-					s_Class[s_PathTable[2]] = p_Value
-					m_Logger:Write('Applying New Texture')
+					if l_Class.typeInfo.name == "SkyComponentData" then
+						local s_Class = SkyComponentData(l_Class)
+						s_Class:MakeWritable()
+						s_Class[s_PathTable[2]] = p_Value
+						m_Logger:Write('Applying New Texture')
+					end
 				end
+			else
+				error('Faulty Texture')
 			end
-		else
-			error('Faulty Texture')
-		end
 
-		-- Reload Entity
-		g_VEManagerClient:Reload('CinematicTools')
+			-- Reload Entity
+			g_VEManagerClient:Reload('CinematicTools')
+		end
 	end
 
 	m_Logger:Write('Value saved at ' .. p_Path)
