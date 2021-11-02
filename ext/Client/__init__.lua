@@ -78,7 +78,10 @@ function VEManagerClient:RegisterModules()
 	require 'Modules/Time'
 	require '__shared/DebugGUI'
 	require 'DebugGui'
-	require 'Modules/CinematicTools'
+
+	if VEM_CONFIG.DEV_LOAD_CINEMATIC_TOOLS then
+		require 'Modules/CinematicTools'
+	end
 end
 
 
