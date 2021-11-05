@@ -25,6 +25,7 @@ end
 function VEManagerServer:ChatCommands(p_Player, p_RecipientMask, p_Message)
 	if p_Player == nil or p_Player.name == nil or p_Message == nil then
 		m_Logger:Write('Invalid message')
+		return
 	end
 
 	-- Check if admin
