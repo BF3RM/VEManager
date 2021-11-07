@@ -44,14 +44,14 @@ end
 
 
 function CinematicTools:ShowUI()
-	g_VEManagerClient:EnablePreset("CinematicTools")
+	g_VEManagerClient:UpdateVisibility("CinematicTools", 10, 1.0)
 	DebugGUI:ShowUI()
 	self.m_Visible = true
 end
 
 
 function CinematicTools:HideUI()
-	g_VEManagerClient:DisablePreset("CinematicTools")
+	g_VEManagerClient:UpdateVisibility("CinematicTools", 10, 0.0)
 	DebugGUI:HideUI()
 	self.m_Visible = false
 end
