@@ -17,6 +17,9 @@ function CinematicTools:RegisterVars()
 	self.m_PresetPriority = nil
 	self.m_CollaborationEnabled = false
 	self.m_Visible = false
+	self.VALUE_STEP = 0.0001
+	self.VALUE_MIN = -100000
+	self.VALUE_MAX = 100000
 end
 
 
@@ -186,59 +189,59 @@ function CinematicTools:CreateGUI()
 			self:GenericCallback("sky.enable", p_Value)
 		end)
 
-		DebugGUI:Range('Sky Brightness', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Sky Brightness', {DefValue = 1, Min = 0, Max = 5, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("sky.brightnessScale", p_Value)
 		end)
 
-		DebugGUI:Range('Sun Size', {DefValue = 0.01, Min = 0, Max = 1, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Sun Size', {DefValue = 0.01, Min = 0, Max = 1, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("sky.sunSize", p_Value)
 		end)
 
-		DebugGUI:Range('Sun Scale', {DefValue = 5, Min = 0, Max = 100, Step = 0.1}, function(p_Value)
+		DebugGUI:Range('Sun Scale', {DefValue = 5, Min = 0, Max = 100, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("sky.sunScale", p_Value)
 		end)
 
-		DebugGUI:Range('Sun Rotation X', {DefValue = 90, Min = 0, Max = 359, Step = 1}, function(p_Value)
+		DebugGUI:Range('Sun Rotation X', {DefValue = 90, Min = 0, Max = 359, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("outdoorLight.sunRotationX", p_Value)
 		end)
 
-		DebugGUI:Range('Sun Rotation Y', {DefValue = 0, Min = 0, Max = 180, Step = 1}, function(p_Value)
+		DebugGUI:Range('Sun Rotation Y', {DefValue = 0, Min = 0, Max = 180, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("outdoorLight.sunRotationY", p_Value)
 		end)
 
-		DebugGUI:Range('Sun Color Red', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Sun Color Red', {DefValue = 1, Min = 0, Max = 5, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("outdoorLight.sunColor.x", p_Value)
 		end)
 
-		DebugGUI:Range('Sun Color Green', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Sun Color Green', {DefValue = 1, Min = 0, Max = 5, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("outdoorLight.sunColor.y", p_Value)
 		end)
 
-		DebugGUI:Range('Sun Color Blue', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Sun Color Blue', {DefValue = 1, Min = 0, Max = 5, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("outdoorLight.sunColor.z", p_Value)
 		end)
 
-		DebugGUI:Range('Panoramic UV Min X', {DefValue = 0, Min = -5, Max = 5, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Panoramic UV Min X', {DefValue = 0, Min = self.VALUE_MIN, Max = self.VALUE_MAX, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("sky.panoramicUVMinX.x", p_Value)
 		end)
 
-		DebugGUI:Range('Panoramic UV Max X', {DefValue = 0, Min = -5, Max = 5, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Panoramic UV Max X', {DefValue = 0, Min = self.VALUE_MIN, Max = self.VALUE_MAX, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("sky.panoramicUVMaxX.x", p_Value)
 		end)
 
-		DebugGUI:Range('Panoramic UV Min Y', {DefValue = 0, Min = -5, Max = 5, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Panoramic UV Min Y', {DefValue = 0, Min = self.VALUE_MIN, Max = self.VALUE_MAX, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("sky.panoramicUVMinY.y", p_Value)
 		end)
 
-		DebugGUI:Range('Panoramic UV Max Y', {DefValue = 0, Min = -5, Max = 5, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Panoramic UV Max Y', {DefValue = 0, Min = self.VALUE_MIN, Max = self.VALUE_MAX, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("sky.panoramicUVMaxY.y", p_Value)
 		end)
 
-		DebugGUI:Range('Panoramic Tile Factor', {DefValue = 0.25, Min = 0, Max = 100, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Panoramic Tile Factor', {DefValue = 0.25, Min = 0, Max = 100, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("sky.panoramicTileFactor", p_Value)
 		end)
 
-		DebugGUI:Range('Panoramic Rotation', {DefValue = 0, Min = 0, Max = 360, Step = 1}, function(p_Value)
+		DebugGUI:Range('Panoramic Rotation', {DefValue = 0, Min = 0, Max = 360, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("sky.panoramicRotation", p_Value)
 		end)
 
@@ -278,119 +281,119 @@ function CinematicTools:CreateGUI()
 	-- Environment
 	DebugGUI:Folder("Environment", function ()
 
-		DebugGUI:Range('Static Envmap Scale', {DefValue = 1, Min = 0, Max = 10, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Static Envmap Scale', {DefValue = 1, Min = 0, Max = 10, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("sky.staticEnvmapScale", p_Value)
 		end)
 
-		DebugGUI:Range('Custom Envmap Scale', {DefValue = 1, Min = 0, Max = 10, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Custom Envmap Scale', {DefValue = 1, Min = 0, Max = 10, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("sky.customEnvmapScale", p_Value)
 		end)
 
-		DebugGUI:Range('Custom Envmap Ambient', {DefValue = 1, Min = 0, Max = 10, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Custom Envmap Ambient', {DefValue = 1, Min = 0, Max = 10, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("sky.customEnvmapAmbient", p_Value)
 		end)
 
-		DebugGUI:Range('Sky Envmap Shadow Scale', {DefValue = 1, Min = 0, Max = 10, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Sky Envmap Shadow Scale', {DefValue = 1, Min = 0, Max = 10, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("outdoorLight.skyEnvmapShadowScale", p_Value)
 		end)
 
-		DebugGUI:Range('Sun Shadow Height Scale', {DefValue = 1, Min = 0, Max = 10, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Sun Shadow Height Scale', {DefValue = 1, Min = 0, Max = 10, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("outdoorLight.sunShadowHeightScale", p_Value)
 		end)
 
-		DebugGUI:Range('Translucency Distortion', {DefValue = 1, Min = 0, Max = 10, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Translucency Distortion', {DefValue = 1, Min = 0, Max = 10, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("sky.translucencyDistortion", p_Value)
 		end)
 
-		DebugGUI:Range('Translucency Ambient', {DefValue = 1, Min = 0, Max = 10, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Translucency Ambient', {DefValue = 1, Min = 0, Max = 10, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("sky.translucencyAmbient", p_Value)
 		end)
 
-		DebugGUI:Range('Ground Color Red (if Enlighten Off)', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Ground Color Red (if Enlighten Off)', {DefValue = 1, Min = 0, Max = 5, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("outdoorLight.groundColor.x", p_Value)
 		end)
 
-		DebugGUI:Range('Ground Color Green (if Enlighten Off)', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Ground Color Green (if Enlighten Off)', {DefValue = 1, Min = 0, Max = 5, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("outdoorLight.groundColor.y", p_Value)
 		end)
 
-		DebugGUI:Range('Ground Color Blue (if Enlighten Off)', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Ground Color Blue (if Enlighten Off)', {DefValue = 1, Min = 0, Max = 5, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("outdoorLight.groundColor.z", p_Value)
 		end)
 
-		DebugGUI:Range('Sky Color Red (if Enlighten Off)', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Sky Color Red (if Enlighten Off)', {DefValue = 1, Min = 0, Max = 5, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("outdoorLight.skyColor.x", p_Value)
 		end)
 
-		DebugGUI:Range('Sky Color Green (if Enlighten Off)', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Sky Color Green (if Enlighten Off)', {DefValue = 1, Min = 0, Max = 5, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("outdoorLight.skyColor.y", p_Value)
 		end)
 
-		DebugGUI:Range('Sky Color Blue (if Enlighten Off)', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Sky Color Blue (if Enlighten Off)', {DefValue = 1, Min = 0, Max = 5, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("outdoorLight.skyColor.z", p_Value)
 		end)
 
-		DebugGUI:Range('Sky Light Angle', {DefValue = 0.85, Min = 0, Max = 5, Step = 0.001}, function(p_Value)
+		DebugGUI:Range('Sky Light Angle', {DefValue = 0.85, Min = 0, Max = 5, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("outdoorLight.skyLightAngleFactor", p_Value)
 		end)
 
-		DebugGUI:Range('Sun Specular Scale', {DefValue = 1, Min = 0, Max = 5, Step = 0.001}, function(p_Value)
+		DebugGUI:Range('Sun Specular Scale', {DefValue = 1, Min = 0, Max = 5, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("outdoorLight.sunSpecularScale", p_Value)
 		end)
 
-		DebugGUI:Range('Cloud Layer 1 Altitude', {DefValue = 500000, Min = 0, Max = 500000, Step = 1}, function(p_Value)
+		DebugGUI:Range('Cloud Layer 1 Altitude', {DefValue = 500000, Min = 0, Max = 500000, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("sky.cloudLayer1Altitude", p_Value)
 		end)
 
-		DebugGUI:Range('Cloud Layer 1 Tile Factor', {DefValue = 1, Min = 0, Max = 5, Step = 0.1}, function(p_Value)
+		DebugGUI:Range('Cloud Layer 1 Tile Factor', {DefValue = 1, Min = 0, Max = 5, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("sky.cloudLayer1TileFactor", p_Value)
 		end)
 
-		DebugGUI:Range('Cloud Layer 1 Rotation', {DefValue = 0, Min = 0, Max = 359, Step = 1}, function(p_Value)
+		DebugGUI:Range('Cloud Layer 1 Rotation', {DefValue = 0, Min = 0, Max = 359, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("sky.cloudLayer1Rotation", p_Value)
 		end)
 
-		DebugGUI:Range('Cloud Layer 1 Speed', {DefValue = VEM_CONFIG.CLOUDS_DEFAULT_SPEED, Min = -1, Max = 1, Step = 0.0001}, function(p_Value)
+		DebugGUI:Range('Cloud Layer 1 Speed', {DefValue = VEM_CONFIG.CLOUDS_DEFAULT_SPEED, Min = self.VALUE_MIN, Max = self.VALUE_MAX, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("sky.cloudLayer1Speed", p_Value)
 		end)
 
-		DebugGUI:Range('Cloud Layer 1 Sunlight Intensity', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Cloud Layer 1 Sunlight Intensity', {DefValue = 1, Min = 0, Max = 5, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("sky.cloudLayer1SunLightIntensity", p_Value)
 		end)
 
-		DebugGUI:Range('Cloud Layer 1 Ambientlight Intensity', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Cloud Layer 1 Ambientlight Intensity', {DefValue = 1, Min = 0, Max = 5, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("sky.cloudLayer1AmbientLightIntensity", p_Value)
 		end)
 
-		DebugGUI:Range('Cloud Layer 1 Alpha Multiplicator', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Cloud Layer 1 Alpha Multiplicator', {DefValue = 1, Min = 0, Max = 5, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("sky.cloudLayer1AlphaMul", p_Value)
 		end)
 
-		DebugGUI:Range('Cloud Layer 2 Altitude', {DefValue = 500000, Min = 0, Max = 500000, Step = 1}, function(p_Value)
+		DebugGUI:Range('Cloud Layer 2 Altitude', {DefValue = 500000, Min = 0, Max = 500000, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("sky.cloudLayer2Altitude", p_Value)
 		end)
 
-		DebugGUI:Range('Cloud Layer 2 Tile Factor', {DefValue = 1, Min = 0, Max = 5, Step = 0.1}, function(p_Value)
+		DebugGUI:Range('Cloud Layer 2 Tile Factor', {DefValue = 1, Min = 0, Max = 5, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("sky.cloudLayer2TileFactor", p_Value)
 		end)
 
-		DebugGUI:Range('Cloud Layer 2 Rotation', {DefValue = 0, Min = 0, Max = 359, Step = 1}, function(p_Value)
+		DebugGUI:Range('Cloud Layer 2 Rotation', {DefValue = 0, Min = 0, Max = 359, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("sky.cloudLayer2Rotation", p_Value)
 		end)
 
-		DebugGUI:Range('Cloud Layer 2 Speed', {DefValue = VEM_CONFIG.CLOUDS_DEFAULT_SPEED, Min = -1, Max = 1, Step = 0.0001}, function(p_Value)
+		DebugGUI:Range('Cloud Layer 2 Speed', {DefValue = VEM_CONFIG.CLOUDS_DEFAULT_SPEED, Min = self.VALUE_MIN, Max = self.VALUE_MAX, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("sky.cloudLayer2Speed", p_Value)
 		end)
 
-		DebugGUI:Range('Cloud Layer 2 Sunlight Intensity', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Cloud Layer 2 Sunlight Intensity', {DefValue = 1, Min = 0, Max = 5, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("sky.cloudLayer2SunLightIntensity", p_Value)
 		end)
 
-		DebugGUI:Range('Cloud Layer 2 Ambientlight Intensity', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Cloud Layer 2 Ambientlight Intensity', {DefValue = 1, Min = 0, Max = 5, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("sky.cloudLayer2AmbientLightIntensity", p_Value)
 		end)
 
-		DebugGUI:Range('Cloud Layer 2 Alpha Multiplicator', {DefValue = 1, Min = 0, Max = 5, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Cloud Layer 2 Alpha Multiplicator', {DefValue = 1, Min = 0, Max = 5, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("sky.cloudLayer2AlphaMul", p_Value)
 		end)
 
@@ -398,19 +401,19 @@ function CinematicTools:CreateGUI()
 			self:GenericCallback("outdoorLight.cloudShadowEnable", p_Value)
 		end)
 
-		DebugGUI:Range('Cloud Shadow Coverage', {DefValue = 1, Min = 0, Max = 5, Step = 0.1}, function(p_Value)
+		DebugGUI:Range('Cloud Shadow Coverage', {DefValue = 1, Min = 0, Max = 5, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("outdoorLight.cloudShadowCoverage", p_Value)
 		end)
 
-		DebugGUI:Range('Cloud Shadow Size', {DefValue = 1, Min = 0, Max = 100, Step = 0.1}, function(p_Value)
+		DebugGUI:Range('Cloud Shadow Size', {DefValue = 1, Min = 0, Max = 100, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("outdoorLight.cloudShadowSize", p_Value)
 		end)
 
-		DebugGUI:Range('Cloud Shadow Speed', {DefValue = VEM_CONFIG.CLOUDS_DEFAULT_SPEED, Min = -1, Max = 1, Step = 0.0001}, function(p_Value)
+		DebugGUI:Range('Cloud Shadow Speed', {DefValue = VEM_CONFIG.CLOUDS_DEFAULT_SPEED, Min = self.VALUE_MIN, Max = self.VALUE_MAX, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("outdoorLight.cloudShadowSpeed", p_Value)
 		end)
 
-		DebugGUI:Range('Cloud Shadow Exponent', {DefValue = 1, Min = 0, Max = 10, Step = 0.1}, function(p_Value)
+		DebugGUI:Range('Cloud Shadow Exponent', {DefValue = 1, Min = 0, Max = 10, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("outdoorLight.cloudShadowExponent", p_Value)
 		end)
 
@@ -423,7 +426,7 @@ function CinematicTools:CreateGUI()
 			self:GenericCallback("enlighten.enable", p_Value)
 		end)
 
-		DebugGUI:Range('Sky Visibility Exponent', {DefValue = 0, Min = 0, Max = 1, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Sky Visibility Exponent', {DefValue = 0, Min = 0, Max = 1, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("sky.skyVisibilityExponent", p_Value)
 		end)
 
@@ -533,43 +536,43 @@ function CinematicTools:CreateGUI()
 			NetEvents:Send('CinematicTools:ColorCorrection', p_Value)
 		end)
 
-		DebugGUI:Range('Brightness Red', {DefValue = 1.0, Min = 0.0, Max = 1.5, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Brightness Red', {DefValue = 1.0, Min = 0.0, Max = 1.5, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("colorCorrection.brightness.x", p_Value)
 		end)
 
-		DebugGUI:Range('Brightness Green', {DefValue = 1.0, Min = 0.0, Max = 1.5, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Brightness Green', {DefValue = 1.0, Min = 0.0, Max = 1.5, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("colorCorrection.brightness.y", p_Value)
 		end)
 
-		DebugGUI:Range('Brightness Blue', {DefValue = 1, Min = 0.0, Max = 1.5, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Brightness Blue', {DefValue = 1, Min = 0.0, Max = 1.5, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("colorCorrection.brightness.z", p_Value)
 		end)
 
-		DebugGUI:Range('Contrast Red', {DefValue = 1.0, Min = 0.0, Max = 1.5, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Contrast Red', {DefValue = 1.0, Min = 0.0, Max = 1.5, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("colorCorrection.contrast.x", p_Value)
 		end)
 
-		DebugGUI:Range('Contrast Green', {DefValue = 1.0, Min = 0.0, Max = 1.5, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Contrast Green', {DefValue = 1.0, Min = 0.0, Max = 1.5, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("colorCorrection.contrast.y", p_Value)
 		end)
 
-		DebugGUI:Range('Contrast Blue', {DefValue = 1.0, Min = 0.0, Max = 1.5, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Contrast Blue', {DefValue = 1.0, Min = 0.0, Max = 1.5, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("colorCorrection.contrast.z", p_Value)
 		end)
 
-		DebugGUI:Range('Saturation Red', {DefValue = 1.0, Min = 0.0, Max = 1.5, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Saturation Red', {DefValue = 1.0, Min = 0.0, Max = 1.5, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("colorCorrection.saturation.x", p_Value)
 		end)
 
-		DebugGUI:Range('Saturation Green', {DefValue = 1.0, Min = 0.0, Max = 1.5, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Saturation Green', {DefValue = 1.0, Min = 0.0, Max = 1.5, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("colorCorrection.saturation.y", p_Value)
 		end)
 
-		DebugGUI:Range('Saturation Blue', {DefValue = 1.0, Min = 0.0, Max = 1.5, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Saturation Blue', {DefValue = 1.0, Min = 0.0, Max = 1.5, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("colorCorrection.saturation.z", p_Value)
 		end)
 
-		DebugGUI:Range('Hue', {DefValue = 0, Min = -1, Max = 1, Step = 0.001}, function(p_Value)
+		DebugGUI:Range('Hue', {DefValue = 0, Min = self.VALUE_MIN, Max = self.VALUE_MAX, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("colorCorrection.hue", p_Value)
 		end)
 
@@ -578,35 +581,35 @@ function CinematicTools:CreateGUI()
 	-- Tonemap
 	DebugGUI:Folder("Tonemap", function ()
 
-		DebugGUI:Range('Method', {DefValue = 2.0, Min = 0.0, Max = 3.0, Step = 1.0}, function(p_Value)
+		DebugGUI:Range('Method', {DefValue = 2.0, Min = 0.0, Max = 3.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("tonemap.tonemapMethod", p_Value)
 		end)
 
-		DebugGUI:Range('Minimum Exposure', {DefValue = 0.0, Min = 0.0, Max = 10.0, Step = 0.1}, function(p_Value)
+		DebugGUI:Range('Minimum Exposure', {DefValue = 0.0, Min = 0.0, Max = 10.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("tonemap.minExposure", p_Value)
 		end)
 
-		DebugGUI:Range('Maximum Exposure', {DefValue = 1.0, Min = 0.0, Max = 10.0, Step = 0.1}, function(p_Value)
+		DebugGUI:Range('Maximum Exposure', {DefValue = 1.0, Min = 0.0, Max = 10.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("tonemap.maxExposure", p_Value)
 		end)
 
-		DebugGUI:Range('Middle Gray ', {DefValue = 1.0, Min = 0.0, Max = 1.0, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Middle Gray ', {DefValue = 1.0, Min = 0.0, Max = 1.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("tonemap.middleGray", p_Value)
 		end)
 
-		DebugGUI:Range('Exposure Adjust Time', {DefValue = 1.0, Min = 0.0, Max = 50.0, Step = 0.1}, function(p_Value)
+		DebugGUI:Range('Exposure Adjust Time', {DefValue = 1.0, Min = 0.0, Max = 50.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("tonemap.exposureAdjustTime", p_Value)
 		end)
 
-		DebugGUI:Range('Bloom Scale Red', {DefValue = 0.2, Min = 0.0, Max = 5.0, Step = 0.05}, function(p_Value)
+		DebugGUI:Range('Bloom Scale Red', {DefValue = 0.2, Min = 0.0, Max = 5.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("tonemap.bloomScale.x", p_Value)
 		end)
 
-		DebugGUI:Range('Bloom Scale Green', {DefValue = 0.2, Min = 0.0, Max = 5.0, Step = 0.05}, function(p_Value)
+		DebugGUI:Range('Bloom Scale Green', {DefValue = 0.2, Min = 0.0, Max = 5.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("tonemap.bloomScale.y", p_Value)
 		end)
 
-		DebugGUI:Range('Bloom Scale Blue', {DefValue = 0.2, Min = 0.0, Max = 5, Step = 0.05}, function(p_Value)
+		DebugGUI:Range('Bloom Scale Blue', {DefValue = 0.2, Min = 0.0, Max = 5, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("tonemap.bloomScale.z", p_Value)
 		end)
 
@@ -614,11 +617,11 @@ function CinematicTools:CreateGUI()
 			self:GenericCallback("tonemap.chromostereopsisEnable", p_Value)
 		end)
 
-		DebugGUI:Range('Chromostereopsis Scale', {DefValue = 0.0, Min = 0.0, Max = 100.0, Step = 0.1}, function(p_Value)
+		DebugGUI:Range('Chromostereopsis Scale', {DefValue = 0.0, Min = 0.0, Max = 100.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("tonemap.chromostereopsisScale", p_Value)
 		end)
 
-		DebugGUI:Range('Chromostereopsis Offset', {DefValue = 0, Min = 0.0, Max = 100.0, Step = 0.1}, function(p_Value)
+		DebugGUI:Range('Chromostereopsis Offset', {DefValue = 0, Min = 0.0, Max = 100.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("tonemap.chromostereopsisOffset", p_Value)
 		end)
 
@@ -627,79 +630,79 @@ function CinematicTools:CreateGUI()
 	-- Fog
 	DebugGUI:Folder("Fog", function ()
 
-		DebugGUI:Range('Fog Start', {DefValue = 0.0, Min = -100.0, Max = 10000.0, Step = 10.0}, function(p_Value)
+		DebugGUI:Range('Fog Start', {DefValue = 0.0, Min = self.VALUE_MIN, Max = self.VALUE_MAX, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("fog.start", p_Value)
 		end)
 
-		DebugGUI:Range('Fog End', {DefValue = 5000.0, Min = 0.0, Max = 15000.0, Step = 10.0}, function(p_Value)
+		DebugGUI:Range('Fog End', {DefValue = 5000.0, Min = self.VALUE_MIN, Max = self.VALUE_MAX, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("fog.endValue", p_Value)
 		end)
 
-		DebugGUI:Range('Curve X', {DefValue = 1.0, Min = -10, Max = 10, Step = 0.001}, function(p_Value)
+		DebugGUI:Range('Curve X', {DefValue = 1.0, Min = self.VALUE_MIN, Max = self.VALUE_MAX, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("fog.curve.x", p_Value)
 		end)
 
-		DebugGUI:Range('Curve Y', {DefValue = 1.0, Min = -10, Max = 10, Step = 0.001}, function(p_Value)
+		DebugGUI:Range('Curve Y', {DefValue = 1.0, Min = self.VALUE_MIN, Max = self.VALUE_MAX, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("fog.curve.y", p_Value)
 		end)
 
-		DebugGUI:Range('Curve Z', {DefValue = 1.0, Min = -10, Max = 10, Step = 0.001}, function(p_Value)
+		DebugGUI:Range('Curve Z', {DefValue = 1.0, Min = self.VALUE_MIN, Max = self.VALUE_MAX, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("fog.curve.z", p_Value)
 		end)
 
-		DebugGUI:Range('Curve W', {DefValue = 1.0, Min = -10, Max = 10, Step = 0.001}, function(p_Value)
+		DebugGUI:Range('Curve W', {DefValue = 1.0, Min = self.VALUE_MIN, Max = self.VALUE_MAX, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("fog.curve.w", p_Value)
 		end)
 
-		DebugGUI:Range('Fog Distance Multiplier [doesn´t work on all maps]', {DefValue = 1.0, Min = 0.0, Max = 5.0, Step = 0.2}, function(p_Value)
+		DebugGUI:Range('Fog Distance Multiplier [doesn´t work on all maps]', {DefValue = 1.0, Min = 0.0, Max = 5.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("fog.fogDistanceMultiplier", p_Value)
 		end)
 
-		DebugGUI:Range('Fog Transparency Fade Start', {DefValue = 25.0, Min = 0.0, Max = 5000.0, Step = 1.0}, function(p_Value)
+		DebugGUI:Range('Fog Transparency Fade Start', {DefValue = 25.0, Min = 0.0, Max = 5000.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("fog.transparencyFadeStart", p_Value)
 		end)
 
-		DebugGUI:Range('Transparency Fade Clamp', {DefValue = 1.0, Min = 0.0, Max = 1.0, Step = 0.1}, function(p_Value)
+		DebugGUI:Range('Transparency Fade Clamp', {DefValue = 1.0, Min = 0.0, Max = 1.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("fog.transparencyFadeClamp", p_Value)
 		end)
 
-		DebugGUI:Range('Transparency Fade End', {DefValue = 100.0, Min = 0.0, Max = 5000.0, Step = 1.0}, function(p_Value)
+		DebugGUI:Range('Transparency Fade End', {DefValue = 100.0, Min = 0.0, Max = 5000.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("fog.transparencyFadeEnd", p_Value)
 		end)
 
-		DebugGUI:Range('Fog Color Start', {DefValue = 0.0, Min = -100, Max = 5000.0, Step = 10.0}, function(p_Value)
+		DebugGUI:Range('Fog Color Start', {DefValue = 0.0, Min = self.VALUE_MIN, Max = self.VALUE_MAX, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("fog.fogColorStart", p_Value)
 		end)
 
-		DebugGUI:Range('Fog Color End', {DefValue = 10000.0, Min = 0.0, Max = 20000.0, Step = 10.0}, function(p_Value)
+		DebugGUI:Range('Fog Color End', {DefValue = 10000.0, Min = self.VALUE_MIN, Max = self.VALUE_MAX, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("fog.fogColorEnd", p_Value)
 		end)
 
-		DebugGUI:Range('Fog Color Red', {DefValue = 1.0, Min = 0.0, Max = 5.0, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Fog Color Red', {DefValue = 1.0, Min = self.VALUE_MIN, Max = self.VALUE_MAX, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("fog.fogColor.x", p_Value)
 		end)
 
-		DebugGUI:Range('Fog Color Green', {DefValue = 1.0, Min = 0.0, Max = 5.0, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Fog Color Green', {DefValue = 1.0, Min = self.VALUE_MIN, Max = self.VALUE_MAX, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("fog.fogColor.y", p_Value)
 		end)
 
-		DebugGUI:Range('Fog Color Blue', {DefValue = 1.0, Min = 0.0, Max = 5.0, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Fog Color Blue', {DefValue = 1.0, Min = self.VALUE_MIN, Max = self.VALUE_MAX, Step = self.VALUE_STEP, function(p_Value)
 			self:GenericCallback("fog.fogColor.z", p_Value)
 		end)
 
-		DebugGUI:Range('Fog Color Curve X', {DefValue = 1.0, Min = -10, Max = 10, Step = 0.001}, function(p_Value)
+		DebugGUI:Range('Fog Color Curve X', {DefValue = 1.0, Min = self.VALUE_MIN, Max = self.VALUE_MAX, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("fog.fogColorCurve.x", p_Value)
 		end)
 
-		DebugGUI:Range('Fog Color Curve Y', {DefValue = 1.0, Min = -10, Max = 10, Step = 0.001}, function(p_Value)
+		DebugGUI:Range('Fog Color Curve Y', {DefValue = 1.0, Min = self.VALUE_MIN, Max = self.VALUE_MAX, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("fog.fogColorCurve.y", p_Value)
 		end)
 
-		DebugGUI:Range('Fog Color Curve Z', {DefValue = 1.0, Min = -10, Max = 10, Step = 0.001}, function(p_Value)
+		DebugGUI:Range('Fog Color Curve Z', {DefValue = 1.0, Min = self.VALUE_MIN, Max = self.VALUE_MAX, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("fog.fogColorCurve.z", p_Value)
 		end)
 
-		DebugGUI:Range('Fog Color Curve W', {DefValue = 1.0, Min = -10, Max = 10, Step = 0.001}, function(p_Value)
+		DebugGUI:Range('Fog Color Curve W', {DefValue = 1.0, Min = self.VALUE_MIN, Max = self.VALUE_MAX, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("fog.fogColorCurve.w", p_Value)
 		end)
 
@@ -708,11 +711,11 @@ function CinematicTools:CreateGUI()
 	-- Wind
 	DebugGUI:Folder("Wind", function ()
 
-		DebugGUI:Range('Wind Direction', {DefValue = 0.0, Min = 0.0, Max = 359, Step = 1.0}, function(p_Value)
+		DebugGUI:Range('Wind Direction', {DefValue = 0.0, Min = 0.0, Max = 359, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("wind.windDirection", p_Value)
 		end)
 
-		DebugGUI:Range('Wind Strength', {DefValue = 1.0, Min = 0.0, Max = 10.0, Step = 0.5}, function(p_Value)
+		DebugGUI:Range('Wind Strength', {DefValue = 1.0, Min = 0.0, Max = 10.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("wind.windStrength", p_Value)
 		end)
 
@@ -725,27 +728,27 @@ function CinematicTools:CreateGUI()
 			self:GenericCallback("dof.enable", p_Value)
 		end)
 
-		DebugGUI:Range('Blur Filter', {DefValue = 6, Min = 0, Max = 6, Step = 1}, function(p_Value)
+		DebugGUI:Range('Blur Filter', {DefValue = 6, Min = 0, Max = 6, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("dof.blurFilter", p_Value)
 		end)
 
-		DebugGUI:Range('Scale', {DefValue = 100.0, Min = 0.0, Max = 500.0, Step = 1.0}, function(p_Value)
+		DebugGUI:Range('Scale', {DefValue = 100.0, Min = 0.0, Max = 500.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("dof.scale", p_Value)
 		end)
 
-		DebugGUI:Range('Near Distance Scale', {DefValue = 0.0, Min = 0.0, Max = 1.0, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Near Distance Scale', {DefValue = 0.0, Min = 0.0, Max = 1.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("dof.nearDistanceScale", p_Value)
 		end)
 
-		DebugGUI:Range('Far Distance Scale', {DefValue = 0.1, Min = 0.0, Max = 1.0, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Far Distance Scale', {DefValue = 0.1, Min = 0.0, Max = 1.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("dof.farDistanceScale", p_Value)
 		end)
 
-		DebugGUI:Range('Focus Distance', {DefValue = 50.0, Min = 0.0, Max = 1000.0, Step = 1}, function(p_Value)
+		DebugGUI:Range('Focus Distance', {DefValue = 50.0, Min = 0.0, Max = 1000.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("dof.focusDistance", p_Value)
 		end)
 
-		DebugGUI:Range('Add Blur', {DefValue = 0.0, Min = 0.0, Max = 1.0, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Add Blur', {DefValue = 0.0, Min = 0.0, Max = 1.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("dof.blurAdd", p_Value)
 		end)
 
@@ -753,11 +756,11 @@ function CinematicTools:CreateGUI()
 			self:GenericCallback("dof.diffusionDofEnable", p_Value)
 		end)
 
-		DebugGUI:Range('DoF Diffusion Aperture', {DefValue = 1.0, Min = 0.6, Max = 20.0, Step = 0.2}, function(p_Value)
+		DebugGUI:Range('DoF Diffusion Aperture', {DefValue = 1.0, Min = 0.6, Max = 20.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("dof.diffusionDofAperture", p_Value)
 		end)
 
-		DebugGUI:Range('DoF Diffusion Focal Length', {DefValue = 1.0, Min = 10.0, Max = 135.0, Step = 1.0}, function(p_Value)
+		DebugGUI:Range('DoF Diffusion Focal Length', {DefValue = 1.0, Min = 10.0, Max = 135.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("dof.diffusionDofFocalLength", p_Value)
 		end)
 
@@ -770,31 +773,31 @@ function CinematicTools:CreateGUI()
 			self:GenericCallback("vignette.enable", p_Value)
 		end)
 
-		DebugGUI:Range('Vignette Opacity', {DefValue = 1.0, Min = 0.0, Max = 1.0, Step = 0.1}, function(p_Value)
+		DebugGUI:Range('Vignette Opacity', {DefValue = 1.0, Min = 0.0, Max = 1.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("vignette.opacity", p_Value)
 		end)
 
-		DebugGUI:Range('Vignette Exponent', {DefValue = 1.0, Min = 0.0, Max = 1.0, Step = 0.1}, function(p_Value)
+		DebugGUI:Range('Vignette Exponent', {DefValue = 1.0, Min = 0.0, Max = 1.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("vignette.exponent", p_Value)
 		end)
 
-		DebugGUI:Range('Vignette Scale X', {DefValue = 1.0, Min = 0.0, Max = 5.0, Step = 0.1}, function(p_Value)
+		DebugGUI:Range('Vignette Scale X', {DefValue = 1.0, Min = 0.0, Max = 5.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("vignette.scale.x", p_Value)
 		end)
 
-		DebugGUI:Range('Vignette Scale Y', {DefValue = 0.75, Min = 0.0, Max = 5.0, Step = 0.1}, function(p_Value)
+		DebugGUI:Range('Vignette Scale Y', {DefValue = 0.75, Min = 0.0, Max = 5.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("vignette.scale.y", p_Value)
 		end)
 
-		DebugGUI:Range('Vignette Color X', {DefValue = 0, Min = 0.0, Max = 5.0, Step = 0.1}, function(p_Value)
+		DebugGUI:Range('Vignette Color X', {DefValue = 0, Min = 0.0, Max = 5.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("vignette.color.x", p_Value)
 		end)
 
-		DebugGUI:Range('Vignette Color Y', {DefValue = 0, Min = 0.0, Max = 5.0, Step = 0.1}, function(p_Value)
+		DebugGUI:Range('Vignette Color Y', {DefValue = 0, Min = 0.0, Max = 5.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("vignette.color.y", p_Value)
 		end)
 
-		DebugGUI:Range('Vignette Color Y', {DefValue = 0, Min = 0.0, Max = 5.0, Step = 0.1}, function(p_Value)
+		DebugGUI:Range('Vignette Color Y', {DefValue = 0, Min = 0.0, Max = 5.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("vignette.color.z", p_Value)
 		end)
 
@@ -815,23 +818,23 @@ function CinematicTools:CreateGUI()
 			self:GenericCallback("filmGrain.linearFilteringEnable", p_Value)
 		end)
 
-		DebugGUI:Range('Color Scale Red', {DefValue = 1.0, Min = 0.0, Max = 2.0, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Color Scale Red', {DefValue = 1.0, Min = 0.0, Max = 2.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("filmGrain.colorScale.x", p_Value)
 		end)
 
-		DebugGUI:Range('Color Scale Green', {DefValue = 1.0, Min = 0.0, Max = 2.0, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Color Scale Green', {DefValue = 1.0, Min = 0.0, Max = 2.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("filmGrain.colorScale.y", p_Value)
 		end)
 
-		DebugGUI:Range('Color Scale Blue', {DefValue = 1.0, Min = 0.0, Max = 2.0, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Color Scale Blue', {DefValue = 1.0, Min = 0.0, Max = 2.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("filmGrain.colorScale.z", p_Value)
 		end)
 
-		DebugGUI:Range('Texture Scale X', {DefValue = 1.0, Min = 0.0, Max = 2.0, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Texture Scale X', {DefValue = 1.0, Min = 0.0, Max = 2.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("filmGrain.textureScale.x", p_Value)
 		end)
 
-		DebugGUI:Range('Texture Scale Y', {DefValue = 1.0, Min = 0.0, Max = 2.0, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Texture Scale Y', {DefValue = 1.0, Min = 0.0, Max = 2.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("filmGrain.textureScale.y", p_Value)
 		end)
 
@@ -844,71 +847,71 @@ function CinematicTools:CreateGUI()
 			self:GenericCallback("lensScope.enable", p_Value)
 		end)
 
-		DebugGUI:Range('Abberation Color 1 Red', {DefValue = 1.0, Min = 0.0, Max = 1.0, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Abberation Color 1 Red', {DefValue = 1.0, Min = 0.0, Max = 1.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("lensScope.chromaticAberrationColor1.x", p_Value)
 		end)
 
-		DebugGUI:Range('Abberation Color 1 Green', {DefValue = 1.0, Min = 0.0, Max = 1.0, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Abberation Color 1 Green', {DefValue = 1.0, Min = 0.0, Max = 1.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("lensScope.chromaticAberrationColor1.y", p_Value)
 		end)
 
-		DebugGUI:Range('Abberation Color 1 Blue', {DefValue = 1.0, Min = 0.0, Max = 1.0, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Abberation Color 1 Blue', {DefValue = 1.0, Min = 0.0, Max = 1.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("lensScope.chromaticAberrationColor1.z", p_Value)
 		end)
 
-		DebugGUI:Range('Abberation Displacement 1 X', {DefValue = 1.0, Min = 0.0, Max = 1.0, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Abberation Displacement 1 X', {DefValue = 1.0, Min = 0.0, Max = 1.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("lensScope.chromaticAberrationDisplacement1.x", p_Value)
 		end)
 
-		DebugGUI:Range('Abberation Displacement 1 Y', {DefValue = 1.0, Min = 0.0, Max = 1.0, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Abberation Displacement 1 Y', {DefValue = 1.0, Min = 0.0, Max = 1.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("lensScope.chromaticAberrationDisplacement1.y", p_Value)
 		end)
 
-		DebugGUI:Range('Abberation Color 2 Red', {DefValue = 1.0, Min = 0.0, Max = 1.0, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Abberation Color 2 Red', {DefValue = 1.0, Min = 0.0, Max = 1.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("lensScope.chromaticAberrationColor2.x", p_Value)
 		end)
 
-		DebugGUI:Range('Abberation Color 2 Green', {DefValue = 1.0, Min = 0.0, Max = 1.0, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Abberation Color 2 Green', {DefValue = 1.0, Min = 0.0, Max = 1.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("lensScope.chromaticAberrationColor2.y", p_Value)
 		end)
 
-		DebugGUI:Range('Abberation Color 2 Blue', {DefValue = 1.0, Min = 0.0, Max = 1.0, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Abberation Color 2 Blue', {DefValue = 1.0, Min = 0.0, Max = 1.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("lensScope.chromaticAberrationColor2.z", p_Value)
 		end)
 
-		DebugGUI:Range('Abberation Displacement 2 X', {DefValue = 1.0, Min = 0.0, Max = 1.0, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Abberation Displacement 2 X', {DefValue = 1.0, Min = 0.0, Max = 1.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("lensScope.chromaticAberrationDisplacement2.x", p_Value)
 		end)
 
-		DebugGUI:Range('Abberation Displacement 2 Y', {DefValue = 1.0, Min = 0.0, Max = 1.0, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Abberation Displacement 2 Y', {DefValue = 1.0, Min = 0.0, Max = 1.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("lensScope.chromaticAberrationDisplacement2.y", p_Value)
 		end)
 
-		DebugGUI:Range('Abberation Strengths X', {DefValue = 1.0, Min = 0.0, Max = 1.0, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Abberation Strengths X', {DefValue = 1.0, Min = 0.0, Max = 1.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("lensScope.chromaticAberrationStrengths.x", p_Value)
 		end)
 
-		DebugGUI:Range('Abberation Strengths Y', {DefValue = 1.0, Min = 0.0, Max = 1.0, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Abberation Strengths Y', {DefValue = 1.0, Min = 0.0, Max = 1.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("lensScope.chromaticAberrationStrengths.y", p_Value)
 		end)
 
-		DebugGUI:Range('Abberation Radial Blend Coeff Distance X', {DefValue = 1.0, Min = 0.0, Max = 1.0, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Abberation Radial Blend Coeff Distance X', {DefValue = 1.0, Min = 0.0, Max = 1.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("lensScope.radialBlendDistanceCoefficients.x", p_Value)
 		end)
 
-		DebugGUI:Range('Abberation Radial Blend Coeff Distance Y', {DefValue = 1.0, Min = 0.0, Max = 1.0, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Abberation Radial Blend Coeff Distance Y', {DefValue = 1.0, Min = 0.0, Max = 1.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("lensScope.radialBlendDistanceCoefficients.y", p_Value)
 		end)
 
-		DebugGUI:Range('Blur Center X', {DefValue = 1.0, Min = 0.0, Max = 1.0, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Blur Center X', {DefValue = 1.0, Min = 0.0, Max = 1.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("lensScope.blurCenter.x", p_Value)
 		end)
 
-		DebugGUI:Range('Blur Center Y', {DefValue = 1.0, Min = 0.0, Max = 1.0, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Blur Center Y', {DefValue = 1.0, Min = 0.0, Max = 1.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("lensScope.blurCenter.y", p_Value)
 		end)
 
-		DebugGUI:Range('Blur Scale', {DefValue = 1.0, Min = 0.0, Max = 2.0, Step = 0.001}, function(p_Value)
+		DebugGUI:Range('Blur Scale', {DefValue = 1.0, Min = 0.0, Max = 2.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("lensScope.blurScale", p_Value)
 		end)
 
@@ -942,11 +945,11 @@ function CinematicTools:CreateGUI()
 			self:GenericCallback("characterLighting.firstPersonEnable", p_Value)
 		end)
 
-		DebugGUI:Range('Character Lighting Mode', {DefValue = 0.0, Min = 0.0, Max = 1.0, Step = 1.0}, function(p_Value)
+		DebugGUI:Range('Character Lighting Mode', {DefValue = 0.0, Min = 0.0, Max = 1.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("characterLighting.characterLightingMode", p_Value)
 		end)
 
-		DebugGUI:Range('Blend Factor [In Mode 1]', {DefValue = 0.0, Min = 0.0, Max = 1.0, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('Blend Factor [In Mode 1]', {DefValue = 0.0, Min = 0.0, Max = 1.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("characterLighting.blendFactor", p_Value)
 		end)
 
@@ -954,39 +957,39 @@ function CinematicTools:CreateGUI()
 			self:GenericCallback("characterLighting.lockToCameraDirection", p_Value)
 		end)
 
-		DebugGUI:Range('Camera Up Rotation', {DefValue = 90.0, Min = 0.0, Max = 180.0, Step = 1.0}, function(p_Value)
+		DebugGUI:Range('Camera Up Rotation', {DefValue = 90.0, Min = 0.0, Max = 180.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("characterLighting.cameraUpRotation", p_Value)
 		end)
 
-		DebugGUI:Range('Top Character Lighting Red', {DefValue = 1.0, Min = 0.0, Max = 5.0, Step = 0.1}, function(p_Value)
+		DebugGUI:Range('Top Character Lighting Red', {DefValue = 1.0, Min = 0.0, Max = 5.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("characterLighting.topLight.x", p_Value)
 		end)
 
-		DebugGUI:Range('Top Character Lighting Green', {DefValue = 1.0, Min = 0.0, Max = 5.0, Step = 0.1}, function(p_Value)
+		DebugGUI:Range('Top Character Lighting Green', {DefValue = 1.0, Min = 0.0, Max = 5.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("characterLighting.topLight.y", p_Value)
 		end)
 
-		DebugGUI:Range('Top Character Lighting Blue', {DefValue = 1.0, Min = 0.0, Max = 5.0, Step = 0.1}, function(p_Value)
+		DebugGUI:Range('Top Character Lighting Blue', {DefValue = 1.0, Min = 0.0, Max = 5.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("characterLighting.topLight.z", p_Value)
 		end)
 
-		DebugGUI:Range('Top Light Direction X', {DefValue = 0.0, Min = 0.0, Max = 360.0, Step = 1}, function(p_Value)
+		DebugGUI:Range('Top Light Direction X', {DefValue = 0.0, Min = 0.0, Max = 360.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("characterLighting.topLightDirX", p_Value)
 		end)
 
-		DebugGUI:Range('Top Light Direction Y', {DefValue = 50.0, Min = 0.0, Max = 180.0, Step = 1}, function(p_Value)
+		DebugGUI:Range('Top Light Direction Y', {DefValue = 50.0, Min = 0.0, Max = 180.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("characterLighting.topLightDirY", p_Value)
 		end)
 
-		DebugGUI:Range('Bottom Character Lighting Red', {DefValue = 1.0, Min = 0.0, Max = 5.0, Step = 0.1}, function(p_Value)
+		DebugGUI:Range('Bottom Character Lighting Red', {DefValue = 1.0, Min = 0.0, Max = 5.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("characterLighting.bottomLight.x", p_Value)
 		end)
 
-		DebugGUI:Range('Bottom Character Lighting Green', {DefValue = 1.0, Min = 0.0, Max = 5.0, Step = 0.1}, function(p_Value)
+		DebugGUI:Range('Bottom Character Lighting Green', {DefValue = 1.0, Min = 0.0, Max = 5.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("characterLighting.bottomLight.y", p_Value)
 		end)
 
-		DebugGUI:Range('Bottom Character Lighting Blue', {DefValue = 1.0, Min = 0.0, Max = 5.0, Step = 0.1}, function(p_Value)
+		DebugGUI:Range('Bottom Character Lighting Blue', {DefValue = 1.0, Min = 0.0, Max = 5.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("characterLighting.bottomLight.z", p_Value)
 		end)
 
@@ -995,27 +998,27 @@ function CinematicTools:CreateGUI()
 	-- Ambient Occlusion
 	DebugGUI:Folder('Ambient Occlusion', function ()
 
-		DebugGUI:Range('HBAO Radius', {DefValue = 0, Min = 0.0, Max = 10.0, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('HBAO Radius', {DefValue = 0, Min = 0.0, Max = 10.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("dynamicAO.hbaoRadius", p_Value)
 		end)
 
-		DebugGUI:Range('HBAO Attentuation', {DefValue = 0, Min = 0.0, Max = 10.0, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('HBAO Attentuation', {DefValue = 0, Min = 0.0, Max = 10.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("dynamicAO.hbaoAttenuation", p_Value)
 		end)
 
-		DebugGUI:Range('HBAO Angle Bias', {DefValue = 0, Min = 0.0, Max = 10.0, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('HBAO Angle Bias', {DefValue = 0, Min = 0.0, Max = 10.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("dynamicAO.hbaoAngleBias", p_Value)
 		end)
 
-		DebugGUI:Range('HBAO Power Exponent', {DefValue = 0, Min = 0.0, Max = 10.0, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('HBAO Power Exponent', {DefValue = 0, Min = 0.0, Max = 10.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("dynamicAO.hbaoPowerExponent", p_Value)
 		end)
 
-		DebugGUI:Range('HBAO Contrast', {DefValue = 0, Min = 0.0, Max = 10.0, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('HBAO Contrast', {DefValue = 0, Min = 0.0, Max = 10.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("dynamicAO.hbaoContrast", p_Value)
 		end)
 
-		DebugGUI:Range('HBAO Max Footprint Radius', {DefValue = 0, Min = 0.0, Max = 10.0, Step = 0.01}, function(p_Value)
+		DebugGUI:Range('HBAO Max Footprint Radius', {DefValue = 0, Min = 0.0, Max = 10.0, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("dynamicAO.hbaoMaxFootprintRadius", p_Value)
 		end)
 
