@@ -686,7 +686,7 @@ function CinematicTools:CreateGUI()
 			self:GenericCallback("fog.fogColor.y", p_Value)
 		end)
 
-		DebugGUI:Range('Fog Color Blue', {DefValue = 1.0, Min = self.VALUE_MIN, Max = self.VALUE_MAX, Step = self.VALUE_STEP, function(p_Value)
+		DebugGUI:Range('Fog Color Blue', {DefValue = 1.0, Min = self.VALUE_MIN, Max = self.VALUE_MAX, Step = self.VALUE_STEP}, function(p_Value)
 			self:GenericCallback("fog.fogColor.z", p_Value)
 		end)
 
