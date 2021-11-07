@@ -18,8 +18,8 @@ function CinematicTools:RegisterVars()
 	self.m_CollaborationEnabled = false
 	self.m_Visible = false
 	self.VALUE_STEP = 0.0001
-	self.VALUE_MIN = -100000
-	self.VALUE_MAX = 100000
+	self.VALUE_MIN = -25000
+	self.VALUE_MAX = 25000
 end
 
 
@@ -221,19 +221,19 @@ function CinematicTools:CreateGUI()
 			self:GenericCallback("outdoorLight.sunColor.z", p_Value)
 		end)
 
-		DebugGUI:Range('Panoramic UV Min X', {DefValue = 0, Min = self.VALUE_MIN, Max = self.VALUE_MAX, Step = self.VALUE_STEP}, function(p_Value)
+		DebugGUI:Range('Panoramic UV Min X', {DefValue = 0, Min = 0, Max = 10, Step = 0.5}, function(p_Value)
 			self:GenericCallback("sky.panoramicUVMinX.x", p_Value)
 		end)
 
-		DebugGUI:Range('Panoramic UV Max X', {DefValue = 0, Min = self.VALUE_MIN, Max = self.VALUE_MAX, Step = self.VALUE_STEP}, function(p_Value)
+		DebugGUI:Range('Panoramic UV Max X', {DefValue = 0, Min = 0, Max = 10, Step = 0.5}, function(p_Value)
 			self:GenericCallback("sky.panoramicUVMaxX.x", p_Value)
 		end)
 
-		DebugGUI:Range('Panoramic UV Min Y', {DefValue = 0, Min = self.VALUE_MIN, Max = self.VALUE_MAX, Step = self.VALUE_STEP}, function(p_Value)
+		DebugGUI:Range('Panoramic UV Min Y', {DefValue = 0, Min = 0, Max = 10, Step = 0.5}, function(p_Value)
 			self:GenericCallback("sky.panoramicUVMinY.y", p_Value)
 		end)
 
-		DebugGUI:Range('Panoramic UV Max Y', {DefValue = 0, Min = self.VALUE_MIN, Max = self.VALUE_MAX, Step = self.VALUE_STEP}, function(p_Value)
+		DebugGUI:Range('Panoramic UV Max Y', {DefValue = 0, Min = 0, Max = 10, Step = 0.5}, function(p_Value)
 			self:GenericCallback("sky.panoramicUVMaxY.y", p_Value)
 		end)
 
