@@ -30,8 +30,14 @@ end
 
 
 function CinematicTools:OnLevelLoaded()
+	if DEV_LOAD_CINEMATIC_TOOLS then
+		g_VEManagerClient:EnablePreset("CinematicTools")
+	end
+
 	if VEM_CONFIG.DEV_SHOW_CINEMATIC_TOOLS_ON_LEVEL_LOAD then
 		self:ShowUI()
+	else
+		self:HideUI()
 	end
 end
 
