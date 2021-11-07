@@ -67,7 +67,7 @@ function VEManagerClient:RegisterEvents()
 	Events:Subscribe('VEManager:FadeTo', self, self.FadeTo)
 	Events:Subscribe('VEManager:FadeOut', self, self.FadeOut)
 	Events:Subscribe('VEManager:Lerp', self, self.Lerp)
-	Events:Subscribe('VEManager:Crossfade', self, self.Crossfade)
+	--Events:Subscribe('VEManager:Crossfade', self, self.Crossfade)
 
 	-- Events from server
 	NetEvents:Subscribe('VEManager:EnablePreset', self, self.EnablePreset)
