@@ -728,7 +728,7 @@ function CinematicTools:CreateGUI()
 			self:GenericCallback("dof.enable", p_Value)
 		end)
 
-		DebugGUI:Range('Blur Filter', {DefValue = 6, Min = 0, Max = 6, Step = 1P}, function(p_Value)
+		DebugGUI:Range('Blur Filter', {DefValue = 6, Min = 0, Max = 6, Step = 1}, function(p_Value)
 			self:GenericCallback("dof.blurFilter", p_Value)
 		end)
 
