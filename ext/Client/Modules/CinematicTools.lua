@@ -141,7 +141,7 @@ function CinematicTools:GenericCallback(p_Path, p_Value, p_Net)
 	-- if a TextureAsset - changes have to be made in the datacontainer directly. states don´t seem to support texture changes.
 	-- Check if boolean etc. else :Is() will fail
 	-- TODO: Automatically Detect Path for Loaded Texture
-	if type(p_Value) ~= "number" or type(p_Value) ~= "boolean" then
+	if type(p_Value) == "userdata" then
 		if p_Value.typeInfo and p_Value.typeInfo.name == 'TextureAsset' then
 			m_Logger:Write('TextureAsset found')
 
