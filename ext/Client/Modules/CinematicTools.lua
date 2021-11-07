@@ -581,7 +581,7 @@ function CinematicTools:CreateGUI()
 	-- Tonemap
 	DebugGUI:Folder("Tonemap", function ()
 
-		DebugGUI:Range('Method', {DefValue = 2.0, Min = 0.0, Max = 3.0, Step = self.VALUE_STEP}, function(p_Value)
+		DebugGUI:Range('Method', {DefValue = 2.0, Min = 0.0, Max = 3.0, Step = 1}, function(p_Value)
 			self:GenericCallback("tonemap.tonemapMethod", p_Value)
 		end)
 
@@ -728,7 +728,7 @@ function CinematicTools:CreateGUI()
 			self:GenericCallback("dof.enable", p_Value)
 		end)
 
-		DebugGUI:Range('Blur Filter', {DefValue = 6, Min = 0, Max = 6, Step = self.VALUE_STEP}, function(p_Value)
+		DebugGUI:Range('Blur Filter', {DefValue = 6, Min = 0, Max = 6, Step = 1P}, function(p_Value)
 			self:GenericCallback("dof.blurFilter", p_Value)
 		end)
 
