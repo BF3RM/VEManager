@@ -30,7 +30,7 @@ end
 
 
 function CinematicTools:OnLevelLoaded()
-	if DEV_LOAD_CINEMATIC_TOOLS then
+	if VEM_CONFIG.DEV_LOAD_CINEMATIC_TOOLS then
 		g_VEManagerClient:EnablePreset("CinematicTools")
 	end
 
