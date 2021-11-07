@@ -945,7 +945,7 @@ function CinematicTools:CreateGUI()
 			self:GenericCallback("characterLighting.firstPersonEnable", p_Value)
 		end)
 
-		DebugGUI:Range('Character Lighting Mode', {DefValue = 0.0, Min = 0.0, Max = 1.0, Step = self.VALUE_STEP}, function(p_Value)
+		DebugGUI:Range('Character Lighting Mode', {DefValue = 0.0, Min = 0.0, Max = 1.0, Step = 1}, function(p_Value)
 			self:GenericCallback("characterLighting.characterLightingMode", p_Value)
 		end)
 
