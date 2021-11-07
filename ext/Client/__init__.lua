@@ -539,7 +539,7 @@ function VEManagerClient:OnUpdateInput(p_Delta, p_SimulationDelta)
 	if VEM_CONFIG.DEV_ENABLE_TEST_KEYS then
 
 		-- Enable DebugUI with Custom Preset
-		if InputManager:WentKeyDown(VEM_CONFIG.DEV_SHOW_HIDE_CINEMATIC_TOOLS_KEY) then
+		if InputManager:WentKeyDown(VEM_CONFIG.DEV_SHOW_HIDE_CINEMATIC_TOOLS_KEY) and VEM_CONFIG.DEV_LOAD_CINEMATIC_TOOLS then
 			if g_CinematicTools.m_Visible then 
 				g_CinematicTools:HideUI()
 			else
