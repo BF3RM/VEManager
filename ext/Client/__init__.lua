@@ -97,6 +97,9 @@ end
 
 function VEManagerClient:EnablePreset(p_ID)
 	self:CheckPresetID(p_ID)
+
+	-- Reset any existing lerping
+	self.m_Lerping = {}
 	
 	m_Logger:Write("Enabling preset: " .. tostring(p_ID))
 	self.m_Presets[p_ID]["logic"].visibility = 1
