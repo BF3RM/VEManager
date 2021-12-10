@@ -228,10 +228,10 @@ end]]
 
 function VEManagerClient:OnPartitionLoad(p_Partition)
 
-	-- Explosion Patches
+	--[[ Explosion Patches
 	if VEM_CONFIG.PATCH_EXPLOSIONS_COLOR_CORRECTION then
 		g_Patches:ExplosionsVE(p_Partition)
-	end
+	end]]
 
 	-- Log Sky & Lighting Textures
 	g_Patches:LogComponents(p_Partition)
