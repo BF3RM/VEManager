@@ -2,8 +2,8 @@ VEM_CONFIG = {
 	-- CLOUDS --
 	CLOUDS_DEFAULT_SPEED = -0.0005, 						-- TODO: this needs to be based on the presets not in VEManager config.
 
-	-- OTHER --
-	PATCH_EXPLOSIONS_COLOR_CORRECTION = true,						-- Disables color correction from explosions (explosions may cause a discontinue preset effect)
+	--[[ OTHER --
+	PATCH_EXPLOSIONS_COLOR_CORRECTION = false,]]						-- Disables color correction from explosions (explosions may cause a discontinue preset effect)
 
 	-- DAY-NIGHT --
 	DN_SUN_TIMINGS = {5.328, 21}, 									-- Sun times in hours (float) [sunrise, sunset]

@@ -97,6 +97,9 @@ end
 
 function VEManagerClient:EnablePreset(p_ID)
 	self:CheckPresetID(p_ID)
+
+	-- Reset any existing lerping
+	self.m_Lerping = {}
 	
 	m_Logger:Write("Enabling preset: " .. tostring(p_ID))
 	self.m_Presets[p_ID]["logic"].visibility = 1
@@ -225,10 +228,10 @@ end]]
 
 function VEManagerClient:OnPartitionLoad(p_Partition)
 
-	-- Explosion Patches
+	--[[ Explosion Patches
 	if VEM_CONFIG.PATCH_EXPLOSIONS_COLOR_CORRECTION then
 		g_Patches:ExplosionsVE(p_Partition)
-	end
+	end]]
 
 	-- Log Sky & Lighting Textures
 	g_Patches:LogComponents(p_Partition)
