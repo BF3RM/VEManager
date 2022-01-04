@@ -4,6 +4,6 @@
 	"Description": "Handles VE, internally uses DebugGUI by Breaknix for CinematicTools",
 	"URL": "https://github.com/BF3RM/VEManager",
 	"Version": "0.2.1",
-	"HasWebUI": false,
+	"HasWebUI": true,
 	"HasVeniceEXT": true
 }
