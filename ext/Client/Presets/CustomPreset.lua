@@ -1,5 +1,5 @@
-class "ve_cinematic_tools"
-local table = [[
+
+return json.decode([[
 {
 	"CharacterLighting": {
         "CharacterLightEnable": "true",
@@ -196,11 +196,4 @@ local table = [[
     "Priority": "10",
     "Visibility": "1"
 }
-]]
-
-function ve_cinematic_tools:GetPreset()
-  return table
-end
-
-return ve_cinematic_tools
-
+]])

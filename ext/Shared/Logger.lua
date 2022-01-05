@@ -1,4 +1,5 @@
-class "Logger"
+---@class Logger
+Logger = class "Logger"
 
 function Logger:__init(p_ClassName, p_ActivateLogging)
 	if type(p_ClassName) ~= "string" then
@@ -38,19 +39,19 @@ function Logger:WriteTable(p_Table)
 		return
 	end
 
-    if VEM_CONFIG.LOGGER_PRINT_ALL == true and self.className ~= nil then
-        goto continue
+	if VEM_CONFIG.LOGGER_PRINT_ALL == true and self.className ~= nil then
+		goto continue
 
-    elseif self.debug == false or
-        self.debug == nil or
-        self.className == nil then
-        return
-    end
+	elseif self.debug == false or
+		self.debug == nil or
+		self.className == nil then
+		return
+	end
 
-    ::continue::
+	::continue::
 
-    print("["..self.className.."] Table:")
-    print(p_Table)
+	print("["..self.className.."] Table:")
+	print(p_Table)
 end
 
 function Logger:Warning(p_Message)

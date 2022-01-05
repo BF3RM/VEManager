@@ -1,7 +1,11 @@
-class 'CinematicTools'
+---@class CinematicTools
+CinematicTools = class 'CinematicTools'
 
+---@type Logger
 local m_Logger = Logger("CinematicTools", false)
 
+---@type Time
+local m_Time = require("Modules/Time")
 
 function CinematicTools:__init()
 	m_Logger:Write("Initializing Cinematic Tools")
@@ -1109,7 +1113,7 @@ function CinematicTools:CreateGUI()
 		DebugGUI:Checkbox('Enable', false, function(p_Value)
 			if p_Value == true then
 				s_Enabled = true
-				g_Time:Add(43200, true, 86400)
+				m_Time:Add(43200, true, 86400)
 			elseif p_Value == false and s_Enabled == true then
 				s_Enabled = false
 				NetEvents:Send('TimeServer:DisableNet')
@@ -1134,7 +1138,7 @@ function CinematicTools:CreateGUI()
 				end
 			elseif s_Enabled == true then
 				local s_Hour = s_Rounded * 3600
-				g_Time:Add(s_Hour, true, 86400)
+				m_Time:Add(s_Hour, true, 86400)
 			end
 		end)
 
@@ -1165,7 +1169,7 @@ function CinematicTools:ParseJSON()
 	if self.m_CineState == nil then
 		return 'No changes'
 	end
-	
+
 	local s_Result = {}
 
 	--Foreach class
@@ -1174,7 +1178,7 @@ function CinematicTools:ParseJSON()
 
 		if self.m_CineState[firstToLower(l_Class)] ~= nil then
 			-- Create class and add it to the VE entity.
-			local s_Class =  _G[l_Class.."ComponentData"]()
+			local s_Class = _G[l_Class.."ComponentData"]()
 
 			local s_Rows = {}
 
@@ -1246,7 +1250,7 @@ function CinematicTools:ParseValue(p_Type, p_Value)
 	elseif p_Type == "CString" then
 		return "\"" .. p_Value .. "\""
 
-	elseif  p_Type == "Float8" or
+	elseif p_Type == "Float8" or
 			p_Type == "Float16" or
 			p_Type == "Float32" or
 			p_Type == "Float64" or
@@ -1274,9 +1278,4 @@ function CinematicTools:ParseValue(p_Type, p_Value)
 	end
 end
 
--- Singleton.
-if g_CinematicTools == nil then
-	g_CinematicTools = CinematicTools()
-end
-
-return g_CinematicTools
+return CinematicTools()

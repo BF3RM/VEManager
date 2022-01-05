@@ -1,6 +1,10 @@
-local Patches = class('Patches')
-local PatchData = require('modules/patchdatatable')
+---@class Patches
+Patches = class('Patches')
 
+local m_PatchDatatable = require('Modules/PatchDatatable')
+local m_Easing = require('Modules/Easing')
+
+---@type Logger
 local m_Logger = Logger("Patches", false)
 
 local m_MenuBgGuids = {
@@ -9,11 +13,11 @@ local m_MenuBgGuids = {
 }
 
 local m_ExplosionGuids = {
-    Guid("0A0EB8EE-5849-4C88-B4B9-92A9C2AA6402"),
-    Guid("D9BFDE03-6E38-4638-87BD-C79A34FBE598"),
-    Guid("EB5AFBB4-ED86-421E-88AE-5E0CE8B27C85"),
-    Guid("CD2CD917-DA8F-11DF-98D7-E3FCCF5294D0"),
-    Guid("C2B0B503-7F38-4CF4-833F-0468EE51C7F2"),
+	Guid("0A0EB8EE-5849-4C88-B4B9-92A9C2AA6402"),
+	Guid("D9BFDE03-6E38-4638-87BD-C79A34FBE598"),
+	Guid("EB5AFBB4-ED86-421E-88AE-5E0CE8B27C85"),
+	Guid("CD2CD917-DA8F-11DF-98D7-E3FCCF5294D0"),
+	Guid("C2B0B503-7F38-4CF4-833F-0468EE51C7F2"),
 }
 
 g_TextureAssets = {}
@@ -26,35 +30,35 @@ function Patches:__init()
 end
 
 function Patches:Components(p_Partition)
-	
-	for _, l_Instance in pairs(p_Partition.instances) do
-		if l_Instance:Is('MeshAsset') then
-			Patches:MeshAsset(l_Instance)
-		
-		elseif l_Instance:Is('MeshMaterialVariation') then
-			Patches:MeshMaterialVariation(l_Instance)
-		
-		--elseif l_Instance:Is('EffectEntityData') then
-		--    Patches:EffectEntityData(l_Instance)
-		--elseif l_Instance:Is('SkyComponentData') then
-		--    Patches:SkyComponentData(l_Instance)
-		
-		elseif l_Instance:Is('LensFlareEntityData') then
-			Patches:LensFlareEntityData(l_Instance)
-		
-		elseif l_Instance:Is('LocalLightEntityData') then
-			Patches:LightSmoothening(l_Instance)
-
+	if p_Partition.primaryInstance:Is("MeshAsset") then
+		Patches:MeshAsset(p_Partition.primaryInstance)
+	elseif p_Partition.primaryInstance:Is("ObjectVariation") then
+		for _, l_Instance in pairs(p_Partition.instances) do
+			if l_Instance:Is('MeshMaterialVariation') then -- ObjectVariation is the primary instance
+				Patches:MeshMaterialVariation(l_Instance)
+			end
+		end
+	elseif p_Partition.primaryInstance:Is("Blueprint") then
+		for _, l_Instance in pairs(p_Partition.instances) do
+			if l_Instance:Is('LensFlareEntityData') then -- PrefabBlueprint is the primary instance
+				Patches:LensFlareEntityData(l_Instance)
+			elseif l_Instance:Is('LocalLightEntityData') then -- Blueprint is the primary instance
+				Patches:LightSmoothening(l_Instance)
+			-- elseif l_Instance:Is('SkyComponentData') then -- VisualEnvironmentBlueprint is the primary instance
+				-- Patches:SkyComponentData(l_Instance)
+			-- elseif l_Instance:Is('EffectEntityData') then -- EffectBlueprint is the primary instance
+				-- Patches:EffectEntityData(l_Instance)
+			end
 		end
 	end
 end
 
+---@param p_Partition DatabasePartition
 function Patches:ExplosionsVE(p_Partition)
-	
-	isExplosionGuid = g_VEManagerClient.m_Easing.tableHasValue(m_ExplosionGuids, p_Partition.guid)
-	
+	local s_IsExplosionGuid = m_Easing.tableHasValue(m_ExplosionGuids, p_Partition.guid)
+
 	for _, l_Instance in pairs(p_Partition.instances) do
-		if isExplosionGuid and l_Instance:Is('ColorCorrectionComponentData') then
+		if s_IsExplosionGuid and l_Instance:Is('ColorCorrectionComponentData') then
 			local s_ComponentData = ColorCorrectionComponentData(l_Instance)
 			s_ComponentData:MakeWritable()
 			s_ComponentData.enable = false
@@ -64,7 +68,7 @@ function Patches:ExplosionsVE(p_Partition)
 end
 
 function Patches:MeshAsset(p_Instance)
-	if PatchData.meshes[p_Instance.partition.name] then
+	if m_PatchDatatable.meshes[p_Instance.partition.name] then
 		local mesh = MeshAsset(p_Instance)
 
 		for _, value in pairs(mesh.materials) do
@@ -75,7 +79,7 @@ function Patches:MeshAsset(p_Instance)
 end
 
 function Patches:MeshMaterialVariation(p_Instance)
-	if PatchData.variations[p_Instance.partition.name] then
+	if m_PatchDatatable.variations[p_Instance.partition.name] then
 		local variation = MeshMaterialVariation(p_Instance)
 		variation:MakeWritable()
 		variation.shader.shader = nil
@@ -83,7 +87,7 @@ function Patches:MeshMaterialVariation(p_Instance)
 end
 
 function Patches:EffectEntityData(p_Instance)
-	if PatchData.effects[p_Instance.partition.name] then
+	if m_PatchDatatable.effects[p_Instance.partition.name] then
 		local effect = EffectEntityData(p_Instance)
 		effect:MakeWritable()
 
@@ -127,10 +131,11 @@ function Patches:onMenuBgLoaded(p_Instance)
 	local s_MenuBg = VisualEnvironmentEntityData(p_Instance)
 	s_MenuBg:MakeWritable()
 	s_MenuBg.priority = 100099
-	
+
 	m_Logger:Write("Menu background patched (priority increased)")
 end
 
+---@param p_Partition DatabasePartition
 function Patches:LogComponents(p_Partition)
 	if p_Partition.primaryInstance:Is('TextureAsset') then
 		local name = p_Partition.name:lower()
@@ -147,9 +152,4 @@ function Patches:LogComponents(p_Partition)
 	end
 end
 
--- Singleton.
-if g_Patches == nil then
-	g_Patches = Patches()
-end
-
-return g_Patches
+return Patches()
