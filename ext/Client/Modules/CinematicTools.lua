@@ -1,12 +1,8 @@
 ---@class CinematicTools
 CinematicTools = class 'CinematicTools'
 
-<<<<<<< Updated upstream
 ---@type Logger
 local m_Logger = Logger("CinematicTools", false)
-=======
-local m_Logger = Logger("CinematicTools", true)
->>>>>>> Stashed changes
 
 ---@type Time
 local m_Time = require("Modules/Time")
@@ -111,7 +107,6 @@ end
 
 
 function CinematicTools:GenericCallback(p_Path, p_Value, p_Net)
-	VisualEnvironmentManager:SetDirty(false)
 	if self.m_CineState == nil then
 		self.m_CineState = self:GetVisualEnvironmentState(self.m_CinePriority)
 		m_Logger:Write('CineState Name: ' .. self.m_CineState.entityName)
@@ -119,6 +114,8 @@ function CinematicTools:GenericCallback(p_Path, p_Value, p_Net)
 		m_Logger:Write('CineState Priority: ' .. self.m_CineState.priority)
 		self.m_CineState.excluded = false
 	end
+	VisualEnvironmentManager:SetDirty(true)
+
 	local s_PathTable = self:GenericSeperator(p_Path, "\\.")
 	--m_Logger:Write(s_PathTable)
 
@@ -133,6 +130,9 @@ function CinematicTools:GenericCallback(p_Path, p_Value, p_Net)
 		m_Logger:Write('Unsupported number of path categories ( ' .. p_Path .. ' -> ' .. tostring(#s_PathTable) .. ')')
 		return
 	end
+
+	-- Save new value
+	VisualEnvironmentManager:SetDirty(true)
 
 	if #s_PathTable == 1 then
 		self.m_CineState[s_PathTable[1]] = p_Value
@@ -170,11 +170,11 @@ function CinematicTools:GenericCallback(p_Path, p_Value, p_Net)
 
 	m_Logger:Write('Value saved at ' .. p_Path)
 
+	VisualEnvironmentManager:SetDirty(true)
 	if p_Net ~= true and self.m_CollaborationEnabled then
 		self:SendForCollaboration(p_Path, p_Value)
 		m_Logger:Write('Sending: ' .. p_Path .. ' with Value: ' .. tostring(p_Value))
 	end
-	VisualEnvironmentManager:SetDirty(true)
 end
 
 
