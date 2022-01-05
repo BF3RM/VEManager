@@ -1,7 +1,11 @@
-class 'Time'
+---@class Time
+Time = class 'Time'
 
+---@type Logger
 local m_Logger = Logger("Time", false)
-local Patches = require('modules/patches')
+
+---@type Patches
+local m_Patches = require('Modules/Patches')
 
 
 function Time:__init()
@@ -14,7 +18,7 @@ end
 function Time:RegisterVars()
 	-- Initialize variables
 	m_Logger:Write('[Client Time Module] Registered Vars')
-	
+
 	self.m_SystemRunning = false
 	self.m_ClientTime = 0
 	self.m_TotalDayLength = 0
@@ -53,10 +57,11 @@ function Time:RegisterEvents()
 	NetEvents:Subscribe('ClientTime:Disable', self, self.Disable)
 end
 
-function Time:OnPartitionLoad(p_Partition)
+---@param p_Partition DatabasePartition
+function Time:OnPartitionLoaded(p_Partition)
 	-- Patch emitters, meshes, effects, lightings etc to allow for higher VE variety (dark presets etc)
 	if VEM_CONFIG.DN_APPLY_PATCHES then
-		Patches:Components(p_Partition)
+		m_Patches:Components(p_Partition)
 	end
 
 	-- Apply Stars on skybox
@@ -108,7 +113,7 @@ function Time:AddTimeToClient(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds
 end
 
 -- Update sun position, for smoother sun relative to time
-function Time:UpdateSunPosition(p_ClientTime) 
+function Time:UpdateSunPosition(p_ClientTime)
 	local s_DayFactor = p_ClientTime / self.m_TotalDayLength
 	local s_SunPosX = 275
 	local s_SunPosY = 0
@@ -160,12 +165,12 @@ function Time:ResetForcedValues()
 	m_Logger:Write("Reverting dynamic presets to default values:")
 	for l_Index, l_Preset in ipairs(self.m_SortedDynamicPresetsTable) do
 		local s_ID = l_Preset[1]
-		
+
 		m_Logger:Write(" - " .. tostring(s_ID) .. " (" .. tostring(l_Index) .. ")")
-		
+
 		if g_VEManagerClient.m_Presets[s_ID] ~= nil then
 			g_VEManagerClient.m_Presets[s_ID]["ve"].priority = self.m_SavedValuesForReset[l_Index].priority
-			
+
 			for _, l_Class in pairs(g_VEManagerClient.m_Presets[s_ID]["ve"].components) do -- Remove patches
 				-- Un-patch Sun Positions
 				if l_Class.typeInfo.name == "OutdoorLightComponentData" then
@@ -174,9 +179,9 @@ function Time:ResetForcedValues()
 					-- Reset values
 					s_Class.sunRotationX = self.m_SavedValuesForReset[l_Index][l_Class.typeInfo.name].sunRotationX
 					s_Class.sunRotationY = self.m_SavedValuesForReset[l_Index][l_Class.typeInfo.name].sunRotationY
-				
+
 				-- Un-patch Star Cloudlayer
-				elseif l_Class.typeInfo.name == "SkyComponentData" then 
+				elseif l_Class.typeInfo.name == "SkyComponentData" then
 					local s_Class = SkyComponentData(l_Class)
 					s_Class:MakeWritable()
 					-- Reset values
@@ -269,7 +274,7 @@ function Time:Add(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 		-- Save default values to revert later
 		self.m_SavedValuesForReset[l_Index] = {}
 		self.m_SavedValuesForReset[l_Index].priority = g_VEManagerClient.m_Presets[s_ID]["ve"].priority
-		
+
 		-- Update preset priority to match it's position in the day-night cycle (morning -> night etc)
 		g_VEManagerClient.m_Presets[s_ID]["ve"].priority = l_Index + self.m_BaseDynamicPresetPriority
 
@@ -286,7 +291,7 @@ function Time:Add(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 				-- Replace values
 				s_Class.sunRotationX = 0.0
 				s_Class.sunRotationY = 0.0
-			
+
 			elseif l_Class.typeInfo.name == "SkyComponentData" then -- Patch Star Cloudlayer
 				--local s_Class = _G[l_Class.typeInfo.name]()
 				local s_Class = SkyComponentData(l_Class)
@@ -364,7 +369,7 @@ function Time:Run()
 	local s_print_enabled = false -- TODO: change syntax
 	local s_h_time = MathUtils:Round(self.m_ClientTime / self.m_TotalDayLength * 24)
 
-	if s_h_time ~= self.m_LastPrintHours  then
+	if s_h_time ~= self.m_LastPrintHours then
 		s_print_enabled = true
 		self.m_LastPrintHours = s_h_time
 	end
@@ -429,24 +434,24 @@ function Time:Run()
 	for l_Index, l_Preset in ipairs(self.m_SortedDynamicPresetsTable) do
 		local s_ID = l_Preset[1]
 		local s_Factor = 0
-		
+
 		if l_Index == self.m_CurrentPreset then
 			s_Factor = s_CurrentPresetVisibilityFactor
 		elseif l_Index == s_NextPreset then
 			s_Factor = s_NextPresetVisibilityFactor
 		end
-		
+
 		if self.m_FirstRun then
 			g_VEManagerClient:SetVisibility(s_ID, s_Factor)
 		else
 			g_VEManagerClient:UpdateVisibility(s_ID, l_Index + 10, s_Factor)
-			
+
 			if s_Factor ~= 0 then -- TODO: Check if cloud speed works properly
 				g_VEManagerClient:SetSingleValue(s_ID, l_Index + 10, 'sky', 'cloudLayer1Speed', self.m_CloudSpeed)
 			end
 		end
 	end
-	
+
 	if self.m_FirstRun then
 		self.m_FirstRun = false
 	end
@@ -455,7 +460,7 @@ function Time:Run()
 	if s_print_enabled and VEM_CONFIG.PRINT_DN_TIME_AND_VISIBILITIES then
 		local s_NextPresetID = self.m_SortedDynamicPresetsTable[s_NextPreset][1]
 		local s_CurrentPresetID = self.m_SortedDynamicPresetsTable[self.m_CurrentPreset][1]
-		
+
 		m_Logger:Write("[" .. tostring(s_h_time) .. "h - sun:" .. tostring(s_SunMoonPos) .. "] " .. tostring(s_CurrentPresetID) .. " (" .. MathUtils:Round(s_CurrentPresetVisibilityFactor*100) .. "%) -> " .. tostring(s_NextPresetID) .. " (" .. MathUtils:Round(s_NextPresetVisibilityFactor*100) .. "%)" )
 	end
 end

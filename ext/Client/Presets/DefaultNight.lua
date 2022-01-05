@@ -1,5 +1,4 @@
-class "night"
-local table = [[
+return json.decode([[
 {
     "CharacterLighting": {
         "CharacterLightEnable": "true",
@@ -140,11 +139,4 @@ local table = [[
     "Priority": "10",
     "Visibility": "1"
 }
-]]
-
-function night:GetPreset()
-  return table
-end
-
-return night
-
+]])

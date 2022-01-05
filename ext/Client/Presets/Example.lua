@@ -1,5 +1,4 @@
-class "ve_base"
-local table = [[
+return [[
 {
     "CharacterLighting": {
         "CharacterLightEnable": "true",
@@ -205,10 +204,3 @@ local table = [[
     "Visibility": "1"
 }
 ]]
-
-function ve_base:GetPreset()
-  return table
-end
-
-return ve_base
-

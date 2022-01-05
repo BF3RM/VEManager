@@ -1,7 +1,8 @@
-class "TimeServer"
+---@class TimeServer
+TimeServer = class "TimeServer"
 
+---@type Logger
 local m_Logger = Logger("TimeServer", false)
-
 
 function TimeServer:__init()
 	m_Logger:Write('Initializing Time-Server')
@@ -11,7 +12,7 @@ end
 
 function TimeServer:RegisterVars()
 	-- Initialise variables
-	m_Logger:Write('[Time-Server]: Registered Vars')
+	m_Logger:Write('Registered Vars')
 	self.m_ServerDayTime = 0.0
 	self.m_TotalServerTime = 0.0
 	self.m_EngineUpdateTimer = 0.0
@@ -23,16 +24,16 @@ function TimeServer:RegisterVars()
 end
 
 function TimeServer:RegisterEvents()
-	m_Logger:Write('[Time-Server]: Registered Events')
-	
+	m_Logger:Write('Registered Events')
+
 	Events:Subscribe('TimeServer:AddTime', self, self.AddTime)
 	NetEvents:Subscribe('TimeServer:AddTimeNet', self, self.AddTimeViaNet)
-	
+
 	Events:Subscribe('TimeServer:Pause', self, self.PauseContinue)
-	
+
 	Events:Subscribe('TimeServer:Disable', self, self.DisableDynamicCycle)
 	NetEvents:Subscribe('TimeServer:DisableNet', self, self.DisableDynamicCycleViaNet)
-	
+
 	self.m_EngineUpdateEvent = Events:Subscribe('Engine:Update', self, self.Run)
 	--self.m_LevelLoadedEvent = Events:Subscribe('Level:Loaded', self, self.OnLevelLoaded)
 	self.m_LevelDestroyEvent = Events:Subscribe('Level:Destroy', self, self.OnLevelDestroy)
@@ -61,8 +62,8 @@ function TimeServer:AddTime(p_StartingTime, p_LengthOfDayInMinutes)
 		self.m_ServerDayTime = p_StartingTime * 3600
 		self.m_IsStatic = true
 	end
-	
-	m_Logger:Write('[Time-Server]: Received new time (Starting Time, Length of Day): ' .. p_StartingTime .. 'h, '.. self.m_TotalDayLength .. 'sec')
+
+	m_Logger:Write('Received new time (Starting Time, Length of Day): ' .. p_StartingTime .. 'h, '.. self.m_TotalDayLength .. 'sec')
 
 	NetEvents:Broadcast('VEManager:AddTimeToClient', self.m_ServerDayTime, self.m_IsStatic, self.m_TotalDayLength)
 	self.m_SystemRunning = true
@@ -86,7 +87,7 @@ function TimeServer:Run(p_DeltaTime, p_SimulationDeltaTime)
 		self:Broadcast(self.m_ServerDayTime, self.m_TotalServerTime)
 
 		if self.m_ServerDayTime >= self.m_TotalDayLength then
-			m_Logger:Write('[Time-Server]: New day cycle')
+			m_Logger:Write('New day cycle')
 			self.m_ServerDayTime = 0
 		end
 	end
@@ -94,21 +95,21 @@ end
 
 function TimeServer:OnPlayerRequest(player)
 	if self.m_SystemRunning == true or self.m_IsStatic == true then
-		m_Logger:Write('[Time-Server]: Received Request by Player')
-		m_Logger:Write('[Time-Server]: Calling Sync Broadcast')
+		m_Logger:Write('Received Request by Player')
+		m_Logger:Write('Calling Sync Broadcast')
 		NetEvents:SendTo('VEManager:AddTimeToClient', player, self.m_ServerDayTime, self.m_IsStatic, self.m_TotalDayLength)
 	end
 end
 
 function TimeServer:Broadcast(p_ServerDayTime, p_TotalServerTime)
-	--m_Logger:Write('[Time-Server]: Syncing Players')
+	--m_Logger:Write('Syncing Players')
 	NetEvents:BroadcastUnreliableOrdered('TimeServer:Sync', p_ServerDayTime, p_TotalServerTime)
 end
 
 function TimeServer:PauseContinue()
 	-- Pause or Continue time
 	self.m_SystemRunning = not self.m_SystemRunning
-	m_Logger:Write('[Time-Server]: Time system running: ' .. tostring(self.m_SystemRunning))
+	m_Logger:Write('Time system running: ' .. tostring(self.m_SystemRunning))
 	NetEvents:Broadcast('ClientTime:Pause', self.m_SystemRunning)
 end
 
@@ -123,7 +124,10 @@ function TimeServer:DisableDynamicCycleViaNet()
 end
 
 -- Chat Commands
-function TimeServer:ChatCommands(p_Player, p_RecipientMask, p_Message)
+---@param p_PlayerName string
+---@param p_RecipientMask integer
+---@param p_Message string
+function TimeServer:ChatCommands(p_PlayerName, p_RecipientMask, p_Message)
 	if p_Message:match('^!settime') then
 		local hour, duration = p_Message:match('^!settime (%d+%.*%d*) (%d+%.*%d*)')
 
@@ -135,38 +139,33 @@ function TimeServer:ChatCommands(p_Player, p_RecipientMask, p_Message)
 			duration = 0.5
 		end
 
-		m_Logger:Write('[Time-Server]: Time Event called by ' .. p_Player.name)
+		m_Logger:Write('Time Event called by ' .. p_PlayerName)
 		self:AddTime(hour, duration)
-	
+
 	elseif p_Message == '!setnight' then
-		m_Logger:Write('[Time-Server]: Time Event called by ' .. p_Player.name)
+		m_Logger:Write('Time Event called by ' .. p_PlayerName)
 		self:AddTime(0, nil)
-	
+
 	elseif p_Message == '!setmorning' then
-		m_Logger:Write('[Time-Server]: Time Event called by ' .. p_Player.name)
+		m_Logger:Write('Time Event called by ' .. p_PlayerName)
 		self:AddTime(9, nil)
-	
+
 	elseif p_Message == '!setnoon' then
-		m_Logger:Write('[Time-Server]: Time Event called by ' .. p_Player.name)
+		m_Logger:Write('Time Event called by ' .. p_PlayerName)
 		self:AddTime(12, nil)
-	
+
 	elseif p_Message == '!setafternoon' then
-		m_Logger:Write('[Time-Server]: Time Event called by ' .. p_Player.name)
+		m_Logger:Write('Time Event called by ' .. p_PlayerName)
 		self:AddTime(15, nil)
-	
+
 	elseif p_Message == '!pausetime' then
-		m_Logger:Write('[Time-Server]: Time Pause called by ' .. p_Player.name)
+		m_Logger:Write('Time Pause called by ' .. p_PlayerName)
 		self:PauseContinue()
-	
+
 	elseif p_Message == '!disabletime' then
-		m_Logger:Write('[Time-Server]: Time Disable called by ' .. p_Player.name)
+		m_Logger:Write('Time Disable called by ' .. p_PlayerName)
 		self:DisableDynamicCycle()
 	end
 end
 
--- Singleton.
-if g_TimeServer == nil then
-	g_TimeServer = TimeServer()
-end
-
-return g_TimeServer
+return TimeServer()

@@ -1,17 +1,32 @@
-class 'VEManagerClient'
+---@class VEManagerClient
+VEManagerClient = class 'VEManagerClient'
 
+---@type Logger
 local m_Logger = Logger("VEManagerClient", false)
+
+local m_Easing = require "Modules/Easing"
+---@type Time
+local m_Time = require 'Modules/Time'
+---@type Patches
+local m_Patches = require('Modules/Patches')
+require '__shared/DebugGUI'
+require 'DebugGui'
+
+---@type CinematicTools|nil
+local m_CinematicTools = nil
+
+if VEM_CONFIG.DEV_LOAD_CINEMATIC_TOOLS then
+	m_CinematicTools = require 'Modules/CinematicTools'
+end
 
 function VEManagerClient:__init()
 	m_Logger:Write('Initializing VEManagerClient')
 	self:RegisterVars()
 	self:RegisterEvents()
-	self:RegisterModules()
 end
 
 function VEManagerClient:RegisterVars()
-	self.m_RawPresets = {}
-    self.m_SupportedTypes = {"Vec2", "Vec3", "Vec4", "Float32", "Boolean", "Int"}
+	self.m_SupportedTypes = {"Vec2", "Vec3", "Vec4", "Float32", "Boolean", "Int"}
 	self.m_SupportedClasses = {
 		"CameraParams",
 		"CharacterLighting",
@@ -32,29 +47,26 @@ function VEManagerClient:RegisterVars()
 		"SunFlare",
 		"Tonemap",
 		"Vignette",
-		"Wind"}
+		"Wind"
+	}
 	self.m_Presets = {}
 	self.m_Lerping = {}
 	self.m_Instances = {}
 	self.m_VisibilityUpdateThreshold = 0.000001
-	
+
 	-- Default Dynamic day-night cycle Presets
-	s_Night = require("Presets/DefaultNight")
-	s_Morning = require("Presets/DefaultMorning")
-	s_Noon = require("Presets/DefaultNoon")
-	s_Evening = require("Presets/DefaultEvening")
-	self.m_RawPresets["DefaultNight"] = json.decode(s_Night:GetPreset())
-	self.m_RawPresets["DefaultMorning"] = json.decode(s_Morning:GetPreset())
-	self.m_RawPresets["DefaultNoon"] = json.decode(s_Noon:GetPreset())
-	self.m_RawPresets["DefaultEvening"] = json.decode(s_Evening:GetPreset())
-	-- Cinematic tools preset
-	s_CinematicTools = require "Presets/CustomPreset"
-	self.m_RawPresets["CinematicTools"] = json.decode(s_CinematicTools:GetPreset()) -- TODO: Remove when you can change presets from tools
+	self.m_RawPresets = {
+		DefaultNight = require("Presets/DefaultNight"),
+		DefaultMorning = require("Presets/DefaultMorning"),
+		DefaultNoon = require("Presets/DefaultNoon"),
+		DefaultEvening = require("Presets/DefaultEvening"),
+		CinematicTools = require("Presets/CustomPreset") -- TODO: Remove when you can change presets from tools
+	}
 end
 
 function VEManagerClient:RegisterEvents()
 	Events:Subscribe('Client:UpdateInput', self, self.OnUpdateInput)
-	Events:Subscribe('Partition:Loaded', self, self.OnPartitionLoad)
+	Events:Subscribe('Partition:Loaded', self, self.OnPartitionLoaded)
 	Events:Subscribe('Level:Loaded', self, self.OnLevelLoaded)
 	Events:Subscribe('Level:Destroy', self, self.OnLevelDestroy)
 
@@ -73,18 +85,6 @@ function VEManagerClient:RegisterEvents()
 	NetEvents:Subscribe('VEManager:EnablePreset', self, self.EnablePreset)
 end
 
-function VEManagerClient:RegisterModules()
-	self.m_Easing = require "Modules/Easing"
-	require 'Modules/Time'
-	require '__shared/DebugGUI'
-	require 'DebugGui'
-
-	if VEM_CONFIG.DEV_LOAD_CINEMATIC_TOOLS then
-		require 'Modules/CinematicTools'
-	end
-end
-
-
 --[[
 
 	User Functions
@@ -100,7 +100,7 @@ function VEManagerClient:EnablePreset(p_ID)
 
 	-- Reset any existing lerping
 	self.m_Lerping = {}
-	
+
 	m_Logger:Write("Enabling preset: " .. tostring(p_ID))
 	self.m_Presets[p_ID]["logic"].visibility = 1
 	self.m_Presets[p_ID]["ve"].visibility = 1
@@ -226,18 +226,19 @@ end]]
 
 ]]
 
-function VEManagerClient:OnPartitionLoad(p_Partition)
+---@param p_Partition DatabasePartition
+function VEManagerClient:OnPartitionLoaded(p_Partition)
 
 	--[[ Explosion Patches
 	if VEM_CONFIG.PATCH_EXPLOSIONS_COLOR_CORRECTION then
-		g_Patches:ExplosionsVE(p_Partition)
+		m_Patches:ExplosionsVE(p_Partition)
 	end]]
 
 	-- Log Sky & Lighting Textures
-	g_Patches:LogComponents(p_Partition)
+	m_Patches:LogComponents(p_Partition)
 
 	-- Send to Time (to apply patches)
-	g_Time:OnPartitionLoad(p_Partition)
+	m_Time:OnPartitionLoaded(p_Partition)
 end
 
 function VEManagerClient:GetState(...)
@@ -335,11 +336,11 @@ function VEManagerClient:LoadPresets()
 		--Foreach class
 		local s_ComponentCount = 0
 		for _, l_Class in pairs(self.m_SupportedClasses) do
-			if l_Preset[l_Class] ~= nil  then
+			if l_Preset[l_Class] ~= nil then
 
 				-- Create class and add it to the VE entity.
-				local s_Class =  _G[l_Class.."ComponentData"]()
-				
+				local s_Class = _G[l_Class.."ComponentData"]()
+
 				s_Class.excluded = false
 				s_Class.isEventConnectionTarget = 3
 				s_Class.isPropertyConnectionTarget = 3
@@ -358,68 +359,68 @@ function VEManagerClient:LoadPresets()
 					-- Get type
 					local s_Type = l_Field.typeInfo.name --Boolean, Int32, Vec3 etc.
 					-- pm_Logger:Write("Field: " .. tostring(s_FieldName) .. " | " .. " Type: " .. tostring(s_Type))
-					
+
 					-- Initialize value
 					local s_Value = nil
 
 					-- If the preset contains that field
 					if l_Preset[l_Class][s_FieldName] ~= nil then
-						
+
 						if IsBasicType(s_Type) then
 							s_Value = self:ParseValue(s_Type, l_Preset[l_Class][s_FieldName])
-						
+
 						elseif l_Field.typeInfo.enum then
 							s_Value = tonumber(l_Preset[l_Class][s_FieldName])
-						
+
 						elseif s_Type == "TextureAsset" then
 							s_Value = self:GetSavedTexture(l_Preset[l_Class][s_FieldName])
 							if s_Value == nil then
 								m_Logger:Write("\t- TextureAsset has not been saved (" .. l_Preset[l_Class][s_FieldName] .. " | " .. tostring(l_Class) .. " | " .. tostring(s_FieldName) .. ")")
 							end
-						
+
 						elseif l_Field.typeInfo.array then
 							error("\t- Found unexpected array") -- TODO: Instead of error (that breaks the code), a continue should be used (unfortunately with goto), or set an "errorFound" true/false parameter to true and skip the component addition
 							return
-						
+
 						else
 							error("\t- Found unexpected DataContainer: " .. s_Type) -- TODO: Instead of error (that breaks the code), a continue should be used (unfortunately with goto), or set an "errorFound" true/false parameter to true and skip the component addition
 							return
 						end
-						
+
 						-- Set value
 						if s_Value ~= nil then
 							s_Class[firstToLower(s_FieldName)] = s_Value
 						end
 					end
-					
+
 					-- If not in the preset or incorrect value
 					if s_Value == nil then
 
 						-- Try to get original value
-						-- m_Logger:Write("Setting default value for field " .. s_FieldName .. " of class " .. l_Class .. " | " ..  tostring(s_Value))
+						-- m_Logger:Write("Setting default value for field " .. s_FieldName .. " of class " .. l_Class .. " | " ..tostring(s_Value))
 						s_Value = self:GetDefaultValue(l_Class, l_Field)
 
 						if s_Value == nil then
 							m_Logger:Write("\t- Failed to fetch original value: " .. tostring(l_Class) .. " | " .. tostring(s_FieldName))
-							
+
 							if s_FieldName == "FilmGrain" then -- fix FilmGrain texture
-								m_Logger:Write("\t\t- Fixing value for field " .. s_FieldName .. " of class " .. l_Class .. " | " ..  tostring(s_Value))
+								m_Logger:Write("\t\t- Fixing value for field " .. s_FieldName .. " of class " .. l_Class .. " | " .. tostring(s_Value))
 								s_Class[firstToLower(s_FieldName)] = TextureAsset(ResourceManager:FindInstanceByGuid(Guid'44AF771F-23D2-11E0-9C90-B6CDFDA832F1', Guid('1FD2F223-0137-2A0F-BC43-D974C2BD07B4')))
 							end
 						else
 							-- Applying original value
 							if IsBasicType(s_Type) then
 								s_Class[firstToLower(s_FieldName)] = s_Value
-							
+
 							elseif l_Field.typeInfo.enum then
 								s_Class[firstToLower(s_FieldName)] = tonumber(s_Value)
-							
+
 							elseif s_Type == "TextureAsset" then
 								s_Class[firstToLower(s_FieldName)] = TextureAsset(s_Value)
 
 							elseif l_Field.typeInfo.array then
 								m_Logger:Write("\t- Found unexpected array, ignoring")
-							
+
 							else
 								-- Its a DataContainer
 								s_Class[firstToLower(s_FieldName)] = _G[s_Type](s_Value)
@@ -441,8 +442,9 @@ function VEManagerClient:LoadPresets()
 	m_Logger:Write("Presets loaded")
 end
 
-
-function VEManagerClient:OnLevelLoaded(p_MapPath, p_GameModeName)
+---@param p_LevelName string
+---@param p_GameModeName string
+function VEManagerClient:OnLevelLoaded(p_LevelName, p_GameModeName)
 	self:LoadPresets()
 end
 
@@ -469,7 +471,7 @@ function VEManagerClient:GetDefaultValue(p_Class, p_Field)
 
 		if l_State.entityName == "Levels/Web_Loading/Lighting/Web_Loading_VE" then
 			goto continue
-		
+
 		elseif l_State.entityName ~= 'EffectEntity' then
 			local s_Class = l_State[firstToLower(p_Class)] --colorCorrection
 
@@ -493,7 +495,7 @@ function VEManagerClient:CreateEntity(p_Class, p_Guid)
 
 	if p_Guid == nil then
 		-- Clone the instance and return the clone with a randomly generated Guid
-		return _G[p_Class](s_Entity:Clone(GenerateGuid()))
+		return _G[p_Class](s_Entity:Clone(MathUtils:RandomGuid()))
 	else
 		return _G[p_Class](s_Entity:Clone(p_Guid))
 	end
@@ -520,7 +522,7 @@ function VEManagerClient:UpdateLerp(percentage)
 			transition = self.m_Presets[preset].transition
 		end
 
-		local lerpValue = self.m_Easing[transition](t,b,c,d)
+		local lerpValue = m_Easing[transition](t,b,c,d)
 
 		if PercentageComplete >= 1 or PercentageComplete < 0 then
 			self:SetVisibility(preset, self.m_Presets[preset].EndValue)
@@ -537,16 +539,18 @@ function VEManagerClient:SetLerpPriority(id) -- remove
 	end
 end
 
+---@param p_Delta number
+---@param p_SimulationDelta number
 function VEManagerClient:OnUpdateInput(p_Delta, p_SimulationDelta)
 	-- Check if DEV Keys are enabled
 	if VEM_CONFIG.DEV_ENABLE_TEST_KEYS then
 
 		-- Enable DebugUI with Custom Preset
 		if InputManager:WentKeyDown(VEM_CONFIG.DEV_SHOW_HIDE_CINEMATIC_TOOLS_KEY) and VEM_CONFIG.DEV_LOAD_CINEMATIC_TOOLS then
-			if g_CinematicTools.m_Visible then 
-				g_CinematicTools:HideUI()
+			if m_CinematicTools.m_Visible then
+				m_CinematicTools:HideUI()
 			else
-				g_CinematicTools:ShowUI()
+				m_CinematicTools:ShowUI()
 			end
 		end
 	end
@@ -575,7 +579,7 @@ function VEManagerClient:ParseValue(p_Type, p_Value)
 	elseif p_Type == "CString" then
 		return tostring(p_Value)
 
-	elseif  p_Type == "Float8" or
+	elseif p_Type == "Float8" or
 			p_Type == "Float16" or
 			p_Type == "Float32" or
 			p_Type == "Float64" or
@@ -600,7 +604,7 @@ function VEManagerClient:ParseValue(p_Type, p_Value)
 	elseif p_Type == "Vec4" then -- Vec4
 		local s_Vec = HandleVec(p_Value)
 		return Vec4(tonumber(s_Vec[1]), tonumber(s_Vec[2]), tonumber(s_Vec[3]), tonumber(s_Vec[4]))
-	
+
 	else
 		m_Logger:Write("Unhandled type: " .. p_Type)
 		return nil
@@ -613,16 +617,7 @@ function VEManagerClient:GetSavedTexture(p_Value)
 		return TextureAsset(_G['g_TextureAssets'][p_Value:lower()])
 	end
 
-	return
-end
-
-function h()
-	local vars = {"A","B","C","D","E","F","0","1","2","3","4","5","6","7","8","9"}
-	return vars[math.floor(MathUtils:GetRandomInt(1,16))]..vars[math.floor(MathUtils:GetRandomInt(1,16))]
-end
-
-function GenerateGuid()
-	return Guid(h()..h()..h()..h().."-"..h()..h().."-"..h()..h().."-"..h()..h().."-"..h()..h()..h()..h()..h()..h(), "D")
+	return nil
 end
 
 function HandleVec(vec)
