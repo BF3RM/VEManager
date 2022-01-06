@@ -1,5 +1,5 @@
 Config = {
-	EnableMKBKey = InputDeviceKeys.IDK_F9, --TODO: MOVE TO CONFIG
+	EnableMKBKey = InputDeviceKeys.IDK_F9,
 
 	-- TODO
 	ClickToDisableMKB = true

@@ -1,4 +1,4 @@
-require "__shared/Config"
+require "__shared/GuiConfig"
 
 local mouseDisabled = true
 
@@ -14,7 +14,7 @@ Events:Subscribe("Level:Loaded", function()
 end)
 
 Events:Subscribe("Player:UpdateInput", function()
-	if InputManager:WentKeyDown(VEE_CONFIG.EDITOR_ENABLE_KEY) then --TODO: ADD TO VEE CONFIG
+	if InputManager:WentKeyDown(Config.EnableMKBKey) and VEM_CONFIG.DEV_ENABLE_TEST_KEYS and VEM_CONFIG.DEV_LOAD_CINEMATIC_TOOLS then
 		mouseDisabled = not mouseDisabled
 
 		if mouseDisabled then

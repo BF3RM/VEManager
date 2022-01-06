@@ -1,18 +1,20 @@
----@class VEEditor
-VEEditor = class 'VEEditor'
+---@class CinematicTools
+CinematicTools = class 'CinematicTools'
 
 ---@type Logger
-local Logger = Logger("VEEditor", false)
+local m_Logger = Logger("CinematicTools", false)
 
+---@type Time
+local m_Time = require("Modules/Time")
 
-function VEEditor:__init()
-	Logger:Write("Initializing Cinematic Tools")
+function CinematicTools:__init()
+	m_Logger:Write("Initializing Cinematic Tools")
 	self:RegisterVars()
 	self:RegisterEvents()
 	self:CreateGUI()
 end
 
-function VEEditor:RegisterVars()
+function CinematicTools:RegisterVars()
 	self.m_CineState = nil
 	self.m_CinePriority = 10000010
 	self.m_PresetName = nil
@@ -25,44 +27,51 @@ function VEEditor:RegisterVars()
 	self.m_CineStateReloaded = false
 end
 
-function VEEditor:RegisterEvents()
+
+function CinematicTools:RegisterEvents()
+	--self.m_VisualStateAddedEvent = Events:Subscribe('VE:StateAdded', self, self.OnVisualStateAdded)
 	self.m_PresetsLoadEvent = Events:Subscribe('VEManager:PresetsLoaded', self, self.OnPresetsLoaded)
-	self.m_DataFromServer = NetEvents:Subscribe('VEEditor:DataToClient', self, self.OnDataFromServer)
-	self.m_ShowUIEvent = NetEvents:Subscribe('VEEditor:ShowUI', self, self.ShowUI)
-	self.m_HideUIEvent = NetEvents:Subscribe('VEEditor:HideUI', self, self.HideUI)
+	self.m_DataFromServer = NetEvents:Subscribe('CinematicTools:DataToClient', self, self.OnDataFromServer)
+	self.m_ShowUIEvent = NetEvents:Subscribe('CinematicTools:ShowUI', self, self.ShowUI)
+	self.m_HideUIEvent = NetEvents:Subscribe('CinematicTools:HideUI', self, self.HideUI)
 end
 
-function VEEditor:OnPresetsLoaded()
-	if VEE_CONFIG.LOAD_CINEMATIC_TOOLS then
-		Events:Dispatch("VEManager:EnablePreset", "EditorLayer")
+
+function CinematicTools:OnPresetsLoaded()
+	if VEM_CONFIG.DEV_LOAD_CINEMATIC_TOOLS then
+		g_VEManagerClient:EnablePreset("CinematicTools")
 	end
 
-	if VEE_CONFIG.SHOW_CINEMATIC_TOOLS_ON_LEVEL_LOAD then
+	if VEM_CONFIG.DEV_SHOW_CINEMATIC_TOOLS_ON_LEVEL_LOAD then
 		self:ShowUI()
 	else
 		self:HideUI()
 	end
 end
 
-function VEEditor:OnDataFromServer(p_Path, p_Value, p_Net)
+
+function CinematicTools:OnDataFromServer(p_Path, p_Value, p_Net)
 	if self.m_CollaborationEnabled == true then
 		self:GenericCallback(p_Path, p_Value, p_Net)
 	end
 end
 
-function VEEditor:ShowUI()
-	Events:Dispatch("VEManager:UpdateVisibility", "EditorLayer", 10, 1.0)
+
+function CinematicTools:ShowUI()
+	g_VEManagerClient:UpdateVisibility("CinematicTools", 10, 1.0)
 	DebugGUI:ShowUI()
 	self.m_Visible = true
 end
 
-function VEEditor:HideUI()
-	Events:Dispatch("VEManager:UpdateVisibility", "EditorLayer", 10, 0.0)
+
+function CinematicTools:HideUI()
+	g_VEManagerClient:UpdateVisibility("CinematicTools", 10, 0.0)
 	DebugGUI:HideUI()
 	self.m_Visible = false
 end
 
-function VEEditor:GenericSeperator(p_Str, p_Sep)
+
+function CinematicTools:GenericSeperator(p_Str, p_Sep)
 	if p_Sep == nil then
 		p_Sep = "%s"
 	end
@@ -75,7 +84,8 @@ function VEEditor:GenericSeperator(p_Str, p_Sep)
 	return s_Table
 end
 
-function VEEditor:GetVisualEnvironmentState(...)
+
+function CinematicTools:GetVisualEnvironmentState(...)
 	--Get all visual environment states
 	local args = { ... }
 	local states = VisualEnvironmentManager:GetStates()
@@ -85,7 +95,7 @@ function VEEditor:GetVisualEnvironmentState(...)
 			state.priority = 1
 		end
 
-		Logger:Write(state.priority .. ' | ' .. state.visibility)
+		m_Logger:Write(state.priority .. ' | ' .. state.visibility)
 
 		for i,priority in pairs(args) do
 			if state.priority == priority then
@@ -96,19 +106,20 @@ function VEEditor:GetVisualEnvironmentState(...)
 	return nil
 end
 
-function VEEditor:GenericCallback(p_Path, p_Value, p_Net)
+
+function CinematicTools:GenericCallback(p_Path, p_Value, p_Net)
 	if self.m_CineState == nil or self.m_CineStateReloaded then
 		self.m_CineState = self:GetVisualEnvironmentState(self.m_CinePriority)
-		Logger:Write('CineState Name: ' .. self.m_CineState.entityName)
-		Logger:Write('CineState ID: ' .. self.m_CineState.stateId)
-		Logger:Write('CineState Priority: ' .. self.m_CineState.priority)
+		m_Logger:Write('CineState Name: ' .. self.m_CineState.entityName)
+		m_Logger:Write('CineState ID: ' .. self.m_CineState.stateId)
+		m_Logger:Write('CineState Priority: ' .. self.m_CineState.priority)
 		self.m_CineState.excluded = false
 		self.m_CineStateReloaded = false
 	end
 	VisualEnvironmentManager:SetDirty(true)
 
 	local s_PathTable = self:GenericSeperator(p_Path, "\\.")
-	--Logger:Write(s_PathTable)
+	--m_Logger:Write(s_PathTable)
 
 	-- Check if value is already saved
 	if #s_PathTable == 1 and self.m_CineState[s_PathTable[1]] == p_Value then
@@ -118,7 +129,7 @@ function VEEditor:GenericCallback(p_Path, p_Value, p_Net)
 	elseif #s_PathTable == 3 and self.m_CineState[s_PathTable[1]][s_PathTable[2]][s_PathTable[3]] == p_Value then
 		return
 	elseif #s_PathTable < 1 or #s_PathTable > 3 then
-		Logger:Write('Unsupported number of path categories ( ' .. p_Path .. ' -> ' .. tostring(#s_PathTable) .. ')')
+		m_Logger:Write('Unsupported number of path categories ( ' .. p_Path .. ' -> ' .. tostring(#s_PathTable) .. ')')
 		return
 	end
 
@@ -138,19 +149,16 @@ function VEEditor:GenericCallback(p_Path, p_Value, p_Net)
 	-- TODO: Automatically Detect Path for Loaded Texture
 	if type(p_Value) == "userdata" then
 		if p_Value.typeInfo and p_Value.typeInfo.name == 'TextureAsset' then
-			Logger:Write('TextureAsset found')
+			m_Logger:Write('TextureAsset found')
 
 			if s_PathTable[1] == 'sky' then
-				local s_ReceivedVE = Events:Subscribe("VEManager:RequestVE", "EditorLayer") --TODO: ADD VEMANAGER EVENT
-				Events:Dispatch("VEManager:RequestVE", "EditorLayer")
-
-				for _, l_Class in pairs(s_ReceivedVE.components) do
+				for _, l_Class in pairs(g_VEManagerClient.m_Presets["CinematicTools"]["ve"].components) do
 
 					if l_Class.typeInfo.name == "SkyComponentData" then
 						local s_Class = SkyComponentData(l_Class)
 						s_Class:MakeWritable()
 						s_Class[s_PathTable[2]] = p_Value
-						Logger:Write('Applying New Texture')
+						m_Logger:Write('Applying New Texture')
 					end
 				end
 			else
@@ -158,26 +166,28 @@ function VEEditor:GenericCallback(p_Path, p_Value, p_Net)
 			end
 
 			-- Reload Entity
-			Events:Dispatch('VEManager:Reload', 'EditorLayer') -- TODO: ADD VEMANAGER EVENT
+			g_VEManagerClient:Reload('CinematicTools')
 		end
 	end
 
-	Logger:Write('Value saved at ' .. p_Path)
+	m_Logger:Write('Value saved at ' .. p_Path)
 
 	VisualEnvironmentManager:SetDirty(true)
 	if p_Net ~= true and self.m_CollaborationEnabled then
 		self:SendForCollaboration(p_Path, p_Value)
-		Logger:Write('Sending: ' .. p_Path .. ' with Value: ' .. tostring(p_Value))
+		m_Logger:Write('Sending: ' .. p_Path .. ' with Value: ' .. tostring(p_Value))
 	end
 end
 
-function VEEditor:SendForCollaboration(p_Path, p_Value)
-	NetEvents:Send('VEEditor:CollaborationData', p_Path, p_Value)
+
+function CinematicTools:SendForCollaboration(p_Path, p_Value)
+	NetEvents:Send('CinematicTools:CollaborationData', p_Path, p_Value)
 end
 
 -- TODO Automate through typeInfo
-function VEEditor:CreateGUI()
-	Logger:Write("*Creating GUI for VEEditor")
+
+function CinematicTools:CreateGUI()
+	m_Logger:Write("*Creating GUI for Cinematic Tools")
 	-- Sky
 	DebugGUI:Folder("Sky", function ()
 
@@ -529,7 +539,7 @@ function VEEditor:CreateGUI()
 
 		DebugGUI:Checkbox('Color Grading Enable', false, function(p_Value)
 			--self:GenericCallback("colorCorrection.colorGradingEnable", p_Value)
-			NetEvents:Send('VEEditor:ColorCorrection', p_Value)
+			NetEvents:Send('CinematicTools:ColorCorrection', p_Value)
 		end)
 
 		DebugGUI:Range('Brightness Red', {DefValue = 1.0, Min = 0.0, Max = 1.5, Step = self.VALUE_STEP}, function(p_Value)
@@ -1071,12 +1081,12 @@ function VEEditor:CreateGUI()
 					counter = counter + 1
 
 					if counter == p_Value then
-						Logger:Write("Selected Texture index " .. tostring(p_Value) .. " (" .. l_Key .. ")" )
+						m_Logger:Write("Selected Texture index " .. tostring(p_Value) .. " (" .. l_Key .. ")" )
 						self.selectedTexture = TextureAsset(l_Value)
 					end
 				end
 			else
-				Logger:Write("No loaded textures have been saved!" )
+				m_Logger:Write("No loaded textures have been saved!" )
 			end
 		end)
 
@@ -1088,7 +1098,7 @@ function VEEditor:CreateGUI()
 		DebugGUI:Button('Apply Texture', function(p_Value)
 
 			if self.selectedTextureDestination == nil or self.selectedTexture == nil then
-				Logger:Write('Texture not Valid')
+				m_Logger:Write('Texture not Valid')
 				return
 			end
 			self:GenericCallback(self.selectedTextureDestination, self.selectedTexture)
@@ -1106,7 +1116,7 @@ function VEEditor:CreateGUI()
 		DebugGUI:Checkbox('Enable', false, function(p_Value)
 			if p_Value == true then
 				s_Enabled = true
-				Events:Dispatch('VEManager:AddTime', 43200, true, 86400)		--TODO: Add Event to VEM
+				m_Time:Add(43200, true, 86400)
 			elseif p_Value == false and s_Enabled == true then
 				s_Enabled = false
 				NetEvents:Send('TimeServer:DisableNet')
@@ -1121,7 +1131,7 @@ function VEEditor:CreateGUI()
 			local s_Rounded = MathUtils:Round(p_Value)
 
 			if s_SyncChangesWithServer == true and s_Enabled == true then
-				Logger:Write('Dispatching Time: ' .. p_Value)
+				m_Logger:Write('Dispatching Time: ' .. p_Value)
 
 				if p_Value == self.m_CurrentSyncedTimeValue then
 					return
@@ -1142,13 +1152,13 @@ function VEEditor:CreateGUI()
 
 		DebugGUI:Text('Load Preset', 'Insert JSON String here', function(p_Preset)
 			local s_Decoded = json.decode(p_Preset)
-			Events:Dispatch('VEManager:DestroyVE', 'EditorLayer')	-- TODO: Add Event to VEManager
-			--g_VEManagerClient.m_Presets["EditorLayer"].ve = nil
-			--g_VEManagerClient.m_Presets["EditorLayer"].entity:Destroy()
-			s_Decoded.Name = "EditorLayer"
+			g_VEManagerClient.m_Presets["CinematicTools"].ve = nil
+			g_VEManagerClient.m_Presets["CinematicTools"].entity:Destroy()
+			s_Decoded.Name = "CinematicTools"
 			s_Decoded.Priority = 10
-			Events:Dispatch('VEManager:ReplaceVE', 'EditorLayer', s_Decoded)		-- TODO: Add Event to VEManager
-			Events:Dispatch('VEManager:ReloadPresets')		-- TODO: Add Event to VEManager
+			g_VEManagerClient.m_RawPresets["CinematicTools"] = s_Decoded
+			g_VEManagerClient:LoadPresets()
+			Logger:Write("Reloaded Cinetools Preset")
 			self.m_CineStateReloaded = true
 		end)
 
@@ -1167,7 +1177,7 @@ function VEEditor:CreateGUI()
 end
 
 -- Print Preset as JSON
-function VEEditor:ParseJSON()
+function CinematicTools:ParseJSON()
 
 	if self.m_CineState == nil then
 		return 'No changes'
@@ -1246,7 +1256,7 @@ function VEEditor:ParseJSON()
 	return s_Result
 end
 
-function VEEditor:ParseValue(p_Type, p_Value)
+function CinematicTools:ParseValue(p_Type, p_Value)
 	-- This separates Vectors. Let's just do it to everything, who cares?
 	if (p_Type == "Boolean") then
 		return "\"" .. tostring(p_Value) .. "\""
@@ -1276,9 +1286,9 @@ function VEEditor:ParseValue(p_Type, p_Value)
 	elseif (p_Type == "Vec4") then -- Vec4
 		return "\"(" .. p_Value.x .. ", " .. p_Value.y .. ", " .. p_Value.z .. ", " .. p_Value.w .. ")\""
 	else
-		Logger:Write("Unhandled type: " .. p_Type)
+		m_Logger:Write("Unhandled type: " .. p_Type)
 		return nil
 	end
 end
 
-return VEEditor()
+return CinematicTools()
