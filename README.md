@@ -3,6 +3,9 @@ A Visual Environment manager for Venice Unleashed.
 
 It's used to create and manage VE presets. Presets can either be created with the  integrated tools/editor or by using the separate mod [CinematicTools](https://github.com/Powback/VEXT-CinematicTools).
 
+## Youtube Tutorial Series
+https://www.youtube.com/watch?v=QYPJ4MNQbos&list=PLqlU85EO4crIPxk10YXiKDXE67lU-dM4m
+
 ## Config Options (Shared/Config.lua):
 	A number of features can be switched on/off from the config file located at Shared/Config.lua
 
