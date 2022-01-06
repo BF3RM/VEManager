@@ -1101,8 +1101,8 @@ function CinematicTools:CreateGUI()
 				m_Logger:Write('Texture not Valid')
 				return
 			end
-			self.m_CineStateReloaded = true
 			self:GenericCallback(self.selectedTextureDestination, self.selectedTexture)
+			self.m_CineStateReloaded = true
 		end)
 
 	end)
