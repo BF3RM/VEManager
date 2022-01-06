@@ -84,6 +84,7 @@ function VEManagerClient:RegisterEvents()
 	Events:Subscribe('VEManager:DestroyVE', self, self.OnVEDestroyRequest)
 	Events:Subscribe('VEManager:ReplaceVE', self, self.OnVEReplaceRequest)
 	Events:Subscribe('VEManager:Reinitialize', self, self.LoadPresets)
+	Events:Subscribe('VEManager:ApplyTexture', self, self.ApplyTexture)
 	--Events:Subscribe('VEManager:Crossfade', self, self.Crossfade)
 
 	-- Events from server
@@ -211,7 +212,7 @@ function VEManagerClient:CheckPresetID(p_ID)
 end
 
 function VEManagerClient:OnVEGuidRequest(p_ID)
-	local s_Guid = self.m_Presets[p_ID].instanceGuid:ToString()
+	local s_Guid = self.m_Presets[p_ID].instanceGuid
 
 	if s_Guid ~= nil then
 		Events:Dispatch("VEManager:AnswerVEGuidRequest", s_Guid)
@@ -229,6 +230,18 @@ function VEManagerClient:OnVEReplaceRequest(p_ID, p_Replacement)
 	self:CheckPresetID(p_ID)
 
 	self.m_RawPresets[p_ID] = p_Replacement
+end
+
+function VEManagerClient:ApplyTexture(p_ID, p_Guid, p_Path)
+	for _, l_Class in pairs(self.m_Presets[p_ID]["ve"].components) do
+
+		if l_Class.typeInfo.name == "SkyComponentData" then
+			local s_Class = SkyComponentData(l_Class)
+			s_Class:MakeWritable()
+			s_Class[p_Path] = TextureAsset(ResourceManager:SearchForInstanceByGuid(p_Guid))
+		end
+	end
+	self:Reload(p_ID)
 end
 
 
