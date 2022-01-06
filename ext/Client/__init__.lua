@@ -79,6 +79,11 @@ function VEManagerClient:RegisterEvents()
 	Events:Subscribe('VEManager:FadeTo', self, self.FadeTo)
 	Events:Subscribe('VEManager:FadeOut', self, self.FadeOut)
 	Events:Subscribe('VEManager:Lerp', self, self.Lerp)
+	Events:Subscribe('VEManager:VEGuidRequest', self, self.OnVEGuidRequest)
+	Events:Subscribe('VEManager:Reload', self, self.Reload)
+	Events:Subscribe('VEManager:DestroyVE', self, self.OnVEDestroyRequest)
+	Events:Subscribe('VEManager:ReplaceVE', self, self.OnVEReplaceRequest)
+	Events:Subscribe('VEManager:Reinitialize', self, self.LoadPresets)
 	--Events:Subscribe('VEManager:Crossfade', self, self.Crossfade)
 
 	-- Events from server
@@ -204,6 +209,29 @@ function VEManagerClient:CheckPresetID(p_ID)
 		error("\nThere isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(p_ID))
 	end
 end
+
+function VEManagerClient:OnVEGuidRequest(p_ID)
+	local s_Guid = self.m_Presets[p_ID].instanceGuid:ToString()
+
+	if s_Guid ~= nil then
+		Events:Dispatch("VEManager:AnswerVEGuidRequest", s_Guid)
+	end
+end
+
+function VEManagerClient:OnVEDestroyRequest(p_ID)
+	self:CheckPresetID(p_ID)
+
+	self.m_Presets[p_ID].ve = nil
+	self.m_Presets[p_ID].entity:Destroy()
+end
+
+function VEManagerClient:OnVEReplaceRequest(p_ID, p_Replacement)
+	self:CheckPresetID(p_ID)
+
+	self.m_RawPresets[p_ID] = p_Replacement
+end
+
+
 
 --[[function VEManagerClient:Crossfade(id1, id2, time)
 	if self.m_Presets[id1] == nil then
