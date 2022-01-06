@@ -24,19 +24,20 @@ function CinematicTools:RegisterVars()
 	self.VALUE_STEP = 0.0001
 	self.VALUE_MIN = -25000
 	self.VALUE_MAX = 25000
+	self.m_CineStateReloaded = false
 end
 
 
 function CinematicTools:RegisterEvents()
 	--self.m_VisualStateAddedEvent = Events:Subscribe('VE:StateAdded', self, self.OnVisualStateAdded)
-	self.m_LevelLoadEvent = Events:Subscribe('Level:Loaded', self, self.OnLevelLoaded)
+	self.m_PresetsLoadEvent = Events:Subscribe('VEManager:PresetsLoaded', self, self.OnPresetsLoaded)
 	self.m_DataFromServer = NetEvents:Subscribe('CinematicTools:DataToClient', self, self.OnDataFromServer)
 	self.m_ShowUIEvent = NetEvents:Subscribe('CinematicTools:ShowUI', self, self.ShowUI)
 	self.m_HideUIEvent = NetEvents:Subscribe('CinematicTools:HideUI', self, self.HideUI)
 end
 
 
-function CinematicTools:OnLevelLoaded()
+function CinematicTools:OnPresetsLoaded()
 	if VEM_CONFIG.DEV_LOAD_CINEMATIC_TOOLS then
 		g_VEManagerClient:EnablePreset("CinematicTools")
 	end
@@ -94,7 +95,7 @@ function CinematicTools:GetVisualEnvironmentState(...)
 			state.priority = 1
 		end
 
-		--m_Logger:Write(state.priority .. ' | ' .. state.visibility)
+		m_Logger:Write(state.priority .. ' | ' .. state.visibility)
 
 		for i,priority in pairs(args) do
 			if state.priority == priority then
@@ -107,12 +108,13 @@ end
 
 
 function CinematicTools:GenericCallback(p_Path, p_Value, p_Net)
-	if self.m_CineState == nil then
+	if self.m_CineState == nil or self.m_CineStateReloaded then
 		self.m_CineState = self:GetVisualEnvironmentState(self.m_CinePriority)
 		m_Logger:Write('CineState Name: ' .. self.m_CineState.entityName)
 		m_Logger:Write('CineState ID: ' .. self.m_CineState.stateId)
 		m_Logger:Write('CineState Priority: ' .. self.m_CineState.priority)
 		self.m_CineState.excluded = false
+		self.m_CineStateReloaded = false
 	end
 	VisualEnvironmentManager:SetDirty(true)
 
@@ -1099,6 +1101,7 @@ function CinematicTools:CreateGUI()
 				m_Logger:Write('Texture not Valid')
 				return
 			end
+			self.m_CineStateReloaded = true
 			self:GenericCallback(self.selectedTextureDestination, self.selectedTexture)
 		end)
 
@@ -1147,6 +1150,18 @@ function CinematicTools:CreateGUI()
 	-- Utilities
 	DebugGUI:Folder("Utilities", function ()
 
+		DebugGUI:Text('Load Preset', 'Insert JSON String here', function(p_Preset)
+			local s_Decoded = json.decode(p_Preset)
+			g_VEManagerClient.m_Presets["CinematicTools"].ve = nil
+			g_VEManagerClient.m_Presets["CinematicTools"].entity:Destroy()
+			s_Decoded.Name = "CinematicTools"
+			s_Decoded.Priority = 10
+			g_VEManagerClient.m_RawPresets["CinematicTools"] = s_Decoded
+			g_VEManagerClient:LoadPresets()
+			Logger:Write("Reloaded Cinetools Preset")
+			self.m_CineStateReloaded = true
+		end)
+
 		DebugGUI:Checkbox('Enable Collaboration Mode', false, function(p_Value)
 			self.m_CollaborationEnabled = p_Value
 		end)
@@ -1158,9 +1173,7 @@ function CinematicTools:CreateGUI()
 		DebugGUI:Button('Print Preset', function(value)
 			print(self:ParseJSON())
 		end)
-
 	end)
-
 end
 
 -- Print Preset as JSON
