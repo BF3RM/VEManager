@@ -7,10 +7,6 @@ local m_Logger = Logger("Server", false)
 ---@type TimeServer
 local m_TimeServer = require 'TimeServer'
 
-if VEM_CONFIG.DEV_LOAD_CINEMATIC_TOOLS then
-	require 'CinetoolsServer'
-end
-
 function VEManagerServer:__init()
 	m_Logger:Write('Initializing VEManagerServer')
 	self:RegisterEvents()

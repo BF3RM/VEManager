@@ -12,13 +12,6 @@ local m_Patches = require('Modules/Patches')
 require '__shared/DebugGUI'
 require 'DebugGui'
 
----@type CinematicTools|nil
-local m_CinematicTools = nil
-
-if VEM_CONFIG.DEV_LOAD_CINEMATIC_TOOLS then
-	m_CinematicTools = require 'Modules/CinematicTools'
-end
-
 function VEManagerClient:__init()
 	m_Logger:Write('Initializing VEManagerClient')
 	self:RegisterVars()
@@ -60,7 +53,6 @@ function VEManagerClient:RegisterVars()
 		DefaultMorning = require("Presets/DefaultMorning"),
 		DefaultNoon = require("Presets/DefaultNoon"),
 		DefaultEvening = require("Presets/DefaultEvening"),
-		CinematicTools = require("Presets/CustomPreset") -- TODO: Remove when you can change presets from tools
 	}
 end
 
