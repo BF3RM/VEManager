@@ -4,7 +4,7 @@ A Visual Environment manager for Venice Unleashed.
 It's used to create and manage VE presets. Presets can either be created with [VEEditor](https://github.com/BF3RM/VEEditor) or[CinematicTools](https://github.com/Powback/VEXT-CinematicTools).
 
 ## Youtube Tutorial Series
-https://www.youtube.com/watch?v=QYPJ4MNQbos&list=PLqlU85EO4crIPxk10YXiKDXE67lU-dM4m
+https://youtube.com/playlist?list=PLqlU85EO4crIPxk10YXiKDXE67lU-dM4m
 
 If you have questions contact IllustrisJack#5355 on Discord.
 
