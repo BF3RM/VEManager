@@ -20,6 +20,8 @@ local m_ExplosionGuids = {
 	Guid("C2B0B503-7F38-4CF4-833F-0468EE51C7F2"),
 }
 
+g_TextureAssets = {}
+
 function Patches:__init()
 	m_Logger:Write("Initializing Patches")
 
@@ -131,6 +133,21 @@ function Patches:onMenuBgLoaded(p_Instance)
 	s_MenuBg.priority = 100099
 
 	m_Logger:Write("Menu background patched (priority increased)")
+end
+
+---@param p_Partition DatabasePartition
+function Patches:LogComponents(p_Partition)
+	if p_Partition.primaryInstance:Is('TextureAsset') then
+		local name = p_Partition.name:lower()
+		-- Save /sky/ or /Lighting/ textures
+		for _, l_Parameter in pairs(VEM_CONFIG.DEV_SEARCH_PARAMETERS_FOR_TEXTURES) do
+			if string.find(name, l_Parameter) then
+				m_Logger:Write("Loaded TextureAsset: " .. name)
+				-- Save texture in the list
+				g_TextureAssets[name] = p_Partition.primaryInstance
+			end
+		end
+	end
 end
 
 return Patches()

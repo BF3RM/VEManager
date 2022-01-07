@@ -9,8 +9,6 @@ local m_Easing = require "Modules/Easing"
 local m_Time = require 'Modules/Time'
 ---@type Patches
 local m_Patches = require('Modules/Patches')
-require '__shared/DebugGUI'
-require 'DebugGui'
 
 function VEManagerClient:__init()
 	m_Logger:Write('Initializing VEManagerClient')
@@ -267,8 +265,7 @@ function VEManagerClient:OnPartitionLoaded(p_Partition)
 		m_Patches:ExplosionsVE(p_Partition)
 	end]]
 
-	-- Log Sky & Lighting Textures
-	m_Patches:LogComponents(p_Partition)
+	Patches:LogComponents(p_Partition)
 
 	-- Send to Time (to apply patches)
 	m_Time:OnPartitionLoaded(p_Partition)
@@ -575,19 +572,6 @@ end
 ---@param p_Delta number
 ---@param p_SimulationDelta number
 function VEManagerClient:OnUpdateInput(p_Delta, p_SimulationDelta)
-	-- Check if DEV Keys are enabled
-	if VEM_CONFIG.DEV_ENABLE_TEST_KEYS then
-
-		-- Enable DebugUI with Custom Preset
-		if InputManager:WentKeyDown(VEM_CONFIG.DEV_SHOW_HIDE_CINEMATIC_TOOLS_KEY) and VEM_CONFIG.DEV_LOAD_CINEMATIC_TOOLS then
-			if m_CinematicTools.m_Visible then
-				m_CinematicTools:HideUI()
-			else
-				m_CinematicTools:ShowUI()
-			end
-		end
-	end
-
 	if #self.m_Lerping > 0 then
 		self:UpdateLerp(p_Delta)
 	end
