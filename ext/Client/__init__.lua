@@ -87,10 +87,13 @@ end
 
 ]]
 
+---@param p_ID string|nil
+---@param p_Preset string|nil
 function VEManagerClient:RegisterPreset(p_ID, p_Preset)
 	self.m_RawPresets[p_ID] = json.decode(p_Preset)
 end
 
+---@param p_ID string|nil
 function VEManagerClient:EnablePreset(p_ID)
 	self:CheckPresetID(p_ID)
 
@@ -104,6 +107,7 @@ function VEManagerClient:EnablePreset(p_ID)
 	self.m_Presets[p_ID].entity:FireEvent("Enable")
 end
 
+---@param p_ID string|nil
 function VEManagerClient:DisablePreset(p_ID)
 	self:CheckPresetID(p_ID)
 
@@ -114,6 +118,8 @@ function VEManagerClient:DisablePreset(p_ID)
 	self.m_Presets[p_ID].entity:FireEvent("Disable")
 end
 
+---@param p_ID string|nil
+---@param p_Visibility number|nil
 function VEManagerClient:SetVisibility(p_ID, p_Visibility)
 	self:CheckPresetID(p_ID)
 
@@ -123,7 +129,9 @@ function VEManagerClient:SetVisibility(p_ID, p_Visibility)
 	self:Reload(p_ID)
 end
 
-function VEManagerClient:UpdateVisibility(p_ID, p_Priority, p_Visibility)
+---@param p_ID string|nil
+---@param p_Visibility number|nil
+function VEManagerClient:UpdateVisibility(p_ID, p_Visibility)
 	self:CheckPresetID(p_ID)
 
 	if math.abs(self.m_Presets[p_ID]["logic"].visibility - p_Visibility) < self.m_VisibilityUpdateThreshold then
@@ -134,7 +142,7 @@ function VEManagerClient:UpdateVisibility(p_ID, p_Priority, p_Visibility)
 	self.m_Presets[p_ID]["ve"].visibility = p_Visibility
 
 	local s_States = VisualEnvironmentManager:GetStates()
-	local s_FixedPriority = 10000000 + p_Priority
+	local s_FixedPriority = 10000000 + self.m_Presets[p_ID].priority
 
 	for _, l_State in pairs(s_States) do
 		if l_State.priority == s_FixedPriority then
@@ -145,6 +153,10 @@ function VEManagerClient:UpdateVisibility(p_ID, p_Priority, p_Visibility)
 	end
 end
 
+---@param p_ID string|nil
+---@param p_Class string|nil
+---@param p_Property string|nil
+---@param p_Value any|nil
 function VEManagerClient:SetSingleValue(p_ID, p_Priority, p_Class, p_Property, p_Value)
 	self:CheckPresetID(p_ID)
 
@@ -160,10 +172,14 @@ function VEManagerClient:SetSingleValue(p_ID, p_Priority, p_Class, p_Property, p
 	end
 end
 
+---@param p_ID string|nil
+---@param p_Time number|nil
 function VEManagerClient:FadeIn(p_ID, p_Time)
 	self:FadeTo(p_ID, 0, 1, p_Time)
 end
 
+---@param p_ID string|nil
+---@param p_Time number|nil
 function VEManagerClient:FadeOut(p_ID, p_Time)
 	self:CheckPresetID(p_ID)
 
@@ -171,6 +187,10 @@ function VEManagerClient:FadeOut(p_ID, p_Time)
 	self:FadeTo(p_ID, s_VisibilityStart, 0, p_Time)
 end
 
+---@param p_ID string|nil
+---@param p_VisibilityStart number|nil
+---@param p_VisibilityEnd number|nil
+---@param p_Time number|nil
 function VEManagerClient:FadeTo(p_ID, p_VisibilityStart, p_VisibilityEnd, p_Time)
 	self:CheckPresetID(p_ID)
 
@@ -181,7 +201,9 @@ function VEManagerClient:FadeTo(p_ID, p_VisibilityStart, p_VisibilityEnd, p_Time
 	self.m_Lerping[#self.m_Lerping + 1] = p_ID
 end
 
-
+---@param p_ID string|nil
+---@param p_Value number|nil
+---@param p_Time number|nil
 function VEManagerClient:Lerp(p_ID, p_Value, p_Time)
 	self:CheckPresetID(p_ID)
 
@@ -193,6 +215,7 @@ function VEManagerClient:Lerp(p_ID, p_Value, p_Time)
 	self.m_Lerping[#self.m_Lerping +1] = p_ID
 end
 
+---@param p_ID string|nil
 function VEManagerClient:CheckPresetID(p_ID)
 	if p_ID == nil then
 		error("\nThe preset ID provided is nil.")
@@ -201,6 +224,7 @@ function VEManagerClient:CheckPresetID(p_ID)
 	end
 end
 
+---@param p_ID string|nil
 function VEManagerClient:OnVEGuidRequest(p_ID)
 	local s_Guid = self.m_Presets[p_ID].instanceGuid
 
@@ -209,6 +233,7 @@ function VEManagerClient:OnVEGuidRequest(p_ID)
 	end
 end
 
+---@param p_ID string|nil
 function VEManagerClient:OnVEDestroyRequest(p_ID)
 	self:CheckPresetID(p_ID)
 
@@ -216,12 +241,17 @@ function VEManagerClient:OnVEDestroyRequest(p_ID)
 	self.m_Presets[p_ID].entity:Destroy()
 end
 
+---@param p_ID string|nil
+---@param p_Replacement string|nil
 function VEManagerClient:OnVEReplaceRequest(p_ID, p_Replacement)
 	self:CheckPresetID(p_ID)
 
 	self.m_RawPresets[p_ID] = p_Replacement
 end
 
+---@param p_ID string|nil
+---@param p_Guid Guid|nil
+---@param p_Path string|nil
 function VEManagerClient:ApplyTexture(p_ID, p_Guid, p_Path)
 	for _, l_Class in pairs(self.m_Presets[p_ID]["ve"].components) do
 
@@ -307,6 +337,7 @@ function VEManagerClient:InitializePresets()
 	end
 end
 
+---@param p_ID string|nil
 function VEManagerClient:Reload(p_ID)
 	self.m_Presets[p_ID].entity:FireEvent("Disable")
 	self.m_Presets[p_ID].entity:FireEvent("Enable")
@@ -362,6 +393,7 @@ function VEManagerClient:LoadPresets()
 
 		self.m_Presets[l_Preset.Name]["ve"] = s_VE
 		self.m_Presets[l_Preset.Name]["type"] = l_Preset.Type
+		self.m_Presets[l_Preset.Name]["priority"] = l_Preset.Priority
 
 		--Foreach class
 		local s_ComponentCount = 0
@@ -483,6 +515,8 @@ function VEManagerClient:OnLevelDestroy()
 	collectgarbage('collect')
 end
 
+---@param p_Class string
+---@param p_Field DataContainer
 function VEManagerClient:GetDefaultValue(p_Class, p_Field)
 	if p_Field.typeInfo.enum then
 
@@ -519,6 +553,8 @@ function VEManagerClient:GetDefaultValue(p_Class, p_Field)
 end
 
 -- This one is a little dirty.
+---@param p_Class string
+---@param p_Guid Guid
 function VEManagerClient:CreateEntity(p_Class, p_Guid)
 	-- Create the instance
 	local s_Entity = _G[p_Class]()
@@ -560,12 +596,6 @@ function VEManagerClient:UpdateLerp(percentage)
 		else
 			self:SetVisibility(preset, lerpValue)
 		end
-	end
-end
-
-function VEManagerClient:SetLerpPriority(id) -- remove
-	if self.m_Presets[id].type ~= 'Time' then
-		return
 	end
 end
 
@@ -714,9 +744,4 @@ function IsBasicType( typ )
 	return false
 end
 
--- Singleton.
-if g_VEManagerClient == nil then
-	g_VEManagerClient = VEManagerClient()
-end
-
-return g_VEManagerClient
+return VEManagerClient()

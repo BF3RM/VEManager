@@ -168,10 +168,10 @@ function Time:ResetForcedValues()
 
 		m_Logger:Write(" - " .. tostring(s_ID) .. " (" .. tostring(l_Index) .. ")")
 
-		if g_VEManagerClient.m_Presets[s_ID] ~= nil then
-			g_VEManagerClient.m_Presets[s_ID]["ve"].priority = self.m_SavedValuesForReset[l_Index].priority
+		if VEManagerClient.m_Presets[s_ID] ~= nil then
+			VEManagerClient.m_Presets[s_ID]["ve"].priority = self.m_SavedValuesForReset[l_Index].priority
 
-			for _, l_Class in pairs(g_VEManagerClient.m_Presets[s_ID]["ve"].components) do -- Remove patches
+			for _, l_Class in pairs(VEManagerClient.m_Presets[s_ID]["ve"].components) do -- Remove patches
 				-- Un-patch Sun Positions
 				if l_Class.typeInfo.name == "OutdoorLightComponentData" then
 					local s_Class = OutdoorLightComponentData(l_Class)
@@ -216,7 +216,7 @@ function Time:Disable()
 
 	-- Hide Presets
 	for l_ID, l_ValueTable in pairs(self.m_SortedDynamicPresetsTable) do
-		g_VEManagerClient:SetVisibility(l_ValueTable[1], 0)
+		VEManagerClient:SetVisibility(l_ValueTable[1], 0)
 	end
 
 	-- Reset patched values
@@ -239,15 +239,15 @@ function Time:Add(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 		-- Get all dynamic presets
 		-- (if no Dynamic presets, DefaultDynamic presets will be loaded)
 		if #self.m_SortedDynamicPresetsTable < 2 then
-			for l_ID, l_Preset in pairs(g_VEManagerClient.m_Presets) do
+			for l_ID, l_Preset in pairs(VEManagerClient.m_Presets) do
 
-				if g_VEManagerClient.m_RawPresets[l_ID] ~= nil then
-					if g_VEManagerClient.m_RawPresets[l_ID].Sky ~= nil and g_VEManagerClient.m_RawPresets[l_ID].OutdoorLight ~= nil then
+				if VEManagerClient.m_RawPresets[l_ID] ~= nil then
+					if VEManagerClient.m_RawPresets[l_ID].Sky ~= nil and VEManagerClient.m_RawPresets[l_ID].OutdoorLight ~= nil then
 
-						local s_SunRotationY = tonumber(g_VEManagerClient.m_RawPresets[l_ID].OutdoorLight.SunRotationY)
-						local s_SkyBrightness = tonumber(g_VEManagerClient.m_RawPresets[l_ID].Sky.BrightnessScale)
+						local s_SunRotationY = tonumber(VEManagerClient.m_RawPresets[l_ID].OutdoorLight.SunRotationY)
+						local s_SkyBrightness = tonumber(VEManagerClient.m_RawPresets[l_ID].Sky.BrightnessScale)
 
-						if g_VEManagerClient.m_Presets[l_ID].type == l_Type and s_SunRotationY ~= nil then
+						if VEManagerClient.m_Presets[l_ID].type == l_Type and s_SunRotationY ~= nil then
 							-- Check if night mode (moon enabled)
 							if s_SkyBrightness ~= nil and s_SkyBrightness <= 0.01 then
 								s_SunRotationY = 360 - s_SunRotationY
@@ -273,13 +273,13 @@ function Time:Add(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 
 		-- Save default values to revert later
 		self.m_SavedValuesForReset[l_Index] = {}
-		self.m_SavedValuesForReset[l_Index].priority = g_VEManagerClient.m_Presets[s_ID]["ve"].priority
+		self.m_SavedValuesForReset[l_Index].priority = VEManagerClient.m_Presets[s_ID]["ve"].priority
 
 		-- Update preset priority to match it's position in the day-night cycle (morning -> night etc)
-		g_VEManagerClient.m_Presets[s_ID]["ve"].priority = l_Index + self.m_BaseDynamicPresetPriority
+		VEManagerClient.m_Presets[s_ID]["ve"].priority = l_Index + self.m_BaseDynamicPresetPriority
 
 		-- Patch Sun Positions
-		for _, l_Class in pairs(g_VEManagerClient.m_Presets[s_ID]["ve"].components) do
+		for _, l_Class in pairs(VEManagerClient.m_Presets[s_ID]["ve"].components) do
 
 			if l_Class.typeInfo.name == "OutdoorLightComponentData" then
 				local s_Class = OutdoorLightComponentData(l_Class)
@@ -442,12 +442,12 @@ function Time:Run()
 		end
 
 		if self.m_FirstRun then
-			g_VEManagerClient:SetVisibility(s_ID, s_Factor)
+			VEManagerClient:SetVisibility(s_ID, s_Factor)
 		else
-			g_VEManagerClient:UpdateVisibility(s_ID, l_Index + 10, s_Factor)
+			VEManagerClient:UpdateVisibility(s_ID, l_Index + 10, s_Factor)
 
 			if s_Factor ~= 0 then -- TODO: Check if cloud speed works properly
-				g_VEManagerClient:SetSingleValue(s_ID, l_Index + 10, 'sky', 'cloudLayer1Speed', self.m_CloudSpeed)
+				VEManagerClient:SetSingleValue(s_ID, l_Index + 10, 'sky', 'cloudLayer1Speed', self.m_CloudSpeed)
 			end
 		end
 	end

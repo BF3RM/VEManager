@@ -15,6 +15,7 @@
 	],
     "settings": {
         "Lua.workspace.maxPreload": 10000,
-        "Lua.diagnostics.libraryFiles": "Disable"
+		"Lua.diagnostics.libraryFiles": "Disable",
+		"lua.targetVersion": "5.2"
     }
 }
