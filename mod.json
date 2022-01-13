@@ -3,7 +3,7 @@
 	"Authors": ["Powback", "IllustrisJack", "Lesley", "GreatApo", "FoolHen"],
 	"Description": "Handles VE, internally uses DebugGUI by Breaknix for CinematicTools",
 	"URL": "https://github.com/BF3RM/VEManager",
-	"Version": "0.2.3",
+	"Version": "0.2.4",
 	"HasWebUI": false,
 	"HasVeniceEXT": true
 }
