@@ -157,11 +157,11 @@ end
 ---@param p_Class string|nil
 ---@param p_Property string|nil
 ---@param p_Value any|nil
-function VEManagerClient:SetSingleValue(p_ID, p_Priority, p_Class, p_Property, p_Value)
+function VEManagerClient:SetSingleValue(p_ID, p_Class, p_Property, p_Value)
 	self:CheckPresetID(p_ID)
 
 	local s_States = VisualEnvironmentManager:GetStates()
-	local s_FixedPriority = 10000000 + p_Priority
+	local s_FixedPriority = 10000000 + self.m_Presets[p_ID].priority
 
 	for _, l_State in pairs(s_States) do
 		if l_State.priority == s_FixedPriority then
