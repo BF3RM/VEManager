@@ -508,6 +508,7 @@ end
 ---@param p_GameModeName string
 function VEManagerClient:OnLevelLoaded(p_LevelName, p_GameModeName)
 	self:LoadPresets()
+	Patches:OnLevelLoaded(p_LevelName, p_GameModeName)
 end
 
 function VEManagerClient:OnLevelDestroy()
