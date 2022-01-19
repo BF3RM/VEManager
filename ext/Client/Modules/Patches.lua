@@ -29,6 +29,13 @@ function Patches:__init()
 	ResourceManager:RegisterInstanceLoadHandler(m_MenuBgGuids.partition, m_MenuBgGuids.instance, self, self.onMenuBgLoaded)
 end
 
+function Patches:OnLevelLoaded(p_LevelName, p_GameMode, p_IsDedicatedServer)
+	-- Disable Vanilla Explosion VEs
+	if VEM_CONFIG.PATCH_EXPLOSIONS_COLOR_CORRECTION then
+		Patches:DisableExplosionVisualEnvironments()
+	end
+end
+
 function Patches:Components(p_Partition)
 	if p_Partition.primaryInstance:Is("MeshAsset") then
 		Patches:MeshAsset(p_Partition.primaryInstance)
@@ -146,6 +153,24 @@ function Patches:LogComponents(p_Partition)
 				-- Save texture in the list
 				g_TextureAssets[name] = p_Partition.primaryInstance
 			end
+		end
+	end
+end
+
+function Patches:DisableExplosionVisualEnvironments()
+	-- get entityData
+	local explosionVES = {
+		blackoutVE = ResourceManager:FindInstanceByGuid(Guid("0A0EB8EE-5849-4C88-B4B9-92A9C2AA6402"), Guid("7B728DE9-327D-45E2-9309-1E602DEDFA2D")),
+		blastMediumVE = ResourceManager:FindInstanceByGuid(Guid("CD2CD917-DA8F-11DF-98D7-E3FCCF5294D0"), Guid("FA601D0C-F768-F778-6C3C-EF9667C4A7A4")),
+		blastLargeVE = ResourceManager:FindInstanceByGuid(Guid("EB5AFBB4-ED86-421E-88AE-5E0CE8B27C85"), Guid("DD94E869-9E43-43E6-B7CF-D4A9B017C693")),
+		blastGasMediumVE = ResourceManager:FindInstanceByGuid(Guid("D9BFDE03-6E38-4638-87BD-C79A34FBE598"), Guid("3A65A77C-10BB-4D06-8589-04C29AF89560"))
+	}
+
+	for _, l_EntityData in pairs(explosionVES) do
+		if l_EntityData ~= nil then
+			l_EntityData = GameEntityData(l_EntityData)
+			l_EntityData:MakeWritable()
+			l_EntityData.enabled = false
 		end
 	end
 end
