@@ -298,7 +298,7 @@ function VEManagerClient:OnPartitionLoaded(p_Partition)
 	Patches:LogComponents(p_Partition)
 
 	-- Send to Time (to apply patches)
-	m_Time:OnPartitionLoaded(p_Partition)
+	Time:OnPartitionLoaded(p_Partition)
 end
 
 function VEManagerClient:GetState(...)
