@@ -11,6 +11,8 @@ local m_Time = require 'Modules/Time'
 local m_Patches = require('Modules/Patches')
 ---@type VEEditor
 local m_VEEditor = require('Modules/VEEditor')
+---@type DebugGUI
+local m_DebugGUI = require('DebugGUI')
 
 function VEManagerClient:__init()
 	m_Logger:Write('Initializing VEManagerClient')

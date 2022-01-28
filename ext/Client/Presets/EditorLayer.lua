@@ -1,4 +1,4 @@
-return [[
+return json.decode([[
 {
     "CharacterLighting":{
         "CharacterLightEnable":"false",
@@ -224,4 +224,4 @@ return [[
     "Priority": "10",
     "Visibility": "1"
 }
-]]
+]])
