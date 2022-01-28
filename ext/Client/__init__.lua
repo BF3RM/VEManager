@@ -9,6 +9,8 @@ local m_Easing = require "Modules/Easing"
 local m_Time = require 'Modules/Time'
 ---@type Patches
 local m_Patches = require('Modules/Patches')
+---@type VEEditor
+local m_VEEditor = require('Modules/VEEditor')
 
 function VEManagerClient:__init()
 	m_Logger:Write('Initializing VEManagerClient')
@@ -51,6 +53,7 @@ function VEManagerClient:RegisterVars()
 		DefaultMorning = require("Presets/DefaultMorning"),
 		DefaultNoon = require("Presets/DefaultNoon"),
 		DefaultEvening = require("Presets/DefaultEvening"),
+		EditorLayer = require("Presets/EditorLayer"),
 	}
 end
 
