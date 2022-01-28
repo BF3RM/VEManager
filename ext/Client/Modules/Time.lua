@@ -449,9 +449,4 @@ function Time:Run()
 	end
 end
 
--- Singleton.
-if g_Time == nil then
-	g_Time = Time()
-end
-
-return g_Time
+return Time()
