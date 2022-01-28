@@ -73,7 +73,7 @@ function VEManagerClient:RegisterModules()
 	require 'Modules/Time'
 	require '__shared/DebugGUI'
 	require 'DebugGui'
-	require 'Modules/CinematicTools'
+	require 'Modules/VEEditor'
 end
 
 
