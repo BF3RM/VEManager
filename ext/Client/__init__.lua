@@ -112,7 +112,7 @@ function VEManagerClient:DisablePreset(p_ID)
 	self:CheckPresetID(p_ID)
 
 	m_Logger:Write("Disabling preset: " .. tostring(p_ID))
-	self.m_Presets[p_ID]["logic"].visibility = 1
+	self.m_Presets[p_ID]["logic"].visibility = 0
 	self.m_Presets[p_ID]["ve"].visibility = 0
 	self.m_Presets[p_ID]["ve"].enabled = false
 	self.m_Presets[p_ID].entity:FireEvent("Disable")
@@ -123,10 +123,11 @@ end
 function VEManagerClient:SetVisibility(p_ID, p_Visibility)
 	self:CheckPresetID(p_ID)
 
-	self.m_Presets[p_ID]["logic"].visibility = p_Visibility
-	self.m_Presets[p_ID]["ve"].visibility = p_Visibility
-
-	self:Reload(p_ID)
+	if self.m_Presets[p_ID]["ve"].enabled then
+		self.m_Presets[p_ID]["logic"].visibility = p_Visibility
+		self.m_Presets[p_ID]["ve"].visibility = p_Visibility
+		self:Reload(p_ID)
+	end
 end
 
 ---@param p_ID string|nil
