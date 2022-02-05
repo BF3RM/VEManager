@@ -296,7 +296,7 @@ function VEManagerClient:OnPartitionLoaded(p_Partition)
 		m_Patches:ExplosionsVE(p_Partition)
 	end]]
 
-	Patches:LogComponents(p_Partition)
+	m_Patches:LogComponents(p_Partition)
 
 	-- Send to Time (to apply patches)
 	m_Time:OnPartitionLoaded(p_Partition)
@@ -436,7 +436,7 @@ function VEManagerClient:LoadPresets()
 							s_Value = tonumber(l_Preset[l_Class][s_FieldName])
 
 						elseif s_Type == "TextureAsset" then
-							s_Value = self:GetSavedTexture(l_Preset[l_Class][s_FieldName])
+							s_Value = m_Patches:GetSavedTexture(l_Preset[l_Class][s_FieldName])
 							if s_Value == nil then
 								m_Logger:Write("\t- TextureAsset has not been saved (" .. l_Preset[l_Class][s_FieldName] .. " | " .. tostring(l_Class) .. " | " .. tostring(s_FieldName) .. ")")
 							end
@@ -509,16 +509,17 @@ end
 ---@param p_GameModeName string
 function VEManagerClient:OnLevelLoaded(p_LevelName, p_GameModeName)
 	self:LoadPresets()
-	Patches:OnLevelLoaded(p_LevelName, p_GameModeName)
+	m_Patches:OnLevelLoaded(p_LevelName, p_GameModeName)
 end
 
 function VEManagerClient:OnLevelDestroy()
+	m_Patches:OnLevelDestroy()
 	self:RegisterVars()
 	collectgarbage('collect')
 end
 
 ---@param p_Class string
----@param p_Field DataContainer
+---@param p_Field FieldInformation
 function VEManagerClient:GetDefaultValue(p_Class, p_Field)
 	if p_Field.typeInfo.enum then
 
@@ -658,15 +659,6 @@ function VEManagerClient:ParseValue(p_Type, p_Value)
 		m_Logger:Write("Unhandled type: " .. p_Type)
 		return nil
 	end
-end
-
-function VEManagerClient:GetSavedTexture(p_Value)
-	-- Check if Texture has been saved
-	if _G['g_TextureAssets'][p_Value:lower()] then
-		return TextureAsset(_G['g_TextureAssets'][p_Value:lower()])
-	end
-
-	return nil
 end
 
 function HandleVec(vec)
