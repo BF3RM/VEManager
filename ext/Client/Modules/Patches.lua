@@ -20,8 +20,6 @@ local m_ExplosionGuids = {
 	Guid("C2B0B503-7F38-4CF4-833F-0468EE51C7F2"),
 }
 
-local m_TextureAssets = {}
-
 function Patches:__init()
 	m_Logger:Write("Initializing Patches")
 
@@ -32,43 +30,29 @@ end
 function Patches:OnLevelLoaded(p_LevelName, p_GameMode, p_IsDedicatedServer)
 	-- Disable Vanilla Explosion VEs
 	if VEM_CONFIG.PATCH_EXPLOSIONS_COLOR_CORRECTION then
-		Patches:DisableExplosionVisualEnvironments()
+		self:DisableExplosionVisualEnvironments()
 	end
-end
-
-function Patches:OnLevelDestroy()
-	-- reset TextureAssets table
-	m_TextureAssets = {}
-end
-
-function Patches:GetSavedTexture(p_Value)
-	-- Check if Texture has been saved
-	if m_TextureAssets[p_Value:lower()] then
-		return TextureAsset(m_TextureAssets[p_Value:lower()])
-	end
-
-	return nil
 end
 
 function Patches:Components(p_Partition)
 	if p_Partition.primaryInstance:Is("MeshAsset") then
-		Patches:MeshAsset(p_Partition.primaryInstance)
+		self:MeshAsset(p_Partition.primaryInstance)
 	elseif p_Partition.primaryInstance:Is("ObjectVariation") then
 		for _, l_Instance in pairs(p_Partition.instances) do
 			if l_Instance:Is('MeshMaterialVariation') then -- ObjectVariation is the primary instance
-				Patches:MeshMaterialVariation(l_Instance)
+				self:MeshMaterialVariation(l_Instance)
 			end
 		end
 	elseif p_Partition.primaryInstance:Is("Blueprint") then
 		for _, l_Instance in pairs(p_Partition.instances) do
 			if l_Instance:Is('LensFlareEntityData') then -- PrefabBlueprint is the primary instance
-				Patches:LensFlareEntityData(l_Instance)
+				self:LensFlareEntityData(l_Instance)
 			elseif l_Instance:Is('LocalLightEntityData') then -- Blueprint is the primary instance
-				Patches:LightSmoothening(l_Instance)
+				self:LightSmoothening(l_Instance)
 			-- elseif l_Instance:Is('SkyComponentData') then -- VisualEnvironmentBlueprint is the primary instance
-				-- Patches:SkyComponentData(l_Instance)
+				-- self:SkyComponentData(l_Instance)
 			-- elseif l_Instance:Is('EffectEntityData') then -- EffectBlueprint is the primary instance
-				-- Patches:EffectEntityData(l_Instance)
+				-- self:EffectEntityData(l_Instance)
 			end
 		end
 	end
@@ -154,21 +138,6 @@ function Patches:onMenuBgLoaded(p_Instance)
 	s_MenuBg.priority = 100099
 
 	m_Logger:Write("Menu background patched (priority increased)")
-end
-
----@param p_Partition DatabasePartition
-function Patches:LogComponents(p_Partition)
-	if p_Partition.primaryInstance:Is('TextureAsset') then
-		local name = p_Partition.name:lower()
-		-- Save /sky/ or /Lighting/ textures
-		for _, l_Parameter in pairs(VEM_CONFIG.DEV_SEARCH_PARAMETERS_FOR_TEXTURES) do
-			if string.find(name, l_Parameter) then
-				m_Logger:Write("Loaded TextureAsset: " .. name)
-				-- Save texture in the list
-				m_TextureAssets[name] = p_Partition.primaryInstance
-			end
-		end
-	end
 end
 
 function Patches:DisableExplosionVisualEnvironments()
