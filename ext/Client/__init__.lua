@@ -519,7 +519,7 @@ function VEManagerClient:OnLevelDestroy()
 end
 
 ---@param p_Class string
----@param p_Field DataContainer
+---@param p_Field FieldInformation
 function VEManagerClient:GetDefaultValue(p_Class, p_Field)
 	if p_Field.typeInfo.enum then
 
