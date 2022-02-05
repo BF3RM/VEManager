@@ -20,7 +20,7 @@ local m_ExplosionGuids = {
 	Guid("C2B0B503-7F38-4CF4-833F-0468EE51C7F2"),
 }
 
-g_TextureAssets = {}
+local m_TextureAssets = {}
 
 function Patches:__init()
 	m_Logger:Write("Initializing Patches")
@@ -34,6 +34,20 @@ function Patches:OnLevelLoaded(p_LevelName, p_GameMode, p_IsDedicatedServer)
 	if VEM_CONFIG.PATCH_EXPLOSIONS_COLOR_CORRECTION then
 		Patches:DisableExplosionVisualEnvironments()
 	end
+end
+
+function Patches:OnLevelDestroy()
+	-- reset TextureAssets table
+	m_TextureAssets = {}
+end
+
+function Patches:GetSavedTexture(p_Value)
+	-- Check if Texture has been saved
+	if m_TextureAssets[p_Value:lower()] then
+		return TextureAsset(m_TextureAssets[p_Value:lower()])
+	end
+
+	return nil
 end
 
 function Patches:Components(p_Partition)
@@ -151,7 +165,7 @@ function Patches:LogComponents(p_Partition)
 			if string.find(name, l_Parameter) then
 				m_Logger:Write("Loaded TextureAsset: " .. name)
 				-- Save texture in the list
-				g_TextureAssets[name] = p_Partition.primaryInstance
+				m_TextureAssets[name] = p_Partition.primaryInstance
 			end
 		end
 	end
