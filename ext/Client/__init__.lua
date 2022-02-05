@@ -296,8 +296,6 @@ function VEManagerClient:OnPartitionLoaded(p_Partition)
 		m_Patches:ExplosionsVE(p_Partition)
 	end]]
 
-	m_Patches:LogComponents(p_Partition)
-
 	-- Send to Time (to apply patches)
 	m_Time:OnPartitionLoaded(p_Partition)
 end
@@ -342,6 +340,18 @@ end
 function VEManagerClient:Reload(p_ID)
 	self.m_Presets[p_ID].entity:FireEvent("Disable")
 	self.m_Presets[p_ID].entity:FireEvent("Enable")
+end
+
+---@param p_Name string
+---@return TextureAsset|nil
+function VEManagerClient:GetTexture(p_Name)
+	local s_TextureAsset = ResourceManager:SearchForDataContainer(p_Name)
+
+	if s_TextureAsset == nil then
+		return nil
+	else
+		return TextureAsset(s_TextureAsset)
+	end
 end
 
 function VEManagerClient:LoadPresets()
@@ -436,7 +446,7 @@ function VEManagerClient:LoadPresets()
 							s_Value = tonumber(l_Preset[l_Class][s_FieldName])
 
 						elseif s_Type == "TextureAsset" then
-							s_Value = m_Patches:GetSavedTexture(l_Preset[l_Class][s_FieldName])
+							s_Value = self:GetTexture(l_Preset[l_Class][s_FieldName])
 							if s_Value == nil then
 								m_Logger:Write("\t- TextureAsset has not been saved (" .. l_Preset[l_Class][s_FieldName] .. " | " .. tostring(l_Class) .. " | " .. tostring(s_FieldName) .. ")")
 							end
@@ -513,7 +523,6 @@ function VEManagerClient:OnLevelLoaded(p_LevelName, p_GameModeName)
 end
 
 function VEManagerClient:OnLevelDestroy()
-	m_Patches:OnLevelDestroy()
 	self:RegisterVars()
 	collectgarbage('collect')
 end
