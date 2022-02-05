@@ -2,7 +2,7 @@
 VEManagerClient = class 'VEManagerClient'
 
 ---@type Logger
-local m_Logger = Logger("VEManagerClient", true)
+local m_Logger = Logger("VEManagerClient", false)
 
 local m_Easing = require "Modules/Easing"
 ---@type Time
