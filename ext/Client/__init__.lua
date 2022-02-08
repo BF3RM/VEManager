@@ -123,11 +123,9 @@ end
 function VEManagerClient:SetVisibility(p_ID, p_Visibility)
 	self:CheckPresetID(p_ID)
 
-	if self.m_Presets[p_ID]["ve"].enabled then
-		self.m_Presets[p_ID]["logic"].visibility = p_Visibility
-		self.m_Presets[p_ID]["ve"].visibility = p_Visibility
-		self:Reload(p_ID)
-	end
+	self.m_Presets[p_ID]["logic"].visibility = p_Visibility
+	self.m_Presets[p_ID]["ve"].visibility = p_Visibility
+	self:Reload(p_ID)
 end
 
 ---@param p_ID string|nil
