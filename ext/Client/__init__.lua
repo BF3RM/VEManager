@@ -96,6 +96,7 @@ end
 ---@param p_ID string|nil
 function VEManagerClient:EnablePreset(p_ID)
 	self:CheckPresetID(p_ID)
+	Patches:OverwriteBaseColorCorrection(p_ID)
 
 	-- Reset any existing lerping
 	self.m_Lerping = {}

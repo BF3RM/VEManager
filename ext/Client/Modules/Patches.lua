@@ -12,12 +12,9 @@ local m_MenuBgGuids = {
 	instance = Guid("F26B7ECE-A71D-93AC-6C49-B6223BF424D6", "D")
 }
 
-local m_ExplosionGuids = {
-	Guid("0A0EB8EE-5849-4C88-B4B9-92A9C2AA6402"),
-	Guid("D9BFDE03-6E38-4638-87BD-C79A34FBE598"),
-	Guid("EB5AFBB4-ED86-421E-88AE-5E0CE8B27C85"),
-	Guid("CD2CD917-DA8F-11DF-98D7-E3FCCF5294D0"),
-	Guid("C2B0B503-7F38-4CF4-833F-0468EE51C7F2"),
+local m_RelevantColorCorrection = {
+	-- https://github.com/EmulatorNexus/Venice-EBX/blob/master/FX/VisualEnviroments/Fullscreen/VE_FS_DmgHitEffect.txt
+	dmgHitEffect = {partition = Guid("1C1B3484-6B73-40D8-B147-0EC4526D62A0"), instance = Guid("26F0FAD2-B92A-4D20-AFA5-8F4E2AAB98DE"), multiplier = { contrast = Vec3(1.1, 1.1, 1.1), saturation = Vec3(0.442, 0.002, 0.002)}}
 }
 
 function Patches:__init()
@@ -27,6 +24,9 @@ function Patches:__init()
 	ResourceManager:RegisterInstanceLoadHandler(m_MenuBgGuids.partition, m_MenuBgGuids.instance, self, self.onMenuBgLoaded)
 end
 
+---@param p_LevelName string
+---@param p_GameMode string
+---@param p_IsDedicatedServer boolean
 function Patches:OnLevelLoaded(p_LevelName, p_GameMode, p_IsDedicatedServer)
 	-- Disable Vanilla Explosion VEs
 	if VEM_CONFIG.PATCH_EXPLOSIONS_COLOR_CORRECTION then
@@ -34,6 +34,25 @@ function Patches:OnLevelLoaded(p_LevelName, p_GameMode, p_IsDedicatedServer)
 	end
 end
 
+---@param p_CalledPreset string|nil
+function Patches:OverwriteBaseColorCorrection(p_CalledPreset)
+	local s_NewBase = VEManagerClient[p_CalledPreset]["ve"].colorCorrection:Clone()
+
+	for _, l_ModificationTable in pairs(m_RelevantColorCorrection) do
+		local s_ModifiedColorCorrection = ResourceManager:FindInstanceByGuid(l_ModificationTable[1], l_ModificationTable[2])
+
+		if s_ModifiedColorCorrection ~= nil then
+			s_ModifiedColorCorrection = ColorCorrectionComponentData(s_ModifiedColorCorrection)
+			s_ModifiedColorCorrection:MakeWritable()
+			s_ModifiedColorCorrection = s_NewBase
+			s_ModifiedColorCorrection.contrast = s_ModifiedColorCorrection.contrast * l_ModificationTable[3].contrast
+			s_ModifiedColorCorrection.saturation = s_ModifiedColorCorrection.saturation * l_ModificationTable[3].saturation
+			m_Logger:Write("Modified Base Color Correction")
+		end
+	end
+end
+
+---@param p_Partition DatabasePartition
 function Patches:Components(p_Partition)
 	if p_Partition.primaryInstance:Is("MeshAsset") then
 		self:MeshAsset(p_Partition.primaryInstance)
@@ -58,20 +77,7 @@ function Patches:Components(p_Partition)
 	end
 end
 
----@param p_Partition DatabasePartition
-function Patches:ExplosionsVE(p_Partition)
-	local s_IsExplosionGuid = m_Easing.tableHasValue(m_ExplosionGuids, p_Partition.guid)
-
-	for _, l_Instance in pairs(p_Partition.instances) do
-		if s_IsExplosionGuid and l_Instance:Is('ColorCorrectionComponentData') then
-			local s_ComponentData = ColorCorrectionComponentData(l_Instance)
-			s_ComponentData:MakeWritable()
-			s_ComponentData.enable = false
-			m_Logger:Write("*Disable Explosion CC Component")
-		end
-	end
-end
-
+---@param p_Instance MeshAsset|nil
 function Patches:MeshAsset(p_Instance)
 	if m_PatchDatatable.meshes[p_Instance.partition.name] then
 		local mesh = MeshAsset(p_Instance)
@@ -83,6 +89,7 @@ function Patches:MeshAsset(p_Instance)
 	end
 end
 
+---@param p_Instance MeshMaterialVariation|nil
 function Patches:MeshMaterialVariation(p_Instance)
 	if m_PatchDatatable.variations[p_Instance.partition.name] then
 		local variation = MeshMaterialVariation(p_Instance)
@@ -91,6 +98,7 @@ function Patches:MeshMaterialVariation(p_Instance)
 	end
 end
 
+---@param p_Instance EffectEntityData|nil
 function Patches:EffectEntityData(p_Instance)
 	if m_PatchDatatable.effects[p_Instance.partition.name] then
 		local effect = EffectEntityData(p_Instance)
@@ -100,6 +108,7 @@ function Patches:EffectEntityData(p_Instance)
 	end
 end
 
+---@param p_Instance SkyComponentData|nil
 function Patches:SkyComponentData(p_Instance)
 	local sky = SkyComponentData(p_Instance)
 	sky:MakeWritable()
@@ -114,6 +123,7 @@ function Patches:SkyComponentData(p_Instance)
 	end
 end
 
+---@param p_Instance LensFlareEntityData|nil
 function Patches:LensFlareEntityData(p_Instance)
 	local flares = LensFlareEntityData(p_Instance)
 	flares:MakeWritable()
@@ -122,6 +132,7 @@ function Patches:LensFlareEntityData(p_Instance)
 	end
 end
 
+---@param p_Instance LocalLightEntityData|nil
 function Patches:LightSmoothening(p_Instance)
 	local BetterLight = LocalLightEntityData(p_Instance)
 	BetterLight:MakeWritable()
@@ -130,6 +141,7 @@ function Patches:LightSmoothening(p_Instance)
 	BetterLight.attenuationOffset = BetterLight.attenuationOffset * 17.5
 end
 
+---@param p_Instance VisualEnvironmentEntityData|nil
 function Patches:onMenuBgLoaded(p_Instance)
 	-- Increase priority of menu bg
 	-- https://github.com/EmulatorNexus/Venice-EBX/blob/f06c290fa43c80e07985eda65ba74c59f4c01aa0/UI/Assets/MenuVisualEnvironment.txt#L140
