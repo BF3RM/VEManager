@@ -5,7 +5,7 @@ local m_PatchDatatable = require('Modules/PatchDatatable')
 local m_Easing = require('Modules/Easing')
 
 ---@type Logger
-local m_Logger = Logger("Patches", false)
+local m_Logger = Logger("Patches", true)
 
 local m_MenuBgGuids = {
 	partition = Guid("3A3E5533-4B2A-11E0-A20D-FE03F1AD0E2F", "D"),
@@ -34,20 +34,20 @@ function Patches:OnLevelLoaded(p_LevelName, p_GameMode, p_IsDedicatedServer)
 	end
 end
 
----@param p_CalledPreset string|nil
-function Patches:OverwriteBaseColorCorrection(p_CalledPreset)
-	local s_NewBase = VEManagerClient[p_CalledPreset]["ve"].colorCorrection:Clone()
+---@param p_CurrentColorCorrection ColorCorrectionComponentData|nil
+function Patches:OverwriteBaseColorCorrection(p_CurrentColorCorrection)
+	local s_NewBase = p_CurrentColorCorrection:Clone()
 
 	for _, l_ModificationTable in pairs(m_RelevantColorCorrection) do
-		local s_ModifiedColorCorrection = ResourceManager:FindInstanceByGuid(l_ModificationTable[1], l_ModificationTable[2])
+		local s_ModifiedColorCorrection = ResourceManager:FindInstanceByGuid(l_ModificationTable["partition"], l_ModificationTable["instance"])
 
-		if s_ModifiedColorCorrection ~= nil then
+		if s_ModifiedColorCorrection ~= nil and s_NewBase ~= nil then
+			s_ModifiedColorCorrection = s_NewBase
 			s_ModifiedColorCorrection = ColorCorrectionComponentData(s_ModifiedColorCorrection)
 			s_ModifiedColorCorrection:MakeWritable()
-			s_ModifiedColorCorrection = s_NewBase
-			s_ModifiedColorCorrection.contrast = s_ModifiedColorCorrection.contrast * l_ModificationTable[3].contrast
-			s_ModifiedColorCorrection.saturation = s_ModifiedColorCorrection.saturation * l_ModificationTable[3].saturation
-			m_Logger:Write("Modified Base Color Correction")
+			s_ModifiedColorCorrection.contrast = s_ModifiedColorCorrection.contrast * l_ModificationTable["multiplier"].contrast
+			s_ModifiedColorCorrection.saturation = s_ModifiedColorCorrection.saturation * l_ModificationTable["multiplier"].saturation
+			m_Logger:Write("Modified Base Color Correction & Applied Original CC Factors")
 		end
 	end
 end

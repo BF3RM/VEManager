@@ -96,7 +96,13 @@ end
 ---@param p_ID string|nil
 function VEManagerClient:EnablePreset(p_ID)
 	self:CheckPresetID(p_ID)
-	Patches:OverwriteBaseColorCorrection(p_ID)
+
+	-- Patch Color Correction Base
+	for _, l_Component in pairs(self.m_Presets[p_ID]["ve"].components) do
+		if l_Component:Is("ColorCorrectionComponentData") then
+			m_Patches:OverwriteBaseColorCorrection(l_Component)
+		end
+	end
 
 	-- Reset any existing lerping
 	self.m_Lerping = {}
