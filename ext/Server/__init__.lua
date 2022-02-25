@@ -10,27 +10,12 @@ local m_TimeServer = require 'TimeServer'
 function VEManagerServer:__init()
 	m_Logger:Write('Initializing VEManagerServer')
 	self:RegisterEvents()
-	self:RegisterRCON()
 end
 
 function VEManagerServer:RegisterEvents()
 	if VEM_CONFIG.DEV_ENABLE_CHAT_COMMANDS then
 		Events:Subscribe('Player:Chat', self, self.ChatCommands)
 	end
-end
-
-function VEManagerServer:RegisterRCON()
-	RCON:RegisterCommand('VEM:RegisterViaRCON', 0, self.OnRCONRegister)
-end
-
----@param p_RawPreset string
-function VEManagerServer:OnRCONRegister(p_RawPreset)
-	local s_Preset = json.decode(p_RawPreset)
-	m_Logger:Write('RCON Preset Call: ' .. s_Preset.name)
-	if s_Preset.name ~= nil then
-		NetEvents:Broadcast('VEManager:RCONRegister', s_Preset.name, p_RawPreset)
-	end
-	s_Preset = nil
 end
 
 ---@param p_Player Player|nil
