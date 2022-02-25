@@ -535,7 +535,6 @@ function VEManagerClient:LoadPresets()
 	for l_ID, l_Preset in pairs(self.m_Presets) do
 		table.insert(s_PresetList, l_ID)
 	end
-	-- This table provides info about all loaded presets to other mods
 	Events:Dispatch("VEManager:PresetsLoaded", s_PresetList)
 	m_Logger:Write("Presets loaded")
 end
