@@ -73,12 +73,13 @@ function VEManagerClient:RegisterEvents()
 	Events:Subscribe('VEManager:Reload', self, self.Reload)
 	Events:Subscribe('VEManager:DestroyVE', self, self.OnVEDestroyRequest)
 	Events:Subscribe('VEManager:ReplaceVE', self, self.OnVEReplaceRequest)
-	Events:Subscribe('VEManager:Reinitialize', self, self.LoadPresets)
+	Events:Subscribe('VEManager:Reinitialize', self, self.Reinitialize)
 	Events:Subscribe('VEManager:ApplyTexture', self, self.ApplyTexture)
 	--Events:Subscribe('VEManager:Crossfade', self, self.Crossfade)
 
 	-- Events from server
 	NetEvents:Subscribe('VEManager:EnablePreset', self, self.EnablePreset)
+	NetEvents:Subscribe('VEManager:RCONRegister', self, self.OnRCONRegister)
 end
 
 --[[
@@ -263,6 +264,15 @@ function VEManagerClient:ApplyTexture(p_ID, p_Guid, p_Path)
 	self:Reload(p_ID)
 end
 
+---@param p_RawPreset string
+function VEManagerClient:OnRCONRegister(p_ID, p_RawPreset)
+	if p_ID ~= nil and p_RawPreset ~= nil then
+		self.m_RawPresets[p_ID] = p_RawPreset
+	else 
+		m_Logger:Error('Received RCON Preset is invalid')
+	end
+	self:Reinitialize()
+end
 
 
 --[[function VEManagerClient:Crossfade(id1, id2, time)
@@ -350,6 +360,17 @@ function VEManagerClient:GetTexture(p_Name)
 	else
 		return TextureAsset(s_TextureAsset)
 	end
+end
+
+function VEManagerClient:Reinitialize()
+	for l_Index, l_Preset in pairs(self.m_Presets) do
+		if l_Preset['entity'] ~= nil then
+			l_Preset['entity']:Destroy()
+		end
+	end 
+	self.m_Presets = {}
+	m_Logger:Write('Destroyed Presets .. Reinitializing now:')
+	self:LoadPresets()
 end
 
 function VEManagerClient:LoadPresets()
@@ -509,7 +530,12 @@ function VEManagerClient:LoadPresets()
 		s_LVEED.visibility = 0
 	end
 	self:InitializePresets()
-	Events:Dispatch("VEManager:PresetsLoaded")
+
+	local s_PresetList = {}
+	for l_ID, l_Preset in pairs(self.m_Presets) do
+		table.insert(s_PresetList, l_ID)
+	end
+	Events:Dispatch("VEManager:PresetsLoaded", s_PresetList)
 	m_Logger:Write("Presets loaded")
 end
 
