@@ -63,6 +63,7 @@ function VEManagerClient:RegisterEvents()
 	Events:Subscribe('VEManager:RegisterPreset', self, self.RegisterPreset)
 	Events:Subscribe('VEManager:EnablePreset', self, self.EnablePreset)
 	Events:Subscribe('VEManager:DisablePreset', self, self.DisablePreset)
+	Events:Subscribe('VEManager:ResetVisibility', self, self.ResetVisibility)
 	Events:Subscribe('VEManager:SetVisibility', self, self.SetVisibility)
 	Events:Subscribe('VEManager:UpdateVisibility', self, self.UpdateVisibility)
 	Events:Subscribe('VEManager:FadeIn', self, self.FadeIn)
@@ -116,6 +117,18 @@ function VEManagerClient:DisablePreset(p_ID)
 	self.m_Presets[p_ID]["ve"].visibility = 0
 	self.m_Presets[p_ID]["ve"].enabled = false
 	self.m_Presets[p_ID].entity:FireEvent("Disable")
+end
+
+---@param p_ID string|nil
+---@param p_Visibility number|nil
+function VEManagerClient:ResetVisibility(p_ID, p_Visibility)
+	for l_Index, l_ID in pairs(self.m_Lerping) do
+		if l_ID == p_ID then
+			self.m_Lerping[l_Index] = nil
+		end
+	end
+
+	self:SetVisibility(p_ID, p_Visibility)
 end
 
 ---@param p_ID string|nil
