@@ -121,6 +121,18 @@ end
 ---@param p_ID string|nil
 ---@param p_Visibility number|nil
 function VEManagerClient:SetVisibility(p_ID, p_Visibility)
+	for l_ID, _ in pairs(self.m_Lerping) do
+		if l_ID == p_ID then
+			self.m_Lerping[l_ID] = nil
+		end
+	end
+
+	self:SetVisibilityInternal(p_ID, p_Visibility)
+end
+
+---@param p_ID string|nil
+---@param p_Visibility number|nil
+function VEManagerClient:SetVisibilityInternal(p_ID, p_Visibility)
 	self:CheckPresetID(p_ID)
 
 	self.m_Presets[p_ID]["logic"].visibility = p_Visibility
@@ -197,7 +209,7 @@ function VEManagerClient:FadeTo(p_ID, p_VisibilityStart, p_VisibilityEnd, p_Time
 	self.m_Presets[p_ID]['startTime'] = SharedUtils:GetTimeMS()
 	self.m_Presets[p_ID]['startValue'] = tonumber(p_VisibilityStart)
 	self.m_Presets[p_ID]['EndValue'] = tonumber(p_VisibilityEnd)
-	self.m_Lerping[#self.m_Lerping + 1] = p_ID
+	self.m_Lerping[p_ID] = true
 end
 
 ---@param p_ID string|nil
@@ -211,7 +223,7 @@ function VEManagerClient:Lerp(p_ID, p_Value, p_Time)
 	self.m_Presets[p_ID]['startValue'] = self.m_Presets[p_ID]["logic"].visibility
 	self.m_Presets[p_ID]['EndValue'] = p_Value
 
-	self.m_Lerping[#self.m_Lerping +1] = p_ID
+	self.m_Lerping[p_ID] = true
 end
 
 ---@param p_ID string|nil
@@ -578,10 +590,10 @@ function VEManagerClient:CreateEntity(p_Class, p_Guid)
 end
 
 function VEManagerClient:UpdateLerp(percentage)
-	for i,preset in pairs(self.m_Lerping) do
+	for p_ID, _ in pairs(self.m_Lerping) do
 
-		local TimeSinceStarted = SharedUtils:GetTimeMS() - self.m_Presets[preset].startTime
-		local PercentageComplete = TimeSinceStarted / self.m_Presets[preset].time
+		local TimeSinceStarted = SharedUtils:GetTimeMS() - self.m_Presets[p_ID].startTime
+		local PercentageComplete = TimeSinceStarted / self.m_Presets[p_ID].time
 		--local lerpValue = self.m_Presets[preset].startValue + (self.m_Presets[preset].EndValue - self.m_Presets[preset].startValue) * PercentageComplete
 
 		-- t = elapsed time
@@ -589,22 +601,22 @@ function VEManagerClient:UpdateLerp(percentage)
 		-- c = change == ending - beginning
 		-- d = duration (total time)
 		local t = TimeSinceStarted
-		local b = self.m_Presets[preset].startValue
-		local c = self.m_Presets[preset].EndValue - self.m_Presets[preset].startValue
-		local d = self.m_Presets[preset].time
+		local b = self.m_Presets[p_ID].startValue
+		local c = self.m_Presets[p_ID].EndValue - self.m_Presets[p_ID].startValue
+		local d = self.m_Presets[p_ID].time
 
 		local transition = "linear"
-		if(self.m_Presets[preset].transition ~= nil) then
-			transition = self.m_Presets[preset].transition
+		if(self.m_Presets[p_ID].transition ~= nil) then
+			transition = self.m_Presets[p_ID].transition
 		end
 
 		local lerpValue = m_Easing[transition](t,b,c,d)
 
 		if PercentageComplete >= 1 or PercentageComplete < 0 then
-			self:SetVisibility(preset, self.m_Presets[preset].EndValue)
-			self.m_Lerping[i] = nil
+			self:SetVisibilityInternal(p_ID, self.m_Presets[p_ID].EndValue)
+			self.m_Lerping[p_ID] = nil
 		else
-			self:SetVisibility(preset, lerpValue)
+			self:SetVisibilityInternal(p_ID, lerpValue)
 		end
 	end
 end
@@ -612,9 +624,7 @@ end
 ---@param p_Delta number
 ---@param p_SimulationDelta number
 function VEManagerClient:OnUpdateInput(p_Delta, p_SimulationDelta)
-	if #self.m_Lerping > 0 then
-		self:UpdateLerp(p_Delta)
-	end
+	self:UpdateLerp(p_Delta)
 end
 
 
