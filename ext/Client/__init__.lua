@@ -86,7 +86,7 @@ function VEManagerClient:RegisterEvents()
 end
 
 function VEManagerClient:RegisterHooks()
-	Hooks:Install('EntityFactory:Create', 999, self, self.OnEntityCreate)
+	Hooks:Install('EntityFactory:CreateFromBlueprint', 999, self, self.CreateFromBlueprint)
 end
 
 --[[
@@ -641,8 +641,8 @@ function VEManagerClient:OnUpdateManager(p_DeltaTime, p_UpdatePass)
 	end
 end
 
-function VEManagerClient:OnEntityCreate(p_HookCtx, p_EntityData, p_Transform)
-	m_LiveEntityHandler:OnEntityCreate(p_HookCtx, p_EntityData, p_Transform)
+function VEManagerClient:CreateFromBlueprint(p_HookCtx, p_Blueprint, p_Transform, p_Variation, p_ParentRepresentative)
+	m_LiveEntityHandler:CreateFromBlueprint(p_HookCtx, p_Blueprint, p_Transform, p_Variation, p_ParentRepresentative)
 end
 
 --[[
