@@ -12,14 +12,6 @@ local m_MenuBgGuids = {
 	instance = Guid("F26B7ECE-A71D-93AC-6C49-B6223BF424D6", "D")
 }
 
-local m_ExplosionGuids = {
-	Guid("0A0EB8EE-5849-4C88-B4B9-92A9C2AA6402"),
-	Guid("D9BFDE03-6E38-4638-87BD-C79A34FBE598"),
-	Guid("EB5AFBB4-ED86-421E-88AE-5E0CE8B27C85"),
-	Guid("CD2CD917-DA8F-11DF-98D7-E3FCCF5294D0"),
-	Guid("C2B0B503-7F38-4CF4-833F-0468EE51C7F2"),
-}
-
 function Patches:__init()
 	m_Logger:Write("Initializing Patches")
 
@@ -54,20 +46,6 @@ function Patches:Components(p_Partition)
 			-- elseif l_Instance:Is('EffectEntityData') then -- EffectBlueprint is the primary instance
 				-- self:EffectEntityData(l_Instance)
 			end
-		end
-	end
-end
-
----@param p_Partition DatabasePartition
-function Patches:ExplosionsVE(p_Partition)
-	local s_IsExplosionGuid = m_Easing.tableHasValue(m_ExplosionGuids, p_Partition.guid)
-
-	for _, l_Instance in pairs(p_Partition.instances) do
-		if s_IsExplosionGuid and l_Instance:Is('ColorCorrectionComponentData') then
-			local s_ComponentData = ColorCorrectionComponentData(l_Instance)
-			s_ComponentData:MakeWritable()
-			s_ComponentData.enable = false
-			m_Logger:Write("*Disable Explosion CC Component")
 		end
 	end
 end

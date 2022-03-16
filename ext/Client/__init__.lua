@@ -9,11 +9,14 @@ local m_Easing = require "Modules/Easing"
 local m_Time = require 'Modules/Time'
 ---@type Patches
 local m_Patches = require('Modules/Patches')
+---@type LiveEntityHandler
+local m_LiveEntityHandler = require('Modules/LiveEntityHandler')
 
 function VEManagerClient:__init()
 	m_Logger:Write('Initializing VEManagerClient')
 	self:RegisterVars()
 	self:RegisterEvents()
+	self:RegisterHooks()
 end
 
 function VEManagerClient:RegisterVars()
@@ -59,6 +62,7 @@ function VEManagerClient:RegisterEvents()
 	Events:Subscribe('Partition:Loaded', self, self.OnPartitionLoaded)
 	Events:Subscribe('Level:Loaded', self, self.OnLevelLoaded)
 	Events:Subscribe('Level:Destroy', self, self.OnLevelDestroy)
+	Events:Subscribe('UpdateManager:Update', self, self.OnUpdateManager)
 
 	Events:Subscribe('VEManager:RegisterPreset', self, self.RegisterPreset)
 	Events:Subscribe('VEManager:EnablePreset', self, self.EnablePreset)
@@ -79,6 +83,10 @@ function VEManagerClient:RegisterEvents()
 
 	-- Events from server
 	NetEvents:Subscribe('VEManager:EnablePreset', self, self.EnablePreset)
+end
+
+function VEManagerClient:RegisterHooks()
+	Hooks:Install('EntityFactory:Create', 999, self, self.OnEntityCreate)
 end
 
 --[[
@@ -627,6 +635,15 @@ function VEManagerClient:OnUpdateInput(p_Delta, p_SimulationDelta)
 	self:UpdateLerp(p_Delta)
 end
 
+function VEManagerClient:OnUpdateManager(p_DeltaTime, p_UpdatePass)
+	if p_UpdatePass == UpdatePass.UpdatePass_PreSim then
+		m_LiveEntityHandler:OnUpdateManagerPreSim(p_DeltaTime)
+	end
+end
+
+function VEManagerClient:OnEntityCreate(p_HookCtx, p_EntityData, p_Transform)
+	m_LiveEntityHandler:OnEntityCreate(p_HookCtx, p_EntityData, p_Transform)
+end
 
 --[[
 
