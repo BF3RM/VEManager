@@ -80,6 +80,7 @@ function VEManagerClient:RegisterEvents()
 	Events:Subscribe('VEManager:Reinitialize', self, self.LoadPresets)
 	Events:Subscribe('VEManager:ApplyTexture', self, self.ApplyTexture)
 	--Events:Subscribe('VEManager:Crossfade', self, self.Crossfade)
+	Events:Subscribe('VEManager:PresetsLoaded', self, self.OnPresetsLoaded)
 
 	-- Events from server
 	NetEvents:Subscribe('VEManager:EnablePreset', self, self.EnablePreset)
@@ -643,6 +644,10 @@ end
 
 function VEManagerClient:OnEntityCreate(p_HookCtx, p_EntityData, p_Transform)
 	m_LiveEntityHandler:OnEntityCreate(p_HookCtx, p_EntityData, p_Transform)
+end
+
+function VEManagerClient:OnPresetsLoaded()
+	m_LiveEntityHandler:OnPresetsLoaded()
 end
 
 --[[

@@ -5,6 +5,17 @@ local m_Logger = Logger("LiveEntityHandler", true)
 
 function LiveEntityHandler:__init()
     m_Logger:Write("LiveEntityHandler init.")
+    self:RegisterVars()
+end
+
+function LiveEntityHandler:RegisterVars()
+    self.SupportedTypes = {
+        -- EntityType | EntityEvents
+        ["ClientEmitterEntity"] = {"Start", "Stop"},
+        ["SpotlightEntity"] = {"Enable", "Disable"},
+        ["PointlightEntity"] = {"Enable", "Disable"},
+        ["LensFlareEntity"] = {"Enable", "Disable"},
+    }
 end
 
 local m_StoredEntities = {}
@@ -19,6 +30,9 @@ function LiveEntityHandler:SetVisibility(p_Category, p_Visible)
         return
     end
 
+    -- Reset before changing
+    self:ResetVisibility()
+
     for _, l_EntityTable in pairs(m_StoredEntities) do
         if l_EntityTable[2] == p_Category then
             if p_Visible then
@@ -30,7 +44,14 @@ function LiveEntityHandler:SetVisibility(p_Category, p_Visible)
     end
 end
 
-local s_Category = 'Night'
+function LiveEntityHandler:ResetVisibility()
+    for _, l_EntityTable in pairs(m_StoredEntities) do
+        table.insert(m_Queue, {l_EntityTable[1], true})
+    end
+    m_StoredEntities = {}
+end
+
+local s_Category = 'XP3_Valley'
 Console:Register('Entity', 'Changes Entity Visibility', function(args)
     if #args == 1 and args[1] == '1' then
         LiveEntityHandler:SetVisibility(s_Category, true)
@@ -40,7 +61,7 @@ Console:Register('Entity', 'Changes Entity Visibility', function(args)
 end)
 
 local s_GuidTable = {
-    ['Night'] = {
+    ['XP3_Valley'] = {
         -- https://github.com/EmulatorNexus/Venice-EBX/blob/master/Levels/XP3_Valley/Objects/Prefabs/Lights/LampPost_Wood_Lights.txt
         Guid('0A230C4A-64DA-404D-89D2-72C4360465B5'),   -- light
         Guid('A6C6C9B9-2466-43C8-843B-86339BC9EAC2'),   -- light
@@ -70,6 +91,7 @@ local s_GuidTable = {
     }
 }
 
+-- Method 1
 function LiveEntityHandler:OnEntityCreate(p_HookCtx, p_EntityData, p_Transform)
     for l_Category, l_GuidTable in pairs(s_GuidTable) do 
         for _, l_Guid in ipairs(l_GuidTable) do
@@ -82,6 +104,29 @@ function LiveEntityHandler:OnEntityCreate(p_HookCtx, p_EntityData, p_Transform)
     end
 end
 
+-- Method 2
+function LiveEntityHandler:OnPresetsLoaded()
+    for _, l_Preset in pairs(VEManagerClient.m_RawPresets) do
+        if l_Preset.LiveEntites ~= nil then
+            for l_EntityType, l_EntityDataGuidTable in pairs(l_Preset.LiveEntites) do
+                for _, l_EntityDataGuid in ipairs(l_EntityDataGuidTable) do
+                    local s_Iterator = EntityManager:GetIterator(l_EntityType)
+
+                    local s_Entity = s_Iterator:Next()
+                    while s_Entity ~= nil do
+                        if s_Entity.data.instanceGuid == l_EntityDataGuid then
+                            table.insert(m_StoredEntities, {s_Entity, l_Preset.Name})
+                            m_Logger:Write('Stored ' .. s_Entity.typeInfo.name)
+                        end
+                        s_Entity = s_Iterator:Next()
+                    end
+                end
+            end
+        end
+    end
+end
+
+
 local s_Timer = 0
 local s_Counter = 0
 function LiveEntityHandler:OnUpdateManagerPreSim(p_DeltaTime)
@@ -89,34 +134,25 @@ function LiveEntityHandler:OnUpdateManagerPreSim(p_DeltaTime)
         return
     end
 
-    local s_UpdateAllowed = true
     for l_Index, l_EntityTable in ipairs(m_Queue) do
-        if s_UpdateAllowed then
-            m_Logger:Write('Entity: ' .. l_EntityTable[1].typeInfo.name)
-            s_UpdateAllowed = false
-
-            if l_EntityTable[2] then
-                if l_EntityTable[1].typeInfo.name == 'ClientEmitterEntity' then
-                    l_EntityTable[1]:FireEvent('Start')
-                elseif l_EntityTable[1].typeInfo.name == 'ClientStaticModelEntity' then
-                    print(l_EntityTable[1].data)
-                else
-                    l_EntityTable[1]:FireEvent('Enable')
-                end
+        m_Logger:Write('Entity: ' .. l_EntityTable[1].typeInfo.name)
+        if l_EntityTable[2] then
+            if self.SupportedTypes[l_EntityTable[1].typeInfo.name] ~= nil then
+                l_EntityTable[1]:FireEvent(self.SupportedTypes[l_EntityTable[1].typeInfo.name][1])
             else
-                if l_EntityTable[1].typeInfo.name == 'ClientEmitterEntity' then
-                    l_EntityTable[1]:FireEvent('Stop')
-                elseif l_EntityTable[1].typeInfo.name == 'ClientStaticModelEntity' then
-                    print(l_EntityTable[1].data)
-                else
-                    l_EntityTable[1]:FireEvent('Disable')
-                end
+                m_Logger:Error('Entity Type not supported')
             end
-            s_Counter = s_Counter + 1
-            table.remove(m_Queue, l_Index)
-            m_Logger:Write('Changed Visibility')
-            break
+        elseif not l_EntityTable[2] then
+            if self.SupportedTypes[l_EntityTable[1].typeInfo.name] ~= nil then
+                l_EntityTable[1]:FireEvent(self.SupportedTypes[l_EntityTable[1].typeInfo.name][2])
+            else
+                m_Logger:Error('Entity Type not supported')
+            end
         end
+        s_Counter = s_Counter + 1
+        table.remove(m_Queue, l_Index)
+        m_Logger:Write('Changed Visibility')
+        break
     end
 
     m_Logger:Write('Still in Queue: ' .. #m_Queue)
