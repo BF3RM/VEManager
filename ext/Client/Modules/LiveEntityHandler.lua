@@ -1,7 +1,7 @@
 ---@class LiveEntityHandler
 LiveEntityHandler = class "LiveEntityHandler"
 
-local m_Logger = Logger("LiveEntityHandler", true)
+local m_Logger = Logger("LiveEntityHandler", false)
 
 function LiveEntityHandler:__init()
     m_Logger:Write("LiveEntityHandler init.")
@@ -105,8 +105,8 @@ function LiveEntityHandler:OnEntityCreate(p_HookCtx, p_EntityData, p_Transform)
 end
 
 -- Method 2
-function LiveEntityHandler:OnPresetsLoaded()
-    for _, l_Preset in pairs(VEManagerClient.m_RawPresets) do
+function LiveEntityHandler:OnPresetsLoaded(p_RawPresets)
+    for _, l_Preset in pairs(p_RawPresets) do
         if l_Preset.LiveEntites ~= nil then
             for l_EntityType, l_EntityDataGuidTable in pairs(l_Preset.LiveEntites) do
                 for _, l_EntityDataGuid in ipairs(l_EntityDataGuidTable) do

@@ -80,7 +80,6 @@ function VEManagerClient:RegisterEvents()
 	Events:Subscribe('VEManager:Reinitialize', self, self.LoadPresets)
 	Events:Subscribe('VEManager:ApplyTexture', self, self.ApplyTexture)
 	--Events:Subscribe('VEManager:Crossfade', self, self.Crossfade)
-	Events:Subscribe('VEManager:PresetsLoaded', self, self.OnPresetsLoaded)
 
 	-- Events from server
 	NetEvents:Subscribe('VEManager:EnablePreset', self, self.EnablePreset)
@@ -531,6 +530,7 @@ function VEManagerClient:LoadPresets()
 	end
 	self:InitializePresets()
 	Events:Dispatch("VEManager:PresetsLoaded")
+	m_LiveEntityHandler:OnPresetsLoaded(self.m_RawPresets)
 	m_Logger:Write("Presets loaded")
 end
 
@@ -644,10 +644,6 @@ end
 
 function VEManagerClient:OnEntityCreate(p_HookCtx, p_EntityData, p_Transform)
 	m_LiveEntityHandler:OnEntityCreate(p_HookCtx, p_EntityData, p_Transform)
-end
-
-function VEManagerClient:OnPresetsLoaded()
-	m_LiveEntityHandler:OnPresetsLoaded()
 end
 
 --[[
