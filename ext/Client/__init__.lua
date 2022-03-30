@@ -55,6 +55,8 @@ function VEManagerClient:RegisterVars()
 		DefaultNoon = require("Presets/DefaultNoon"),
 		DefaultEvening = require("Presets/DefaultEvening"),
 	}
+
+	self.m_CurrentPreset = nil
 end
 
 function VEManagerClient:RegisterEvents()
@@ -113,6 +115,11 @@ function VEManagerClient:EnablePreset(p_ID)
 	self.m_Presets[p_ID]["ve"].visibility = 1
 	self.m_Presets[p_ID]["ve"].enabled = true
 	self.m_Presets[p_ID].entity:FireEvent("Enable")
+	self.m_CurrentPreset = p_ID
+
+	if self.m_RawPresets[p_ID]["LiveEntities"] ~= nil then
+		LiveEntityHandler:SetVisibility(p_ID, false)
+	end
 end
 
 ---@param p_ID string|nil
@@ -124,6 +131,10 @@ function VEManagerClient:DisablePreset(p_ID)
 	self.m_Presets[p_ID]["ve"].visibility = 0
 	self.m_Presets[p_ID]["ve"].enabled = false
 	self.m_Presets[p_ID].entity:FireEvent("Disable")
+
+	if self.m_RawPresets[p_ID]["LiveEntities"] ~= nil then
+		LiveEntityHandler:SetVisibility(p_ID, true)
+	end
 end
 
 ---@param p_ID string|nil
@@ -145,6 +156,15 @@ function VEManagerClient:SetVisibilityInternal(p_ID, p_Visibility)
 
 	self.m_Presets[p_ID]["logic"].visibility = p_Visibility
 	self.m_Presets[p_ID]["ve"].visibility = p_Visibility
+
+
+	if self.m_RawPresets[p_ID]["LiveEntities"] ~= nil then
+		if p_Visibility > 0.5 then
+			LiveEntityHandler:SetVisibility(p_ID, false)
+		else 
+			LiveEntityHandler:SetVisibility(p_ID, true)
+		end
+	end
 	self:Reload(p_ID)
 end
 
@@ -530,7 +550,6 @@ function VEManagerClient:LoadPresets()
 	end
 	self:InitializePresets()
 	Events:Dispatch("VEManager:PresetsLoaded")
-	m_LiveEntityHandler:OnPresetsLoaded(self.m_RawPresets)
 	m_Logger:Write("Presets loaded")
 end
 
@@ -643,7 +662,7 @@ function VEManagerClient:OnUpdateManager(p_DeltaTime, p_UpdatePass)
 end
 
 function VEManagerClient:OnEntityCreate(p_HookCtx, p_EntityData, p_Transform)
-	m_LiveEntityHandler:OnEntityCreate(p_HookCtx, p_EntityData, p_Transform)
+	--m_LiveEntityHandler:OnEntityCreate(p_HookCtx, p_EntityData, p_Transform)
 end
 
 --[[
@@ -773,4 +792,5 @@ function IsBasicType( typ )
 	return false
 end
 
+CLIENT = VEManagerClient()
 return VEManagerClient()

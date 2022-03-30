@@ -1,26 +1,36 @@
 ---@class LiveEntityHandler
 LiveEntityHandler = class "LiveEntityHandler"
 
-local m_Logger = Logger("LiveEntityHandler", false)
+local m_Logger = Logger("LiveEntityHandler", true)
+local m_StoredEntities = nil
+local m_Queue = {}
 
 function LiveEntityHandler:__init()
     m_Logger:Write("LiveEntityHandler init.")
     self:RegisterVars()
+    self:RegisterEvents()
 end
 
 function LiveEntityHandler:RegisterVars()
     self.SupportedTypes = {
         -- EntityType | EntityEvents
         ["ClientEmitterEntity"] = {"Start", "Stop"},
-        ["SpotlightEntity"] = {"Enable", "Disable"},
-        ["PointlightEntity"] = {"Enable", "Disable"},
+        ["SpotLightEntity"] = {"Enable", "Disable"},
+        ["PointLightEntity"] = {"Enable", "Disable"},
         ["LensFlareEntity"] = {"Enable", "Disable"},
     }
+
+    m_StoredEntities = nil
+    m_Queue = {}
 end
 
-local m_StoredEntities = {}
--- to prevent crash
-local m_Queue = {}
+function LiveEntityHandler:RegisterEvents()
+    Events:Subscribe('Level:LoadResources', self, self.OnLoadResources)
+end
+
+function LiveEntityHandler:OnLoadResources()
+    self:RegisterVars()
+end
 
 ---@param p_Category string
 ---@param p_Visible boolean
@@ -30,8 +40,29 @@ function LiveEntityHandler:SetVisibility(p_Category, p_Visible)
         return
     end
 
-    -- Reset before changing
-    self:ResetVisibility()
+    if m_StoredEntities == nil then
+        m_StoredEntities = {}
+        for l_ID, l_Preset in pairs(CLIENT.m_RawPresets) do
+            if l_Preset.LiveEntities ~= nil then
+                for _, l_EntityDataGuid in ipairs(l_Preset.LiveEntities) do
+                    --m_Logger:Write('*Found GUID in LIVEENTITIES: ' .. tostring(l_EntityDataGuid))
+                    l_EntityDataGuid = Guid(l_EntityDataGuid)
+                    local s_EntityData = ResourceManager:SearchForInstanceByGuid(l_EntityDataGuid)
+                    local s_EntityName = s_EntityData.typeInfo.name:gsub("%Data", "")
+                    local s_Iterator = EntityManager:GetIterator(s_EntityName)
+
+                    local s_Entity = s_Iterator:Next()
+                    while s_Entity ~= nil do
+                        if s_Entity.data.instanceGuid == l_EntityDataGuid then
+                            table.insert(m_StoredEntities, {s_Entity, l_ID})
+                            --m_Logger:Write('Stored ' .. s_Entity.typeInfo.name)
+                        end
+                        s_Entity = s_Iterator:Next()
+                    end
+                end
+            end
+        end
+    end
 
     for _, l_EntityTable in pairs(m_StoredEntities) do
         if l_EntityTable[2] == p_Category then
@@ -42,13 +73,6 @@ function LiveEntityHandler:SetVisibility(p_Category, p_Visible)
             end
         end
     end
-end
-
-function LiveEntityHandler:ResetVisibility()
-    for _, l_EntityTable in pairs(m_StoredEntities) do
-        table.insert(m_Queue, {l_EntityTable[1], true})
-    end
-    m_StoredEntities = {}
 end
 
 local s_Category = 'XP3_Valley'
@@ -103,29 +127,6 @@ function LiveEntityHandler:OnEntityCreate(p_HookCtx, p_EntityData, p_Transform)
         end
     end
 end
-
--- Method 2
-function LiveEntityHandler:OnPresetsLoaded(p_RawPresets)
-    for _, l_Preset in pairs(p_RawPresets) do
-        if l_Preset.LiveEntites ~= nil then
-            for l_EntityType, l_EntityDataGuidTable in pairs(l_Preset.LiveEntites) do
-                for _, l_EntityDataGuid in ipairs(l_EntityDataGuidTable) do
-                    local s_Iterator = EntityManager:GetIterator(l_EntityType)
-
-                    local s_Entity = s_Iterator:Next()
-                    while s_Entity ~= nil do
-                        if s_Entity.data.instanceGuid == l_EntityDataGuid then
-                            table.insert(m_StoredEntities, {s_Entity, l_Preset.Name})
-                            m_Logger:Write('Stored ' .. s_Entity.typeInfo.name)
-                        end
-                        s_Entity = s_Iterator:Next()
-                    end
-                end
-            end
-        end
-    end
-end
-
 
 local s_Timer = 0
 local s_Counter = 0
