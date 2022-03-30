@@ -1,7 +1,7 @@
 ---@class LiveEntityHandler
 LiveEntityHandler = class "LiveEntityHandler"
 
-local m_Logger = Logger("LiveEntityHandler", true)
+local m_Logger = Logger("LiveEntityHandler", false)
 local m_StoredEntities = nil
 local m_Queue = {}
 
