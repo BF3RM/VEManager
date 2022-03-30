@@ -9,11 +9,14 @@ local m_Easing = require "Modules/Easing"
 local m_Time = require 'Modules/Time'
 ---@type Patches
 local m_Patches = require('Modules/Patches')
+---@type LiveEntityHandler
+local m_LiveEntityHandler = require('Modules/LiveEntityHandler')
 
 function VEManagerClient:__init()
 	m_Logger:Write('Initializing VEManagerClient')
 	self:RegisterVars()
 	self:RegisterEvents()
+	self:RegisterHooks()
 end
 
 function VEManagerClient:RegisterVars()
@@ -52,6 +55,8 @@ function VEManagerClient:RegisterVars()
 		DefaultNoon = require("Presets/DefaultNoon"),
 		DefaultEvening = require("Presets/DefaultEvening"),
 	}
+
+	self.m_CurrentPreset = nil
 end
 
 function VEManagerClient:RegisterEvents()
@@ -59,6 +64,7 @@ function VEManagerClient:RegisterEvents()
 	Events:Subscribe('Partition:Loaded', self, self.OnPartitionLoaded)
 	Events:Subscribe('Level:Loaded', self, self.OnLevelLoaded)
 	Events:Subscribe('Level:Destroy', self, self.OnLevelDestroy)
+	Events:Subscribe('UpdateManager:Update', self, self.OnUpdateManager)
 
 	Events:Subscribe('VEManager:RegisterPreset', self, self.RegisterPreset)
 	Events:Subscribe('VEManager:EnablePreset', self, self.EnablePreset)
@@ -79,6 +85,10 @@ function VEManagerClient:RegisterEvents()
 
 	-- Events from server
 	NetEvents:Subscribe('VEManager:EnablePreset', self, self.EnablePreset)
+end
+
+function VEManagerClient:RegisterHooks()
+	Hooks:Install('EntityFactory:Create', 999, self, self.OnEntityCreate)
 end
 
 --[[
@@ -105,6 +115,11 @@ function VEManagerClient:EnablePreset(p_ID)
 	self.m_Presets[p_ID]["ve"].visibility = 1
 	self.m_Presets[p_ID]["ve"].enabled = true
 	self.m_Presets[p_ID].entity:FireEvent("Enable")
+	self.m_CurrentPreset = p_ID
+
+	if self.m_RawPresets[p_ID]["LiveEntities"] ~= nil then
+		LiveEntityHandler:SetVisibility(p_ID, false)
+	end
 end
 
 ---@param p_ID string|nil
@@ -116,6 +131,10 @@ function VEManagerClient:DisablePreset(p_ID)
 	self.m_Presets[p_ID]["ve"].visibility = 0
 	self.m_Presets[p_ID]["ve"].enabled = false
 	self.m_Presets[p_ID].entity:FireEvent("Disable")
+
+	if self.m_RawPresets[p_ID]["LiveEntities"] ~= nil then
+		LiveEntityHandler:SetVisibility(p_ID, true)
+	end
 end
 
 ---@param p_ID string|nil
@@ -137,6 +156,15 @@ function VEManagerClient:SetVisibilityInternal(p_ID, p_Visibility)
 
 	self.m_Presets[p_ID]["logic"].visibility = p_Visibility
 	self.m_Presets[p_ID]["ve"].visibility = p_Visibility
+
+
+	if self.m_RawPresets[p_ID]["LiveEntities"] ~= nil then
+		if p_Visibility > 0.5 then
+			LiveEntityHandler:SetVisibility(p_ID, false)
+		else 
+			LiveEntityHandler:SetVisibility(p_ID, true)
+		end
+	end
 	self:Reload(p_ID)
 end
 
@@ -627,6 +655,15 @@ function VEManagerClient:OnUpdateInput(p_Delta, p_SimulationDelta)
 	self:UpdateLerp(p_Delta)
 end
 
+function VEManagerClient:OnUpdateManager(p_DeltaTime, p_UpdatePass)
+	if p_UpdatePass == UpdatePass.UpdatePass_PreSim then
+		m_LiveEntityHandler:OnUpdateManagerPreSim(p_DeltaTime)
+	end
+end
+
+function VEManagerClient:OnEntityCreate(p_HookCtx, p_EntityData, p_Transform)
+	--m_LiveEntityHandler:OnEntityCreate(p_HookCtx, p_EntityData, p_Transform)
+end
 
 --[[
 
@@ -755,4 +792,5 @@ function IsBasicType( typ )
 	return false
 end
 
+CLIENT = VEManagerClient()
 return VEManagerClient()
