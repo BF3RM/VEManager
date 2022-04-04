@@ -16,7 +16,6 @@ function VEManagerClient:__init()
 	m_Logger:Write('Initializing VEManagerClient')
 	self:RegisterVars()
 	self:RegisterEvents()
-	self:RegisterHooks()
 end
 
 function VEManagerClient:RegisterVars()
@@ -85,10 +84,6 @@ function VEManagerClient:RegisterEvents()
 
 	-- Events from server
 	NetEvents:Subscribe('VEManager:EnablePreset', self, self.EnablePreset)
-end
-
-function VEManagerClient:RegisterHooks()
-	Hooks:Install('EntityFactory:Create', 999, self, self.OnEntityCreate)
 end
 
 --[[
