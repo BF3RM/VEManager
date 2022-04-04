@@ -256,6 +256,7 @@ function VEManagerClient:CheckPresetID(p_ID)
 	elseif self.m_Presets[p_ID] == nil then
 		error("\nThere isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(p_ID))
 	end
+	return true
 end
 
 ---@param p_ID string|nil
@@ -788,4 +789,4 @@ function IsBasicType( typ )
 end
 
 CLIENT = VEManagerClient()
-return VEManagerClient()
+return CLIENT
