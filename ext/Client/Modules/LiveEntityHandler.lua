@@ -40,6 +40,10 @@ function LiveEntityHandler:SetVisibility(p_Category, p_Visible)
         return
     end
 
+    if #m_Queue ~= 0 then 
+        m_Queue = {}
+    end
+
     if m_StoredEntities == nil then
         m_StoredEntities = {}
         for l_ID, l_Preset in pairs(CLIENT.m_RawPresets) do
@@ -76,6 +80,8 @@ function LiveEntityHandler:SetVisibility(p_Category, p_Visible)
 end
 
 local s_Counter = 0
+local s_UpdatedEntites = 0
+local s_EntitiesPerUpdate = 10
 function LiveEntityHandler:OnUpdateManagerPreSim(p_DeltaTime)
     if #m_Queue <= 0 then
         return
@@ -97,9 +103,14 @@ function LiveEntityHandler:OnUpdateManagerPreSim(p_DeltaTime)
             end
         end
         s_Counter = s_Counter + 1
+        s_UpdatedEntites = s_UpdatedEntites + 1
         table.remove(m_Queue, l_Index)
         m_Logger:Write('Changed Visibility')
-        break
+
+        if s_UpdatedEntites > s_EntitiesPerUpdate then
+            s_UpdatedEntites = 0
+            break
+        end
     end
 
     m_Logger:Write('Still in Queue: ' .. #m_Queue)

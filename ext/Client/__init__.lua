@@ -152,7 +152,6 @@ function VEManagerClient:SetVisibilityInternal(p_ID, p_Visibility)
 	self.m_Presets[p_ID]["logic"].visibility = p_Visibility
 	self.m_Presets[p_ID]["ve"].visibility = p_Visibility
 
-
 	if self.m_RawPresets[p_ID]["LiveEntities"] ~= nil then
 		if p_Visibility > 0.5 then
 			LiveEntityHandler:SetVisibility(p_ID, false)
