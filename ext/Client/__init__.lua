@@ -1,4 +1,5 @@
 ---@class VEManagerClient
+---@overload fun():VEManagerClient
 VEManagerClient = class 'VEManagerClient'
 
 ---@type Logger
@@ -19,7 +20,7 @@ function VEManagerClient:__init()
 end
 
 function VEManagerClient:RegisterVars()
-	self.m_SupportedTypes = {"Vec2", "Vec3", "Vec4", "Float32", "Boolean", "Int"}
+	self.m_SupportedTypes = { "Vec2", "Vec3", "Vec4", "Float32", "Boolean", "Int" }
 	self.m_SupportedClasses = {
 		"CameraParams",
 		"CharacterLighting",
@@ -56,6 +57,7 @@ function VEManagerClient:RegisterVars()
 	}
 
 	self.m_CurrentPreset = nil
+	self.m_IsLevelLoaded = false
 end
 
 function VEManagerClient:RegisterEvents()
@@ -100,7 +102,7 @@ end
 
 ---@param p_ID string|nil
 function VEManagerClient:EnablePreset(p_ID)
-	self:CheckPresetID(p_ID)
+	if not self:CheckPresetID(p_ID) then return end
 
 	-- Reset any existing lerping
 	self.m_Lerping = {}
@@ -119,7 +121,7 @@ end
 
 ---@param p_ID string|nil
 function VEManagerClient:DisablePreset(p_ID)
-	self:CheckPresetID(p_ID)
+	if not self:CheckPresetID(p_ID) then return end
 
 	m_Logger:Write("Disabling preset: " .. tostring(p_ID))
 	self.m_Presets[p_ID]["logic"].visibility = 0
@@ -147,7 +149,7 @@ end
 ---@param p_ID string|nil
 ---@param p_Visibility number|nil
 function VEManagerClient:SetVisibilityInternal(p_ID, p_Visibility)
-	self:CheckPresetID(p_ID)
+	if not self:CheckPresetID(p_ID) then return end
 
 	self.m_Presets[p_ID]["logic"].visibility = p_Visibility
 	self.m_Presets[p_ID]["ve"].visibility = p_Visibility
@@ -155,7 +157,7 @@ function VEManagerClient:SetVisibilityInternal(p_ID, p_Visibility)
 	if self.m_RawPresets[p_ID]["LiveEntities"] ~= nil then
 		if p_Visibility > 0.5 then
 			LiveEntityHandler:SetVisibility(p_ID, false)
-		else 
+		else
 			LiveEntityHandler:SetVisibility(p_ID, true)
 		end
 	end
@@ -165,7 +167,7 @@ end
 ---@param p_ID string|nil
 ---@param p_Visibility number|nil
 function VEManagerClient:UpdateVisibility(p_ID, p_Visibility)
-	self:CheckPresetID(p_ID)
+	if not self:CheckPresetID(p_ID) then return end
 
 	if math.abs(self.m_Presets[p_ID]["logic"].visibility - p_Visibility) < self.m_VisibilityUpdateThreshold then
 		return
@@ -191,7 +193,7 @@ end
 ---@param p_Property string|nil
 ---@param p_Value any|nil
 function VEManagerClient:SetSingleValue(p_ID, p_Class, p_Property, p_Value)
-	self:CheckPresetID(p_ID)
+	if not self:CheckPresetID(p_ID) then return end
 
 	local s_States = VisualEnvironmentManager:GetStates()
 	local s_FixedPriority = 10000000 + self.m_Presets[p_ID].priority
@@ -214,7 +216,7 @@ end
 ---@param p_ID string|nil
 ---@param p_Time number|nil
 function VEManagerClient:FadeOut(p_ID, p_Time)
-	self:CheckPresetID(p_ID)
+	if not self:CheckPresetID(p_ID) then return end
 
 	local s_VisibilityStart = self.m_Presets[p_ID]["logic"].visibility
 	self:FadeTo(p_ID, s_VisibilityStart, 0, p_Time)
@@ -225,7 +227,7 @@ end
 ---@param p_VisibilityEnd number|nil
 ---@param p_Time number|nil
 function VEManagerClient:FadeTo(p_ID, p_VisibilityStart, p_VisibilityEnd, p_Time)
-	self:CheckPresetID(p_ID)
+	if not self:CheckPresetID(p_ID) then return end
 
 	self.m_Presets[p_ID]['time'] = tonumber(p_Time)
 	self.m_Presets[p_ID]['startTime'] = SharedUtils:GetTimeMS()
@@ -238,7 +240,7 @@ end
 ---@param p_Value number|nil
 ---@param p_Time number|nil
 function VEManagerClient:Lerp(p_ID, p_Value, p_Time)
-	self:CheckPresetID(p_ID)
+	if not self:CheckPresetID(p_ID) then return end
 
 	self.m_Presets[p_ID]['time'] = p_Time
 	self.m_Presets[p_ID]['startTime'] = SharedUtils:GetTimeMS()
@@ -250,11 +252,16 @@ end
 
 ---@param p_ID string|nil
 function VEManagerClient:CheckPresetID(p_ID)
-	if p_ID == nil then
-		error("\nThe preset ID provided is nil.")
-	elseif self.m_Presets[p_ID] == nil then
-		error("\nThere isn't a preset with this id or it hasn't been parsed yet. Id: ".. tostring(p_ID))
+	if not self.m_IsLevelLoaded then
+		return false
 	end
+
+	if p_ID == nil then
+		m_Logger:Error("\nThe preset ID provided is nil.")
+	elseif self.m_Presets[p_ID] == nil then
+		m_Logger:Error("\nThere isn't a preset with this id or it hasn't been parsed yet. Id: " .. tostring(p_ID))
+	end
+
 	return true
 end
 
@@ -269,7 +276,7 @@ end
 
 ---@param p_ID string|nil
 function VEManagerClient:OnVEDestroyRequest(p_ID)
-	self:CheckPresetID(p_ID)
+	if not self:CheckPresetID(p_ID) then return end
 
 	self.m_Presets[p_ID].ve = nil
 	self.m_Presets[p_ID].entity:Destroy()
@@ -278,7 +285,7 @@ end
 ---@param p_ID string|nil
 ---@param p_Replacement string|nil
 function VEManagerClient:OnVEReplaceRequest(p_ID, p_Replacement)
-	self:CheckPresetID(p_ID)
+	if not self:CheckPresetID(p_ID) then return end
 
 	self.m_RawPresets[p_ID] = p_Replacement
 end
@@ -297,8 +304,6 @@ function VEManagerClient:ApplyTexture(p_ID, p_Guid, p_Path)
 	end
 	self:Reload(p_ID)
 end
-
-
 
 --[[function VEManagerClient:Crossfade(id1, id2, time)
 	if self.m_Presets[id1] == nil then
@@ -445,7 +450,7 @@ function VEManagerClient:LoadPresets()
 			if l_Preset[l_Class] ~= nil then
 
 				-- Create class and add it to the VE entity.
-				local s_Class = _G[l_Class.."ComponentData"]()
+				local s_Class = _G[l_Class .. "ComponentData"]()
 
 				s_Class.excluded = false
 				s_Class.isEventConnectionTarget = 3
@@ -511,7 +516,7 @@ function VEManagerClient:LoadPresets()
 
 							if s_FieldName == "FilmGrain" then -- fix FilmGrain texture
 								m_Logger:Write("\t\t- Fixing value for field " .. s_FieldName .. " of class " .. l_Class .. " | " .. tostring(s_Value))
-								s_Class[firstToLower(s_FieldName)] = TextureAsset(ResourceManager:FindInstanceByGuid(Guid'44AF771F-23D2-11E0-9C90-B6CDFDA832F1', Guid('1FD2F223-0137-2A0F-BC43-D974C2BD07B4')))
+								s_Class[firstToLower(s_FieldName)] = TextureAsset(ResourceManager:FindInstanceByGuid(Guid('44AF771F-23D2-11E0-9C90-B6CDFDA832F1'), Guid('1FD2F223-0137-2A0F-BC43-D974C2BD07B4')))
 							end
 						else
 							-- Applying original value
@@ -553,6 +558,7 @@ end
 function VEManagerClient:OnLevelLoaded(p_LevelName, p_GameModeName)
 	self:LoadPresets()
 	m_Patches:OnLevelLoaded(p_LevelName, p_GameModeName)
+	self.m_IsLevelLoaded = true
 end
 
 function VEManagerClient:OnLevelDestroy()
@@ -629,11 +635,11 @@ function VEManagerClient:UpdateLerp(percentage)
 		local d = self.m_Presets[p_ID].time
 
 		local transition = "linear"
-		if(self.m_Presets[p_ID].transition ~= nil) then
+		if self.m_Presets[p_ID].transition ~= nil then
 			transition = self.m_Presets[p_ID].transition
 		end
 
-		local lerpValue = m_Easing[transition](t,b,c,d)
+		local lerpValue = m_Easing[transition](t, b, c, d)
 
 		if PercentageComplete >= 1 or PercentageComplete < 0 then
 			self:SetVisibilityInternal(p_ID, self.m_Presets[p_ID].EndValue)
@@ -679,17 +685,17 @@ function VEManagerClient:ParseValue(p_Type, p_Value)
 		return tostring(p_Value)
 
 	elseif p_Type == "Float8" or
-			p_Type == "Float16" or
-			p_Type == "Float32" or
-			p_Type == "Float64" or
-			p_Type == "Int8" or
-			p_Type == "Int16" or
-			p_Type == "Int32" or
-			p_Type == "Int64" or
-			p_Type == "Uint8" or
-			p_Type == "Uint16" or
-			p_Type == "Uint32" or
-			p_Type == "Uint64" then
+		p_Type == "Float16" or
+		p_Type == "Float32" or
+		p_Type == "Float64" or
+		p_Type == "Int8" or
+		p_Type == "Int16" or
+		p_Type == "Int32" or
+		p_Type == "Int64" or
+		p_Type == "Uint8" or
+		p_Type == "Uint16" or
+		p_Type == "Uint32" or
+		p_Type == "Uint64" then
 		return tonumber(p_Value)
 
 	elseif p_Type == "Vec2" then -- Vec2
@@ -732,9 +738,9 @@ function split(pString, pPattern)
 	local s, e, cap = pString:find(fpat, 1)
 	while s do
 		if s ~= 1 or cap ~= "" then
-			table.insert(Table,cap)
+			table.insert(Table, cap)
 		end
-		last_end = e+1
+		last_end = e + 1
 		s, e, cap = pString:find(fpat, last_end)
 	end
 	if last_end <= #pString then
@@ -745,16 +751,15 @@ function split(pString, pPattern)
 end
 
 function dump(o)
-
-	if(o == nil) then
+	if o == nil then
 		m_Logger:Write("tried to load jack shit")
 	end
 
 	if type(o) == 'table' then
 		local s = '{ '
-		for k,v in pairs(o) do
-			if type(k) ~= 'number' then k = '"'..k..'"' end
-			s = s .. '['..k..'] = ' .. dump(v) .. ','
+		for k, v in pairs(o) do
+			if type(k) ~= 'number' then k = '"' .. k .. '"' end
+			s = s .. '[' .. k .. '] = ' .. dump(v) .. ','
 		end
 		return s .. '} '
 	else
@@ -762,26 +767,26 @@ function dump(o)
 	end
 end
 
-function IsBasicType( typ )
+function IsBasicType(typ)
 	if typ == "CString" or
-	typ == "Float8" or
-	typ == "Float16" or
-	typ == "Float32" or
-	typ == "Float64" or
-	typ == "Int8" or
-	typ == "Int16" or
-	typ == "Int32" or
-	typ == "Int64" or
-	typ == "Uint8" or
-	typ == "Uint16" or
-	typ == "Uint32" or
-	typ == "Uint64" or
-	typ == "LinearTransform" or
-	typ == "Vec2" or
-	typ == "Vec3" or
-	typ == "Vec4" or
-	typ == "Boolean" or
-	typ == "Guid" then
+		typ == "Float8" or
+		typ == "Float16" or
+		typ == "Float32" or
+		typ == "Float64" or
+		typ == "Int8" or
+		typ == "Int16" or
+		typ == "Int32" or
+		typ == "Int64" or
+		typ == "Uint8" or
+		typ == "Uint16" or
+		typ == "Uint32" or
+		typ == "Uint64" or
+		typ == "LinearTransform" or
+		typ == "Vec2" or
+		typ == "Vec3" or
+		typ == "Vec4" or
+		typ == "Boolean" or
+		typ == "Guid" then
 		return true
 	end
 	return false
