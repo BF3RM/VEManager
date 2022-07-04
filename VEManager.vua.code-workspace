@@ -1,0 +1,31 @@
+{
+	"folders": [
+		{
+			"name": "Shared",
+			"path": "ext\\Shared"
+		},
+		{
+			"name": "Server",
+			"path": "ext\\Server"
+		},
+		{
+			"name": "Client",
+			"path": "ext\\Client"
+		}
+	],
+	"settings": {
+		"Lua.workspace.maxPreload": 10000,
+		"Lua.diagnostics.libraryFiles": "Disable",
+		"Lua.runtime.version": "Lua 5.4",
+		"Lua.format.enable": true,
+		"Lua.misc.parameters": [
+			"--preview"
+		]
+	},
+	"extensions": {
+		"recommendations": [
+			"imposter.vscode-lua-vu",
+			"editorconfig.editorconfig"
+		]
+	}
+}
