@@ -257,9 +257,9 @@ function VEManagerClient:CheckPresetID(p_ID)
 	end
 
 	if p_ID == nil then
-		error("\nThe preset ID provided is nil.")
+		m_Logger:Error("\nThe preset ID provided is nil.")
 	elseif self.m_Presets[p_ID] == nil then
-		error("\nThere isn't a preset with this id or it hasn't been parsed yet. Id: " .. tostring(p_ID))
+		m_Logger:Error("\nThere isn't a preset with this id or it hasn't been parsed yet. Id: " .. tostring(p_ID))
 	end
 
 	return true
