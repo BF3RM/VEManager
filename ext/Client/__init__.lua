@@ -549,8 +549,8 @@ function VEManagerClient:LoadPresets()
 		s_LVEED.visibility = 0
 	end
 	self:InitializePresets()
-	NetEvents:Send("VEManager:PlayerReady")
 	Events:Dispatch("VEManager:PresetsLoaded")
+	NetEvents:Send("VEManager:PlayerReady")
 	m_Logger:Write("Presets loaded")
 end
 
