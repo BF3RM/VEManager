@@ -79,6 +79,20 @@ function VEEditor:OnPresetsLoaded()
 		m_Logger:Write('CineState Priority: ' .. self.m_CineState.priority)
 		self.m_CineState.excluded = false
 		VisualEnvironmentManager:SetDirty(true)
+
+		-- reset to default
+		for l_Index, l_Class in pairs(self.m_SupportedClasses) do
+			m_Logger:Write("Class: " .. l_Class)
+			local s_LoweredClass = firstToLower(l_Class)
+			if self.m_DefaultState[s_LoweredClass] ~= nil and s_LoweredClass ~= 'enlighten' then
+				self.m_CineState[s_LoweredClass] = self.m_DefaultState[s_LoweredClass]:Clone()
+			elseif self.m_DefaultState[s_LoweredClass] == nil and s_LoweredClass == "characterLighting" then
+				self.m_CineState[s_LoweredClass].characterLightEnable = false
+			elseif self.m_DefaultState[s_LoweredClass] == nil and self.m_CineState[s_LoweredClass] ~= nil then
+				self.m_CineState[s_LoweredClass].enable = false
+			end
+		end
+		VisualEnvironmentManager:SetDirty(true)
 	end
 end
 
