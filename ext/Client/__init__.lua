@@ -3,7 +3,7 @@
 VEManagerClient = class 'VEManagerClient'
 
 ---@type Logger
-local m_Logger = Logger("VEManagerClient", true)
+local m_Logger = Logger("VEManagerClient", false)
 
 local m_Easing = require "Modules/Easing"
 ---@type Time
@@ -228,7 +228,7 @@ end
 function VEManagerClient:FadeOut(p_ID, p_Time)
 	if not self:CheckPresetID(p_ID) then return end
 
-	local s_VisibilityStart = self.m_Presets[p_ID]["ve"].visibility
+	local s_VisibilityStart = self.m_Presets[p_ID]["logic"].visibility
 	self:FadeTo(p_ID, s_VisibilityStart, 0, p_Time)
 end
 
