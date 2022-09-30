@@ -3,7 +3,7 @@
 VEManagerClient = class 'VEManagerClient'
 
 ---@type Logger
-local m_Logger = Logger("VEManagerClient", false)
+local m_Logger = Logger("VEManagerClient", true)
 
 local m_Easing = require "Modules/Easing"
 ---@type Time
@@ -56,7 +56,6 @@ function VEManagerClient:RegisterVars()
 		DefaultEvening = require("Presets/DefaultEvening"),
 	}
 
-	self.m_CurrentPreset = nil
 	self.m_IsLevelLoaded = false
 end
 
@@ -94,8 +93,8 @@ end
 
 ]]
 
----@param p_ID string|nil
----@param p_Preset string|nil
+---@param p_ID string
+---@param p_Preset string
 function VEManagerClient:RegisterPreset(p_ID, p_Preset)
 	self.m_RawPresets[p_ID] = json.decode(p_Preset)
 end
@@ -108,11 +107,10 @@ function VEManagerClient:EnablePreset(p_ID)
 	self.m_Lerping = {}
 
 	m_Logger:Write("Enabling preset: " .. tostring(p_ID))
-	self.m_Presets[p_ID]["logic"].visibility = 1
-	self.m_Presets[p_ID]["ve"].visibility = 1
-	self.m_Presets[p_ID]["ve"].enabled = true
-	self.m_Presets[p_ID].entity:FireEvent("Enable")
-	self.m_CurrentPreset = p_ID
+
+	if not self:_InitializePreset(p_ID) then
+		m_Logger:Error("Failed to create VE from preset " .. tostring(p_ID))
+	end
 
 	if self.m_RawPresets[p_ID]["LiveEntities"] ~= nil then
 		LiveEntityHandler:SetVisibility(p_ID, false)
@@ -124,10 +122,10 @@ function VEManagerClient:DisablePreset(p_ID)
 	if not self:CheckPresetID(p_ID) then return end
 
 	m_Logger:Write("Disabling preset: " .. tostring(p_ID))
-	self.m_Presets[p_ID]["logic"].visibility = 0
-	self.m_Presets[p_ID]["ve"].visibility = 0
-	self.m_Presets[p_ID]["ve"].enabled = false
-	self.m_Presets[p_ID].entity:FireEvent("Disable")
+
+	if not self:_DestroyVE(p_ID) then
+		m_Logger:Error("Failed to destroy VE of preset " .. tostring(p_ID))
+	end
 
 	if self.m_RawPresets[p_ID]["LiveEntities"] ~= nil then
 		LiveEntityHandler:SetVisibility(p_ID, true)
@@ -151,17 +149,23 @@ end
 function VEManagerClient:SetVisibilityInternal(p_ID, p_Visibility)
 	if not self:CheckPresetID(p_ID) then return end
 
-	self.m_Presets[p_ID]["logic"].visibility = p_Visibility
-	self.m_Presets[p_ID]["ve"].visibility = p_Visibility
+	if not self.m_Presets[p_ID].entity then
+		self:_InitializePreset(p_ID, p_Visibility)
+	elseif p_Visibility == 0.0 then
+		self:_DestroyVE(p_ID)
+	else
+		self.m_Presets[p_ID]["logic"].visibility = p_Visibility
+		self.m_Presets[p_ID]["ve"].visibility = p_Visibility
 
-	if self.m_RawPresets[p_ID]["LiveEntities"] ~= nil then
-		if p_Visibility > 0.5 then
-			LiveEntityHandler:SetVisibility(p_ID, false)
-		else
-			LiveEntityHandler:SetVisibility(p_ID, true)
+		if self.m_RawPresets[p_ID]["LiveEntities"] ~= nil then
+			if p_Visibility > 0.5 then
+				LiveEntityHandler:SetVisibility(p_ID, false)
+			else
+				LiveEntityHandler:SetVisibility(p_ID, true)
+			end
 		end
+		self:Reload(p_ID)
 	end
-	self:Reload(p_ID)
 end
 
 ---@param p_ID string|nil
@@ -173,17 +177,23 @@ function VEManagerClient:UpdateVisibility(p_ID, p_Visibility)
 		return
 	end
 
-	self.m_Presets[p_ID]["logic"].visibility = p_Visibility
-	self.m_Presets[p_ID]["ve"].visibility = p_Visibility
+	if not self.m_Presets[p_ID].entity then
+		self:_InitializePreset(p_ID, p_Visibility)
+	elseif p_Visibility == 0.0 then
+		self:_DestroyVE(p_ID)
+	else
+		self.m_Presets[p_ID]["logic"].visibility = p_Visibility
+		self.m_Presets[p_ID]["ve"].visibility = p_Visibility
 
-	local s_States = VisualEnvironmentManager:GetStates()
-	local s_FixedPriority = 10000000 + self.m_Presets[p_ID].priority
+		local s_States = VisualEnvironmentManager:GetStates()
+		local s_FixedPriority = 10000000 + self.m_Presets[p_ID].priority
 
-	for _, l_State in pairs(s_States) do
-		if l_State.priority == s_FixedPriority then
-			l_State.visibility = p_Visibility
-			VisualEnvironmentManager:SetDirty(true)
-			return
+		for _, l_State in pairs(s_States) do
+			if l_State.priority == s_FixedPriority then
+				l_State.visibility = p_Visibility
+				VisualEnvironmentManager:SetDirty(true)
+				return
+			end
 		end
 	end
 end
@@ -218,7 +228,7 @@ end
 function VEManagerClient:FadeOut(p_ID, p_Time)
 	if not self:CheckPresetID(p_ID) then return end
 
-	local s_VisibilityStart = self.m_Presets[p_ID]["logic"].visibility
+	local s_VisibilityStart = self.m_Presets[p_ID]["ve"].visibility
 	self:FadeTo(p_ID, s_VisibilityStart, 0, p_Time)
 end
 
@@ -356,22 +366,68 @@ function VEManagerClient:GetState(...)
 	return nil
 end
 
-function VEManagerClient:InitializePresets()
-	m_Logger:Write("Spawned Presets:")
-
+---@param p_ID string|nil
+---@param p_Visibility number|nil
+---@return boolean wasSuccessful
+function VEManagerClient:_InitializePreset(p_ID, p_Visibility)
 	for l_Index, l_Preset in pairs(self.m_Presets) do
-		l_Preset["entity"] = EntityManager:CreateEntity(l_Preset["logic"], LinearTransform())
+		if l_Index == p_ID then
+			m_Logger:Write("Spawning VE: ")
 
-		if l_Preset["entity"] == nil then
-			m_Logger:Write("- " .. tostring(l_Index) .. ", could not be spawned.")
-			return
+			if l_Preset.entity then
+				m_Logger:Error("- " .. tostring(l_Index) .. ", already exists.")
+				return false
+			end
+
+			l_Preset["entity"] = EntityManager:CreateEntity(l_Preset["logic"], LinearTransform())
+
+			-- check if entity creation was successful
+			if not l_Preset.entity then
+				m_Logger:Error("- " .. tostring(l_Index) .. ", could not be spawned.")
+				return false
+			end
+
+			self.m_Presets[p_ID]["logic"].visibility = p_Visibility or 1.0
+			self.m_Presets[p_ID]["ve"].visibility = p_Visibility or 1.0
+
+			l_Preset.entity:Init(Realm.Realm_Client, true)
+			l_Preset.entity:FireEvent("Enable")
+			VisualEnvironmentManager:SetDirty(true)
+
+			m_Logger:Write("- " .. l_Preset["blueprint"].name)
+			print(l_Preset.entity)
+			return true
 		end
-
-		l_Preset["entity"]:Init(Realm.Realm_Client, true)
-		VisualEnvironmentManager:SetDirty(true)
-
-		m_Logger:Write("- " .. tostring(l_Index))
 	end
+	return false
+end
+
+---@param p_ID string|nil
+---@return boolean wasSuccessful
+function VEManagerClient:_DestroyVE(p_ID)
+	for l_Index, l_Preset in pairs(self.m_Presets) do
+		if l_Index == p_ID then
+			m_Logger:Write("Destroying VE: ")
+
+			-- check if entities exist
+			if not l_Preset.entity then
+				m_Logger:Warning("- " .. tostring(l_Index) .. ", does not exist. Do you really want to destroy at this point?.")
+				return true
+			end
+
+			-- destroy entity
+			l_Preset.entity:Destroy()
+			l_Preset.entity = nil
+			VisualEnvironmentManager:SetDirty(true)
+
+			self.m_Presets[p_ID]["logic"].visibility = 0.0
+			self.m_Presets[p_ID]["ve"].visibility = 0.0
+
+			m_Logger:Write("- " .. tostring(l_Index))
+			return true
+		end
+	end
+	return false
 end
 
 ---@param p_ID string|nil
@@ -392,9 +448,11 @@ function VEManagerClient:GetTexture(p_Name)
 	end
 end
 
-function VEManagerClient:LoadPresets()
+---@param p_ID string|nil
+function VEManagerClient:LoadPresets(p_ID)
 	m_Logger:Write("Loading presets... (Name, Type, Priority)")
-	--Foreach preset
+
+	-- prepare presets
 	for l_Index, l_Preset in pairs(self.m_RawPresets) do
 
 		-- Variables check
@@ -424,7 +482,7 @@ function VEManagerClient:LoadPresets()
 		local s_LVEED = self:CreateEntity("LogicVisualEnvironmentEntityData")
 		self.m_Presets[l_Preset.Name] = {}
 		self.m_Presets[l_Preset.Name]["logic"] = s_LVEED
-		s_LVEED.visibility = 1
+		s_LVEED.visibility = 0
 
 		local s_VEB = self:CreateEntity("VisualEnvironmentBlueprint")
 		s_VEB.name = l_Preset.Name
@@ -438,7 +496,7 @@ function VEManagerClient:LoadPresets()
 
 		s_VE.enabled = true
 		s_VE.priority = l_Preset.Priority
-		s_VE.visibility = 1
+		s_VE.visibility = 0
 
 		self.m_Presets[l_Preset.Name]["ve"] = s_VE
 		self.m_Presets[l_Preset.Name]["type"] = l_Preset.Type
@@ -544,11 +602,7 @@ function VEManagerClient:LoadPresets()
 			end
 		end
 		s_VE.runtimeComponentCount = s_ComponentCount
-		s_VE.visibility = 0
-		s_VE.enabled = false
-		s_LVEED.visibility = 0
 	end
-	self:InitializePresets()
 	Events:Dispatch("VEManager:PresetsLoaded")
 	NetEvents:Send("VEManager:PlayerReady")
 	m_Logger:Write("Presets loaded")

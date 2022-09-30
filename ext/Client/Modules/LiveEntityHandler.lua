@@ -40,7 +40,7 @@ function LiveEntityHandler:SetVisibility(p_Category, p_Visible)
         return
     end
 
-    if #m_Queue ~= 0 then 
+    if #m_Queue ~= 0 then
         m_Queue = {}
     end
 
