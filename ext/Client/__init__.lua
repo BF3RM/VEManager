@@ -51,6 +51,7 @@ function VEManagerClient:RegisterVars()
 	-- Default Dynamic day-night cycle Presets
 	self.m_RawPresets = {
 		DefaultNight = require("Presets/DefaultNight"),
+		DefaultNight2 = require("Presets/DefaultNight2"),
 		DefaultMorning = require("Presets/DefaultMorning"),
 		DefaultNoon = require("Presets/DefaultNoon"),
 		DefaultEvening = require("Presets/DefaultEvening"),
@@ -185,8 +186,9 @@ function VEManagerClient:UpdateVisibility(p_ID, p_Visibility)
 		self.m_Presets[p_ID]["logic"].visibility = p_Visibility
 		self.m_Presets[p_ID]["ve"].visibility = p_Visibility
 
+		-- TODO: Store States
 		local s_States = VisualEnvironmentManager:GetStates()
-		local s_FixedPriority = 10000000 + self.m_Presets[p_ID].priority
+		local s_FixedPriority = 10000000 + self.m_Presets[p_ID]["ve"].priority
 
 		for _, l_State in pairs(s_States) do
 			if l_State.priority == s_FixedPriority then
@@ -470,7 +472,7 @@ function VEManagerClient:LoadPresets(p_ID)
 			l_Preset.Priority = tonumber(l_Preset.Priority)
 			-- Restrict using day-night cycle priorities
 			-- TODO: This should be somehow adjusted to the new dynamic system
-			if l_Preset.Priority >= 11 and l_Preset.Priority <= 14 then
+			if l_Preset.Priority >= 11 and l_Preset.Priority <= 20 then
 				l_Preset.Priority = l_Preset.Priority + 5
 			end
 		end

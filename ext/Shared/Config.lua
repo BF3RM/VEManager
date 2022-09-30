@@ -9,7 +9,7 @@ VEM_CONFIG = {
 	DN_APPLY_PATCHES = true,										-- Applies the needed Patches for Day-Night (removes bright meshes/textures meant for day)
 
 	-- PRINT --
-	PRINT_DN_TIME_AND_VISIBILITIES = false,							-- Print current time every hour along with the visibilities of the 4 presets
+	PRINT_DN_TIME_AND_VISIBILITIES = true,							-- Print current time every hour along with the visibilities of the 4 presets
 	LOGGER_ENABLED = true, 											-- Enables the use of the Logger Class [DEV]
 	LOGGER_PRINT_ALL = false,										-- Prints All Logger Prints
 

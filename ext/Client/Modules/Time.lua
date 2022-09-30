@@ -178,6 +178,8 @@ function Time:ResetForcedValues()
 					-- Reset values
 					s_Class.sunRotationX = self.m_SavedValuesForReset[l_Index][l_Class.typeInfo.name].sunRotationX
 					s_Class.sunRotationY = self.m_SavedValuesForReset[l_Index][l_Class.typeInfo.name].sunRotationY
+					VisualEnvironmentManager:SetSunRotationX(0.0)
+					VisualEnvironmentManager:SetSunRotationY(0.0)
 
 				-- Un-patch Star Cloudlayer
 				elseif l_Class.typeInfo.name == "SkyComponentData" then
