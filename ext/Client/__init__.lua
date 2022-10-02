@@ -375,7 +375,7 @@ function VEManagerClient:_InitializePreset(p_ID, p_Visibility)
 			m_Logger:Write("Spawning VE: ")
 
 			if l_Preset.entity then
-				m_Logger:Error("- " .. tostring(l_Index) .. ", already exists.")
+				m_Logger:Warning("- " .. tostring(l_Index) .. ", already exists.")
 				return false
 			end
 
@@ -383,19 +383,18 @@ function VEManagerClient:_InitializePreset(p_ID, p_Visibility)
 
 			-- check if entity creation was successful
 			if not l_Preset.entity then
-				m_Logger:Error("- " .. tostring(l_Index) .. ", could not be spawned.")
+				m_Logger:Warning("- " .. tostring(l_Index) .. ", could not be spawned.")
 				return false
 			end
 
-			self.m_Presets[p_ID]["logic"].visibility = p_Visibility or 1.0
-			self.m_Presets[p_ID]["ve"].visibility = p_Visibility or 1.0
+			l_Preset["logic"].visibility = p_Visibility or 1.0
+			l_Preset["ve"].visibility = p_Visibility or 1.0
 
 			l_Preset.entity:Init(Realm.Realm_Client, true)
 			l_Preset.entity:FireEvent("Enable")
 			VisualEnvironmentManager:SetDirty(true)
 
 			m_Logger:Write("- " .. l_Preset["blueprint"].name)
-			print(l_Preset.entity)
 			return true
 		end
 	end
@@ -420,8 +419,8 @@ function VEManagerClient:_DestroyVE(p_ID)
 			l_Preset.entity = nil
 			VisualEnvironmentManager:SetDirty(true)
 
-			self.m_Presets[p_ID]["logic"].visibility = 0.0
-			self.m_Presets[p_ID]["ve"].visibility = 0.0
+			l_Preset["logic"].visibility = 0.0
+			l_Preset["ve"].visibility = 0.0
 
 			m_Logger:Write("- " .. tostring(l_Index))
 			return true
@@ -448,8 +447,7 @@ function VEManagerClient:GetTexture(p_Name)
 	end
 end
 
----@param p_ID string|nil
-function VEManagerClient:LoadPresets(p_ID)
+function VEManagerClient:LoadPresets()
 	m_Logger:Write("Loading presets... (Name, Type, Priority)")
 
 	-- prepare presets
@@ -478,16 +476,19 @@ function VEManagerClient:LoadPresets(p_ID)
 		-- Generate our VisualEnvironment
 		local s_IsBasePreset = l_Preset.Priority == 1
 
+		-- Create Preset Table
+		self.m_Presets[l_Preset.Name] = {}
+		local s_Preset = self.m_Presets[l_Preset.Name]
+
 		--Not sure if we need the LogicelVEEntity, but :shrug:
 		local s_LVEED = self:CreateEntity("LogicVisualEnvironmentEntityData")
-		self.m_Presets[l_Preset.Name] = {}
-		self.m_Presets[l_Preset.Name]["logic"] = s_LVEED
+		s_Preset["logic"] = s_LVEED
 		s_LVEED.visibility = 0
 
 		local s_VEB = self:CreateEntity("VisualEnvironmentBlueprint")
 		s_VEB.name = l_Preset.Name
 		s_LVEED.visualEnvironment = s_VEB
-		self.m_Presets[l_Preset.Name]["blueprint"] = s_VEB
+		s_Preset["blueprint"] = s_VEB
 
 		local s_VE = self:CreateEntity("VisualEnvironmentEntityData")
 		s_VEB.object = s_VE
@@ -498,9 +499,9 @@ function VEManagerClient:LoadPresets(p_ID)
 		s_VE.priority = l_Preset.Priority
 		s_VE.visibility = 0
 
-		self.m_Presets[l_Preset.Name]["ve"] = s_VE
-		self.m_Presets[l_Preset.Name]["type"] = l_Preset.Type
-		self.m_Presets[l_Preset.Name]["priority"] = l_Preset.Priority
+		s_Preset["ve"] = s_VE
+		s_Preset["type"] = l_Preset.Type
+		s_Preset["priority"] = l_Preset.Priority
 
 		--Foreach class
 		local s_ComponentCount = 0
