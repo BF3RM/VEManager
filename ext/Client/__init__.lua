@@ -108,8 +108,12 @@ function VEManagerClient:EnablePreset(p_ID)
 
 	m_Logger:Write("Enabling preset: " .. tostring(p_ID))
 
-	if not self:_InitializePreset(p_ID) then
+	local s_Initialized, s_AlreadyExists = self:_InitializePreset(p_ID)
+
+	if not s_Initialized and not s_AlreadyExists then
 		m_Logger:Error("Failed to create VE from preset " .. tostring(p_ID))
+	elseif not s_Initialized and s_AlreadyExists then
+		m_Logger:Warning("Didnt create VE, since it already exists. This shouldnt happen. Making " .. tostring(p_ID) .. " visible nevertheless")
 	end
 
 	if self.m_RawPresets[p_ID]["LiveEntities"] ~= nil then
@@ -369,6 +373,7 @@ end
 ---@param p_ID string|nil
 ---@param p_Visibility number|nil
 ---@return boolean wasSuccessful
+---@return boolean alreadyExistsWarning
 function VEManagerClient:_InitializePreset(p_ID, p_Visibility)
 	for l_Index, l_Preset in pairs(self.m_Presets) do
 		if l_Index == p_ID then
@@ -376,7 +381,8 @@ function VEManagerClient:_InitializePreset(p_ID, p_Visibility)
 
 			if l_Preset.entity then
 				m_Logger:Warning("- " .. tostring(l_Index) .. ", already exists.")
-				return false
+				self:SetVisibilityInternal(p_ID, 1)
+				return false, true
 			end
 
 			l_Preset["entity"] = EntityManager:CreateEntity(l_Preset["logic"], LinearTransform())
@@ -384,7 +390,7 @@ function VEManagerClient:_InitializePreset(p_ID, p_Visibility)
 			-- check if entity creation was successful
 			if not l_Preset.entity then
 				m_Logger:Warning("- " .. tostring(l_Index) .. ", could not be spawned.")
-				return false
+				return false, false
 			end
 
 			l_Preset["logic"].visibility = p_Visibility or 1.0
@@ -395,10 +401,10 @@ function VEManagerClient:_InitializePreset(p_ID, p_Visibility)
 			VisualEnvironmentManager:SetDirty(true)
 
 			m_Logger:Write("- " .. l_Preset["blueprint"].name)
-			return true
+			return true, false
 		end
 	end
-	return false
+	return false, false
 end
 
 ---@param p_ID string|nil
