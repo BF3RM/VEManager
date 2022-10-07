@@ -421,6 +421,7 @@ function VEManagerClient:_DestroyVE(p_ID)
 			end
 
 			-- destroy entity
+			self.m_Lerping[p_ID] = nil
 			l_Preset.entity:Destroy()
 			l_Preset.entity = nil
 			VisualEnvironmentManager:SetDirty(true)
