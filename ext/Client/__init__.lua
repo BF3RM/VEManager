@@ -619,9 +619,9 @@ end
 ---@param p_LevelName string
 ---@param p_GameModeName string
 function VEManagerClient:OnLevelLoaded(p_LevelName, p_GameModeName)
+	self.m_IsLevelLoaded = true
 	self:LoadPresets()
 	m_Patches:OnLevelLoaded(p_LevelName, p_GameModeName)
-	self.m_IsLevelLoaded = true
 end
 
 function VEManagerClient:OnLevelDestroy()
