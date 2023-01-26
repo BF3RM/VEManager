@@ -312,11 +312,15 @@ function VEManagerClient:OnVEDestroyRequest(p_ID)
 end
 
 ---@param p_ID string
----@param p_Replacement table
+---@param p_Replacement string
 function VEManagerClient:OnVEReplaceRequest(p_ID, p_Replacement)
 	if not self:CheckPresetID(p_ID) then return end
+	local s_Preset = json.decode(p_Replacement)
 
-	self.m_RawPresets[p_ID] = p_Replacement
+	if s_Preset == nil then
+		m_Logger:Warning('Error when parsing the replacement preset. Id: ' .. tostring(p_ID))
+	end
+	self.m_RawPresets[p_ID] = s_Preset
 end
 
 ---@param p_ID string
@@ -334,7 +338,7 @@ function VEManagerClient:ApplyTexture(p_ID, p_Guid, p_Path)
 			if s_Instance then
 				s_Class[p_Path] = TextureAsset(s_Instance)
 			else
-				m_Logger:Error('Could not find instance with guid ' .. tostring(p_Guid))
+				m_Logger:Warning('Could not find instance with guid ' .. tostring(p_Guid))
 			end
 		end
 	end
