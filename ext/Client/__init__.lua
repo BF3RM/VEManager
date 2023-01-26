@@ -74,6 +74,7 @@ function VEManagerClient:RegisterEvents()
 	Events:Subscribe('VEManager:FadeIn', self, self.FadeIn)
 	Events:Subscribe('VEManager:FadeTo', self, self.FadeTo)
 	Events:Subscribe('VEManager:FadeOut', self, self.FadeOut)
+	Events:Subscribe('VEManager:Pulse', self, self.OnPulse)
 	Events:Subscribe('VEManager:Lerp', self, self.Lerp)
 	Events:Subscribe('VEManager:VEGuidRequest', self, self.OnVEGuidRequest)
 	Events:Subscribe('VEManager:Reload', self, self.Reload)
@@ -99,7 +100,7 @@ function VEManagerClient:RegisterPreset(p_ID, p_Preset)
 	self.m_RawPresets[p_ID] = json.decode(p_Preset)
 end
 
----@param p_ID string|nil
+---@param p_ID string
 function VEManagerClient:EnablePreset(p_ID)
 	if not self:CheckPresetID(p_ID) then return end
 
@@ -121,7 +122,7 @@ function VEManagerClient:EnablePreset(p_ID)
 	end
 end
 
----@param p_ID string|nil
+---@param p_ID string
 function VEManagerClient:DisablePreset(p_ID)
 	if not self:CheckPresetID(p_ID) then return end
 
@@ -136,26 +137,21 @@ function VEManagerClient:DisablePreset(p_ID)
 	end
 end
 
----@param p_ID string|nil
----@param p_Visibility number|nil
+---@param p_ID string
+---@param p_Visibility number
 function VEManagerClient:SetVisibility(p_ID, p_Visibility)
-	for l_ID, _ in pairs(self.m_Lerping) do
-		if l_ID == p_ID then
-			self.m_Lerping[l_ID] = nil
-		end
-	end
-
+	self.m_Lerping[p_ID] = nil
 	self:SetVisibilityInternal(p_ID, p_Visibility)
 end
 
----@param p_ID string|nil
----@param p_Visibility number|nil
+---@param p_ID string
+---@param p_Visibility number
 function VEManagerClient:SetVisibilityInternal(p_ID, p_Visibility)
 	if not self:CheckPresetID(p_ID) then return end
 
 	if not self.m_Presets[p_ID].entity then
 		self:_InitializePreset(p_ID, p_Visibility)
-	elseif p_Visibility == 0.0 then
+	elseif p_Visibility <= 0.0 then
 		self:_DestroyVE(p_ID)
 	else
 		self.m_Presets[p_ID]["logic"].visibility = p_Visibility
@@ -172,8 +168,8 @@ function VEManagerClient:SetVisibilityInternal(p_ID, p_Visibility)
 	end
 end
 
----@param p_ID string|nil
----@param p_Visibility number|nil
+---@param p_ID string
+---@param p_Visibility number
 function VEManagerClient:UpdateVisibility(p_ID, p_Visibility)
 	if not self:CheckPresetID(p_ID) then return end
 
@@ -202,10 +198,10 @@ function VEManagerClient:UpdateVisibility(p_ID, p_Visibility)
 	end
 end
 
----@param p_ID string|nil
----@param p_Class string|nil
----@param p_Property string|nil
----@param p_Value any|nil
+---@param p_ID string
+---@param p_Class string
+---@param p_Property string
+---@param p_Value any
 function VEManagerClient:SetSingleValue(p_ID, p_Class, p_Property, p_Value)
 	if not self:CheckPresetID(p_ID) then return end
 
@@ -221,14 +217,14 @@ function VEManagerClient:SetSingleValue(p_ID, p_Class, p_Property, p_Value)
 	end
 end
 
----@param p_ID string|nil
----@param p_Time number|nil
+---@param p_ID string
+---@param p_Time number time of the transition in miliseconds
 function VEManagerClient:FadeIn(p_ID, p_Time)
 	self:FadeTo(p_ID, 0, 1, p_Time)
 end
 
----@param p_ID string|nil
----@param p_Time number|nil
+---@param p_ID string
+---@param p_Time number time of the transition in miliseconds
 function VEManagerClient:FadeOut(p_ID, p_Time)
 	if not self:CheckPresetID(p_ID) then return end
 
@@ -236,10 +232,29 @@ function VEManagerClient:FadeOut(p_ID, p_Time)
 	self:FadeTo(p_ID, s_VisibilityStart, 0, p_Time)
 end
 
----@param p_ID string|nil
----@param p_VisibilityStart number|nil
----@param p_VisibilityEnd number|nil
----@param p_Time number|nil
+---@param p_ID string
+---@param p_Time number time of the transition in miliseconds
+---@param p_DecreaseFirst boolean sets if the first pulse decreases the current value until 0
+function VEManagerClient:OnPulse(p_ID, p_Time, p_DecreaseFirst)
+	if not self:CheckPresetID(p_ID) then return end
+
+	local s_VisibilityStart = self.m_Presets[p_ID]["logic"].visibility
+
+	self.m_Presets[p_ID]['time'] = tonumber(p_Time)
+	self.m_Presets[p_ID]['startTime'] = SharedUtils:GetTimeMS()
+	self.m_Presets[p_ID]['startValue'] = tonumber(s_VisibilityStart)
+	if p_DecreaseFirst then
+		self.m_Presets[p_ID]['EndValue'] = 0
+	else
+		self.m_Presets[p_ID]['EndValue'] = 1
+	end
+	self.m_Lerping[p_ID] = { enabled = true, pulsing = true }
+end
+
+---@param p_ID string
+---@param p_VisibilityStart number
+---@param p_VisibilityEnd number
+---@param p_Time number time of the transition in miliseconds
 function VEManagerClient:FadeTo(p_ID, p_VisibilityStart, p_VisibilityEnd, p_Time)
 	if not self:CheckPresetID(p_ID) then return end
 
@@ -247,12 +262,12 @@ function VEManagerClient:FadeTo(p_ID, p_VisibilityStart, p_VisibilityEnd, p_Time
 	self.m_Presets[p_ID]['startTime'] = SharedUtils:GetTimeMS()
 	self.m_Presets[p_ID]['startValue'] = tonumber(p_VisibilityStart)
 	self.m_Presets[p_ID]['EndValue'] = tonumber(p_VisibilityEnd)
-	self.m_Lerping[p_ID] = true
+	self.m_Lerping[p_ID] = { enabled = true, pulsing = false }
 end
 
----@param p_ID string|nil
----@param p_Value number|nil
----@param p_Time number|nil
+---@param p_ID string
+---@param p_Value number
+---@param p_Time number time of the transition in miliseconds
 function VEManagerClient:Lerp(p_ID, p_Value, p_Time)
 	if not self:CheckPresetID(p_ID) then return end
 
@@ -261,10 +276,10 @@ function VEManagerClient:Lerp(p_ID, p_Value, p_Time)
 	self.m_Presets[p_ID]['startValue'] = self.m_Presets[p_ID]["logic"].visibility
 	self.m_Presets[p_ID]['EndValue'] = p_Value
 
-	self.m_Lerping[p_ID] = true
+	self.m_Lerping[p_ID] = { enabled = true, pulsing = false }
 end
 
----@param p_ID string|nil
+---@param p_ID string
 function VEManagerClient:CheckPresetID(p_ID)
 	if not self.m_IsLevelLoaded then
 		return false
@@ -279,7 +294,7 @@ function VEManagerClient:CheckPresetID(p_ID)
 	return true
 end
 
----@param p_ID string|nil
+---@param p_ID string
 function VEManagerClient:OnVEGuidRequest(p_ID)
 	local s_Guid = self.m_Presets[p_ID].instanceGuid
 
@@ -288,7 +303,7 @@ function VEManagerClient:OnVEGuidRequest(p_ID)
 	end
 end
 
----@param p_ID string|nil
+---@param p_ID string
 function VEManagerClient:OnVEDestroyRequest(p_ID)
 	if not self:CheckPresetID(p_ID) then return end
 
@@ -296,24 +311,35 @@ function VEManagerClient:OnVEDestroyRequest(p_ID)
 	self.m_Presets[p_ID].entity:Destroy()
 end
 
----@param p_ID string|nil
----@param p_Replacement string|nil
+---@param p_ID string
+---@param p_Replacement string
 function VEManagerClient:OnVEReplaceRequest(p_ID, p_Replacement)
 	if not self:CheckPresetID(p_ID) then return end
+	local s_Preset = json.decode(p_Replacement)
 
-	self.m_RawPresets[p_ID] = p_Replacement
+	if s_Preset == nil then
+		m_Logger:Warning('Error when parsing the replacement preset. Id: ' .. tostring(p_ID))
+	end
+	self.m_RawPresets[p_ID] = s_Preset
 end
 
----@param p_ID string|nil
----@param p_Guid Guid|nil
----@param p_Path string|nil
+---@param p_ID string
+---@param p_Guid Guid
+---@param p_Path string
 function VEManagerClient:ApplyTexture(p_ID, p_Guid, p_Path)
 	for _, l_Class in pairs(self.m_Presets[p_ID]["ve"].components) do
 
 		if l_Class.typeInfo.name == "SkyComponentData" then
 			local s_Class = SkyComponentData(l_Class)
 			s_Class:MakeWritable()
-			s_Class[p_Path] = TextureAsset(ResourceManager:SearchForInstanceByGuid(p_Guid))
+
+			local s_Instance = ResourceManager:SearchForInstanceByGuid(p_Guid)
+
+			if s_Instance then
+				s_Class[p_Path] = TextureAsset(s_Instance)
+			else
+				m_Logger:Warning('Could not find instance with guid ' .. tostring(p_Guid))
+			end
 		end
 	end
 	self:Reload(p_ID)
@@ -370,7 +396,7 @@ function VEManagerClient:GetState(...)
 	return nil
 end
 
----@param p_ID string|nil
+---@param p_ID string
 ---@param p_Visibility number|nil
 ---@return boolean wasSuccessful
 ---@return boolean alreadyExistsWarning
@@ -407,33 +433,34 @@ function VEManagerClient:_InitializePreset(p_ID, p_Visibility)
 	return false, false
 end
 
----@param p_ID string|nil
+---@param p_ID string
 ---@return boolean wasSuccessful
 function VEManagerClient:_DestroyVE(p_ID)
-	for l_Index, l_Preset in pairs(self.m_Presets) do
-		if l_Index == p_ID then
-			m_Logger:Write("Destroying VE: ")
+	m_Logger:Write("Attemting to destroy VE preset with id " .. p_ID .. "...")
 
-			-- check if entities exist
-			if not l_Preset.entity then
-				m_Logger:Warning("- " .. tostring(l_Index) .. ", does not exist. Do you really want to destroy at this point?.")
-				return true
-			end
+	local s_Preset = self.m_Presets[p_ID]
 
-			-- destroy entity
-			self.m_Lerping[p_ID] = nil
-			l_Preset.entity:Destroy()
-			l_Preset.entity = nil
-			VisualEnvironmentManager:SetDirty(true)
-
-			l_Preset["logic"].visibility = 0.0
-			l_Preset["ve"].visibility = 0.0
-
-			m_Logger:Write("- " .. tostring(l_Index))
-			return true
-		end
+	if s_Preset == nil then
+		m_Logger:Warning("Tried to destroy a preset that does not exist")
+		return false
 	end
-	return false
+
+	if not s_Preset.entity then
+		m_Logger:Warning("Preset entity does not exist. Do you really want to destroy at this point?.")
+		return true
+	end
+
+	-- destroy entity
+	self.m_Lerping[p_ID] = nil
+	s_Preset.entity:Destroy()
+	s_Preset.entity = nil
+	VisualEnvironmentManager:SetDirty(true)
+
+	s_Preset["logic"].visibility = 0.0
+	s_Preset["ve"].visibility = 0.0
+
+	m_Logger:Write("- " .. tostring(s_Preset))
+	return true
 end
 
 ---@param p_ID string|nil
@@ -668,7 +695,7 @@ end
 
 -- This one is a little dirty.
 ---@param p_Class string
----@param p_Guid Guid
+---@param p_Guid Guid|nil
 function VEManagerClient:CreateEntity(p_Class, p_Guid)
 	-- Create the instance
 	local s_Entity = _G[p_Class]()
@@ -681,34 +708,51 @@ function VEManagerClient:CreateEntity(p_Class, p_Guid)
 	end
 end
 
-function VEManagerClient:UpdateLerp(percentage)
-	for p_ID, _ in pairs(self.m_Lerping) do
+function VEManagerClient:UpdateLerp()
+	for l_ID, _ in pairs(self.m_Lerping) do
 
-		local TimeSinceStarted = SharedUtils:GetTimeMS() - self.m_Presets[p_ID].startTime
-		local PercentageComplete = TimeSinceStarted / self.m_Presets[p_ID].time
-		--local lerpValue = self.m_Presets[preset].startValue + (self.m_Presets[preset].EndValue - self.m_Presets[preset].startValue) * PercentageComplete
+		local s_Preset = self.m_Presets[l_ID]
+		local msSinceStarted = SharedUtils:GetTimeMS() - s_Preset.startTime
+		local percentageComplete = msSinceStarted / s_Preset.time * 100
 
-		-- t = elapsed time
+		-- t = elapsed time (ms)
 		-- b = begin
 		-- c = change == ending - beginning
-		-- d = duration (total time)
-		local t = TimeSinceStarted
-		local b = self.m_Presets[p_ID].startValue
-		local c = self.m_Presets[p_ID].EndValue - self.m_Presets[p_ID].startValue
-		local d = self.m_Presets[p_ID].time
+		-- d = duration (total time, ms)
+		local t = msSinceStarted
+		local b = s_Preset.startValue
+		local c = s_Preset.EndValue - s_Preset.startValue
+		local d = s_Preset.time
 
 		local transition = "linear"
-		if self.m_Presets[p_ID].transition ~= nil then
-			transition = self.m_Presets[p_ID].transition
+		if s_Preset.transition ~= nil then
+			transition = s_Preset.transition
 		end
 
 		local lerpValue = m_Easing[transition](t, b, c, d)
 
-		if PercentageComplete >= 1 or PercentageComplete < 0 then
-			self:SetVisibilityInternal(p_ID, self.m_Presets[p_ID].EndValue)
-			self.m_Lerping[p_ID] = nil
+		if percentageComplete >= 100 then
+			if self.m_Lerping[l_ID].pulsing then
+				s_Preset['startTime'] = SharedUtils:GetTimeMS()
+
+				-- Swap if pulsing, so we set the opposite visibility as goal
+				if lerpValue < 0.1 then
+					s_Preset['startValue'] = 0.0
+					s_Preset['EndValue'] = 1.0
+				else
+					s_Preset['startValue'] = 1.0
+					s_Preset['EndValue'] = 0.0
+				end
+			else
+				self:SetVisibilityInternal(l_ID, s_Preset.EndValue)
+				self.m_Lerping[l_ID] = nil
+			end
+		elseif percentageComplete < 0 then
+			m_Logger:Warning('Lerping of preset ' .. tostring(l_ID) .. ' has its completed percentage of ' .. tostring(percentageComplete) .. ', should never happen')
+			self:SetVisibilityInternal(l_ID, s_Preset.EndValue)
+			self.m_Lerping[l_ID] = nil
 		else
-			self:SetVisibilityInternal(p_ID, lerpValue)
+			self:SetVisibilityInternal(l_ID, lerpValue)
 		end
 	end
 end
@@ -716,7 +760,7 @@ end
 ---@param p_Delta number
 ---@param p_SimulationDelta number
 function VEManagerClient:OnUpdateInput(p_Delta, p_SimulationDelta)
-	self:UpdateLerp(p_Delta)
+	self:UpdateLerp()
 end
 
 function VEManagerClient:OnUpdateManager(p_DeltaTime, p_UpdatePass)
