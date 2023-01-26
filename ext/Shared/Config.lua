@@ -17,7 +17,7 @@ VEM_CONFIG = {
 	SERVER_SYNC_CLIENT_EVERY_TICKS = 2, 							-- Sync clients with the correct time ever X ticks
 
 	-- DEV --
-	ADMINS = {"GreatApo", "IllustrisJack"},							-- Players that can use the VEM chat commands
+	ADMINS = {"GreatApo", "IllustrisJack", "FoolHen"},							-- Players that can use the VEM chat commands
 	DEV_ENABLE_CHAT_COMMANDS = true,								-- Enables the use of VEM Internal Chat Commands
 	DEV_ENABLE_TEST_KEYS = true,									-- Enables the use of VEM Internal Testing Keybinds
 	DEV_SEARCH_PARAMETERS_FOR_TEXTURES = {							-- Defines the Search Parameters for the Cinematic Tools Texture Tool
