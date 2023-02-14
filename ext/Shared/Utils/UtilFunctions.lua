@@ -196,15 +196,34 @@ function UtilityFunctions:GetFieldDefaultValue(p_Class, p_Field)
 	end
 end
 
--- Initialize
-UtilityFunctions()
+-- Returns public functions of a class - this automatically throws an error if someone tries to use a non public functions from outside a class
+---@param p_Class table
+---@return table
+function UtilityFunctions:InitializeClass(p_Class)
+    -- Initialize
+    p_Class()
 
--- Only return public functions
-return {
-    InitEngineType = UtilityFunctions.InitEngineType,
-    IsBasicType = UtilityFunctions.IsBasicType,
-    ParseValue = UtilityFunctions.ParseValue,
-    GetTexture = UtilityFunctions.GetTexture,
-    FirstToLower = UtilityFunctions.FirstToLower,
-	GetFieldDefaultValue = UtilityFunctions.GetFieldDefaultValue
-}
+    local s_PublicFunctionTable = {}
+
+    print(p_Class.name)
+
+    --print("Class: " .. p_Class)
+    for l_MethodName, l_Method in pairs(p_Class.__declaredMethods) do
+        -- check if public and a function
+        if type(l_Method) == "function" and string.sub(l_MethodName, 1, 1) ~= "_" then
+            s_PublicFunctionTable[l_MethodName] = l_Method
+
+            if l_MethodName == "isInstanceOf" then
+                print("- Added Public MiddleClass Method: " .. l_MethodName)
+            else
+                print("- Added Public Method: " .. l_MethodName)
+            end
+        end
+    end
+
+    return s_PublicFunctionTable
+end
+
+return UtilityFunctions:InitializeClass(UtilityFunctions)
+
+

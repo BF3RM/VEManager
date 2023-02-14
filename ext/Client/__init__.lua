@@ -6,7 +6,11 @@ VEManagerClient = class 'VEManagerClient'
 local m_Logger = Logger("VEManagerClient", false)
 
 --#region Imports
+-- Types
+require "__shared/Types/VisualEnvironmentObject"
+---@type VisualEnvironmentHandler
 local m_VisualEnvironmentHandler = require("VisualEnvironmentHandler")
+---@type Patches
 local m_Patches = require("Patches")
 --#endregion
 
@@ -30,9 +34,8 @@ function VEManagerClient:RegisterEvents()
 
 	Events:Subscribe('VEManager:RegisterPreset', self, self._RegisterPreset)
 	Events:Subscribe('VEManager:EnablePreset', self, self._EnablePreset)
-	Events:Subscribe('VEManager:DisablePreset', self, self.DisablePreset)
-	Events:Subscribe('VEManager:SetVisibility', self, self.SetVisibility)
-	Events:Subscribe('VEManager:UpdateVisibility', self, self.UpdateVisibility)
+	Events:Subscribe('VEManager:DisablePreset', self, self._DisablePreset)
+	Events:Subscribe('VEManager:SetVisibility', self, self._SetVisibility)
 	Events:Subscribe('VEManager:FadeIn', self, self.FadeIn)
 	Events:Subscribe('VEManager:FadeTo', self, self.FadeTo)
 	Events:Subscribe('VEManager:FadeOut', self, self.FadeOut)
@@ -102,7 +105,7 @@ function VEManagerClient:_EnablePreset(p_ID)
 end
 
 ---@param p_ID string
-function VEManagerClient:DisablePreset(p_ID)
+function VEManagerClient:_DisablePreset(p_ID)
 	if not m_VisualEnvironmentHandler:CheckIfExists(p_ID) then return end
 
 	m_Logger:Write("Disabling preset: " .. tostring(p_ID))
@@ -113,6 +116,21 @@ function VEManagerClient:DisablePreset(p_ID)
 
 	if self.m_RawPresets[p_ID]["LiveEntities"] ~= nil then
 		LiveEntityHandler:SetVisibility(p_ID, true)
+	end
+end
+
+---@param p_ID string
+function VEManagerClient:_SetVisibility(p_ID, p_Visibility)
+	if not m_VisualEnvironmentHandler:CheckIfExists(p_ID) then return end
+
+	m_VisualEnvironmentHandler:SetVisibility(p_ID, p_Visibility)
+
+	if self.m_RawPresets[p_ID]["LiveEntities"] ~= nil then
+		if p_Visibility > 0.5 then
+			LiveEntityHandler:SetVisibility(p_ID, false)
+		else
+			LiveEntityHandler:SetVisibility(p_ID, true)
+		end
 	end
 end
 
@@ -203,12 +221,12 @@ function VEManagerClient:_LoadPresets()
 					end
 
 					-- If not in the preset or incorrect value
-					if s_Value == nil then
+					if not s_Value then
 						-- Try to get original value
 						-- m_Logger:Write("Setting default value for field " .. s_FieldName .. " of class " .. l_Class .. " | " ..tostring(s_Value))
 						s_Value = UtilityFunctions:GetFieldDefaultValue(l_Class, l_Field)
 
-						if s_Value == nil then
+						if not s_Value then
 							m_Logger:Write("\t- Failed to fetch original value: " .. tostring(l_Class) .. " | " .. tostring(s_FieldName))
 
 							if s_FieldName == "FilmGrain" then -- fix FilmGrain texture
@@ -247,4 +265,4 @@ function VEManagerClient:_LoadPresets()
 	m_Logger:Write("Presets loaded")
 end
 
-return VEManagerClient()
+return UtilityFunctions:InitializeClass(VEManagerClient)

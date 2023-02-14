@@ -410,6 +410,51 @@ local function tableHasValue(tab, val)
 		return false
 end
 
+---@class EasingTransitions
+---@field linear string|function
+---@field inQuad string|function
+---@field outQuad string|function
+---@field inOutQuad string|function
+---@field outInQuad string|function
+---@field inCubic string|function
+---@field outCubic string|function
+---@field inOutCubic string|function
+---@field outInCubic string|function
+---@field inQuart string|function
+---@field outQuart string|function
+---@field inOutQuart string|function
+---@field outInQuart string|function
+---@field inQuint string|function
+---@field outQuint string|function
+---@field inOutQuint string|function
+---@field outInQuint string|function
+---@field inSine string|function
+---@field outSine string|function
+---@field inOutSine string|function
+---@field outInSine string|function
+---@field inExpo string|function
+---@field outExpo string|function
+---@field inOutExpo string|function
+---@field outInExpo string|function
+---@field inCirc string|function
+---@field outCirc string|function
+---@field inOutCirc string|function
+---@field outInCirc string|function
+---@field inElastic string|function
+---@field outElastic string|function
+---@field inOutElastic string|function
+---@field outInElastic string|function
+---@field inBack string|function
+---@field outBack string|function
+---@field inOutBack string|function
+---@field outInBack string|function
+---@field inBounce string|function
+---@field outBounce string|function
+---@field inOutBounce string|function
+---@field outInBounce string|function
+---@field tableHasValue string|function
+---@field tableGetIndex string|function
+
 return {
 	linear = linear,
 	inQuad = inQuad,

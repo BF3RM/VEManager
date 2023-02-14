@@ -142,10 +142,5 @@ function Patches:_DisableExplosionVisualEnvironments()
 	end
 end
 
--- Initializing
-Patches()
+return UtilityFunctions:InitializeClass(Patches)
 
-return {
-	OnLevelLoaded = Patches.OnLevelLoaded,
-	PatchComponents = Patches.PatchComponents
-}

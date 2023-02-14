@@ -5,6 +5,9 @@ VisualEnvironmentHandler = class 'VisualEnvironmentHandler'
 ---@type Logger
 local m_Logger = Logger("VisualEnvironmentHandler", false)
 
+---@type EasingTransitions
+local m_Easing = require "__shared/Utils/Easing"
+
 function VisualEnvironmentHandler:__init()
 	m_Logger:Write('Initializing VisualEnvironmentHandler')
 	self:RegisterVars()
@@ -16,6 +19,11 @@ function VisualEnvironmentHandler:RegisterVars()
 	---@type table<VisualEnvironmentObject>
 	self.m_VisualEnvironmentObjects = {}
 	-- Table of currently lerping visual environments
+	---@class LerpProperties
+	---@field enabled boolean -- if lerp is enabled
+	---@field pulsing boolean -- if lerp should pulse (bounce)
+	---@field transitionFunction function<EasingTransitions>
+	---@type table<string, LerpProperties> key: Name, value: LerpProperties
 	self.m_Lerping = {}
 end
 
@@ -76,8 +84,8 @@ function VisualEnvironmentHandler:InitializeVE(p_ID, p_Visibility)
 				return false, false
 			end
 
-			l_Object["logic"].visibility = p_Visibility or 1.0
-			l_Object["ve"].visibility = p_Visibility or 1.0
+			l_Object.logic.visibility = p_Visibility or 1.0
+			l_Object.ve.visibility = p_Visibility or 1.0
 
 			l_Object.entity:Init(Realm.Realm_Client, true)
 			l_Object.entity:FireEvent("Enable")
@@ -94,7 +102,7 @@ end
 ---@return boolean wasSuccessful
 function VisualEnvironmentHandler:DestroyVE(p_ID)
 	m_Logger:Write("Attemting to destroy VE preset with id " .. p_ID .. "...")
-
+	---@type VisualEnvironmentObject
 	local s_Object = self.m_VisualEnvironmentObjects[p_ID]
 
 	if s_Object == nil then
@@ -113,16 +121,62 @@ function VisualEnvironmentHandler:DestroyVE(p_ID)
 	s_Object.entity = nil
 	VisualEnvironmentManager:SetDirty(true)
 
-	s_Object["logic"].visibility = 0.0
-	s_Object["ve"].visibility = 0.0
+	s_Object.logic.visibility = 0.0
+	s_Object.ve.visibility = 0.0
 
 	m_Logger:Write("- " .. tostring(s_Object))
 	return true
 end
 
+function VisualEnvironmentHandler:SetVisibility(p_ID, p_Visibility)
+	---@type VisualEnvironmentObject
+	local s_Object = self.m_VisualEnvironmentObjects[p_ID]
+
+	if not s_Object.entity then
+		self:InitializeVE(p_ID, p_Visibility)
+	elseif p_Visibility <= 0.0 then
+		self:DestroyVE(p_ID)
+	else
+		s_Object.logic.visibility = p_Visibility
+		s_Object.ve.visibility = p_Visibility
+		s_Object.entity.state.visibility = p_Visibility
+	end
+end
+
+---@param p_ID string
+---@param p_VisibilityStart number
+---@param p_VisibilityEnd number
+---@param p_Time number time of the transition in miliseconds
+---@param p_TransitionType EasingTransitions
+function VisualEnvironmentHandler:FadeTo(p_ID, p_VisibilityStart, p_VisibilityEnd, p_Time, p_TransitionType)
+	---@type VisualEnvironmentObject
+	local s_Object = self.m_VisualEnvironmentObjects[p_ID]
+
+	s_Object.time = p_Time
+	s_Object.startTime = SharedUtils:GetTimeMS()
+	s_Object.startValue = p_VisibilityStart
+	s_Object.endValue = p_VisibilityEnd
+
+	local s_TransitionFunction = m_Easing[p_TransitionType]
+
+	if not s_TransitionFunction then
+		-- default to linear
+		s_TransitionFunction = m_Easing["linear"]
+	end
+
+	---@type LerpProperties
+	local s_LerpProperties = {
+		enabled = true,
+		-- pulsing = false,
+		transitionFunction = s_TransitionFunction
+	}
+
+	self.m_Lerping[p_ID] = s_LerpProperties
+end
+
 function VisualEnvironmentHandler:ResetLerps()
 	-- Only reset base (main) visual environment lerps
-	for l_ID, _ in pairs(self.m_Lerping) do
+	for l_ID, l_LerpProperties in pairs(self.m_Lerping) do
 		---@type VisualEnvironmentObject
 		local s_Object = self.m_VisualEnvironmentObjects[l_ID]
 
@@ -135,14 +189,53 @@ function VisualEnvironmentHandler:ResetLerps()
 	self.m_Lerping = {}
 end
 
--- Initialize
-VisualEnvironmentHandler()
+function VisualEnvironmentHandler:UpdateLerp()
+	for l_ID, l_LerpingTable in pairs(self.m_Lerping) do
 
--- Only Expose Public Functions
-return {
-    InitializeVE = VisualEnvironmentHandler.InitializeVE,
-	GetVEObjectCount = VisualEnvironmentHandler.GetTotalVEObjectCount,
-	RegisterVisualEnvironmentObject = VisualEnvironmentHandler.RegisterVisualEnvironmentObject,
-	CheckIfExists = VisualEnvironmentHandler.CheckIfExists,
-	ResetLerps = VisualEnvironmentHandler.ResetLerps
-}
+		---@type VisualEnvironmentObject
+		local s_Object = self.m_VisualEnvironmentObjects[l_ID]
+		local s_TimeSinceStart = SharedUtils:GetTimeMS() - s_Object.startTime
+		local s_CompletionPercentage = s_TimeSinceStart / s_Object.time * 100
+
+		-- ! for now only use functions that need these parameters
+		-- t = elapsed time (ms)
+		-- b = begin
+		-- c = change == ending - beginning
+		-- d = duration (total time, ms)
+		local t = s_TimeSinceStart
+		local b = s_Object.startValue
+		local c = s_Object.endValue - s_Object.startValue
+		local d = s_Object.time
+
+		local s_TransitionFunction = l_LerpingTable.transitionFunction
+
+		---@type number
+		local lerpValue = s_TransitionFunction(t, b, c, d)
+
+		if s_CompletionPercentage >= 100 then
+			--[[if self.m_Lerping[l_ID].pulsing then
+				s_Preset.startTime = SharedUtils:GetTimeMS()
+
+				-- Swap if pulsing, so we set the opposite visibility as goal
+				if lerpValue < 0.1 then
+					s_Preset.startValue = 0.0
+					s_Preset.endValue = 1.0
+				else
+					s_Preset.startValue = 1.0
+					s_Preset.endValue = 0.0
+				end
+			else]]
+			self:SetVisibility(l_ID, s_Object.endValue)
+			self.m_Lerping[l_ID] = nil
+			--end
+		elseif s_CompletionPercentage < 0 then
+			m_Logger:Warning('Lerping of preset ' .. tostring(l_ID) .. ' has its completed percentage of ' .. tostring(s_CompletionPercentage) .. ', should never happen')
+			self:SetVisibility(l_ID, s_Object.endValue)
+			self.m_Lerping[l_ID] = nil
+		else
+			self:SetVisibility(l_ID, lerpValue)
+		end
+	end
+end
+
+return UtilityFunctions:InitializeClass(VisualEnvironmentHandler)

@@ -4,13 +4,16 @@
 ---@field ve VisualEnvironmentEntityData
 ---@field entity VisualEnvironmentEntity|nil
 ---@field supportedClasses table<string>
+---@field time number -- lerping
+---@field startTime number -- lerping
+---@field startValue number -- lerping
+---@field endValue number -- lerping
 ---@overload fun(arg: VisualEnvironmentObject): VisualEnvironmentObject
 VisualEnvironmentObject = class "VisualEnvironmentObject"
 
 ---@param p_VEName string
 ---@param p_VEPriority number
 ---@param p_VEType string
----@return VisualEnvironmentObject
 function VisualEnvironmentObject:__init(p_VEName, p_VEPriority, p_VEType)
     --Not sure if we need the LogicelVEEntity, but :shrug:
     local s_LVEED = UtilityFunctions:InitEngineType("LogicVisualEnvironmentEntityData")
@@ -56,5 +59,8 @@ function VisualEnvironmentObject:__init(p_VEName, p_VEPriority, p_VEType)
 		"Wind"
 	}
 end
+
+---@class VisualEnvironmentEntity
+---@field state VisualEnvironmentState
 
 return VisualEnvironmentObject
