@@ -1,5 +1,9 @@
 {
     "lua.targetVersion": "5.2",
     "todo-tree.tree.scanMode": "workspace",
-    "todo-tree.regex.regex": "((--|//|#|<!--|;|/\\*|^)\\s*($TAGS)|^\\s*- \\[ \\])"
+    "todo-tree.regex.regex": "((--|//|#|<!--|;|/\\*|^)\\s*($TAGS)|^\\s*- \\[ \\])",
+    "workbench.colorCustomizations": {
+        "minimap.background": "#00000000",
+        "scrollbar.shadow": "#00000000"
+    }
 }
