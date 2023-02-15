@@ -2,7 +2,7 @@
 ---@field logic LogicVisualEnvironmentEntityData
 ---@field blueprint VisualEnvironmentBlueprint
 ---@field ve VisualEnvironmentEntityData
----@field entity VisualEnvironmentEntity|nil
+---@field entity VisualEnvironmentEntity|Entity|nil
 ---@field supportedClasses table<string>
 ---@field time number -- lerping
 ---@field startTime number -- lerping
@@ -62,5 +62,6 @@ end
 
 ---@class VisualEnvironmentEntity
 ---@field state VisualEnvironmentState
+
 
 return VisualEnvironmentObject

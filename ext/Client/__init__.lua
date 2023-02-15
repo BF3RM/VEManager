@@ -33,34 +33,30 @@ function VEManagerClient:RegisterEvents()
 	Events:Subscribe('UpdateManager:Update', self, self.OnUpdateManager)
 
 	Events:Subscribe('VEManager:RegisterPreset', self, self._RegisterPreset)
-	Events:Subscribe('VEManager:EnablePreset', self, self._EnablePreset)
-	Events:Subscribe('VEManager:DisablePreset', self, self._DisablePreset)
-	Events:Subscribe('VEManager:SetVisibility', self, self._SetVisibility)
-	Events:Subscribe('VEManager:FadeIn', self, self.FadeIn)
-	Events:Subscribe('VEManager:FadeTo', self, self.FadeTo)
-	Events:Subscribe('VEManager:FadeOut', self, self.FadeOut)
-	Events:Subscribe('VEManager:Pulse', self, self.OnPulse)
-	Events:Subscribe('VEManager:Lerp', self, self.Lerp)
-	Events:Subscribe('VEManager:VEGuidRequest', self, self.OnVEGuidRequest)
-	Events:Subscribe('VEManager:Reload', self, self.Reload)
-	Events:Subscribe('VEManager:DestroyVE', self, self.OnVEDestroyRequest)
-	Events:Subscribe('VEManager:ReplaceVE', self, self.OnVEReplaceRequest)
-	Events:Subscribe('VEManager:Reinitialize', self, self.LoadPresets)
-	Events:Subscribe('VEManager:ApplyTexture', self, self.ApplyTexture)
-	--Events:Subscribe('VEManager:Crossfade', self, self.Crossfade)
-
-	-- Events from server
-	NetEvents:Subscribe('VEManager:EnablePreset', self, self.EnablePreset)
+	Events:Subscribe('VEManager:EnablePreset', self, self._OnEnablePreset)
+	Events:Subscribe('VEManager:DisablePreset', self, self._OnDisablePreset)
+	Events:Subscribe('VEManager:SetVisibility', self, self._OnSetVisibility)
+	Events:Subscribe('VEManager:FadeTo', self, self._OnFadeTo)
+	Events:Subscribe('VEManager:FadeIn', self, self._OnFadeIn)
+	Events:Subscribe('VEManager:FadeOut', self, self._OnFadeOut)
+	--Events:Subscribe('VEManager:Pulse', self, self.OnPulse)
+	--Events:Subscribe('VEManager:Lerp', self, self.Lerp)
+	Events:Subscribe('VEManager:VEGuidRequest', self, self._OnVEGuidRequest)
+	Events:Subscribe('VEManager:Reload', self, self._OnReload)
+	Events:Subscribe('VEManager:ReplaceVE', self, self._OnReplaceVE)
+	Events:Subscribe('VEManager:Reinitialize', self, self._OnReinitialize)
+	Events:Subscribe('VEManager:ApplyTexture', self, self._OnApplyTexture)
 end
 
---#region Event Functions
+--#region VU Event Functions
 
 ---@param p_LevelName string
 ---@param p_GameModeName string
-function VEManagerClient:_OnLevelLoaded(p_LevelName, p_GameModeName)
+---@param p_IsDedicatedServer boolean
+function VEManagerClient:_OnLevelLoaded(p_LevelName, p_GameModeName, p_IsDedicatedServer)
 	LEVEL_LOADED = true
+	m_Patches:OnLevelLoaded(p_LevelName, p_GameModeName, p_IsDedicatedServer)
 	self:_LoadPresets()
-	m_Patches:OnLevelLoaded(p_LevelName, p_GameModeName)
 end
 
 function VEManagerClient:_OnLevelDestroy()
@@ -71,7 +67,7 @@ end
 ---@param p_Partition DatabasePartition
 function VEManagerClient:_OnPartitionLoaded(p_Partition)
 	-- Send to Time (to apply patches)
-	m_Time:OnPartitionLoaded(p_Partition)
+	m_Patches:PatchComponents(p_Partition)
 end
 --#endregion
 
@@ -82,7 +78,7 @@ function VEManagerClient:_RegisterPreset(p_ID, p_Preset)
 end
 
 ---@param p_ID string
-function VEManagerClient:_EnablePreset(p_ID)
+function VEManagerClient:_OnEnablePreset(p_ID)
 	if not m_VisualEnvironmentHandler:CheckIfExists(p_ID) then return end
 
 	--[[ reset all running lerps as EnablePreset() is a function to apply the main visual environment,
@@ -105,7 +101,7 @@ function VEManagerClient:_EnablePreset(p_ID)
 end
 
 ---@param p_ID string
-function VEManagerClient:_DisablePreset(p_ID)
+function VEManagerClient:_OnDisablePreset(p_ID)
 	if not m_VisualEnvironmentHandler:CheckIfExists(p_ID) then return end
 
 	m_Logger:Write("Disabling preset: " .. tostring(p_ID))
@@ -120,7 +116,7 @@ function VEManagerClient:_DisablePreset(p_ID)
 end
 
 ---@param p_ID string
-function VEManagerClient:_SetVisibility(p_ID, p_Visibility)
+function VEManagerClient:_OnSetVisibility(p_ID, p_Visibility)
 	if not m_VisualEnvironmentHandler:CheckIfExists(p_ID) then return end
 
 	m_VisualEnvironmentHandler:SetVisibility(p_ID, p_Visibility)
@@ -132,6 +128,81 @@ function VEManagerClient:_SetVisibility(p_ID, p_Visibility)
 			LiveEntityHandler:SetVisibility(p_ID, true)
 		end
 	end
+end
+
+---@param p_ID string
+---@param p_Visibility number
+---@param p_FadeTime number
+---@param p_TransitionType EasingTransitions|nil
+function VEManagerClient:_OnFadeTo(p_ID, p_Visibility, p_FadeTime, p_TransitionType)
+	if not m_VisualEnvironmentHandler:CheckIfExists(p_ID) then return end
+
+	m_VisualEnvironmentHandler:FadeTo(p_ID, nil, p_Visibility, p_FadeTime, p_TransitionType)
+end
+
+---@param p_ID string
+---@param p_FadeTime number
+function VEManagerClient:_OnFadeIn(p_ID, p_FadeTime)
+	if not m_VisualEnvironmentHandler:CheckIfExists(p_ID) then return end
+
+	m_VisualEnvironmentHandler:FadeTo(p_ID, 0, 1, p_FadeTime)
+end
+
+---@param p_ID string
+---@param p_FadeTime number
+function VEManagerClient:_OnFadeOut(p_ID, p_FadeTime)
+	if not m_VisualEnvironmentHandler:CheckIfExists(p_ID) then return end
+
+	m_VisualEnvironmentHandler:FadeTo(p_ID, nil, 1, p_FadeTime)
+end
+
+---@param p_ID string
+function VEManagerClient:_OnVEGuidRequest(p_ID)
+	if not m_VisualEnvironmentHandler:CheckIfExists(p_ID) then return end
+
+	local s_Guid = m_VisualEnvironmentHandler:GetEntityDataGuid(p_ID)
+
+	if s_Guid then
+		Events:Dispatch("VEManager:AnswerVEGuidRequest", s_Guid)
+	end
+end
+
+---@param p_ID string
+function VEManagerClient:_OnReload(p_ID)
+	if not m_VisualEnvironmentHandler:CheckIfExists(p_ID) then return end
+
+	m_VisualEnvironmentHandler:Reload(p_ID)
+end
+
+---@param p_ID string
+---@param p_Replacement string
+function VEManagerClient:_OnReplaceVE(p_ID, p_Replacement)
+	if not m_VisualEnvironmentHandler:CheckIfExists(p_ID) then return end
+
+	local s_Preset = json.decode(p_Replacement)
+
+	if not s_Preset then
+		m_Logger:Warning('Error when parsing the replacement preset. Id: ' .. tostring(p_ID))
+	end
+	self.m_RawPresets[p_ID] = s_Preset
+end
+
+function VEManagerClient:_OnReinitialize()
+	m_VisualEnvironmentHandler:__init()
+end
+
+---@param p_ID string
+---@param p_Guid Guid
+---@param p_Path string
+function VEManagerClient:_OnApplyTexture(p_ID, p_Guid, p_Path)
+	if not m_VisualEnvironmentHandler:CheckIfExists(p_ID) then return end
+
+	m_VisualEnvironmentHandler:__init()
+end
+
+---@return table<string, string>
+function VEManagerClient:GetRawPresets()
+	return self.m_RawPresets
 end
 
 function VEManagerClient:_LoadPresets()

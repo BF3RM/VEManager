@@ -26,6 +26,10 @@ end
 
 ---@param p_Partition DatabasePartition
 function Patches:PatchComponents(p_Partition)
+	if not CONFIG.PATCH_DN_COMPONENTS then
+		return
+	end
+
 	if p_Partition.primaryInstance:Is("MeshAsset") then
 		self:_PatchMeshAsset(p_Partition.primaryInstance)
 	elseif p_Partition.primaryInstance:Is("ObjectVariation") then

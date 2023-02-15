@@ -36,6 +36,14 @@ function VisualEnvironmentHandler:RegisterVisualEnvironmentObject(p_Object)
 
 end
 
+---@return VisualEnvironmentObject
+function VisualEnvironmentHandler:GetVisualEnvironmentObject(p_ID)
+	---@type VisualEnvironmentObject
+	local s_Object = self.m_VisualEnvironmentObjects[p_ID]
+
+	return s_Object
+end
+
 ---@return number
 function VisualEnvironmentHandler:GetTotalVEObjectCount()
 	return #self.m_VisualEnvironmentObjects
@@ -58,6 +66,19 @@ function VisualEnvironmentHandler:CheckIfExists(p_ID)
 end
 
 ---@param p_ID string
+---@return Guid|nil
+function VisualEnvironmentHandler:GetEntityDataGuid(p_ID)
+	---@type VisualEnvironmentObject
+	local s_Object = self.m_VisualEnvironmentObjects[p_ID]
+	local s_Guid = s_Object.entity.data.instanceGuid
+
+	if s_Guid then
+		return s_Guid
+	end
+	return nil
+end
+
+---@param p_ID string
 ---@param p_Visibility number
 ---@return boolean IsInitialized
 ---@return boolean DoesAlreadyExist
@@ -74,7 +95,7 @@ function VisualEnvironmentHandler:InitializeVE(p_ID, p_Visibility)
 				return false, true
 			end
 
-			---@type VisualEnvironmentEntity|nil
+			---@type VisualEnvironmentEntity|Entity|nil
 			local s_Entity = EntityManager:CreateEntity(l_Object["logic"], LinearTransform())
 			l_Object.entity = s_Entity
 
@@ -128,6 +149,15 @@ function VisualEnvironmentHandler:DestroyVE(p_ID)
 	return true
 end
 
+---@param p_ID string
+function VisualEnvironmentHandler:Reload(p_ID)
+	---@type VisualEnvironmentObject
+	local s_Object = self.m_VisualEnvironmentObjects[p_ID]
+
+	s_Object.entity:FireEvent("Disable")
+	s_Object.entity:FireEvent("Enable")
+end
+
 function VisualEnvironmentHandler:SetVisibility(p_ID, p_Visibility)
 	---@type VisualEnvironmentObject
 	local s_Object = self.m_VisualEnvironmentObjects[p_ID]
@@ -144,17 +174,17 @@ function VisualEnvironmentHandler:SetVisibility(p_ID, p_Visibility)
 end
 
 ---@param p_ID string
----@param p_VisibilityStart number
+---@param p_VisibilityStart number|nil
 ---@param p_VisibilityEnd number
 ---@param p_Time number time of the transition in miliseconds
----@param p_TransitionType EasingTransitions
+---@param p_TransitionType EasingTransitions|nil
 function VisualEnvironmentHandler:FadeTo(p_ID, p_VisibilityStart, p_VisibilityEnd, p_Time, p_TransitionType)
 	---@type VisualEnvironmentObject
 	local s_Object = self.m_VisualEnvironmentObjects[p_ID]
 
 	s_Object.time = p_Time
 	s_Object.startTime = SharedUtils:GetTimeMS()
-	s_Object.startValue = p_VisibilityStart
+	s_Object.startValue = p_VisibilityStart or s_Object.entity.state.visibility
 	s_Object.endValue = p_VisibilityEnd
 
 	local s_TransitionFunction = m_Easing[p_TransitionType]
@@ -236,6 +266,46 @@ function VisualEnvironmentHandler:UpdateLerp()
 			self:SetVisibility(l_ID, lerpValue)
 		end
 	end
+end
+
+---@param p_ID string
+---@param p_Class string
+---@param p_Property string
+---@param p_Value any
+function VisualEnvironmentHandler:SetSingleValue(p_ID, p_Class, p_Property, p_Value)
+	if not p_Class or not p_Property or not p_Value then
+		m_Logger:Write("Passed invalid parameters")
+		return
+	end
+	---@type VisualEnvironmentObject
+	local s_Object = self.m_VisualEnvironmentObjects[p_ID]
+	s_Object.entity.state[p_Class][p_Property] = p_Value
+	VisualEnvironmentManager:SetDirty(true)
+end
+
+---@param p_ID string
+---@param p_Guid Guid
+---@param p_Path string
+function VisualEnvironmentHandler:ApplyTexture(p_ID, p_Guid, p_Path)
+	---@type VisualEnvironmentObject
+	local s_Object = self.m_VisualEnvironmentObjects[p_ID]
+
+	for _, l_Class in pairs(s_Object.ve.components) do
+
+		if l_Class.typeInfo.name == "SkyComponentData" then
+			local s_Class = SkyComponentData(l_Class)
+			s_Class:MakeWritable()
+
+			local s_Instance = ResourceManager:SearchForInstanceByGuid(p_Guid)
+
+			if s_Instance then
+				s_Class[p_Path] = TextureAsset(s_Instance)
+			else
+				m_Logger:Warning('[ApplyTexture] Could not find instance with guid ' .. tostring(p_Guid))
+			end
+		end
+	end
+	self:Reload(p_ID)
 end
 
 return UtilityFunctions:InitializeClass(VisualEnvironmentHandler)
