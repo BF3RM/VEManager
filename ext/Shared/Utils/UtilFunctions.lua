@@ -1,6 +1,7 @@
 -- General Utility Functions
 ---@class UtilityFunctions
 ---@overload fun():UtilityFunctions
+---@diagnostic disable-next-line: assign-type-mismatch
 UtilityFunctions = class 'UtilityFunctions'
 
 ---@type Logger
@@ -126,14 +127,17 @@ function UtilityFunctions:ParseValue(p_Type, p_Value)
 
 	elseif p_Type == "Vec2" then -- Vec2
 		local s_Vec = _HandleVector(p_Value)
+		---@diagnostic disable-next-line: param-type-mismatch
 		return Vec2(tonumber(s_Vec[1]), tonumber(s_Vec[2]))
 
 	elseif p_Type == "Vec3" then -- Vec3
 		local s_Vec = _HandleVector(p_Value)
+		---@diagnostic disable-next-line: param-type-mismatch
 		return Vec3(tonumber(s_Vec[1]), tonumber(s_Vec[2]), tonumber(s_Vec[3]))
 
 	elseif p_Type == "Vec4" then -- Vec4
 		local s_Vec = _HandleVector(p_Value)
+		---@diagnostic disable-next-line: param-type-mismatch
 		return Vec4(tonumber(s_Vec[1]), tonumber(s_Vec[2]), tonumber(s_Vec[3]), tonumber(s_Vec[4]))
 
 	else
@@ -159,43 +163,6 @@ function UtilityFunctions:FirstToLower(p_String)
 	return (p_String:gsub("^%L", string.lower))
 end
 
----@param p_Class string
----@param p_Field FieldInformation
-function UtilityFunctions:GetFieldDefaultValue(p_Class, p_Field)
-	if p_Field.typeInfo.enum then
-
-		if p_Field.typeInfo.name == "Realm" then
-			return Realm.Realm_Client
-		else
-			m_Logger:Write("\t- Found unhandled enum, " .. p_Field.typeInfo.name)
-			return
-		end
-	end
-
-	local s_States = VisualEnvironmentManager:GetStates()
-
-	for _, l_State in ipairs(s_States) do
-		--m_Logger:Write(">>>>>> state:" .. l_State.entityName)
-
-		if l_State.entityName == "Levels/Web_Loading/Lighting/Web_Loading_VE" then
-			goto continue
-
-		elseif l_State.entityName ~= 'EffectEntity' then
-			local s_Class = l_State[self:FirstToLower(p_Class)] --colorCorrection
-
-			if s_Class == nil then
-				goto continue
-			end
-
-			--m_Logger:Write("Sending default value: " .. tostring(p_Class) .. " | " .. tostring(p_Field.typeInfo.name) .. " | " .. tostring(s_Class[firstToLower(p_Field.typeInfo.name)]) .. " (" .. tostring(type(s_Class[firstToLower(p_Field.typeInfo.name)])) .. ")")
-			--m_Logger:Write(tostring(s_Class[firstToLower(p_Field.name)]) .. ' | ' .. tostring(p_Field.typeInfo.name))
-			return s_Class[self:FirstToLower(p_Field.name)] --colorCorrection Contrast
-		end
-
-		::continue::
-	end
-end
-
 -- Returns public functions of a class - this automatically throws an error if someone tries to use a non public functions from outside a class
 ---@param p_Class table
 ---@return table
@@ -203,25 +170,25 @@ function UtilityFunctions:InitializeClass(p_Class)
     -- Initialize
     p_Class()
 
-    local s_PublicFunctionTable = {}
+	local s_PublicTable = {}
 
-    print(p_Class.name)
+    m_Logger:Write(p_Class.name)
 
     --print("Class: " .. p_Class)
     for l_MethodName, l_Method in pairs(p_Class.__declaredMethods) do
         -- check if public and a function
         if type(l_Method) == "function" and string.sub(l_MethodName, 1, 1) ~= "_" then
-            s_PublicFunctionTable[l_MethodName] = l_Method
+            s_PublicTable[l_MethodName] = l_Method
 
             if l_MethodName == "isInstanceOf" then
-                print("- Added Public MiddleClass Method: " .. l_MethodName)
+                m_Logger:Write("- Added Public MiddleClass Method: " .. l_MethodName)
             else
-                print("- Added Public Method: " .. l_MethodName)
+                m_Logger:Write("- Added Public Method: " .. l_MethodName)
             end
         end
     end
 
-    return s_PublicFunctionTable
+    return s_PublicTable
 end
 
 return UtilityFunctions:InitializeClass(UtilityFunctions)

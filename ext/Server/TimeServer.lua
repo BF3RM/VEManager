@@ -1,5 +1,6 @@
 ---@class TimeServer
 ---@overload fun():TimeServer
+---@diagnostic disable-next-line: assign-type-mismatch
 TimeServer = class "TimeServer"
 
 ---@type Logger
@@ -27,7 +28,7 @@ function TimeServer:RegisterVars()
 	---@type number
 	self.m_ServerTickrate = SharedUtils:GetTickrate()
 	---@type number
-	self.m_SyncTickrate = VEM_CONFIG.SERVER_SYNC_CLIENT_EVERY_TICKS / self.m_ServerTickrate --[Hz]
+	self.m_SyncTickrate = CONFIG.SERVER_SYNC_CLIENT_EVERY_TICKS / self.m_ServerTickrate --[Hz]
 	---@type boolean
 	self.m_SystemRunning = false
 end

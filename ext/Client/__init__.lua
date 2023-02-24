@@ -1,13 +1,13 @@
 ---@class VEManagerClient
 ---@overload fun():VEManagerClient
+---@diagnostic disable-next-line: assign-type-mismatch
 VEManagerClient = class 'VEManagerClient'
 
 ---@type Logger
-local m_Logger = Logger("VEManagerClient", false)
+local m_Logger = Logger("VEManagerClient", true)
 
 --#region Imports
--- Types
-require "__shared/Types/VisualEnvironmentObject"
+require "Types/VisualEnvironmentObject"
 ---@type VisualEnvironmentHandler
 local m_VisualEnvironmentHandler = require("VisualEnvironmentHandler")
 ---@type Patches
@@ -22,15 +22,20 @@ end
 
 function VEManagerClient:RegisterVars()
 	-- Table of raw JSON presets
-	self.m_RawPresets = {}
+	-- Default Dynamic day-night cycle Presets
+	self.m_RawPresets = {
+		DefaultNight = require("Presets/DefaultNight"),
+		DefaultMorning = require("Presets/DefaultMorning"),
+		DefaultNoon = require("Presets/DefaultNoon"),
+		DefaultEvening = require("Presets/DefaultEvening"),
+	}
 end
 
 function VEManagerClient:RegisterEvents()
-	Events:Subscribe('Client:UpdateInput', self, self.OnUpdateInput)
 	Events:Subscribe('Partition:Loaded', self, self._OnPartitionLoaded)
 	Events:Subscribe('Level:Loaded', self, self._OnLevelLoaded)
 	Events:Subscribe('Level:Destroy', self, self._OnLevelDestroy)
-	Events:Subscribe('UpdateManager:Update', self, self.OnUpdateManager)
+	Events:Subscribe('UpdateManager:Update', self, self._OnUpdateManager)
 
 	Events:Subscribe('VEManager:RegisterPreset', self, self._RegisterPreset)
 	Events:Subscribe('VEManager:EnablePreset', self, self._OnEnablePreset)
@@ -39,8 +44,7 @@ function VEManagerClient:RegisterEvents()
 	Events:Subscribe('VEManager:FadeTo', self, self._OnFadeTo)
 	Events:Subscribe('VEManager:FadeIn', self, self._OnFadeIn)
 	Events:Subscribe('VEManager:FadeOut', self, self._OnFadeOut)
-	--Events:Subscribe('VEManager:Pulse', self, self.OnPulse)
-	--Events:Subscribe('VEManager:Lerp', self, self.Lerp)
+	Events:Subscribe('VEManager:Pulse', self, self._OnPulse)
 	Events:Subscribe('VEManager:VEGuidRequest', self, self._OnVEGuidRequest)
 	Events:Subscribe('VEManager:Reload', self, self._OnReload)
 	Events:Subscribe('VEManager:ReplaceVE', self, self._OnReplaceVE)
@@ -66,8 +70,17 @@ end
 
 ---@param p_Partition DatabasePartition
 function VEManagerClient:_OnPartitionLoaded(p_Partition)
-	-- Send to Time (to apply patches)
 	m_Patches:PatchComponents(p_Partition)
+end
+
+---@param p_DeltaTime number
+---@param p_UpdatePass UpdatePass
+function VEManagerClient:_OnUpdateManager(p_DeltaTime, p_UpdatePass)
+	if p_UpdatePass == UpdatePass.UpdatePass_PreSim then
+		--m_--LiveEntityHandler:OnUpdateManagerPreSim(p_DeltaTime)
+	elseif p_UpdatePass == UpdatePass.UpdatePass_PostSim then
+		m_VisualEnvironmentHandler:UpdateLerp(p_DeltaTime)
+	end
 end
 --#endregion
 
@@ -75,6 +88,7 @@ end
 ---@param p_Preset string
 function VEManagerClient:_RegisterPreset(p_ID, p_Preset)
 	self.m_RawPresets[p_ID] = json.decode(p_Preset)
+	m_Logger:Write("Registered Preset: " .. p_ID)
 end
 
 ---@param p_ID string
@@ -96,7 +110,7 @@ function VEManagerClient:_OnEnablePreset(p_ID)
 	end
 
 	if self.m_RawPresets[p_ID]["LiveEntities"] ~= nil then
-		LiveEntityHandler:SetVisibility(p_ID, false)
+		--LiveEntityHandler:SetVisibility(p_ID, false)
 	end
 end
 
@@ -111,7 +125,7 @@ function VEManagerClient:_OnDisablePreset(p_ID)
 	end
 
 	if self.m_RawPresets[p_ID]["LiveEntities"] ~= nil then
-		LiveEntityHandler:SetVisibility(p_ID, true)
+		--LiveEntityHandler:SetVisibility(p_ID, true)
 	end
 end
 
@@ -123,21 +137,22 @@ function VEManagerClient:_OnSetVisibility(p_ID, p_Visibility)
 
 	if self.m_RawPresets[p_ID]["LiveEntities"] ~= nil then
 		if p_Visibility > 0.5 then
-			LiveEntityHandler:SetVisibility(p_ID, false)
+			--LiveEntityHandler:SetVisibility(p_ID, false)
 		else
-			LiveEntityHandler:SetVisibility(p_ID, true)
+			--LiveEntityHandler:SetVisibility(p_ID, true)
 		end
 	end
 end
 
 ---@param p_ID string
----@param p_Visibility number
----@param p_FadeTime number
+---@param p_VisibilityStart number|nil
+---@param p_VisibilityEnd number
+---@param p_FadeTime number time of the transition in miliseconds
 ---@param p_TransitionType EasingTransitions|nil
-function VEManagerClient:_OnFadeTo(p_ID, p_Visibility, p_FadeTime, p_TransitionType)
+function VEManagerClient:_OnFadeTo(p_ID, p_VisibilityStart, p_VisibilityEnd, p_FadeTime, p_TransitionType)
 	if not m_VisualEnvironmentHandler:CheckIfExists(p_ID) then return end
 
-	m_VisualEnvironmentHandler:FadeTo(p_ID, nil, p_Visibility, p_FadeTime, p_TransitionType)
+	m_VisualEnvironmentHandler:FadeTo(p_ID, p_VisibilityStart, p_VisibilityEnd, p_FadeTime, p_TransitionType)
 end
 
 ---@param p_ID string
@@ -153,7 +168,17 @@ end
 function VEManagerClient:_OnFadeOut(p_ID, p_FadeTime)
 	if not m_VisualEnvironmentHandler:CheckIfExists(p_ID) then return end
 
-	m_VisualEnvironmentHandler:FadeTo(p_ID, nil, 1, p_FadeTime)
+	m_VisualEnvironmentHandler:FadeTo(p_ID, nil, 0, p_FadeTime)
+end
+
+---@param p_ID string
+---@param p_PulseTime number time of the transition in miliseconds
+---@param p_DecreaseFirst boolean sets if the first pulse decreases the current value until 0
+---@param p_TransitionType EasingTransitions|nil
+function VEManagerClient:_OnPulse(p_ID, p_PulseTime, p_DecreaseFirst, p_TransitionType)
+	if not m_VisualEnvironmentHandler:CheckIfExists(p_ID) then return end
+
+	m_VisualEnvironmentHandler:Pulse(p_ID, p_PulseTime, p_DecreaseFirst, p_TransitionType)
 end
 
 ---@param p_ID string
@@ -208,9 +233,18 @@ end
 function VEManagerClient:_LoadPresets()
 	m_Logger:Write("Loading presets... (Name, Type, Priority)")
 
-	-- prepare presets
-	for l_Index, l_Preset in pairs(self.m_RawPresets) do
+	local s_VanillaState
+	for _, l_State in ipairs(VisualEnvironmentManager:GetStates()) do
+		if l_State.entityName ~= "EffectEntity" and l_State.entityName ~= "Levels/Web_Loading/Lighting/Web_Loading_VE" then
+			-- SET VANILLA VE TO PRIORITY 0
+			l_State.priority = 0
+			l_State.visibility = 0
+			s_VanillaState = l_State
+		end
+	end
 
+	-- prepare presets
+	for l_ID, l_Preset in pairs(self.m_RawPresets) do
 		-- Variables check
 		if not l_Preset.Name then
 			l_Preset.Name = 'unknown_preset_' .. tostring(m_VisualEnvironmentHandler:GetTotalVEObjectCount())
@@ -229,6 +263,7 @@ function VEManagerClient:_LoadPresets()
 		-- Generate our VisualEnvironment
 		local s_IsBasePreset = l_Preset.Priority == 1
 
+		m_Logger:Write("(" .. l_Preset.Name ..", " .. l_Preset.Priority .. ", " .. l_Preset.Type .. ")")
 		local s_VEObject = VisualEnvironmentObject(l_Preset.Name, l_Preset.Priority, l_Preset.Type)
 
 		--Foreach class
@@ -239,7 +274,6 @@ function VEManagerClient:_LoadPresets()
 
 				-- Create class and add it to the VE entity.
 				local s_Class = UtilityFunctions:InitEngineType(l_Class .. "ComponentData")
-
 				s_Class.excluded = false
 				s_Class.isEventConnectionTarget = 3
 				s_Class.isPropertyConnectionTarget = 3
@@ -293,15 +327,39 @@ function VEManagerClient:_LoadPresets()
 
 					-- If not in the preset or incorrect value
 					if not s_Value then
+						---@param p_Class string
+						---@param p_Field FieldInformation
+						local function _GetFieldDefaultValue(p_Class, p_Field)
+							if p_Field.typeInfo.enum then
+
+								if p_Field.typeInfo.name == "Realm" then
+									return Realm.Realm_Client
+								else
+									m_Logger:Write("\t- Found unhandled enum, " .. p_Field.typeInfo.name)
+									return
+								end
+							end
+
+							local s_Class = s_VanillaState[UtilityFunctions:FirstToLower(p_Class)]
+							local s_ReturnValue
+
+							if s_Class then
+								s_ReturnValue = s_Class[UtilityFunctions:FirstToLower(p_Field.name)]
+							end
+							--m_Logger:Write("Sending default value: " .. tostring(p_Class) .. " | " .. tostring(p_Field.typeInfo.name) .. " | " .. tostring(s_Class[firstToLower(p_Field.typeInfo.name)]) .. " (" .. tostring(type(s_Class[firstToLower(p_Field.typeInfo.name)])) .. ")")
+							--m_Logger:Write(tostring(s_Class[firstToLower(p_Field.name)]) .. ' | ' .. tostring(p_Field.typeInfo.name))
+							return s_ReturnValue
+						end
 						-- Try to get original value
 						-- m_Logger:Write("Setting default value for field " .. s_FieldName .. " of class " .. l_Class .. " | " ..tostring(s_Value))
-						s_Value = UtilityFunctions:GetFieldDefaultValue(l_Class, l_Field)
+						s_Value = _GetFieldDefaultValue(l_Class, l_Field)
 
 						if not s_Value then
 							m_Logger:Write("\t- Failed to fetch original value: " .. tostring(l_Class) .. " | " .. tostring(s_FieldName))
 
 							if s_FieldName == "FilmGrain" then -- fix FilmGrain texture
 								m_Logger:Write("\t\t- Fixing value for field " .. s_FieldName .. " of class " .. l_Class .. " | " .. tostring(s_Value))
+								---@diagnostic disable-next-line: param-type-mismatch
 								s_Class[UtilityFunctions:FirstToLower(s_FieldName)] = TextureAsset(ResourceManager:FindInstanceByGuid(Guid('44AF771F-23D2-11E0-9C90-B6CDFDA832F1'), Guid('1FD2F223-0137-2A0F-BC43-D974C2BD07B4')))
 							end
 						else
@@ -313,6 +371,7 @@ function VEManagerClient:_LoadPresets()
 								s_Class[UtilityFunctions:FirstToLower(s_FieldName)] = tonumber(s_Value)
 
 							elseif s_Type == "TextureAsset" then
+								---@diagnostic disable-next-line: param-type-mismatch
 								s_Class[UtilityFunctions:FirstToLower(s_FieldName)] = TextureAsset(s_Value)
 
 							elseif l_Field.typeInfo.array then
@@ -325,11 +384,11 @@ function VEManagerClient:_LoadPresets()
 					end
 				end
 				s_ComponentCount = s_ComponentCount + 1
-				s_VEObject["ve"].components:add(s_Class)
+				s_VEObject.ve.components:add(s_Class)
 			end
 		end
-		s_VEObject["ve"].runtimeComponentCount = s_ComponentCount
-		m_VisualEnvironmentHandler:RegisterVisualEnvironmentObject(s_VEObject)
+		s_VEObject.ve.runtimeComponentCount = s_ComponentCount
+		m_VisualEnvironmentHandler:RegisterVisualEnvironmentObject(l_ID, s_VEObject)
 	end
 	Events:Dispatch("VEManager:PresetsLoaded")
 	NetEvents:Send("VEManager:PlayerReady")

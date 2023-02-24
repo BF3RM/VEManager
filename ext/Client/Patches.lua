@@ -1,8 +1,9 @@
 ---@class Patches
 ---@overload fun():Patches
+---@diagnostic disable-next-line: assign-type-mismatch
 Patches = class('Patches')
 
-local m_PatchDatatable = require('Modules/EmitterMeshPatchDatatable')
+local m_PatchDatatable = require('EmitterMeshPatchDatatable')
 
 ---@type Logger
 local m_Logger = Logger("Patches", false)
@@ -14,47 +15,8 @@ function Patches:__init()
 	ResourceManager:RegisterInstanceLoadHandler(Guid("3A3E5533-4B2A-11E0-A20D-FE03F1AD0E2F"), Guid("F26B7ECE-A71D-93AC-6C49-B6223BF424D6"), self, self._OnMenuBGLoaded)
 end
 
----@param p_LevelName string
----@param p_GameMode string
----@param p_IsDedicatedServer boolean
-function Patches:OnLevelLoaded(p_LevelName, p_GameMode, p_IsDedicatedServer)
-	-- Disable Vanilla Explosion VEs
-	if VEM_CONFIG.PATCH_EXPLOSIONS_COLOR_CORRECTION then
-		self:_DisableExplosionVisualEnvironments()
-	end
-end
-
----@param p_Partition DatabasePartition
-function Patches:PatchComponents(p_Partition)
-	if not CONFIG.PATCH_DN_COMPONENTS then
-		return
-	end
-
-	if p_Partition.primaryInstance:Is("MeshAsset") then
-		self:_PatchMeshAsset(p_Partition.primaryInstance)
-	elseif p_Partition.primaryInstance:Is("ObjectVariation") then
-		for _, l_Instance in pairs(p_Partition.instances) do
-			if l_Instance:Is('MeshMaterialVariation') then -- ObjectVariation is the primary instance
-				self:_PatchMeshMaterialVariation(l_Instance)
-			end
-		end
-	elseif p_Partition.primaryInstance:Is("Blueprint") then
-		for _, l_Instance in pairs(p_Partition.instances) do
-			if l_Instance:Is('LensFlareEntityData') then -- PrefabBlueprint is the primary instance
-				self:_PatchLensFlareEntityData(l_Instance)
-			elseif l_Instance:Is('LocalLightEntityData') then -- Blueprint is the primary instance
-				self:_ApplyLightSmoothening(l_Instance)
-			-- elseif l_Instance:Is('SkyComponentData') then -- VisualEnvironmentBlueprint is the primary instance
-				-- self:SkyComponentData(l_Instance)
-			-- elseif l_Instance:Is('EffectEntityData') then -- EffectBlueprint is the primary instance
-				-- self:EffectEntityData(l_Instance)
-			end
-		end
-	end
-end
-
 ---@param p_Instance DataContainer
-function Patches:_PatchMeshAsset(p_Instance)
+local function _PatchMeshAsset(p_Instance)
 	if m_PatchDatatable.meshes[p_Instance.partition.name] then
 		local s_Mesh = MeshAsset(p_Instance)
 
@@ -66,7 +28,7 @@ function Patches:_PatchMeshAsset(p_Instance)
 end
 
 ---@param p_Instance DataContainer
-function Patches:_PatchMeshMaterialVariation(p_Instance)
+local function _PatchMeshMaterialVariation(p_Instance)
 	if m_PatchDatatable.variations[p_Instance.partition.name] then
 		local s_Variation = MeshMaterialVariation(p_Instance)
 		s_Variation:MakeWritable()
@@ -75,7 +37,7 @@ function Patches:_PatchMeshMaterialVariation(p_Instance)
 end
 
 ---@param p_Instance DataContainer
-function Patches:_PatchEffectEntityData(p_Instance)
+local function _PatchEffectEntityData(p_Instance)
 	if m_PatchDatatable.effects[p_Instance.partition.name] then
 		local s_Effect = EffectEntityData(p_Instance)
 		s_Effect:MakeWritable()
@@ -84,7 +46,7 @@ function Patches:_PatchEffectEntityData(p_Instance)
 end
 
 ---@param p_Instance DataContainer
-function Patches:_PatchSkyComponentData(p_Instance)
+local function _PatchSkyComponentData(p_Instance)
 	local s_Sky = SkyComponentData(p_Instance)
 	s_Sky:MakeWritable()
 
@@ -99,17 +61,17 @@ function Patches:_PatchSkyComponentData(p_Instance)
 end
 
 ---@param p_Instance DataContainer
-function Patches:_PatchLensFlareEntityData(p_Instance)
+local function _PatchLensFlareEntityData(p_Instance)
 	local s_Flares = LensFlareEntityData(p_Instance)
 	s_Flares:MakeWritable()
 
-	for _, l_Event in pairs(s_Flares.elements) do
-		l_Event.size = l_Event.size * 0.3
+	for _, l_Element in pairs(s_Flares.elements) do
+		l_Element.size = l_Element.size * 0.3
 	end
 end
 
 ---@param p_Instance DataContainer
-function Patches:_ApplyLightSmoothening(p_Instance)
+local function _ApplyLightSmoothening(p_Instance)
 	local s_PatchedLight = LocalLightEntityData(p_Instance)
 	s_PatchedLight:MakeWritable()
 	s_PatchedLight.radius = s_PatchedLight.radius * 1.25
@@ -117,18 +79,7 @@ function Patches:_ApplyLightSmoothening(p_Instance)
 	s_PatchedLight.attenuationOffset = s_PatchedLight.attenuationOffset * 17.5
 end
 
----@param p_Instance DataContainer
-function Patches:_OnMenuBGLoaded(p_Instance)
-	-- Increase priority of menu bg
-	-- https://github.com/EmulatorNexus/Venice-EBX/blob/f06c290fa43c80e07985eda65ba74c59f4c01aa0/UI/Assets/MenuVisualEnvironment.txt#L140
-	local s_MenuBg = VisualEnvironmentEntityData(p_Instance)
-	s_MenuBg:MakeWritable()
-	s_MenuBg.priority = 100
-
-	m_Logger:Write("Menu background patched (priority increased)")
-end
-
-function Patches:_DisableExplosionVisualEnvironments()
+local function _DisableExplosionVisualEnvironments()
 	-- get entityData
 	local s_ExplosionVisualEnvironments = {
 		blackoutVE = ResourceManager:FindInstanceByGuid(Guid("0A0EB8EE-5849-4C88-B4B9-92A9C2AA6402"), Guid("7B728DE9-327D-45E2-9309-1E602DEDFA2D")),
@@ -144,6 +95,56 @@ function Patches:_DisableExplosionVisualEnvironments()
 			l_EntityData.enabled = false
 		end
 	end
+end
+
+---@param p_LevelName string
+---@param p_GameMode string
+---@param p_IsDedicatedServer boolean
+function Patches:OnLevelLoaded(p_LevelName, p_GameMode, p_IsDedicatedServer)
+	-- Disable Vanilla Explosion VEs
+	if CONFIG.PATCH_EXPLOSIONS_COLOR_CORRECTION then
+		_DisableExplosionVisualEnvironments()
+	end
+end
+
+---@param p_Partition DatabasePartition
+function Patches:PatchComponents(p_Partition)
+	if not CONFIG.PATCH_DN_COMPONENTS then
+		return
+	end
+
+	if p_Partition.primaryInstance:Is("MeshAsset") then
+		_PatchMeshAsset(p_Partition.primaryInstance)
+	elseif p_Partition.primaryInstance:Is("ObjectVariation") then
+		for _, l_Instance in ipairs(p_Partition.instances) do
+			if l_Instance:Is('MeshMaterialVariation') then -- ObjectVariation is the primary instance
+				_PatchMeshMaterialVariation(l_Instance)
+			end
+		end
+	elseif p_Partition.primaryInstance:Is("Blueprint") then
+		for _, l_Instance in ipairs(p_Partition.instances) do
+			if l_Instance:Is('LensFlareEntityData') then -- PrefabBlueprint is the primary instance
+				_PatchLensFlareEntityData(l_Instance)
+			elseif l_Instance:Is('LocalLightEntityData') then -- Blueprint is the primary instance
+				_ApplyLightSmoothening(l_Instance)
+			-- elseif l_Instance:Is('SkyComponentData') then -- VisualEnvironmentBlueprint is the primary instance
+				-- self:SkyComponentData(l_Instance)
+			-- elseif l_Instance:Is('EffectEntityData') then -- EffectBlueprint is the primary instance
+				-- self:EffectEntityData(l_Instance)
+			end
+		end
+	end
+end
+
+---@param p_Instance DataContainer
+function Patches:_OnMenuBGLoaded(p_Instance)
+	-- Increase priority of menu bg
+	-- https://github.com/EmulatorNexus/Venice-EBX/blob/f06c290fa43c80e07985eda65ba74c59f4c01aa0/UI/Assets/MenuVisualEnvironment.txt#L140
+	local s_MenuBg = VisualEnvironmentEntityData(p_Instance)
+	s_MenuBg:MakeWritable()
+	s_MenuBg.priority = 100
+
+	m_Logger:Write("Menu background patched (priority increased)")
 end
 
 return UtilityFunctions:InitializeClass(Patches)

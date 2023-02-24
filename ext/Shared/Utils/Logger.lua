@@ -1,4 +1,5 @@
 ---@class Logger
+---@diagnostic disable-next-line: assign-type-mismatch
 Logger = class "Logger"
 
 function Logger:__init(p_ClassName, p_ActivateLogging)
@@ -16,11 +17,11 @@ function Logger:__init(p_ClassName, p_ActivateLogging)
 end
 
 function Logger:Write(p_Message)
-	if not VEM_CONFIG.LOGGER_ENABLED then
+	if not CONFIG.LOGGER_ENABLED then
 		return
 	end
 
-	if VEM_CONFIG.LOGGER_PRINT_ALL == true and self.className ~= nil then
+	if CONFIG.LOGGER_PRINT_ALL == true and self.className ~= nil then
 		goto continue
 
 	elseif self.debug == false or
@@ -35,11 +36,11 @@ function Logger:Write(p_Message)
 end
 
 function Logger:WriteTable(p_Table)
-	if not VEM_CONFIG.LOGGER_ENABLED then
+	if not CONFIG.LOGGER_ENABLED then
 		return
 	end
 
-	if VEM_CONFIG.LOGGER_PRINT_ALL == true and self.className ~= nil then
+	if CONFIG.LOGGER_PRINT_ALL == true and self.className ~= nil then
 		goto continue
 
 	elseif self.debug == false or
