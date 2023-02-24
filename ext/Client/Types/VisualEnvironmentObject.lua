@@ -12,6 +12,7 @@ VisualEnvironmentObject = class "VisualEnvironmentObject"
 ---@param p_VEPriority number
 ---@param p_VEType string
 function VisualEnvironmentObject:__init(p_VEName, p_VEPriority, p_VEType)
+	-- spawning from blueprint alone doesn´t work somehow, would have been nice tho since we can store the name there
     local s_VE = UtilityFunctions:InitEngineType("VisualEnvironmentEntityData")
     s_VE.enabled = true
     s_VE.priority = p_VEPriority

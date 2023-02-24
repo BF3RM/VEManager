@@ -260,9 +260,6 @@ function VEManagerClient:_LoadPresets()
 			l_Preset.Priority = tonumber(l_Preset.Priority)
 		end
 
-		-- Generate our VisualEnvironment
-		local s_IsBasePreset = l_Preset.Priority == 1
-
 		m_Logger:Write("(" .. l_Preset.Name ..", " .. l_Preset.Priority .. ", " .. l_Preset.Type .. ")")
 		local s_VEObject = VisualEnvironmentObject(l_Preset.Name, l_Preset.Priority, l_Preset.Type)
 
@@ -301,10 +298,8 @@ function VEManagerClient:_LoadPresets()
 
 						if UtilityFunctions:IsBasicType(s_Type) then
 							s_Value = UtilityFunctions:ParseValue(s_Type, l_Preset[l_Class][s_FieldName])
-
 						elseif l_Field.typeInfo.enum then
 							s_Value = tonumber(l_Preset[l_Class][s_FieldName])
-
 						elseif s_Type == "TextureAsset" then
 							s_Value = UtilityFunctions:GetTexture(l_Preset[l_Class][s_FieldName])
 
@@ -326,7 +321,7 @@ function VEManagerClient:_LoadPresets()
 					end
 
 					-- If not in the preset or incorrect value
-					if not s_Value then
+					if s_Value == nil then
 						---@param p_Class string
 						---@param p_Field FieldInformation
 						local function _GetFieldDefaultValue(p_Class, p_Field)
@@ -340,13 +335,13 @@ function VEManagerClient:_LoadPresets()
 								end
 							end
 
-							local s_Class = s_VanillaState[UtilityFunctions:FirstToLower(p_Class)]
+							local s_VanillaClass = s_VanillaState[UtilityFunctions:FirstToLower(p_Class)]
 							local s_ReturnValue
 
-							if s_Class then
-								s_ReturnValue = s_Class[UtilityFunctions:FirstToLower(p_Field.name)]
+							if s_VanillaClass then
+								s_ReturnValue = s_VanillaClass[UtilityFunctions:FirstToLower(p_Field.name)]
 							end
-							--m_Logger:Write("Sending default value: " .. tostring(p_Class) .. " | " .. tostring(p_Field.typeInfo.name) .. " | " .. tostring(s_Class[firstToLower(p_Field.typeInfo.name)]) .. " (" .. tostring(type(s_Class[firstToLower(p_Field.typeInfo.name)])) .. ")")
+							--m_Logger:Write("Sending default value: " .. tostring(p_Class) .. " | " .. tostring(p_Field.typeInfo.name) .. " | " .. tostring(p_Class[UtilityFunctions:FirstToLower(p_Field.typeInfo.name)]) .. " (" .. tostring(type(s_Class[UtilityFunctions:FirstToLower(p_Field.typeInfo.name)])) .. ")")
 							--m_Logger:Write(tostring(s_Class[firstToLower(p_Field.name)]) .. ' | ' .. tostring(p_Field.typeInfo.name))
 							return s_ReturnValue
 						end
@@ -354,7 +349,7 @@ function VEManagerClient:_LoadPresets()
 						-- m_Logger:Write("Setting default value for field " .. s_FieldName .. " of class " .. l_Class .. " | " ..tostring(s_Value))
 						s_Value = _GetFieldDefaultValue(l_Class, l_Field)
 
-						if not s_Value then
+						if s_Value == nil then
 							m_Logger:Write("\t- Failed to fetch original value: " .. tostring(l_Class) .. " | " .. tostring(s_FieldName))
 
 							if s_FieldName == "FilmGrain" then -- fix FilmGrain texture
