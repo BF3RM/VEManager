@@ -288,7 +288,7 @@ function VisualEnvironmentHandler:ResetLerps()
 		local s_Object = m_VisualEnvironmentObjects[l_ID]
 
 		-- check if alive
-		if s_Object and s_Object.entity then
+		if s_Object and s_Object.entity and s_Object.ve.priority == 1 then
 			self:DestroyVE(l_ID)
 		end
 	end
