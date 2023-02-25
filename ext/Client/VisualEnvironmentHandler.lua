@@ -24,6 +24,7 @@ local m_VisualEnvironmentObjects = {}
 ---@field startTime number
 ---@field startValue number
 ---@field endValue number
+---@field firstRun boolean
 ---@type table<string, LerpProperties> key: Name, value: LerpProperties
 local m_Lerping = {}
 
@@ -150,18 +151,19 @@ function VisualEnvironmentHandler:DestroyVE(p_ID)
 	end
 
 	if not s_Object.entity then
-		m_Logger:Warning("Preset entity does not exist. Do you really want to destroy at this point?.")
+		m_Logger:Write("Preset entity does not exist. Do you really want to destroy at this point?.")
 		return true
 	end
 
 	-- destroy entity
 	m_Lerping[p_ID] = nil
+	---@type VisualEnvironmentState
+	local s_State = VisualEnvironmentEntity(s_Object.entity).state
+	s_State.visibility = 0
 	s_Object.entity:Destroy()
 	s_Object.entity = nil
-	VisualEnvironmentManager:SetDirty(true)
-
-	--s_Object.logic.visibility = 0.0
 	s_Object.ve.visibility = 0.0
+	VisualEnvironmentManager:SetDirty(true)
 
 	if s_Object.rawPreset["RuntimeEntities"] ~= nil then
 		m_RuntimeEntityHandler:SetVisibility(s_Object, true)
@@ -238,7 +240,8 @@ function VisualEnvironmentHandler:FadeTo(p_ID, p_VisibilityStart, p_VisibilityEn
 		transitionTime = p_FadeTime,
 		startTime = SharedUtils:GetTimeMS(),
 		startValue = p_VisibilityStart or s_Object.ve.visibility,
-		endValue = p_VisibilityEnd
+		endValue = p_VisibilityEnd,
+		firstRun = true
 	}
 
 	m_Lerping[p_ID] = s_LerpProperties
@@ -275,13 +278,14 @@ function VisualEnvironmentHandler:Pulse(p_ID, p_PulseTime, p_DecreaseFirst, p_Tr
 		transitionTime = p_PulseTime,
 		startTime = SharedUtils:GetTimeMS(),
 		startValue = s_VisibilityStart,
-		endValue = s_VisibilityEnd
+		endValue = s_VisibilityEnd,
+		firstRun = true
 	}
 
 	m_Lerping[p_ID] = s_LerpProperties
 end
 
-function VisualEnvironmentHandler:ResetLerps()
+function VisualEnvironmentHandler:ResetPriorityOneLerps()
 	-- Only reset base (main) visual environment lerps
 	for l_ID, l_LerpProperties in pairs(m_Lerping) do
 		---@type VisualEnvironmentObject
@@ -290,18 +294,22 @@ function VisualEnvironmentHandler:ResetLerps()
 		-- check if alive
 		if s_Object and s_Object.entity and s_Object.ve.priority == 1 then
 			self:DestroyVE(l_ID)
+			m_Lerping[l_ID] = {}
 		end
 	end
-
-	m_Lerping = {}
 end
 
-local once = false
 ---@param p_DeltaTime number
 function VisualEnvironmentHandler:UpdateLerp(p_DeltaTime)
 	for l_ID, l_LerpingTable in pairs(m_Lerping) do
 		local s_TimeSinceStart = SharedUtils:GetTimeMS() - l_LerpingTable.startTime
 		local s_CompletionPercentage = s_TimeSinceStart / l_LerpingTable.transitionTime * 100
+
+		if l_LerpingTable.firstRun then
+			-- prevent destroying on first run
+			l_LerpingTable.startValue = math.max(l_LerpingTable.startValue, 0.01)
+			l_LerpingTable.firstRun = false
+		end
 
 		-- ! for now only use functions that need these parameters
 		-- t = elapsed time (ms)
@@ -341,6 +349,7 @@ function VisualEnvironmentHandler:UpdateLerp(p_DeltaTime)
 			m_Lerping[l_ID] = nil
 		else
 			self:SetVisibility(l_ID, s_LerpValue)
+			print("Setting Visibility: " .. s_LerpValue .. " of " .. l_ID)
 		end
 	end
 end

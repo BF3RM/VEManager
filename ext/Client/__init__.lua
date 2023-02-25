@@ -98,9 +98,8 @@ end
 function VEManagerClient:_OnEnablePreset(p_ID)
 	if not m_VisualEnvironmentHandler:CheckIfExists(p_ID) then return end
 
-	--[[ reset all running lerps as EnablePreset() is a function to apply the main visual environment,
-	if you don´t want to stop active lerps use SetVisibility() ]]
-	m_VisualEnvironmentHandler:ResetLerps()
+	-- reset all running priority 1 lerps as EnablePreset() is a function to apply the main visual environment
+	m_VisualEnvironmentHandler:ResetPriorityOneLerps()
 
 	m_Logger:Write("Enabling preset: " .. tostring(p_ID))
 

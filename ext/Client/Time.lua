@@ -139,7 +139,7 @@ function Time:_ResetForcedValues()
 
 		if not m_VisualEnvironmentHandler:CheckIfExists(s_ID) then return end
 		local s_Object = m_VisualEnvironmentHandler:GetVisualEnvironmentObject(s_ID)
-		VEManagerClient.m_Presets[s_ID]["ve"].priority = self.m_SavedValuesForReset[l_Index].priority
+		s_Object.ve.priority = self.m_SavedValuesForReset[l_Index].priority
 
 		for _, l_Class in ipairs(s_Object.ve.components) do -- Remove patches
 			-- Un-patch Sun Positions
