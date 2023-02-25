@@ -255,8 +255,14 @@ function VisualEnvironmentHandler:Pulse(p_ID, p_PulseTime, p_DecreaseFirst, p_Tr
 	---@type VisualEnvironmentObject
 	local s_Object = m_VisualEnvironmentObjects[p_ID]
 	local s_TransitionFunction = m_Easing[p_TransitionType]
-	local s_VisibilityStart = s_Object.ve.visibility
+	local s_VisibilityStart
 	local s_VisibilityEnd
+
+	if s_Object.entity and s_Object.entity.state then
+		s_VisibilityStart = s_Object.entity.state.visibility
+	else
+		s_VisibilityStart = 0
+	end
 
 	if not s_TransitionFunction then
 		-- default to linear
