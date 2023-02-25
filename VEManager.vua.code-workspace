@@ -20,7 +20,11 @@
 		"Lua.format.enable": true,
 		"Lua.misc.parameters": [
 			"--preview"
-		]
+		],
+		"workbench.colorCustomizations": {
+			"minimap.background": "#00000000",
+			"scrollbar.shadow": "#00000000"
+		}
 	},
 	"extensions": {
 		"recommendations": [
