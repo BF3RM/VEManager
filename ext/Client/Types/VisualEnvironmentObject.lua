@@ -1,6 +1,4 @@
 ---@class VisualEnvironmentObject
----@field logic LogicVisualEnvironmentEntityData
----@field blueprint VisualEnvironmentBlueprint
 ---@field ve VisualEnvironmentEntityData
 ---@field entity VisualEnvironmentEntity|Entity|nil
 ---@field supportedClasses table<string>
@@ -18,6 +16,7 @@ function VisualEnvironmentObject:__init(p_VEName, p_VEPriority, p_VEType)
     s_VE.priority = p_VEPriority
     s_VE.visibility = 1
 
+	self.name = p_VEName
     self.ve = s_VE
     self.type = p_VEType
     self.priority = p_VEType

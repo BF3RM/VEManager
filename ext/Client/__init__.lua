@@ -41,6 +41,7 @@ function VEManagerClient:RegisterEvents()
 	Events:Subscribe('VEManager:EnablePreset', self, self._OnEnablePreset)
 	Events:Subscribe('VEManager:DisablePreset', self, self._OnDisablePreset)
 	Events:Subscribe('VEManager:SetVisibility', self, self._OnSetVisibility)
+	Events:Subscribe('VEManager:SetSingleValue', self, self._OnSetSingleValue)
 	Events:Subscribe('VEManager:FadeTo', self, self._OnFadeTo)
 	Events:Subscribe('VEManager:FadeIn', self, self._OnFadeIn)
 	Events:Subscribe('VEManager:FadeOut', self, self._OnFadeOut)
@@ -142,6 +143,16 @@ function VEManagerClient:_OnSetVisibility(p_ID, p_Visibility)
 			--LiveEntityHandler:SetVisibility(p_ID, true)
 		end
 	end
+end
+
+---@param p_ID string
+---@param p_Class string
+---@param p_Property string
+---@param p_Value any
+function VEManagerClient:_OnSetSingleValue(p_ID, p_Class, p_Property, p_Value)
+	if not m_VisualEnvironmentHandler:CheckIfExists(p_ID) then return end
+
+	m_VisualEnvironmentHandler:SetSingleValue(p_ID, p_Class, p_Property, p_Value)
 end
 
 ---@param p_ID string
@@ -315,7 +326,7 @@ function VEManagerClient:_LoadPresets()
 						end
 
 						-- Set value
-						if s_Value then
+						if s_Value ~= nil then
 							s_Class[UtilityFunctions:FirstToLower(s_FieldName)] = s_Value
 						end
 					end
@@ -361,7 +372,6 @@ function VEManagerClient:_LoadPresets()
 							-- Applying original value
 							if UtilityFunctions:IsBasicType(s_Type) then
 								s_Class[UtilityFunctions:FirstToLower(s_FieldName)] = s_Value
-
 							elseif l_Field.typeInfo.enum then
 								s_Class[UtilityFunctions:FirstToLower(s_FieldName)] = tonumber(s_Value)
 

@@ -114,6 +114,7 @@ function VisualEnvironmentHandler:InitializeVE(p_ID, p_Visibility)
 			l_Object.ve.visibility = p_Visibility or 1.0
 			l_Object.entity:Init(Realm.Realm_Client, true)
 
+			---@type VisualEnvironmentState
 			local s_State = VisualEnvironmentEntity(l_Object.entity).state
 
 			if s_State then
