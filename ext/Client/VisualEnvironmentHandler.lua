@@ -8,6 +8,8 @@ local m_Logger = Logger("VisualEnvironmentHandler", true)
 
 ---@type EasingTransitions
 local m_Easing = require "__shared/Utils/Easing"
+---@type RuntimeEntityHandler
+local m_RuntimeEntityHandler = require("RuntimeEntityHandler")
 
 -- Table of visual environment objects
 ---@type table<VisualEnvironmentObject>
@@ -124,6 +126,10 @@ function VisualEnvironmentHandler:InitializeVE(p_ID, p_Visibility)
 				self:Reload(p_ID)
 			end
 
+			if l_Object.rawPreset["RuntimeEntities"] ~= nil then
+				m_RuntimeEntityHandler:SetVisibility(l_Object, false)
+			end
+
 			m_Logger:Write("- " .. l_Index .. " | Priority: " .. l_Object.ve.priority .. " | Visibility: " .. p_Visibility)
 			return true, false
 		end
@@ -156,6 +162,10 @@ function VisualEnvironmentHandler:DestroyVE(p_ID)
 
 	--s_Object.logic.visibility = 0.0
 	s_Object.ve.visibility = 0.0
+
+	if s_Object.rawPreset["RuntimeEntities"] ~= nil then
+		m_RuntimeEntityHandler:SetVisibility(s_Object, true)
+	end
 
 	m_Logger:Write("-> Destroyed!")
 	return true
@@ -193,6 +203,14 @@ function VisualEnvironmentHandler:SetVisibility(p_ID, p_Visibility)
 			VisualEnvironmentManager:SetDirty(true)
 		else
 			self:Reload(p_ID)
+		end
+	end
+
+	if s_Object.rawPreset["RuntimeEntities"] ~= nil then
+		if p_Visibility > 0.5 then
+			m_RuntimeEntityHandler:SetVisibility(s_Object, false)
+		else
+			m_RuntimeEntityHandler:SetVisibility(s_Object, true)
 		end
 	end
 end

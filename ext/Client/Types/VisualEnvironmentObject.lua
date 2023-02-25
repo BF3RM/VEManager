@@ -6,20 +6,41 @@
 ---@diagnostic disable-next-line: assign-type-mismatch
 VisualEnvironmentObject = class "VisualEnvironmentObject"
 
----@param p_VEName string
----@param p_VEPriority number
----@param p_VEType string
-function VisualEnvironmentObject:__init(p_VEName, p_VEPriority, p_VEType)
+---@type Logger
+local m_Logger = Logger("VisualEnvironmentObject", true)
+
+---@type VisualEnvironmentHandler
+local m_VisualEnvironmentHandler = require("VisualEnvironmentHandler")
+
+---@param p_Preset table
+function VisualEnvironmentObject:__init(p_Preset)
+	if not p_Preset.Name then
+		p_Preset.Name = 'unknown_preset_' .. tostring(m_VisualEnvironmentHandler:GetTotalVEObjectCount())
+	end
+
+	if not p_Preset.Type then
+		p_Preset.Type = 'generic'
+	end
+
+	if not p_Preset.Priority then
+		p_Preset.Priority = 1
+	else
+		p_Preset.Priority = tonumber(p_Preset.Priority)
+	end
+
+	m_Logger:Write("(" .. p_Preset.Name ..", " .. p_Preset.Priority .. ", " .. p_Preset.Type .. ")")
+
 	-- spawning from blueprint alone doesn´t work somehow, would have been nice tho since we can store the name there
     local s_VE = UtilityFunctions:InitEngineType("VisualEnvironmentEntityData")
     s_VE.enabled = true
-    s_VE.priority = p_VEPriority
+    s_VE.priority = p_Preset.Priority
     s_VE.visibility = 1
 
-	self.name = p_VEName
+	self.name = p_Preset.Name
     self.ve = s_VE
-    self.type = p_VEType
-    self.priority = p_VEType
+    self.type = p_Preset.Type
+    self.priority = p_Preset.Priority
+	self.rawPreset = p_Preset
 
     -- Supported classes by VisualEnvironmentStates https://docs.veniceunleashed.net/vext/ref/client/type/visualenvironmentstate/
 	self.supportedClasses = {

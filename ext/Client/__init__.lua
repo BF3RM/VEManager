@@ -10,6 +10,8 @@ local m_Logger = Logger("VEManagerClient", true)
 require "Types/VisualEnvironmentObject"
 ---@type VisualEnvironmentHandler
 local m_VisualEnvironmentHandler = require("VisualEnvironmentHandler")
+---@type RuntimeEntityHandler
+local m_RuntimeEntityHandler = require("RuntimeEntityHandler")
 ---@type Patches
 local m_Patches = require("Patches")
 --#endregion
@@ -78,7 +80,7 @@ end
 ---@param p_UpdatePass UpdatePass
 function VEManagerClient:_OnUpdateManager(p_DeltaTime, p_UpdatePass)
 	if p_UpdatePass == UpdatePass.UpdatePass_PreSim then
-		--m_--LiveEntityHandler:OnUpdateManagerPreSim(p_DeltaTime)
+		m_RuntimeEntityHandler:OnUpdateManagerPreSim(p_DeltaTime)
 	elseif p_UpdatePass == UpdatePass.UpdatePass_PostSim then
 		m_VisualEnvironmentHandler:UpdateLerp(p_DeltaTime)
 	end
@@ -109,10 +111,6 @@ function VEManagerClient:_OnEnablePreset(p_ID)
 	elseif not s_Initialized and s_AlreadyExists then
 		m_Logger:Warning("Didnt create VE Entity, since it already exists. This shouldnt happen. Making " .. tostring(p_ID) .. " visible nevertheless")
 	end
-
-	if self.m_RawPresets[p_ID]["LiveEntities"] ~= nil then
-		--LiveEntityHandler:SetVisibility(p_ID, false)
-	end
 end
 
 ---@param p_ID string
@@ -124,10 +122,6 @@ function VEManagerClient:_OnDisablePreset(p_ID)
 	if not m_VisualEnvironmentHandler:DestroyVE(p_ID) then
 		m_Logger:Error("Failed to destroy VE of preset " .. tostring(p_ID))
 	end
-
-	if self.m_RawPresets[p_ID]["LiveEntities"] ~= nil then
-		--LiveEntityHandler:SetVisibility(p_ID, true)
-	end
 end
 
 ---@param p_ID string
@@ -135,14 +129,6 @@ function VEManagerClient:_OnSetVisibility(p_ID, p_Visibility)
 	if not m_VisualEnvironmentHandler:CheckIfExists(p_ID) then return end
 
 	m_VisualEnvironmentHandler:SetVisibility(p_ID, p_Visibility)
-
-	if self.m_RawPresets[p_ID]["LiveEntities"] ~= nil then
-		if p_Visibility > 0.5 then
-			--LiveEntityHandler:SetVisibility(p_ID, false)
-		else
-			--LiveEntityHandler:SetVisibility(p_ID, true)
-		end
-	end
 end
 
 ---@param p_ID string
@@ -256,23 +242,8 @@ function VEManagerClient:_LoadPresets()
 
 	-- prepare presets
 	for l_ID, l_Preset in pairs(self.m_RawPresets) do
-		-- Variables check
-		if not l_Preset.Name then
-			l_Preset.Name = 'unknown_preset_' .. tostring(m_VisualEnvironmentHandler:GetTotalVEObjectCount())
-		end
-
-		if not l_Preset.Type then
-			l_Preset.Type = 'generic'
-		end
-
-		if not l_Preset.Priority then
-			l_Preset.Priority = 1
-		else
-			l_Preset.Priority = tonumber(l_Preset.Priority)
-		end
-
-		m_Logger:Write("(" .. l_Preset.Name ..", " .. l_Preset.Priority .. ", " .. l_Preset.Type .. ")")
-		local s_VEObject = VisualEnvironmentObject(l_Preset.Name, l_Preset.Priority, l_Preset.Type)
+		-- Create Object
+		local s_VEObject = VisualEnvironmentObject(l_Preset)
 
 		--Foreach class
 		local s_ComponentCount = 0
@@ -394,6 +365,7 @@ function VEManagerClient:_LoadPresets()
 		end
 		s_VEObject.ve.runtimeComponentCount = s_ComponentCount
 		m_VisualEnvironmentHandler:RegisterVisualEnvironmentObject(l_ID, s_VEObject)
+		self.m_RawPresets[l_ID] = nil
 	end
 	Events:Dispatch("VEManager:PresetsLoaded")
 	NetEvents:Send("VEManager:PlayerReady")
