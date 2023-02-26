@@ -3,7 +3,7 @@
 	"Authors": ["Powback", "IllustrisJack", "Lesley", "GreatApo", "FoolHen"],
 	"Description": "Handles VE",
 	"URL": "https://github.com/BF3RM/VEManager",
-	"Version": "0.4.3",
+	"Version": "0.5.0-rc.1",
 	"HasWebUI": false,
 	"HasVeniceEXT": true
 }
