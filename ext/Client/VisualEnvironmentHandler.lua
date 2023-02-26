@@ -35,6 +35,10 @@ function VisualEnvironmentHandler:RegisterVars()
 	self._Lerping = {}
 end
 
+function VisualEnvironmentHandler:OnLevelDestroy()
+	self:RegisterVars()
+end
+
 ---@param p_ID string
 ---@param p_Object table<VisualEnvironmentObject>
 function VisualEnvironmentHandler:RegisterVisualEnvironmentObject(p_ID, p_Object)

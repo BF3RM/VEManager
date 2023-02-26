@@ -68,6 +68,7 @@ end
 
 function VEManagerClient:_OnLevelDestroy()
 	self:RegisterVars()
+	m_VisualEnvironmentHandler:OnLevelDestroy()
 	collectgarbage('collect')
 end
 
