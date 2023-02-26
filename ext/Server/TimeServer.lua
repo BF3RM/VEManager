@@ -128,4 +128,4 @@ function TimeServer:_OnDisable()
 	NetEvents:Broadcast('ClientTime:Disable')
 end
 
-return UtilityFunctions:InitializeClass(TimeServer)
+return TimeServer()
