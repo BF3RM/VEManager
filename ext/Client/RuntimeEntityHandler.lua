@@ -124,4 +124,4 @@ function RuntimeEntityHandler:OnUpdateManagerPreSim(p_DeltaTime)
     s_Counter = 0
 end
 
-return UtilityFunctions:InitializeClass(RuntimeEntityHandler)
+return RuntimeEntityHandler()

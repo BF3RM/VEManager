@@ -163,34 +163,6 @@ function UtilityFunctions:FirstToLower(p_String)
 	return (p_String:gsub("^%L", string.lower))
 end
 
--- Returns public functions of a class - this automatically throws an error if someone tries to use a non public functions from outside a class
----@param p_Class table
----@return table
-function UtilityFunctions:InitializeClass(p_Class)
-    -- Initialize
-    p_Class()
-
-	local s_PublicTable = {}
-
-    m_Logger:Write(p_Class.name)
-
-    --print("Class: " .. p_Class)
-    for l_MethodName, l_Method in pairs(p_Class.__declaredMethods) do
-        -- check if public and a function
-        if type(l_Method) == "function" and string.sub(l_MethodName, 1, 1) ~= "_" then
-            s_PublicTable[l_MethodName] = l_Method
-
-            if l_MethodName == "isInstanceOf" then
-                m_Logger:Write("- Added Public MiddleClass Method: " .. l_MethodName)
-            else
-                m_Logger:Write("- Added Public Method: " .. l_MethodName)
-            end
-        end
-    end
-
-    return s_PublicTable
-end
-
-return UtilityFunctions:InitializeClass(UtilityFunctions)
+return UtilityFunctions()
 
 

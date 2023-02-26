@@ -11,50 +11,53 @@ local m_Easing = require "__shared/Utils/Easing"
 ---@type RuntimeEntityHandler
 local m_RuntimeEntityHandler = require("RuntimeEntityHandler")
 
--- Table of visual environment objects
----@type table<VisualEnvironmentObject>
-local m_VisualEnvironmentObjects = {}
--- Table of currently lerping visual environments
----@class LerpProperties
----@field enabled boolean -- if lerp is enabled
----@field pulsing boolean -- if pulsing is enabled
----@field transitionFunctionName EasingTransitions|string
----@field transitionFunction function<EasingTransitions>
----@field transitionTime number
----@field startTime number
----@field startValue number
----@field endValue number
----@field firstRun boolean
----@type table<string, LerpProperties> key: Name, value: LerpProperties
-local m_Lerping = {}
-
 function VisualEnvironmentHandler:__init()
 	m_Logger:Write('Initializing VisualEnvironmentHandler')
 	self:RegisterVars()
 end
 
 function VisualEnvironmentHandler:RegisterVars()
-
+	-- Table of visual environment objects
+	---@type table<VisualEnvironmentObject>
+	self._VisualEnvironmentObjects = {}
+	-- Table of currently lerping visual environments
+	---@class LerpProperties
+	---@field enabled boolean -- if lerp is enabled
+	---@field pulsing boolean -- if pulsing is enabled
+	---@field transitionFunctionName EasingTransitions|string
+	---@field transitionFunction function<EasingTransitions>
+	---@field transitionTime number
+	---@field startTime number
+	---@field startValue number
+	---@field endValue number
+	---@field firstRun boolean
+	---@type table<string, LerpProperties> key: Name, value: LerpProperties
+	self._Lerping = {}
 end
 
 ---@param p_ID string
 ---@param p_Object table<VisualEnvironmentObject>
 function VisualEnvironmentHandler:RegisterVisualEnvironmentObject(p_ID, p_Object)
-	m_VisualEnvironmentObjects[p_ID] = p_Object
+	self._VisualEnvironmentObjects[p_ID] = p_Object
 end
 
 ---@param p_ID string
 ---@return VisualEnvironmentObject
 function VisualEnvironmentHandler:GetVisualEnvironmentObject(p_ID)
 	---@type VisualEnvironmentObject
-	local s_Object = m_VisualEnvironmentObjects[p_ID]
+	local s_Object = self._VisualEnvironmentObjects[p_ID]
 
 	return s_Object
 end
 
+---@return table<VisualEnvironmentObject>
+function VisualEnvironmentHandler:GetVisualEnvironmentObjects()
+	return self._VisualEnvironmentObjects
+end
+
 ---@return number
 function VisualEnvironmentHandler:GetTotalVEObjectCount()
-	return #m_VisualEnvironmentObjects
+	return #self._VisualEnvironmentObjects
 end
 
 ---@param p_ID string
@@ -66,7 +69,7 @@ function VisualEnvironmentHandler:CheckIfExists(p_ID)
 
 	if p_ID == nil then
 		m_Logger:Error("\nThe VE object ID provided is nil.")
-	elseif m_VisualEnvironmentObjects[p_ID] == nil then
+	elseif self._VisualEnvironmentObjects[p_ID] == nil then
 		m_Logger:Error("\nThere isn't a VE object with this id or it hasn't been parsed yet. Id: " .. tostring(p_ID))
 	end
 
@@ -77,7 +80,7 @@ end
 ---@return Guid|nil
 function VisualEnvironmentHandler:GetEntityDataGuid(p_ID)
 	---@type VisualEnvironmentObject
-	local s_Object = m_VisualEnvironmentObjects[p_ID]
+	local s_Object = self._VisualEnvironmentObjects[p_ID]
 	local s_Guid = s_Object.entity.data.instanceGuid
 
 	if s_Guid then
@@ -93,7 +96,7 @@ end
 function VisualEnvironmentHandler:InitializeVE(p_ID, p_Visibility)
 	---@param l_Index integer
 	---@param l_Object VisualEnvironmentObject
-	for l_Index, l_Object in pairs(m_VisualEnvironmentObjects) do
+	for l_Index, l_Object in pairs(self._VisualEnvironmentObjects) do
 		if l_Index == p_ID then
 			m_Logger:Write("Spawning VE: ")
 
@@ -143,7 +146,7 @@ end
 function VisualEnvironmentHandler:DestroyVE(p_ID)
 	m_Logger:Write("Attempting to destroy VE preset with id " .. p_ID .. "...")
 	---@type VisualEnvironmentObject
-	local s_Object = m_VisualEnvironmentObjects[p_ID]
+	local s_Object = self._VisualEnvironmentObjects[p_ID]
 
 	if s_Object == nil then
 		m_Logger:Warning("Tried to destroy a preset that does not exist")
@@ -156,7 +159,7 @@ function VisualEnvironmentHandler:DestroyVE(p_ID)
 	end
 
 	-- destroy entity
-	m_Lerping[p_ID] = nil
+	self._Lerping[p_ID] = nil
 	---@type VisualEnvironmentState
 	local s_State = VisualEnvironmentEntity(s_Object.entity).state
 	s_State.visibility = 0
@@ -179,7 +182,7 @@ function VisualEnvironmentHandler:Reload(p_IDOrObject)
 	local s_Object = p_IDOrObject
 
 	if p_IDOrObject == type("string") then
-		s_Object = m_VisualEnvironmentObjects[p_IDOrObject]
+		s_Object = self._VisualEnvironmentObjects[p_IDOrObject]
 	end
 
 	s_Object.entity:FireEvent("Disable")
@@ -190,7 +193,7 @@ end
 ---@param p_Visibility number
 function VisualEnvironmentHandler:SetVisibility(p_ID, p_Visibility)
 	---@type VisualEnvironmentObject
-	local s_Object = m_VisualEnvironmentObjects[p_ID]
+	local s_Object = self._VisualEnvironmentObjects[p_ID]
 
 	if not s_Object.entity then
 		self:InitializeVE(p_ID, p_Visibility)
@@ -224,7 +227,7 @@ end
 ---@param p_TransitionType EasingTransitions|nil
 function VisualEnvironmentHandler:FadeTo(p_ID, p_VisibilityStart, p_VisibilityEnd, p_FadeTime, p_TransitionType)
 	---@type VisualEnvironmentObject
-	local s_Object = m_VisualEnvironmentObjects[p_ID]
+	local s_Object = self._VisualEnvironmentObjects[p_ID]
 	local s_TransitionFunction = m_Easing[p_TransitionType]
 
 	if not s_TransitionFunction then
@@ -244,7 +247,7 @@ function VisualEnvironmentHandler:FadeTo(p_ID, p_VisibilityStart, p_VisibilityEn
 		firstRun = true
 	}
 
-	m_Lerping[p_ID] = s_LerpProperties
+	self._Lerping[p_ID] = s_LerpProperties
 end
 
 ---@param p_ID string
@@ -253,7 +256,7 @@ end
 ---@param p_TransitionType EasingTransitions|nil
 function VisualEnvironmentHandler:Pulse(p_ID, p_PulseTime, p_DecreaseFirst, p_TransitionType)
 	---@type VisualEnvironmentObject
-	local s_Object = m_VisualEnvironmentObjects[p_ID]
+	local s_Object = self._VisualEnvironmentObjects[p_ID]
 	local s_TransitionFunction = m_Easing[p_TransitionType]
 	local s_VisibilityStart
 	local s_VisibilityEnd
@@ -288,26 +291,26 @@ function VisualEnvironmentHandler:Pulse(p_ID, p_PulseTime, p_DecreaseFirst, p_Tr
 		firstRun = true
 	}
 
-	m_Lerping[p_ID] = s_LerpProperties
+	self._Lerping[p_ID] = s_LerpProperties
 end
 
 function VisualEnvironmentHandler:ResetPriorityOneLerps()
 	-- Only reset base (main) visual environment lerps
-	for l_ID, l_LerpProperties in pairs(m_Lerping) do
+	for l_ID, l_LerpProperties in pairs(self._Lerping) do
 		---@type VisualEnvironmentObject
-		local s_Object = m_VisualEnvironmentObjects[l_ID]
+		local s_Object = self._VisualEnvironmentObjects[l_ID]
 
 		-- check if alive
 		if s_Object and s_Object.entity and s_Object.ve.priority == 1 then
 			self:DestroyVE(l_ID)
-			m_Lerping[l_ID] = {}
+			self._Lerping[l_ID] = {}
 		end
 	end
 end
 
 ---@param p_DeltaTime number
 function VisualEnvironmentHandler:UpdateLerp(p_DeltaTime)
-	for l_ID, l_LerpingTable in pairs(m_Lerping) do
+	for l_ID, l_LerpingTable in pairs(self._Lerping) do
 		local s_TimeSinceStart = SharedUtils:GetTimeMS() - l_LerpingTable.startTime
 		local s_CompletionPercentage = s_TimeSinceStart / l_LerpingTable.transitionTime * 100
 
@@ -347,12 +350,12 @@ function VisualEnvironmentHandler:UpdateLerp(p_DeltaTime)
 				end
 			else
 				self:SetVisibility(l_ID, l_LerpingTable.endValue)
-				m_Lerping[l_ID] = nil
+				self._Lerping[l_ID] = nil
 			end
 		elseif s_CompletionPercentage < 0 then
 			m_Logger:Warning('Lerping of preset ' .. tostring(l_ID) .. ' has its completed percentage of ' .. tostring(s_CompletionPercentage) .. ', should never happen')
 			self:SetVisibility(l_ID, l_LerpingTable.endValue)
-			m_Lerping[l_ID] = nil
+			self._Lerping[l_ID] = nil
 		else
 			self:SetVisibility(l_ID, s_LerpValue)
 			print("Setting Visibility: " .. s_LerpValue .. " of " .. l_ID)
@@ -370,7 +373,7 @@ function VisualEnvironmentHandler:SetSingleValue(p_ID, p_Class, p_Property, p_Va
 		return
 	end
 	---@type VisualEnvironmentObject
-	local s_Object = m_VisualEnvironmentObjects[p_ID]
+	local s_Object = self._VisualEnvironmentObjects[p_ID]
 	s_Object.entity.state[p_Class][p_Property] = p_Value
 	VisualEnvironmentManager:SetDirty(true)
 end
@@ -380,7 +383,7 @@ end
 ---@param p_Path string
 function VisualEnvironmentHandler:ApplyTexture(p_ID, p_Guid, p_Path)
 	---@type VisualEnvironmentObject
-	local s_Object = m_VisualEnvironmentObjects[p_ID]
+	local s_Object = self._VisualEnvironmentObjects[p_ID]
 
 	for _, l_Class in pairs(s_Object.ve.components) do
 
@@ -400,4 +403,4 @@ function VisualEnvironmentHandler:ApplyTexture(p_ID, p_Guid, p_Path)
 	self:Reload(p_ID)
 end
 
-return UtilityFunctions:InitializeClass(VisualEnvironmentHandler)
+return VisualEnvironmentHandler()

@@ -1,5 +1,6 @@
 ---@class VEManagerServer
 ---@overload fun():VEManagerServer
+---@diagnostic disable-next-line: assign-type-mismatch
 VEManagerServer = class 'VEManagerServer'
 
 ---@type Logger
@@ -12,4 +13,4 @@ function VEManagerServer:__init()
 	m_Logger:Write('Initializing VEManagerServer')
 end
 
-return UtilityFunctions:InitializeClass(VEManagerServer)
+return VEManagerServer()

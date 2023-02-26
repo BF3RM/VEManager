@@ -25,7 +25,7 @@ end
 function VEManagerClient:RegisterVars()
 	-- Table of raw JSON presets
 	-- Default Dynamic day-night cycle Presets
-	self.m_RawPresets = {
+	self._RawPresets = {
 		DefaultNight = require("Presets/DefaultNight"),
 		DefaultMorning = require("Presets/DefaultMorning"),
 		DefaultNoon = require("Presets/DefaultNoon"),
@@ -90,7 +90,7 @@ end
 ---@param p_ID string
 ---@param p_Preset string
 function VEManagerClient:_RegisterPreset(p_ID, p_Preset)
-	self.m_RawPresets[p_ID] = json.decode(p_Preset)
+	self._RawPresets[p_ID] = json.decode(p_Preset)
 	m_Logger:Write("Registered Preset: " .. p_ID)
 end
 
@@ -205,7 +205,7 @@ function VEManagerClient:_OnReplaceVE(p_ID, p_Replacement)
 	if not s_Preset then
 		m_Logger:Warning('Error when parsing the replacement preset. Id: ' .. tostring(p_ID))
 	end
-	self.m_RawPresets[p_ID] = s_Preset
+	self._RawPresets[p_ID] = s_Preset
 end
 
 function VEManagerClient:_OnReinitialize()
@@ -223,7 +223,7 @@ end
 
 ---@return table<string, string>
 function VEManagerClient:GetRawPresets()
-	return self.m_RawPresets
+	return self._RawPresets
 end
 
 function VEManagerClient:_LoadPresets()
@@ -240,7 +240,7 @@ function VEManagerClient:_LoadPresets()
 	end
 
 	-- prepare presets
-	for l_ID, l_Preset in pairs(self.m_RawPresets) do
+	for l_ID, l_Preset in pairs(self._RawPresets) do
 		-- Create Object
 		local s_VEObject = VisualEnvironmentObject(l_Preset)
 
@@ -364,11 +364,11 @@ function VEManagerClient:_LoadPresets()
 		end
 		s_VEObject.ve.runtimeComponentCount = s_ComponentCount
 		m_VisualEnvironmentHandler:RegisterVisualEnvironmentObject(l_ID, s_VEObject)
-		self.m_RawPresets[l_ID] = nil
+		self._RawPresets[l_ID] = nil
 	end
 	Events:Dispatch("VEManager:PresetsLoaded")
 	NetEvents:Send("VEManager:PlayerReady")
 	m_Logger:Write("Presets loaded")
 end
 
-return UtilityFunctions:InitializeClass(VEManagerClient)
+return VEManagerClient()

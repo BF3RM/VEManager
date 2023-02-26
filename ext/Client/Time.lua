@@ -1,5 +1,6 @@
 ---@class Time
 ---@overload fun():Time
+---@diagnostic disable-next-line: assign-type-mismatch
 Time = class 'Time'
 
 ---@type Logger
@@ -19,28 +20,26 @@ function Time:RegisterVars()
 	-- Initialize variables
 	m_Logger:Write('[Client Time Module] Registered Vars')
 
-	self.m_SystemRunning = false
-	self.m_ClientTime = 0
-	self.m_TotalDayLength = 0
-	self.m_FirstRun = false
-	self.m_IsDay = nil
+	self._SystemRunning = false
+	self._ClientTime = 0
+	self._TotalDayLength = 0
+	self._FirstRun = false
+	self._IsDay = nil
 
-	self.m_LastPrintHours = -1
-	self.m_BaseDynamicPresetPriority = 10
+	self._LastPrintHours = -1
+	self._BaseDynamicPresetPriority = 10
 
-	self.m_SunPosX = 0
-	self.m_SunPosY = 0
+	self._SunPosX = 0
+	self._SunPosY = 0
 
-	self.m_SortedDynamicPresetsTable = {}
-	self.m_SavedValuesForReset = {}
+	self._SortedDynamicPresetsTable = {}
+	self._SavedValuesForReset = {}
 
-	self.m_CurrentPreset = 1
+	self._CurrentPreset = 1
 
-	self.m_CloudSpeed = CONFIG.CLOUDS_DEFAULT_SPEED
-	self.m_Sunrise = CONFIG.DN_SUN_TIMINGS[1] / 24
-	self.m_Sunset = CONFIG.DN_SUN_TIMINGS[2] / 24
-
-	self.m_RawPresets = VEManagerClient:GetRawPresets()
+	self._CloudSpeed = CONFIG.CLOUDS_DEFAULT_SPEED
+	self._Sunrise = CONFIG.DN_SUN_TIMINGS[1] / 24
+	self._Sunset = CONFIG.DN_SUN_TIMINGS[2] / 24
 end
 
 function Time:RegisterEvents()
@@ -75,8 +74,8 @@ end
 function Time:_OnServerSync(p_ServerDayTime, p_TotalServerTime)
 	if not p_ServerDayTime or not p_TotalServerTime then
 		return
-	elseif self.m_SystemRunning then
-		self.m_ClientTime = p_ServerDayTime
+	elseif self._SystemRunning then
+		self._ClientTime = p_ServerDayTime
 		--self.m_TotalClientTime = p_TotalServerTime -- Not currently used
 		self:_Run()
 	end
@@ -85,22 +84,22 @@ end
 -- Update sun position, for smoother sun relative to time
 ---@param p_ClientTime number
 function Time:_UpdateSunPosition(p_ClientTime)
-	local s_DayFactor = p_ClientTime / self.m_TotalDayLength
+	local s_DayFactor = p_ClientTime / self._TotalDayLength
 	local s_SunPosX = 275
 	local s_SunPosY = 0
 
-	if s_DayFactor <= self.m_Sunrise then -- Moon
-		local s_FactorNight = (s_DayFactor + 1 - self.m_Sunset) / (self.m_Sunrise + 1 - self.m_Sunset)
+	if s_DayFactor <= self._Sunrise then -- Moon
+		local s_FactorNight = (s_DayFactor + 1 - self._Sunset) / (self._Sunrise + 1 - self._Sunset)
 		s_SunPosY = 180 * (1 - s_FactorNight)
-		self.m_IsDay = false
-	elseif s_DayFactor <= self.m_Sunset then -- Day
-		local s_FactorDay = (s_DayFactor - self.m_Sunrise) / (self.m_Sunset - self.m_Sunrise)
+		self._IsDay = false
+	elseif s_DayFactor <= self._Sunset then -- Day
+		local s_FactorDay = (s_DayFactor - self._Sunrise) / (self._Sunset - self._Sunrise)
 		s_SunPosY = 180 * s_FactorDay
-		self.m_IsDay = true
+		self._IsDay = true
 	else -- Moon
-		local s_FactorNight = (s_DayFactor - self.m_Sunset) / (self.m_Sunrise + 1 - self.m_Sunset)
+		local s_FactorNight = (s_DayFactor - self._Sunset) / (self._Sunrise + 1 - self._Sunset)
 		s_SunPosY = 180 * (1 - s_FactorNight)
-		self.m_IsDay = false
+		self._IsDay = false
 	end
 
 	-- Avoid crashes
@@ -110,36 +109,36 @@ function Time:_UpdateSunPosition(p_ClientTime)
 	end
 
 	-- Update position (if needed)
-	if self.m_SunPosY ~= s_SunPosY or self.m_SunPosY ~= s_SunPosY then
+	if self._SunPosY ~= s_SunPosY or self._SunPosY ~= s_SunPosY then
 		-- Update class variables
-		self.m_SunPosX = s_SunPosX
-		self.m_SunPosY = s_SunPosY
-		VisualEnvironmentManager:SetSunRotationX(self.m_SunPosX)
-		VisualEnvironmentManager:SetSunRotationY(self.m_SunPosY)
+		self._SunPosX = s_SunPosX
+		self._SunPosY = s_SunPosY
+		VisualEnvironmentManager:SetSunRotationX(self._SunPosX)
+		VisualEnvironmentManager:SetSunRotationY(self._SunPosY)
 	end
 end
 
 function Time:_SetCloudSpeed()
 	if CONFIG.DN_CHANGE_CLOUDS_SPEED_BASED_ON_DAY_LENGTH then
-		self.m_CloudSpeed = 1 / (self.m_TotalDayLength / 60 * 0.5)
-		m_Logger:Write('Set Cloud Speed = ' .. tostring(self.m_CloudSpeed))
+		self._CloudSpeed = 1 / (self._TotalDayLength / 60 * 0.5)
+		m_Logger:Write('Set Cloud Speed = ' .. tostring(self._CloudSpeed))
 	end
 end
 
 function Time:_ResetForcedValues()
-	if #self.m_SortedDynamicPresetsTable < 1 then
+	if #self._SortedDynamicPresetsTable < 1 then
 		m_Logger:Write("No modified presets to revert.")
 		return
 	end
 	m_Logger:Write("Reverting dynamic presets to default values:")
 
-	for l_Index, l_Preset in ipairs(self.m_SortedDynamicPresetsTable) do
+	for l_Index, l_Preset in ipairs(self._SortedDynamicPresetsTable) do
 		local s_ID = l_Preset[1]
 		m_Logger:Write(" - " .. tostring(s_ID) .. " (" .. tostring(l_Index) .. ")")
 
 		if not m_VisualEnvironmentHandler:CheckIfExists(s_ID) then return end
 		local s_Object = m_VisualEnvironmentHandler:GetVisualEnvironmentObject(s_ID)
-		s_Object.ve.priority = self.m_SavedValuesForReset[l_Index].priority
+		s_Object.ve.priority = self._SavedValuesForReset[l_Index].priority
 
 		for _, l_Class in ipairs(s_Object.ve.components) do -- Remove patches
 			-- Un-patch Sun Positions
@@ -147,43 +146,44 @@ function Time:_ResetForcedValues()
 				local s_Class = OutdoorLightComponentData(l_Class)
 				s_Class:MakeWritable()
 				-- Reset values
-				s_Class.sunRotationX = self.m_SavedValuesForReset[l_Index][l_Class.typeInfo.name].sunRotationX
-				s_Class.sunRotationY = self.m_SavedValuesForReset[l_Index][l_Class.typeInfo.name].sunRotationY
+				s_Class.sunRotationX = self._SavedValuesForReset[l_Index][l_Class.typeInfo.name].sunRotationX
+				s_Class.sunRotationY = self._SavedValuesForReset[l_Index][l_Class.typeInfo.name].sunRotationY
 			-- Un-patch Star Cloudlayer
 			elseif l_Class.typeInfo.name == "SkyComponentData" then
 				local s_Class = SkyComponentData(l_Class)
 				s_Class:MakeWritable()
 				-- Reset values
-				s_Class.sunSize = self.m_SavedValuesForReset[l_Index][l_Class.typeInfo.name].sunSize
-				s_Class.sunScale = self.m_SavedValuesForReset[l_Index][l_Class.typeInfo.name].sunScale
-				s_Class.cloudLayer2Altitude = self.m_SavedValuesForReset[l_Index][l_Class.typeInfo.name].cloudLayer2Altitude
-				s_Class.cloudLayer2TileFactor = self.m_SavedValuesForReset[l_Index][l_Class.typeInfo.name].cloudLayer2TileFactor
-				s_Class.cloudLayer2Rotation = self.m_SavedValuesForReset[l_Index][l_Class.typeInfo.name].cloudLayer2Rotation
-				s_Class.cloudLayer2Speed = self.m_SavedValuesForReset[l_Index][l_Class.typeInfo.name].cloudLayer2Speed
+				s_Class.sunSize = self._SavedValuesForReset[l_Index][l_Class.typeInfo.name].sunSize
+				s_Class.sunScale = self._SavedValuesForReset[l_Index][l_Class.typeInfo.name].sunScale
+				s_Class.cloudLayer2Altitude = self._SavedValuesForReset[l_Index][l_Class.typeInfo.name].cloudLayer2Altitude
+				s_Class.cloudLayer2TileFactor = self._SavedValuesForReset[l_Index][l_Class.typeInfo.name].cloudLayer2TileFactor
+				s_Class.cloudLayer2Rotation = self._SavedValuesForReset[l_Index][l_Class.typeInfo.name].cloudLayer2Rotation
+				s_Class.cloudLayer2Speed = self._SavedValuesForReset[l_Index][l_Class.typeInfo.name].cloudLayer2Speed
 			end
 		end
 	end
 	-- reset
-	self.m_SortedDynamicPresetsTable = {}
+	self._SortedDynamicPresetsTable = {}
 end
 
 ---@param p_SystemRunning boolean
 function Time:_OnPauseUnpause(p_SystemRunning)
-	self.m_SystemRunning = p_SystemRunning
+	self._SystemRunning = p_SystemRunning
 end
 
 function Time:_OnDisable()
 	-- Check if presets exist
-	if #self.m_SortedDynamicPresetsTable < 1 then
+	if #self._SortedDynamicPresetsTable < 1 then
 		return
 	end
 
 	-- Disable time system if running
-	self.m_SystemRunning = false
+	self._SystemRunning = false
 
 	-- Hide Presets
-	for l_ID, l_ValueTable in pairs(self.m_SortedDynamicPresetsTable) do
-		VEManagerClient:SetVisibility(l_ValueTable[1], 0)
+	for _, l_ValueTable in ipairs(self._SortedDynamicPresetsTable) do
+		if not m_VisualEnvironmentHandler:CheckIfExists(l_ValueTable[1]) then return end
+		m_VisualEnvironmentHandler:SetVisibility(l_ValueTable[1], 0)
 	end
 	-- Reset patched values
 	self:_ResetForcedValues()
@@ -195,32 +195,33 @@ end
 ---@param p_IsStatic boolean
 ---@param p_LengthOfDayInSeconds number
 function Time:_OnAddTime(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
-	if self.m_SystemRunning or self.m_FirstRun then
+	if self._SystemRunning or self._FirstRun then
 		self:RegisterVars()
 	end
 
 	local s_Types = {'Dynamic', 'DefaultDynamic'}
 	m_Logger:Write("Searching for dynamic presets:")
 
+	local s_VisualEnvironmentObjects = m_VisualEnvironmentHandler:GetVisualEnvironmentObjects()
+
 	-- Create the list of day-night cycle presets from (default) dynamic presets
 	for _, l_Type in ipairs(s_Types) do
 		m_Logger:Write("Found for Type: " .. l_Type)
 		-- Get all dynamic presets
 		-- (if no Dynamic presets, DefaultDynamic presets will be loaded)
-		if #self.m_SortedDynamicPresetsTable < 2 then
-			for l_ID, l_Preset in pairs(self.m_RawPresets) do
-				if l_Preset.Sky ~= nil and l_Preset.OutdoorLight ~= nil then
-					local s_SunRotationY = tonumber(l_Preset.OutdoorLight.SunRotationY)
-					local s_SkyBrightness = tonumber(l_Preset.Sky.BrightnessScale)
-					local s_Object = m_VisualEnvironmentHandler:GetVisualEnvironmentObject(l_ID)
+		if #self._SortedDynamicPresetsTable < 2 then
+			for l_ID, l_Object in pairs(s_VisualEnvironmentObjects) do
+				if l_Object.rawPreset.Sky ~= nil and l_Object.rawPreset.OutdoorLight ~= nil then
+					local s_SunRotationY = tonumber(l_Object.rawPreset.OutdoorLight.SunRotationY)
+					local s_SkyBrightness = tonumber(l_Object.rawPreset.Sky.BrightnessScale)
 
-					if s_Object.type == l_Type and s_SunRotationY ~= nil then
+					if l_Object.type == l_Type and s_SunRotationY ~= nil then
 						-- Check if night mode (moon enabled)
 						if s_SkyBrightness ~= nil and s_SkyBrightness <= 0.01 then
 							s_SunRotationY = 360 - s_SunRotationY
 						end
-						m_Logger:Write(" - " .. tostring(l_ID) .. " (sun: " .. tostring(s_SunRotationY) .. ")")
-						table.insert(self.m_SortedDynamicPresetsTable, {l_ID, s_SunRotationY})
+						m_Logger:Write(" - " .. tostring(l_ID) .. " (Sun: " .. tostring(s_SunRotationY) .. ")")
+						table.insert(self._SortedDynamicPresetsTable, {l_ID, s_SunRotationY})
 					end
 				end
 			end
@@ -228,30 +229,34 @@ function Time:_OnAddTime(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 	end
 
 	-- Sort presets in the table based on position in the day-night cycle
-	table.sort(self.m_SortedDynamicPresetsTable, function(a,b) return tonumber(a[2]) < tonumber(b[2]) end)
+	table.sort(self._SortedDynamicPresetsTable, function(a,b) return tonumber(a[2]) < tonumber(b[2]) end)
 
 	-- Set priorities & patch presets
 	m_Logger:Write("Sorted dynamic presets:")
-	for l_Index, l_Preset in ipairs(self.m_SortedDynamicPresetsTable) do
+	for l_Index, l_Preset in ipairs(self._SortedDynamicPresetsTable) do
 		local s_ID = l_Preset[1]
 
+		if not m_VisualEnvironmentHandler:CheckIfExists(s_ID) then return end
+
+		---@type VisualEnvironmentObject
+		local s_Object = s_VisualEnvironmentObjects[s_ID]
+
 		-- Save default values to revert later
-		self.m_SavedValuesForReset[l_Index] = {}
-		self.m_SavedValuesForReset[l_Index].priority = VEManagerClient.m_Presets[s_ID]["ve"].priority
+		self._SavedValuesForReset[l_Index] = {}
+		self._SavedValuesForReset[l_Index].priority = s_Object.ve.priority
 
 		-- Update preset priority to match it's position in the day-night cycle (morning -> night etc)
-		VEManagerClient.m_Presets[s_ID]["ve"].priority = l_Index + self.m_BaseDynamicPresetPriority
+		s_Object.ve.priority = l_Index + self._BaseDynamicPresetPriority
 
 		-- Patch Sun Positions
-		for _, l_Class in pairs(VEManagerClient.m_Presets[s_ID]["ve"].components) do
-
+		for _, l_Class in pairs(s_Object.ve.components) do
 			if l_Class.typeInfo.name == "OutdoorLightComponentData" then
 				local s_Class = OutdoorLightComponentData(l_Class)
 				s_Class:MakeWritable()
 				-- Save values
-				self.m_SavedValuesForReset[l_Index][l_Class.typeInfo.name] = {}
-				self.m_SavedValuesForReset[l_Index][l_Class.typeInfo.name].sunRotationX = s_Class.sunRotationX
-				self.m_SavedValuesForReset[l_Index][l_Class.typeInfo.name].sunRotationY = s_Class.sunRotationX
+				self._SavedValuesForReset[l_Index][l_Class.typeInfo.name] = {}
+				self._SavedValuesForReset[l_Index][l_Class.typeInfo.name].sunRotationX = s_Class.sunRotationX
+				self._SavedValuesForReset[l_Index][l_Class.typeInfo.name].sunRotationY = s_Class.sunRotationX
 				-- Replace values
 				s_Class.sunRotationX = 0.0
 				s_Class.sunRotationY = 0.0
@@ -260,13 +265,13 @@ function Time:_OnAddTime(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 				local s_Class = SkyComponentData(l_Class)
 				s_Class:MakeWritable()
 				-- Save values
-				self.m_SavedValuesForReset[l_Index][l_Class.typeInfo.name] = {}
-				self.m_SavedValuesForReset[l_Index][l_Class.typeInfo.name].sunSize = s_Class.sunSize
-				self.m_SavedValuesForReset[l_Index][l_Class.typeInfo.name].sunScale = s_Class.sunScale
-				self.m_SavedValuesForReset[l_Index][l_Class.typeInfo.name].cloudLayer2Altitude = s_Class.cloudLayer2Altitude
-				self.m_SavedValuesForReset[l_Index][l_Class.typeInfo.name].cloudLayer2TileFactor = s_Class.cloudLayer2TileFactor
-				self.m_SavedValuesForReset[l_Index][l_Class.typeInfo.name].cloudLayer2Rotation = s_Class.cloudLayer2Rotation
-				self.m_SavedValuesForReset[l_Index][l_Class.typeInfo.name].cloudLayer2Speed = s_Class.cloudLayer2Speed
+				self._SavedValuesForReset[l_Index][l_Class.typeInfo.name] = {}
+				self._SavedValuesForReset[l_Index][l_Class.typeInfo.name].sunSize = s_Class.sunSize
+				self._SavedValuesForReset[l_Index][l_Class.typeInfo.name].sunScale = s_Class.sunScale
+				self._SavedValuesForReset[l_Index][l_Class.typeInfo.name].cloudLayer2Altitude = s_Class.cloudLayer2Altitude
+				self._SavedValuesForReset[l_Index][l_Class.typeInfo.name].cloudLayer2TileFactor = s_Class.cloudLayer2TileFactor
+				self._SavedValuesForReset[l_Index][l_Class.typeInfo.name].cloudLayer2Rotation = s_Class.cloudLayer2Rotation
+				self._SavedValuesForReset[l_Index][l_Class.typeInfo.name].cloudLayer2Speed = s_Class.cloudLayer2Speed
 				-- Replace values
 				s_Class.sunSize = 0.01
 				s_Class.sunScale = 1.5
@@ -281,84 +286,84 @@ function Time:_OnAddTime(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 	end
 
 	-- Save dayLength in Class (minutes -> seconds)
-	self.m_TotalDayLength = p_LengthOfDayInSeconds
-	m_Logger:Write('[Time-Client]: Length of Day: ' .. self.m_TotalDayLength .. ' Seconds')
-	self.m_ClientTime = p_StartingTime
-	m_Logger:Write('[Time-Client]: Starting at Time: ' .. p_StartingTime / 3600 / (self.m_TotalDayLength / 86000) .. ' Hours ('.. p_StartingTime ..' Seconds)')
+	self._TotalDayLength = p_LengthOfDayInSeconds
+	m_Logger:Write('[Time-Client]: Length of Day: ' .. self._TotalDayLength .. ' Seconds')
+	self._ClientTime = p_StartingTime
+	m_Logger:Write('[Time-Client]: Starting at Time: ' .. p_StartingTime / 3600 / (self._TotalDayLength / 86000) .. ' Hours ('.. p_StartingTime ..' Seconds)')
 
 	-- Update sun & clouds
-	self:_UpdateSunPosition(self.m_ClientTime)
+	self:_UpdateSunPosition(self._ClientTime)
 	self:_SetCloudSpeed()
 
 	-- Sun/Moon position fix
-	local s_SunMoonPos = self.m_SunPosY
+	local s_SunMoonPos = self._SunPosY
 
-	if not self.m_IsDay then
+	if not self._IsDay then
 		-- Moon visible (from 180 to 360) but actual moon position in VE is 0 to 180
 		s_SunMoonPos = 360 - s_SunMoonPos
 	end
 
 	-- Find starting preset
-	for l_Index, l_Preset in ipairs(self.m_SortedDynamicPresetsTable) do
+	for l_Index, l_Preset in ipairs(self._SortedDynamicPresetsTable) do
 		local s_SunPosY = l_Preset[2]
 		if s_SunPosY < s_SunMoonPos then
-			self.m_CurrentPreset = l_Index
+			self._CurrentPreset = l_Index
 		end
 	end
 
 	-- Initialize
-	self.m_FirstRun = true
+	self._FirstRun = true
 	self:_Run()
 
 	if p_IsStatic ~= true then
-		self.m_SystemRunning = true
+		self._SystemRunning = true
 		m_Logger:Write("Day-Night Cycle Activated")
 	end
 end
 
 function Time:_Run()
-	if not self.m_SystemRunning and not self.m_FirstRun then
+	if not self._SystemRunning and not self._FirstRun then
 		return
 	end
 
-	if not self.m_ClientTime then
-		m_Logger:Warning("Nil ClientTime: " .. tostring(self.m_ClientTime))
+	if not self._ClientTime then
+		m_Logger:Warning("Nil ClientTime: " .. tostring(self._ClientTime))
 		return
 	end
 
 	local s_PrintEnabled = false
-	local s_Hour = MathUtils:Round(self.m_ClientTime / self.m_TotalDayLength * 24)
+	local s_Hour = MathUtils:Round(self._ClientTime / self._TotalDayLength * 24)
 
-	if s_Hour ~= self.m_LastPrintHours then
+	if s_Hour ~= self._LastPrintHours then
 		s_PrintEnabled = true
-		self.m_LastPrintHours = s_Hour
+		self._LastPrintHours = s_Hour
 	end
 
-	self:_UpdateSunPosition(self.m_ClientTime)
+	self:_UpdateSunPosition(self._ClientTime)
 
 	-- Sun/Moon position fix
-	local s_SunMoonPos = self.m_SunPosY
+	local s_SunMoonPos = self._SunPosY
 
-	if not self.m_IsDay then
+	if not self._IsDay then
 		-- Moon visible (from 180 to 360) but actual moon position in VE is 0 to 180
 		s_SunMoonPos = 360 - s_SunMoonPos
 	end
 
 	-- Get sun positions for each preset
-	local s_CurrentPresetSunPosY = self.m_SortedDynamicPresetsTable[self.m_CurrentPreset][2]
-	local s_NextPreset = self.m_CurrentPreset % #self.m_SortedDynamicPresetsTable + 1
-	local s_NextPresetSunPosY = self.m_SortedDynamicPresetsTable[s_NextPreset][2]
+	local s_CurrentPresetSunPosY = self._SortedDynamicPresetsTable[self._CurrentPreset][2]
+	local s_NextPreset = self._CurrentPreset % #self._SortedDynamicPresetsTable + 1
+	local s_NextPresetSunPosY = self._SortedDynamicPresetsTable[s_NextPreset][2]
 
 	-- Check if still in current presets
 	if s_SunMoonPos >= s_NextPresetSunPosY and (
 		s_CurrentPresetSunPosY < s_NextPresetSunPosY or
 		(s_NextPresetSunPosY < s_CurrentPresetSunPosY and s_SunMoonPos < s_CurrentPresetSunPosY)
 		) then
-		self.m_CurrentPreset = s_NextPreset
-		s_CurrentPresetSunPosY = self.m_SortedDynamicPresetsTable[self.m_CurrentPreset][2]
+		self._CurrentPreset = s_NextPreset
+		s_CurrentPresetSunPosY = self._SortedDynamicPresetsTable[self._CurrentPreset][2]
 
-		s_NextPreset = self.m_CurrentPreset % #self.m_SortedDynamicPresetsTable + 1
-		s_NextPresetSunPosY = self.m_SortedDynamicPresetsTable[s_NextPreset][2]
+		s_NextPreset = self._CurrentPreset % #self._SortedDynamicPresetsTable + 1
+		s_NextPresetSunPosY = self._SortedDynamicPresetsTable[s_NextPreset][2]
 	end
 
 	--m_Logger:Write("Current preset: " .. tostring(self.m_CurrentPreset))
@@ -393,33 +398,32 @@ function Time:_Run()
 	--m_Logger:Write("Sun/Moon: " .. tostring(s_SunMoonPos) .. " ( " .. self.m_CurrentPreset .. " -> " .. s_NextPreset .. " ), visibility: " .. tostring(s_VisibilityFactor))
 	--m_Logger:Write("Visibility Factor: " .. tostring(s_VisibilityFactor))
 
-	for l_Index, l_Preset in ipairs(self.m_SortedDynamicPresetsTable) do
+	for l_Index, l_Preset in ipairs(self._SortedDynamicPresetsTable) do
 		local s_ID = l_Preset[1]
 		local s_Factor = 0
 
-		if l_Index == self.m_CurrentPreset then
+		if l_Index == self._CurrentPreset then
 			s_Factor = s_CurrentPresetVisibilityFactor
 		elseif l_Index == s_NextPreset then
 			s_Factor = s_NextPresetVisibilityFactor
 		end
 
+		if not m_VisualEnvironmentHandler:CheckIfExists(s_ID) then return end
 		m_VisualEnvironmentHandler:SetVisibility(s_ID, s_Factor)
 
 		if s_Factor ~= 0 then -- TODO: Check if cloud speed works properly
-
-			if not m_VisualEnvironmentHandler:CheckIfExists(s_ID) then return end
-			m_VisualEnvironmentHandler:SetSingleValue(s_ID, 'sky', 'cloudLayer1Speed', self.m_CloudSpeed)
+			m_VisualEnvironmentHandler:SetSingleValue(s_ID, 'sky', 'cloudLayer1Speed', self._CloudSpeed)
 		end
 	end
 
-	if self.m_FirstRun then
-		self.m_FirstRun = false
+	if self._FirstRun then
+		self._FirstRun = false
 	end
 
 	-- Log visibilities
 	if s_PrintEnabled and CONFIG.PRINT_DN_TIME_AND_VISIBILITIES then
-		local s_NextPresetID = self.m_SortedDynamicPresetsTable[s_NextPreset][1]
-		local s_CurrentPresetID = self.m_SortedDynamicPresetsTable[self.m_CurrentPreset][1]
+		local s_NextPresetID = self._SortedDynamicPresetsTable[s_NextPreset][1]
+		local s_CurrentPresetID = self._SortedDynamicPresetsTable[self._CurrentPreset][1]
 
 		m_Logger:Write("[" .. tostring(s_Hour) .. "h - sun:" .. tostring(s_SunMoonPos) .. "] " .. tostring(s_CurrentPresetID) .. " (" .. MathUtils:Round(s_CurrentPresetVisibilityFactor*100) .. "%) -> " .. tostring(s_NextPresetID) .. " (" .. MathUtils:Round(s_NextPresetVisibilityFactor*100) .. "%)" )
 	end

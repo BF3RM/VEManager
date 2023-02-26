@@ -147,5 +147,5 @@ function Patches:_OnMenuBGLoaded(p_Instance)
 	m_Logger:Write("Menu background patched (priority increased)")
 end
 
-return UtilityFunctions:InitializeClass(Patches)
+return Patches()
 
