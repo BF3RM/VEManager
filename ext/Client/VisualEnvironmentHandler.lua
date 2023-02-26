@@ -358,7 +358,6 @@ function VisualEnvironmentHandler:UpdateLerp(p_DeltaTime)
 			self._Lerping[l_ID] = nil
 		else
 			self:SetVisibility(l_ID, s_LerpValue)
-			print("Setting Visibility: " .. s_LerpValue .. " of " .. l_ID)
 		end
 	end
 end
