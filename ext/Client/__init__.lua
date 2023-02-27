@@ -67,6 +67,7 @@ function VEManagerClient:_OnLevelLoaded(p_LevelName, p_GameModeName, p_IsDedicat
 end
 
 function VEManagerClient:_OnLevelDestroy()
+	LEVEL_LOADED = false
 	self:RegisterVars()
 	m_VisualEnvironmentHandler:OnLevelDestroy()
 	collectgarbage('collect')
