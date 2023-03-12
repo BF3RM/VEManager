@@ -4,7 +4,7 @@
 VisualEnvironmentHandler = class 'VisualEnvironmentHandler'
 
 ---@type Logger
-local m_Logger = Logger("VisualEnvironmentHandler", true)
+local m_Logger = Logger("VisualEnvironmentHandler", false)
 
 ---@type EasingTransitions
 local m_Easing = require "__shared/Utils/Easing"
@@ -377,7 +377,7 @@ function VisualEnvironmentHandler:SetSingleValue(p_ID, p_Class, p_Property, p_Va
 	end
 	---@type VisualEnvironmentObject
 	local s_Object = self._VisualEnvironmentObjects[p_ID]
-	s_Object.entity.state[p_Class][p_Property] = p_Value
+	VisualEnvironmentEntity(s_Object.entity).state[p_Class][p_Property] = p_Value
 	VisualEnvironmentManager:SetDirty(true)
 end
 

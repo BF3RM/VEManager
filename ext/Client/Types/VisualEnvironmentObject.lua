@@ -24,6 +24,8 @@ function VisualEnvironmentObject:__init(p_Preset)
 
 	if not p_Preset.Priority then
 		p_Preset.Priority = 1
+	elseif p_Preset.Type == 'Dynamic' then
+		p_Preset.Priority = 200
 	else
 		p_Preset.Priority = tonumber(p_Preset.Priority)
 	end

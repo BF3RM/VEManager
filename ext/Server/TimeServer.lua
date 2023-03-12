@@ -4,7 +4,7 @@
 TimeServer = class "TimeServer"
 
 ---@type Logger
-local m_Logger = Logger("TimeServer", false)
+local m_Logger = Logger("TimeServer", true)
 
 function TimeServer:__init()
 	m_Logger:Write('Initializing Time-Server')
@@ -37,7 +37,7 @@ function TimeServer:RegisterEvents()
 	m_Logger:Write('Registered Events')
 
 	---@type Event
-	self.m_EngineUpdateEvent = Events:Subscribe('Engine:Update', self, self._OnEngineUpdate)
+	Events:Subscribe('Engine:Update', self, self._OnEngineUpdate)
 	Events:Subscribe('Level:Destroy', self, self._OnLevelDestroy)
 	Events:Subscribe('TimeServer:Enable', self, self._OnEnable)
 	Events:Subscribe('TimeServer:Pause', self, self._OnPauseUnpause)
@@ -47,7 +47,7 @@ function TimeServer:RegisterEvents()
 end
 
 function TimeServer:_OnLevelDestroy()
-	self.m_EngineUpdateEvent:Unsubscribe()
+	self:RegisterVars()
 end
 
 ---@param p_StartingTime number

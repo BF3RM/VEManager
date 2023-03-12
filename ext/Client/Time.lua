@@ -4,7 +4,7 @@
 Time = class 'Time'
 
 ---@type Logger
-local m_Logger = Logger("Time", false)
+local m_Logger = Logger("Time", true)
 
 ---@type VisualEnvironmentHandler
 local m_VisualEnvironmentHandler = require("VisualEnvironmentHandler")
@@ -37,7 +37,6 @@ function Time:RegisterVars()
 
 	self._CurrentPreset = 1
 
-	self._CloudSpeed = CONFIG.CLOUDS_DEFAULT_SPEED
 	self._Sunrise = CONFIG.DN_SUN_TIMINGS[1] / 24
 	self._Sunset = CONFIG.DN_SUN_TIMINGS[2] / 24
 end
@@ -46,15 +45,16 @@ function Time:RegisterEvents()
 	NetEvents:Subscribe('VEManager:AddTimeToClient', self, self._OnAddTime)
 	NetEvents:Subscribe('ClientTime:Pause', self, self._OnPauseUnpause)
 	NetEvents:Subscribe('ClientTime:Disable', self, self._OnDisable)
+	Events:Subscribe('VEManager:PresetsLoaded', self, self._OnPresetsLoaded)
 end
 
-function Time:OnLevelLoaded()
-	self.m_ServerSyncEvent = NetEvents:Subscribe('TimeServer:Sync', self, self._OnServerSync) -- Server Sync
+function Time:_OnPresetsLoaded()
+	self._SyncEvent = NetEvents:Subscribe('TimeServer:Sync', self, self._OnServerSync) -- Server Sync
 	self:_Sync()
 end
 
 function Time:OnLevelDestroy()
-	self.m_ServerSyncEvent = NetEvents:Unsubscribe('TimeServer:Sync') -- Server Sync
+	self._SyncEvent:Unsubscribe()
 	self:_Disable()
 end
 
@@ -217,7 +217,7 @@ function Time:_OnAddTime(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 
 					if l_Object.type == l_Type and s_SunRotationY ~= nil then
 						-- Check if night mode (moon enabled)
-						if s_SkyBrightness ~= nil and s_SkyBrightness <= 0.01 then
+						if s_SunRotationY >= 180 then
 							s_SunRotationY = 360 - s_SunRotationY
 						end
 						m_Logger:Write(" - " .. tostring(l_ID) .. " (Sun: " .. tostring(s_SunRotationY) .. ")")
@@ -411,8 +411,8 @@ function Time:_Run()
 		if not m_VisualEnvironmentHandler:CheckIfExists(s_ID) then return end
 		m_VisualEnvironmentHandler:SetVisibility(s_ID, s_Factor)
 
-		if s_Factor ~= 0 then -- TODO: Check if cloud speed works properly
-			m_VisualEnvironmentHandler:SetSingleValue(s_ID, 'sky', 'cloudLayer1Speed', self._CloudSpeed)
+		if s_Factor ~= 0 then -- hardcode for now
+			m_VisualEnvironmentHandler:SetSingleValue(s_ID, 'sky', 'cloudLayer1Speed', -0.0001)
 		end
 	end
 

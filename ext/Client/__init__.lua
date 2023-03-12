@@ -14,6 +14,8 @@ local m_VisualEnvironmentHandler = require("VisualEnvironmentHandler")
 local m_RuntimeEntityHandler = require("RuntimeEntityHandler")
 ---@type Patches
 local m_Patches = require("Patches")
+---@type Time
+local m_Time = require("Time")
 --#endregion
 
 function VEManagerClient:__init()
