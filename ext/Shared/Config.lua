@@ -10,7 +10,7 @@ CONFIG = {
 
     -- PRINT --
     PRINT_DN_TIME_AND_VISIBILITIES = false,							-- Print current time every hour along with the visibilities of the 4 presets
-    LOGGER_ENABLED = true, 											-- Enables the use of the Logger Class [DEV]
+    LOGGER_ENABLED = false, 											-- Enables the use of the Logger Class [DEV]
     LOGGER_PRINT_ALL = false,										-- Prints All Logger Prints
 
     -- SERVER --
