@@ -216,10 +216,6 @@ function Time:_OnAddTime(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 					local s_SkyBrightness = tonumber(l_Object.rawPreset.Sky.BrightnessScale)
 
 					if l_Object.type == l_Type and s_SunRotationY ~= nil then
-						-- Check if night mode (moon enabled)
-						if s_SunRotationY >= 180 then
-							s_SunRotationY = 360 - s_SunRotationY
-						end
 						m_Logger:Write(" - " .. tostring(l_ID) .. " (Sun: " .. tostring(s_SunRotationY) .. ")")
 						table.insert(self._SortedDynamicPresetsTable, {l_ID, s_SunRotationY})
 					end
