@@ -76,7 +76,7 @@ return json.decode([[
         "GroundColor": "(0.0005, 0.0005, 0.0005)",
         "SunSpecularScale": "0",
         "SunRotationX": "0",
-        "SunRotationY": "170"
+        "SunRotationY": "359"
     },
     "Sky": {
         "Realm": "0",
@@ -135,7 +135,6 @@ return json.decode([[
         "WindStrength": "1.7"
     },
     "Name": "DefaultNight",
-    "Type": "DefaultDynamic",
     "Priority": "10",
     "Visibility": "1"
 }

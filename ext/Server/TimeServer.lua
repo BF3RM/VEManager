@@ -70,7 +70,8 @@ function TimeServer:_OnEnable(p_StartingTime, p_LengthOfDayInMinutes)
 		self.m_IsStatic = true
 	end
 
-	m_Logger:Write('Received new time (Starting Time, Length of Day): ' .. p_StartingTime .. 'h, '.. self.m_TotalDayLength .. 'sec')
+	m_Logger:Write('Received new time (Starting Time, Length of Day): ' ..
+	p_StartingTime .. 'h, ' .. self.m_TotalDayLength .. 'sec')
 
 	NetEvents:Broadcast('VEManager:AddTimeToClient', self.m_ServerDayTime, self.m_IsStatic, self.m_TotalDayLength)
 	self.m_SystemRunning = true
@@ -106,7 +107,8 @@ end
 function TimeServer:_OnPlayerSync(p_Player)
 	if self.m_SystemRunning == true or self.m_IsStatic == true then
 		m_Logger:Write('Syncing Player with Server')
-		NetEvents:SendTo('VEManager:AddTimeToClient', p_Player, self.m_ServerDayTime, self.m_IsStatic, self.m_TotalDayLength)
+		NetEvents:SendTo('VEManager:AddTimeToClient', p_Player, self.m_ServerDayTime, self.m_IsStatic,
+			self.m_TotalDayLength)
 	end
 end
 
@@ -126,6 +128,45 @@ end
 function TimeServer:_OnDisable()
 	self.m_SystemRunning = false
 	NetEvents:Broadcast('ClientTime:Disable')
+end
+
+-- Chat Commands
+---@param p_PlayerName string
+---@param p_RecipientMask integer
+---@param p_Message string
+function TimeServer:ChatCommands(p_PlayerName, p_RecipientMask, p_Message)
+	if p_Message:match('^!settime') then
+		local hour, duration = p_Message:match('^!settime (%d+%.*%d*) (%d+%.*%d*)')
+
+		if hour == nil then
+			hour = 9
+		end
+
+		if duration == nil then
+			duration = 0.5
+		end
+
+		m_Logger:Write('Time Event called by ' .. p_PlayerName)
+		self:_OnEnable(hour, duration)
+	elseif p_Message == '!setnight' then
+		m_Logger:Write('Time Event called by ' .. p_PlayerName)
+		self:_OnEnable(0, nil)
+	elseif p_Message == '!setmorning' then
+		m_Logger:Write('Time Event called by ' .. p_PlayerName)
+		self:_OnEnable(9, nil)
+	elseif p_Message == '!setnoon' then
+		m_Logger:Write('Time Event called by ' .. p_PlayerName)
+		self:_OnEnable(12, nil)
+	elseif p_Message == '!setafternoon' then
+		m_Logger:Write('Time Event called by ' .. p_PlayerName)
+		self:_OnEnable(15, nil)
+	elseif p_Message == '!pausetime' or p_message == '!resumetime' then
+		m_Logger:Write('Time Pause called by ' .. p_PlayerName)
+		self:_OnPauseUnpause()
+	elseif p_Message == '!disabletime' then
+		m_Logger:Write('Time Disable called by ' .. p_PlayerName)
+		self:_OnDisable()
+	end
 end
 
 return TimeServer()

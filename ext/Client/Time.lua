@@ -42,10 +42,11 @@ function Time:RegisterVars()
 end
 
 function Time:RegisterEvents()
+	Events:Subscribe('VEManager:PresetsLoaded', self, self._OnPresetsLoaded)
+
 	NetEvents:Subscribe('VEManager:AddTimeToClient', self, self._OnAddTime)
 	NetEvents:Subscribe('ClientTime:Pause', self, self._OnPauseUnpause)
 	NetEvents:Subscribe('ClientTime:Disable', self, self._OnDisable)
-	Events:Subscribe('VEManager:PresetsLoaded', self, self._OnPresetsLoaded)
 end
 
 function Time:_OnPresetsLoaded()
@@ -84,37 +85,39 @@ end
 -- Update sun position, for smoother sun relative to time
 ---@param p_ClientTime number
 function Time:_UpdateSunPosition(p_ClientTime)
-	local s_DayFactor = p_ClientTime / self._TotalDayLength
-	local s_SunPosX = 275
-	local s_SunPosY = 0
+	if self._SunPosX ~= nil and self._SunPosY ~= nil then
+		local s_DayFactor = p_ClientTime / self._TotalDayLength
+		local s_SunPosX = 275
+		local s_SunPosY = 0
 
-	if s_DayFactor <= self._Sunrise then -- Moon
-		local s_FactorNight = (s_DayFactor + 1 - self._Sunset) / (self._Sunrise + 1 - self._Sunset)
-		s_SunPosY = 180 * (1 - s_FactorNight)
-		self._IsDay = false
-	elseif s_DayFactor <= self._Sunset then -- Day
-		local s_FactorDay = (s_DayFactor - self._Sunrise) / (self._Sunset - self._Sunrise)
-		s_SunPosY = 180 * s_FactorDay
-		self._IsDay = true
-	else -- Moon
-		local s_FactorNight = (s_DayFactor - self._Sunset) / (self._Sunrise + 1 - self._Sunset)
-		s_SunPosY = 180 * (1 - s_FactorNight)
-		self._IsDay = false
-	end
+		if s_DayFactor <= self._Sunrise then -- Moon
+			local s_FactorNight = (s_DayFactor + 1 - self._Sunset) / (self._Sunrise + 1 - self._Sunset)
+			s_SunPosY = 180 * (1 - s_FactorNight)
+			self._IsDay = false
+		elseif s_DayFactor <= self._Sunset then -- Day
+			local s_FactorDay = (s_DayFactor - self._Sunrise) / (self._Sunset - self._Sunrise)
+			s_SunPosY = 180 * s_FactorDay
+			self._IsDay = true
+		else -- Moon
+			local s_FactorNight = (s_DayFactor - self._Sunset) / (self._Sunrise + 1 - self._Sunset)
+			s_SunPosY = 180 * (1 - s_FactorNight)
+			self._IsDay = false
+		end
 
-	-- Avoid crashes
-	s_SunPosY = MathUtils:Round(s_SunPosY * 100) / 100
-	if s_SunPosY < 0 or s_SunPosY > 180 then
-		return
-	end
+		-- Avoid crashes
+		s_SunPosY = MathUtils:Round(s_SunPosY * 100) / 100
+		if s_SunPosY < 0 or s_SunPosY > 180 then
+			return
+		end
 
-	-- Update position (if needed)
-	if self._SunPosY ~= s_SunPosY or self._SunPosY ~= s_SunPosY then
-		-- Update class variables
-		self._SunPosX = s_SunPosX
-		self._SunPosY = s_SunPosY
-		VisualEnvironmentManager:SetSunRotationX(self._SunPosX)
-		VisualEnvironmentManager:SetSunRotationY(self._SunPosY)
+		-- Update position (if needed)
+		if self._SunPosY ~= s_SunPosY or self._SunPosX ~= s_SunPosX then
+			-- Update class variables
+			self._SunPosX = s_SunPosX
+			self._SunPosY = s_SunPosY
+			VisualEnvironmentManager:SetSunRotationX(self._SunPosX)
+			VisualEnvironmentManager:SetSunRotationY(self._SunPosY)
+		end
 	end
 end
 
@@ -148,16 +151,19 @@ function Time:_ResetForcedValues()
 				-- Reset values
 				s_Class.sunRotationX = self._SavedValuesForReset[l_Index][l_Class.typeInfo.name].sunRotationX
 				s_Class.sunRotationY = self._SavedValuesForReset[l_Index][l_Class.typeInfo.name].sunRotationY
-			-- Un-patch Star Cloudlayer
+				-- Un-patch Star Cloudlayer
 			elseif l_Class.typeInfo.name == "SkyComponentData" then
 				local s_Class = SkyComponentData(l_Class)
 				s_Class:MakeWritable()
 				-- Reset values
 				s_Class.sunSize = self._SavedValuesForReset[l_Index][l_Class.typeInfo.name].sunSize
 				s_Class.sunScale = self._SavedValuesForReset[l_Index][l_Class.typeInfo.name].sunScale
-				s_Class.cloudLayer2Altitude = self._SavedValuesForReset[l_Index][l_Class.typeInfo.name].cloudLayer2Altitude
-				s_Class.cloudLayer2TileFactor = self._SavedValuesForReset[l_Index][l_Class.typeInfo.name].cloudLayer2TileFactor
-				s_Class.cloudLayer2Rotation = self._SavedValuesForReset[l_Index][l_Class.typeInfo.name].cloudLayer2Rotation
+				s_Class.cloudLayer2Altitude = self._SavedValuesForReset[l_Index][l_Class.typeInfo.name]
+					.cloudLayer2Altitude
+				s_Class.cloudLayer2TileFactor = self._SavedValuesForReset[l_Index][l_Class.typeInfo.name]
+					.cloudLayer2TileFactor
+				s_Class.cloudLayer2Rotation = self._SavedValuesForReset[l_Index][l_Class.typeInfo.name]
+					.cloudLayer2Rotation
 				s_Class.cloudLayer2Speed = self._SavedValuesForReset[l_Index][l_Class.typeInfo.name].cloudLayer2Speed
 			end
 		end
@@ -199,7 +205,7 @@ function Time:_OnAddTime(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 		self:RegisterVars()
 	end
 
-	local s_Types = {'Dynamic', 'DefaultDynamic'}
+	local s_Types = { 'Dynamic', 'DefaultDynamic' }
 	m_Logger:Write("Searching for dynamic presets:")
 
 	local s_VisualEnvironmentObjects = m_VisualEnvironmentHandler:GetVisualEnvironmentObjects()
@@ -217,7 +223,7 @@ function Time:_OnAddTime(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 
 					if l_Object.type == l_Type and s_SunRotationY ~= nil then
 						m_Logger:Write(" - " .. tostring(l_ID) .. " (Sun: " .. tostring(s_SunRotationY) .. ")")
-						table.insert(self._SortedDynamicPresetsTable, {l_ID, s_SunRotationY})
+						table.insert(self._SortedDynamicPresetsTable, { l_ID, s_SunRotationY })
 					end
 				end
 			end
@@ -225,7 +231,7 @@ function Time:_OnAddTime(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 	end
 
 	-- Sort presets in the table based on position in the day-night cycle
-	table.sort(self._SortedDynamicPresetsTable, function(a,b) return tonumber(a[2]) < tonumber(b[2]) end)
+	table.sort(self._SortedDynamicPresetsTable, function(a, b) return tonumber(a[2]) < tonumber(b[2]) end)
 
 	-- Set priorities & patch presets
 	m_Logger:Write("Sorted dynamic presets:")
@@ -264,9 +270,12 @@ function Time:_OnAddTime(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 				self._SavedValuesForReset[l_Index][l_Class.typeInfo.name] = {}
 				self._SavedValuesForReset[l_Index][l_Class.typeInfo.name].sunSize = s_Class.sunSize
 				self._SavedValuesForReset[l_Index][l_Class.typeInfo.name].sunScale = s_Class.sunScale
-				self._SavedValuesForReset[l_Index][l_Class.typeInfo.name].cloudLayer2Altitude = s_Class.cloudLayer2Altitude
-				self._SavedValuesForReset[l_Index][l_Class.typeInfo.name].cloudLayer2TileFactor = s_Class.cloudLayer2TileFactor
-				self._SavedValuesForReset[l_Index][l_Class.typeInfo.name].cloudLayer2Rotation = s_Class.cloudLayer2Rotation
+				self._SavedValuesForReset[l_Index][l_Class.typeInfo.name].cloudLayer2Altitude = s_Class
+					.cloudLayer2Altitude
+				self._SavedValuesForReset[l_Index][l_Class.typeInfo.name].cloudLayer2TileFactor = s_Class
+					.cloudLayer2TileFactor
+				self._SavedValuesForReset[l_Index][l_Class.typeInfo.name].cloudLayer2Rotation = s_Class
+					.cloudLayer2Rotation
 				self._SavedValuesForReset[l_Index][l_Class.typeInfo.name].cloudLayer2Speed = s_Class.cloudLayer2Speed
 				-- Replace values
 				s_Class.sunSize = 0.01
@@ -285,7 +294,8 @@ function Time:_OnAddTime(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 	self._TotalDayLength = p_LengthOfDayInSeconds
 	m_Logger:Write('[Time-Client]: Length of Day: ' .. self._TotalDayLength .. ' Seconds')
 	self._ClientTime = p_StartingTime
-	m_Logger:Write('[Time-Client]: Starting at Time: ' .. p_StartingTime / 3600 / (self._TotalDayLength / 86000) .. ' Hours ('.. p_StartingTime ..' Seconds)')
+	m_Logger:Write('[Time-Client]: Starting at Time: ' ..
+		p_StartingTime / 3600 / (self._TotalDayLength / 86000) .. ' Hours (' .. p_StartingTime .. ' Seconds)')
 
 	-- Update sun & clouds
 	self:_UpdateSunPosition(self._ClientTime)
@@ -352,8 +362,8 @@ function Time:_Run()
 
 	-- Check if still in current presets
 	if s_SunMoonPos >= s_NextPresetSunPosY and (
-		s_CurrentPresetSunPosY < s_NextPresetSunPosY or
-		(s_NextPresetSunPosY < s_CurrentPresetSunPosY and s_SunMoonPos < s_CurrentPresetSunPosY)
+			s_CurrentPresetSunPosY < s_NextPresetSunPosY or
+			(s_NextPresetSunPosY < s_CurrentPresetSunPosY and s_SunMoonPos < s_CurrentPresetSunPosY)
 		) then
 		self._CurrentPreset = s_NextPreset
 		s_CurrentPresetSunPosY = self._SortedDynamicPresetsTable[self._CurrentPreset][2]
@@ -362,21 +372,23 @@ function Time:_Run()
 		s_NextPresetSunPosY = self._SortedDynamicPresetsTable[s_NextPreset][2]
 	end
 
-	--m_Logger:Write("Current preset: " .. tostring(self.m_CurrentPreset))
-	--m_Logger:Write("Next preset: " .. tostring(s_NextPreset))
+	-- m_Logger:Write("Current preset: " .. tostring(self.m_CurrentPreset))
+	-- m_Logger:Write("Next preset: " .. tostring(s_NextPreset))
 
 	-- Calculate visibility factor
 	local s_VisibilityFactor = nil
 
 	if s_SunMoonPos <= s_NextPresetSunPosY and s_SunMoonPos <= s_CurrentPresetSunPosY then
 		-- When changing from 360 to 0 with s_SunMoonPos after 0
-		s_VisibilityFactor = (s_SunMoonPos + 360 - s_CurrentPresetSunPosY) / (s_NextPresetSunPosY + 360 - s_CurrentPresetSunPosY)
+		s_VisibilityFactor = (s_SunMoonPos + 360 - s_CurrentPresetSunPosY) /
+			(s_NextPresetSunPosY + 360 - s_CurrentPresetSunPosY)
 	elseif s_SunMoonPos <= s_NextPresetSunPosY then
 		-- Normal case
 		s_VisibilityFactor = (s_SunMoonPos - s_CurrentPresetSunPosY) / (s_NextPresetSunPosY - s_CurrentPresetSunPosY)
 	else
 		-- When changing from 360 to 0 with s_SunMoonPos before 360
-		s_VisibilityFactor = (s_SunMoonPos - s_CurrentPresetSunPosY) / (s_NextPresetSunPosY + 360 - s_CurrentPresetSunPosY)
+		s_VisibilityFactor = (s_SunMoonPos - s_CurrentPresetSunPosY) /
+			(s_NextPresetSunPosY + 360 - s_CurrentPresetSunPosY)
 	end
 
 	local s_NextPresetVisibilityFactor = nil
@@ -421,7 +433,15 @@ function Time:_Run()
 		local s_NextPresetID = self._SortedDynamicPresetsTable[s_NextPreset][1]
 		local s_CurrentPresetID = self._SortedDynamicPresetsTable[self._CurrentPreset][1]
 
-		m_Logger:Write("[" .. tostring(s_Hour) .. "h - sun:" .. tostring(s_SunMoonPos) .. "] " .. tostring(s_CurrentPresetID) .. " (" .. MathUtils:Round(s_CurrentPresetVisibilityFactor*100) .. "%) -> " .. tostring(s_NextPresetID) .. " (" .. MathUtils:Round(s_NextPresetVisibilityFactor*100) .. "%)" )
+		m_Logger:Write("[" ..
+			tostring(s_Hour) ..
+			"h - sun:" ..
+			tostring(s_SunMoonPos) ..
+			"] " ..
+			tostring(s_CurrentPresetID) ..
+			" (" ..
+			MathUtils:Round(s_CurrentPresetVisibilityFactor * 100) ..
+			"%) -> " .. tostring(s_NextPresetID) .. " (" .. MathUtils:Round(s_NextPresetVisibilityFactor * 100) .. "%)")
 	end
 end
 

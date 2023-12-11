@@ -30,21 +30,21 @@ function VisualEnvironmentObject:__init(p_Preset)
 		p_Preset.Priority = tonumber(p_Preset.Priority)
 	end
 
-	m_Logger:Write("(" .. p_Preset.Name ..", " .. p_Preset.Priority .. ", " .. p_Preset.Type .. ")")
+	m_Logger:Write("(" .. p_Preset.Name .. ", " .. p_Preset.Priority .. ", " .. p_Preset.Type .. ")")
 
 	-- spawning from blueprint alone doesn´t work somehow, would have been nice tho since we can store the name there
-    local s_VE = UtilityFunctions:InitEngineType("VisualEnvironmentEntityData")
-    s_VE.enabled = true
-    s_VE.priority = p_Preset.Priority
-    s_VE.visibility = 1
+	local s_VE = UtilityFunctions:InitEngineType("VisualEnvironmentEntityData")
+	s_VE.enabled = true
+	s_VE.priority = p_Preset.Priority
+	s_VE.visibility = 1
 
 	self.name = p_Preset.Name
-    self.ve = s_VE
-    self.type = p_Preset.Type
-    self.priority = p_Preset.Priority
+	self.ve = s_VE
+	self.type = p_Preset.Type
+	self.priority = p_Preset.Priority
 	self.rawPreset = p_Preset
 
-    -- Supported classes by VisualEnvironmentStates https://docs.veniceunleashed.net/vext/ref/client/type/visualenvironmentstate/
+	-- Supported classes by VisualEnvironmentStates https://docs.veniceunleashed.net/vext/ref/client/type/visualenvironmentstate/
 	self.supportedClasses = {
 		"CameraParams",
 		"CharacterLighting",
@@ -65,7 +65,8 @@ function VisualEnvironmentObject:__init(p_Preset)
 		"SunFlare",
 		"Tonemap",
 		"Vignette",
-		"Wind"
+		"Wind",
+		"ShaderParams"
 	}
 end
 

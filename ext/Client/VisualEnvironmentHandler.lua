@@ -14,6 +14,7 @@ local m_RuntimeEntityHandler = require("RuntimeEntityHandler")
 function VisualEnvironmentHandler:__init()
 	m_Logger:Write('Initializing VisualEnvironmentHandler')
 	self:RegisterVars()
+	self:RegisterEvents()
 end
 
 function VisualEnvironmentHandler:RegisterVars()
@@ -33,6 +34,22 @@ function VisualEnvironmentHandler:RegisterVars()
 	---@field firstRun boolean
 	---@type table<string, LerpProperties> key: Name, value: LerpProperties
 	self._Lerping = {}
+	self._DayNightCycleEnabled = false -- Stil not sure if this could be useful later.
+end
+
+function VisualEnvironmentHandler:RegisterEvents()
+	Events:Subscribe('TimeServer:Enable', self, self.OnTimeEnable)
+	Events:Subscribe('TimeServer:Disable', self, self.OnTimeDisable)
+end
+
+function VisualEnvironmentHandler:OnTimeEnable()
+	m_Logger:Write('[VisualEnvironmentHandler] : Time Enabled')
+	self._DayNightCycleEnabled = true
+end
+
+function VisualEnvironmentHandler:OnTimeDisable()
+	m_Logger:Write('[VisualEnvironmentHandler] : Time Disabled')
+	self._DayNightCycleEnabled = false
 end
 
 function VisualEnvironmentHandler:OnLevelDestroy()
@@ -138,7 +155,8 @@ function VisualEnvironmentHandler:InitializeVE(p_ID, p_Visibility)
 				m_RuntimeEntityHandler:SetVisibility(l_Object, false)
 			end
 
-			m_Logger:Write("- " .. l_Index .. " | Priority: " .. l_Object.ve.priority .. " | Visibility: " .. p_Visibility)
+			m_Logger:Write("- " ..
+				l_Index .. " | Priority: " .. l_Object.ve.priority .. " | Visibility: " .. p_Visibility)
 			return true, false
 		end
 	end
@@ -199,9 +217,9 @@ function VisualEnvironmentHandler:SetVisibility(p_ID, p_Visibility)
 	---@type VisualEnvironmentObject
 	local s_Object = self._VisualEnvironmentObjects[p_ID]
 
-	if not s_Object.entity then
+	if not s_Object.entity and p_Visibility > 0 then
 		self:InitializeVE(p_ID, p_Visibility)
-	elseif p_Visibility <= 0.0 then
+	elseif s_Object.entity and p_Visibility <= 0.0 then
 		self:DestroyVE(p_ID)
 	else
 		s_Object.ve.visibility = p_Visibility
@@ -357,7 +375,9 @@ function VisualEnvironmentHandler:UpdateLerp(p_DeltaTime)
 				self._Lerping[l_ID] = nil
 			end
 		elseif s_CompletionPercentage < 0 then
-			m_Logger:Warning('Lerping of preset ' .. tostring(l_ID) .. ' has its completed percentage of ' .. tostring(s_CompletionPercentage) .. ', should never happen')
+			m_Logger:Warning('Lerping of preset ' ..
+				tostring(l_ID) ..
+				' has its completed percentage of ' .. tostring(s_CompletionPercentage) .. ', should never happen')
 			self:SetVisibility(l_ID, l_LerpingTable.endValue)
 			self._Lerping[l_ID] = nil
 		else
@@ -389,7 +409,6 @@ function VisualEnvironmentHandler:ApplyTexture(p_ID, p_Guid, p_Path)
 	local s_Object = self._VisualEnvironmentObjects[p_ID]
 
 	for _, l_Class in pairs(s_Object.ve.components) do
-
 		if l_Class.typeInfo.name == "SkyComponentData" then
 			local s_Class = SkyComponentData(l_Class)
 			s_Class:MakeWritable()
