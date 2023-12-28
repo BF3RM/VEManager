@@ -71,19 +71,19 @@ return json.decode([[
     "OutdoorLight": {
         "Realm": "0",
         "Enable": "true",
-        "SunColor": "(1, 1, 1)",
+        "SunColor": "(0.5, 0.5, 0.5)",
         "SkyColor": "(0.015, 0.015, 0.015)",
         "GroundColor": "(0.0005, 0.0005, 0.0005)",
         "SunSpecularScale": "0",
         "SunRotationX": "0",
-        "SunRotationY": "359"
+        "SunRotationY": "180"
     },
     "Sky": {
         "Realm": "0",
         "Enable": "true",
         "BrightnessScale": "0.005",
         "SunSize": "0.005",
-        "SunScale": "6",
+        "SunScale": "1.000",
         "CloudLayerSunColor": "(0, 0, 0)",
         "CloudLayer1Altitude": "500000.0",
         "CloudLayer1TileFactor": "0.25",
@@ -135,6 +135,7 @@ return json.decode([[
         "WindStrength": "1.7"
     },
     "Name": "DefaultNight",
+    "Type": "DefaultDynamic",
     "Priority": "10",
     "Visibility": "1"
 }

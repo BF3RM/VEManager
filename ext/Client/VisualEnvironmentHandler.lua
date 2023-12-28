@@ -14,7 +14,6 @@ local m_RuntimeEntityHandler = require("RuntimeEntityHandler")
 function VisualEnvironmentHandler:__init()
 	m_Logger:Write('Initializing VisualEnvironmentHandler')
 	self:RegisterVars()
-	self:RegisterEvents()
 end
 
 function VisualEnvironmentHandler:RegisterVars()
@@ -34,22 +33,6 @@ function VisualEnvironmentHandler:RegisterVars()
 	---@field firstRun boolean
 	---@type table<string, LerpProperties> key: Name, value: LerpProperties
 	self._Lerping = {}
-	self._DayNightCycleEnabled = false -- Stil not sure if this could be useful later.
-end
-
-function VisualEnvironmentHandler:RegisterEvents()
-	Events:Subscribe('TimeServer:Enable', self, self.OnTimeEnable)
-	Events:Subscribe('TimeServer:Disable', self, self.OnTimeDisable)
-end
-
-function VisualEnvironmentHandler:OnTimeEnable()
-	m_Logger:Write('[VisualEnvironmentHandler] : Time Enabled')
-	self._DayNightCycleEnabled = true
-end
-
-function VisualEnvironmentHandler:OnTimeDisable()
-	m_Logger:Write('[VisualEnvironmentHandler] : Time Disabled')
-	self._DayNightCycleEnabled = false
 end
 
 function VisualEnvironmentHandler:OnLevelDestroy()
@@ -217,9 +200,9 @@ function VisualEnvironmentHandler:SetVisibility(p_ID, p_Visibility)
 	---@type VisualEnvironmentObject
 	local s_Object = self._VisualEnvironmentObjects[p_ID]
 
-	if not s_Object.entity and p_Visibility > 0 then
+	if not s_Object.entity then
 		self:InitializeVE(p_ID, p_Visibility)
-	elseif s_Object.entity and p_Visibility <= 0.0 then
+	elseif p_Visibility <= 0.0 then
 		self:DestroyVE(p_ID)
 	else
 		s_Object.ve.visibility = p_Visibility

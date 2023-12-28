@@ -11,7 +11,7 @@ CONFIG = {
     -- PRINT --
     PRINT_DN_TIME_AND_VISIBILITIES = true, -- Print current time every hour along with the visibilities of the 4 presets
     LOGGER_ENABLED = true,                 -- Enables the use of the Logger Class [DEV]
-    LOGGER_PRINT_ALL = true,               -- Prints All Logger Prints
+    LOGGER_PRINT_ALL = false,              -- Prints All Logger Prints
 
     -- SERVER --
     SERVER_SYNC_CLIENT_EVERY_TICKS = 2, -- Sync clients with the correct time ever X ticks

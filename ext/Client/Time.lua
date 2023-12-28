@@ -42,11 +42,12 @@ function Time:RegisterVars()
 end
 
 function Time:RegisterEvents()
-	Events:Subscribe('VEManager:PresetsLoaded', self, self._OnPresetsLoaded)
-
 	NetEvents:Subscribe('VEManager:AddTimeToClient', self, self._OnAddTime)
 	NetEvents:Subscribe('ClientTime:Pause', self, self._OnPauseUnpause)
 	NetEvents:Subscribe('ClientTime:Disable', self, self._OnDisable)
+
+	Events:Subscribe('VEManager:PresetsLoaded', self, self._OnPresetsLoaded)
+	Events:Subscribe('Level:Destroy', self, self.OnLevelDestroy)
 end
 
 function Time:_OnPresetsLoaded()
@@ -55,11 +56,7 @@ function Time:_OnPresetsLoaded()
 end
 
 function Time:OnLevelDestroy()
-	self._SyncEvent:Unsubscribe()
-	self:_Disable()
-end
-
-function Time:_Disable()
+	-- With this we get rid of carrying old presets when the map changes.
 	self:_ResetForcedValues()
 	self:RegisterVars()
 	m_Logger:Write("Reset Time System")
@@ -85,7 +82,7 @@ end
 -- Update sun position, for smoother sun relative to time
 ---@param p_ClientTime number
 function Time:_UpdateSunPosition(p_ClientTime)
-	if self._SunPosX ~= nil and self._SunPosY ~= nil then
+	if self._SunPosY and self._SunPosX then
 		local s_DayFactor = p_ClientTime / self._TotalDayLength
 		local s_SunPosX = 275
 		local s_SunPosY = 0
@@ -136,11 +133,10 @@ function Time:_ResetForcedValues()
 	m_Logger:Write("Reverting dynamic presets to default values:")
 
 	for l_Index, l_Preset in ipairs(self._SortedDynamicPresetsTable) do
-		local s_ID = l_Preset[1]
-		m_Logger:Write(" - " .. tostring(s_ID) .. " (" .. tostring(l_Index) .. ")")
+		m_Logger:Write(" - " .. tostring(l_Preset['presetID']) .. " (" .. tostring(l_Index) .. ")")
 
-		if not m_VisualEnvironmentHandler:CheckIfExists(s_ID) then return end
-		local s_Object = m_VisualEnvironmentHandler:GetVisualEnvironmentObject(s_ID)
+		if not m_VisualEnvironmentHandler:CheckIfExists(l_Preset['presetID']) then return end
+		local s_Object = m_VisualEnvironmentHandler:GetVisualEnvironmentObject(l_Preset['presetID'])
 		s_Object.ve.priority = self._SavedValuesForReset[l_Index].priority
 
 		for _, l_Class in ipairs(s_Object.ve.components) do -- Remove patches
@@ -188,10 +184,11 @@ function Time:_OnDisable()
 
 	-- Hide Presets
 	for _, l_ValueTable in ipairs(self._SortedDynamicPresetsTable) do
-		if not m_VisualEnvironmentHandler:CheckIfExists(l_ValueTable[1]) then return end
-		m_VisualEnvironmentHandler:SetVisibility(l_ValueTable[1], 0)
+		if not m_VisualEnvironmentHandler:CheckIfExists(l_ValueTable['presetID']) then return end
+		m_VisualEnvironmentHandler:SetVisibility(l_ValueTable['presetID'], 0)
 	end
 	-- Reset patched values
+	m_VisualEnvironmentHandler:SetVisibility('Vanilla', 1)
 	self:_ResetForcedValues()
 end
 
@@ -204,44 +201,73 @@ function Time:_OnAddTime(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 	if self._SystemRunning or self._FirstRun then
 		self:RegisterVars()
 	end
+	-- We hide the Vanilla preset
+	m_VisualEnvironmentHandler:SetVisibility('Vanilla', 0)
 
-	local s_Types = { 'Dynamic', 'DefaultDynamic' }
+
+	local dynamicTypes = { 'Dynamic', 'DefaultDynamic' }
 	m_Logger:Write("Searching for dynamic presets:")
 
 	local s_VisualEnvironmentObjects = m_VisualEnvironmentHandler:GetVisualEnvironmentObjects()
 
 	-- Create the list of day-night cycle presets from (default) dynamic presets
-	for _, l_Type in ipairs(s_Types) do
-		m_Logger:Write("Found for Type: " .. l_Type)
-		-- Get all dynamic presets
-		-- (if no Dynamic presets, DefaultDynamic presets will be loaded)
-		if #self._SortedDynamicPresetsTable < 2 then
-			for l_ID, l_Object in pairs(s_VisualEnvironmentObjects) do
-				if l_Object.rawPreset.Sky ~= nil and l_Object.rawPreset.OutdoorLight ~= nil then
-					local s_SunRotationY = tonumber(l_Object.rawPreset.OutdoorLight.SunRotationY)
-					local s_SkyBrightness = tonumber(l_Object.rawPreset.Sky.BrightnessScale)
+	-- for _, l_Type in ipairs(s_Types) do
+	-- 	m_Logger:Write("Found for Type: " .. l_Type)
+	-- Get all dynamic presets
+	-- (if no Dynamic presets, DefaultDynamic presets will be loaded)
+	if #self._SortedDynamicPresetsTable < 2 then
+		-- The damn thing initializes the tables/arrays WITH 1.... 			
+		for presetID, veObject in pairs(s_VisualEnvironmentObjects) do
+			if veObject.rawPreset.Sky ~= nil and veObject.rawPreset.OutdoorLight ~= nil then
+				local s_SunRotationY = tonumber(veObject.rawPreset.OutdoorLight.SunRotationY)
+				-- local s_SkyBrightness = tonumber(veObject.rawPreset.Sky.BrightnessScale)  -- we are no longer using this it seems?
 
-					if l_Object.type == l_Type and s_SunRotationY ~= nil then
-						m_Logger:Write(" - " .. tostring(l_ID) .. " (Sun: " .. tostring(s_SunRotationY) .. ")")
-						table.insert(self._SortedDynamicPresetsTable, { l_ID, s_SunRotationY })
+				-- if l_Object.type == l_Type and s_SunRotationY ~= nil then					
+				if s_SunRotationY ~= nil then
+					m_Logger:Write(" - " .. tostring(presetID) .. " (Sun: " .. tostring(s_SunRotationY) .. ")")
+
+					-- We get the index of a possible match for the given sunRotationY already stored
+					local indexMatch = table.Any(self._SortedDynamicPresetsTable, "sunRotationY", s_SunRotationY)
+					if indexMatch then
+						-- We replace the already saved preset if the incoming preset is Dynamic and has the same sunRotationY value.
+						m_Logger:Write("There is already a preset for sunY: - " ..
+							tostring(self._SortedDynamicPresetsTable[indexMatch].sunRotationY))
+						m_Logger:Write("The stored preset: - " ..
+							tostring(self._SortedDynamicPresetsTable[indexMatch].presetID))
+						m_Logger:Write("The new VEObject Type: - " .. tostring(veObject.type))
+						if veObject.type == "Dynamic" then
+							m_Logger:Write(
+								"Replacing an already saved preset with a Dynamic preset for the same sunRotationY value")
+							self._SortedDynamicPresetsTable[indexMatch] = {
+								presetID = presetID,
+								sunRotationY =
+									s_SunRotationY
+							}
+						end
+					elseif table.Contains(dynamicTypes, veObject.type) then
+						-- We save the new VE preset if its a Dynamic or DefaultDynamic
+						m_Logger:Write("Saving a new preset!")
+						table.insert(self._SortedDynamicPresetsTable,
+							{ presetID = presetID, sunRotationY = s_SunRotationY })
 					end
 				end
 			end
 		end
 	end
 
+	m_Logger:WriteTable(self._SortedDynamicPresetsTable)
+
 	-- Sort presets in the table based on position in the day-night cycle
-	table.sort(self._SortedDynamicPresetsTable, function(a, b) return tonumber(a[2]) < tonumber(b[2]) end)
+	table.sort(self._SortedDynamicPresetsTable,
+		function(a, b) return tonumber(a['sunRotationY']) < tonumber(b['sunRotationY']) end)
 
 	-- Set priorities & patch presets
 	m_Logger:Write("Sorted dynamic presets:")
 	for l_Index, l_Preset in ipairs(self._SortedDynamicPresetsTable) do
-		local s_ID = l_Preset[1]
-
-		if not m_VisualEnvironmentHandler:CheckIfExists(s_ID) then return end
+		if not m_VisualEnvironmentHandler:CheckIfExists(l_Preset['presetID']) then return end
 
 		---@type VisualEnvironmentObject
-		local s_Object = s_VisualEnvironmentObjects[s_ID]
+		local s_Object = s_VisualEnvironmentObjects[l_Preset['presetID']]
 
 		-- Save default values to revert later
 		self._SavedValuesForReset[l_Index] = {}
@@ -286,8 +312,8 @@ function Time:_OnAddTime(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 				s_Class.cloudLayer2Speed = -0.0010000000474975
 			end
 		end
-		local s_SunRotationY = l_Preset[2]
-		m_Logger:Write(" - " .. tostring(s_ID) .. " (sun: " .. tostring(s_SunRotationY) .. " deg)")
+		m_Logger:Write(" - " ..
+			tostring(l_Preset['presetID']) .. " (sun: " .. tostring(l_Preset['sunRotationY']) .. " deg)")
 	end
 
 	-- Save dayLength in Class (minutes -> seconds)
@@ -311,7 +337,7 @@ function Time:_OnAddTime(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 
 	-- Find starting preset
 	for l_Index, l_Preset in ipairs(self._SortedDynamicPresetsTable) do
-		local s_SunPosY = l_Preset[2]
+		local s_SunPosY = l_Preset['sunRotationY']
 		if s_SunPosY < s_SunMoonPos then
 			self._CurrentPreset = l_Index
 		end
@@ -356,9 +382,9 @@ function Time:_Run()
 	end
 
 	-- Get sun positions for each preset
-	local s_CurrentPresetSunPosY = self._SortedDynamicPresetsTable[self._CurrentPreset][2]
+	local s_CurrentPresetSunPosY = self._SortedDynamicPresetsTable[self._CurrentPreset]['sunRotationY']
 	local s_NextPreset = self._CurrentPreset % #self._SortedDynamicPresetsTable + 1
-	local s_NextPresetSunPosY = self._SortedDynamicPresetsTable[s_NextPreset][2]
+	local s_NextPresetSunPosY = self._SortedDynamicPresetsTable[s_NextPreset]['sunRotationY']
 
 	-- Check if still in current presets
 	if s_SunMoonPos >= s_NextPresetSunPosY and (
@@ -366,14 +392,14 @@ function Time:_Run()
 			(s_NextPresetSunPosY < s_CurrentPresetSunPosY and s_SunMoonPos < s_CurrentPresetSunPosY)
 		) then
 		self._CurrentPreset = s_NextPreset
-		s_CurrentPresetSunPosY = self._SortedDynamicPresetsTable[self._CurrentPreset][2]
+		s_CurrentPresetSunPosY = self._SortedDynamicPresetsTable[self._CurrentPreset]['sunRotationY']
 
 		s_NextPreset = self._CurrentPreset % #self._SortedDynamicPresetsTable + 1
-		s_NextPresetSunPosY = self._SortedDynamicPresetsTable[s_NextPreset][2]
+		s_NextPresetSunPosY = self._SortedDynamicPresetsTable[s_NextPreset]['sunRotationY']
 	end
 
-	-- m_Logger:Write("Current preset: " .. tostring(self.m_CurrentPreset))
-	-- m_Logger:Write("Next preset: " .. tostring(s_NextPreset))
+	--m_Logger:Write("Current preset: " .. tostring(self.m_CurrentPreset))
+	--m_Logger:Write("Next preset: " .. tostring(s_NextPreset))
 
 	-- Calculate visibility factor
 	local s_VisibilityFactor = nil
@@ -407,7 +433,6 @@ function Time:_Run()
 	--m_Logger:Write("Visibility Factor: " .. tostring(s_VisibilityFactor))
 
 	for l_Index, l_Preset in ipairs(self._SortedDynamicPresetsTable) do
-		local s_ID = l_Preset[1]
 		local s_Factor = 0
 
 		if l_Index == self._CurrentPreset then
@@ -416,11 +441,11 @@ function Time:_Run()
 			s_Factor = s_NextPresetVisibilityFactor
 		end
 
-		if not m_VisualEnvironmentHandler:CheckIfExists(s_ID) then return end
-		m_VisualEnvironmentHandler:SetVisibility(s_ID, s_Factor)
+		if not m_VisualEnvironmentHandler:CheckIfExists(l_Preset['presetID']) then return end
+		m_VisualEnvironmentHandler:SetVisibility(l_Preset['presetID'], s_Factor)
 
 		if s_Factor ~= 0 then -- hardcode for now
-			m_VisualEnvironmentHandler:SetSingleValue(s_ID, 'sky', 'cloudLayer1Speed', -0.0001)
+			m_VisualEnvironmentHandler:SetSingleValue(l_Preset['presetID'], 'sky', 'cloudLayer1Speed', -0.0001)
 		end
 	end
 
@@ -430,8 +455,8 @@ function Time:_Run()
 
 	-- Log visibilities
 	if s_PrintEnabled and CONFIG.PRINT_DN_TIME_AND_VISIBILITIES then
-		local s_NextPresetID = self._SortedDynamicPresetsTable[s_NextPreset][1]
-		local s_CurrentPresetID = self._SortedDynamicPresetsTable[self._CurrentPreset][1]
+		local s_NextPresetID = self._SortedDynamicPresetsTable[s_NextPreset]['presetID']
+		local s_CurrentPresetID = self._SortedDynamicPresetsTable[self._CurrentPreset]['presetID']
 
 		m_Logger:Write("[" ..
 			tostring(s_Hour) ..

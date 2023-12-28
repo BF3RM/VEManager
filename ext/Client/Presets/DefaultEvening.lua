@@ -100,11 +100,11 @@ return json.decode([[
         "CustomEnvmapAmbient": "1"
     },
     "SunFlare": {
-        "Element1Size": "0.35:0.35:",
-        "Element2Size": "0.0:0.0:",
-        "Element3Size": "0.0:0.0:",
-        "Element4Size": "0.0:0.0:",
-        "Element5Size": "0.0:0.0:"
+        "Element1Size": "0.05:0.05:",
+        "Element2Size": "0.05:0.05:",
+        "Element3Size": "0.05:0.05:",
+        "Element4Size": "0.05:0.05:",
+        "Element5Size": "0.05:0.05:"
     },
     "Tonemap": {
         "Realm": "0",

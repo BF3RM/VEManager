@@ -71,7 +71,7 @@ function TimeServer:_OnEnable(p_StartingTime, p_LengthOfDayInMinutes)
 	end
 
 	m_Logger:Write('Received new time (Starting Time, Length of Day): ' ..
-	p_StartingTime .. 'h, ' .. self.m_TotalDayLength .. 'sec')
+		p_StartingTime .. 'h, ' .. self.m_TotalDayLength .. 'sec')
 
 	NetEvents:Broadcast('VEManager:AddTimeToClient', self.m_ServerDayTime, self.m_IsStatic, self.m_TotalDayLength)
 	self.m_SystemRunning = true

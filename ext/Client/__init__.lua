@@ -32,6 +32,7 @@ function VEManagerClient:RegisterVars()
 		DefaultMorning = require("Presets/DefaultMorning"),
 		DefaultNoon = require("Presets/DefaultNoon"),
 		DefaultEvening = require("Presets/DefaultEvening"),
+		Vanilla = require("Presets/Vanilla"),
 	}
 	self.m_vanillaPreset = nil
 end
@@ -56,6 +57,8 @@ function VEManagerClient:RegisterEvents()
 	Events:Subscribe('VEManager:ReplaceVE', self, self._OnReplaceVE)
 	Events:Subscribe('VEManager:Reinitialize', self, self._OnReinitialize)
 	Events:Subscribe('VEManager:ApplyTexture', self, self._OnApplyTexture)
+
+	NetEvents:Subscribe('VEManager:EnablePreset', self, self._OnEnablePreset)
 end
 
 --#region VU Event Functions
@@ -328,7 +331,6 @@ function VEManagerClient:_LoadPresets()
 							s_Value = tonumber(l_Preset[l_Class][s_FieldName])
 						elseif s_Type == "TextureAsset" then
 							s_Value = UtilityFunctions:GetTexture(l_Preset[l_Class][s_FieldName])
-
 							if not s_Value then
 								m_Logger:Write("\t- TextureAsset has not been saved (" ..
 									l_Preset[l_Class][s_FieldName] ..
@@ -396,8 +398,10 @@ function VEManagerClient:_LoadPresets()
 		self._RawPresets[l_ID] = nil
 	end
 	Events:Dispatch("VEManager:PresetsLoaded")
+	NetEvents:Send("VEManager:PresetsLoaded")
 	NetEvents:Send("VEManager:PlayerReady")
 	m_Logger:Write("Presets loaded")
+	self._OnEnablePreset(self, 'Vanilla')
 end
 
 return VEManagerClient()

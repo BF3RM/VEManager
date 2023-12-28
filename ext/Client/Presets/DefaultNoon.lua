@@ -92,11 +92,7 @@ return json.decode([[
 		"CloudLayer2Texture": "levels/testrange_lighting/sky/sky_07_starlayer_d"
     },
     "SunFlare": {
-        "Element1Size": "0.35:0.35:",
-        "Element2Size": "0.0:0.0:",
-        "Element3Size": "0.0:0.0:",
-        "Element4Size": "0.0:0.0:",
-        "Element5Size": "0.0:0.0:"
+
     },
     "Tonemap": {
         "Realm": "0",
