@@ -5,11 +5,11 @@ Patches = class('Patches')
 
 local m_PatchDatatable = require('EmitterMeshPatchDatatable')
 
----@type Logger
-local m_Logger = Logger("Patches", false)
+---@type VEMLogger
+local m_VEMLogger = VEMLogger("Patches", false)
 
 function Patches:__init()
-	m_Logger:Write("Initializing Patches")
+	m_VEMLogger:Write("Initializing Patches")
 
 	-- Patch Menu Background
 	ResourceManager:RegisterInstanceLoadHandler(Guid("3A3E5533-4B2A-11E0-A20D-FE03F1AD0E2F"),
@@ -130,7 +130,7 @@ end
 ---@param p_IsDedicatedServer boolean
 function Patches:OnLevelLoaded(p_LevelName, p_GameMode, p_IsDedicatedServer)
 	-- Disable Vanilla Explosion VEs
-	if CONFIG.PATCH_EXPLOSIONS_COLOR_CORRECTION then
+	if VEM_CONFIG.PATCH_EXPLOSIONS_COLOR_CORRECTION then
 		_DisableExplosionVisualEnvironments()
 	end
 end
@@ -142,7 +142,7 @@ function Patches:PatchComponents(p_Partition)
 	-- tostring(p_Partition.primaryInstance.typeInfo.elementType))
 	-- print('The partition primaryInstance typeinfo name : ' .. tostring(p_Partition.primaryInstance.typeInfo.name))
 
-	if not CONFIG.PATCH_DN_COMPONENTS then
+	if not VEM_CONFIG.PATCH_DN_COMPONENTS then
 		return
 	end
 
@@ -181,7 +181,7 @@ function Patches:_OnMenuBGLoaded(p_Instance)
 	s_MenuBg:MakeWritable()
 	s_MenuBg.priority = 100
 
-	m_Logger:Write("Menu background patched (priority increased)")
+	m_VEMLogger:Write("Menu background patched (priority increased)")
 end
 
 return Patches()

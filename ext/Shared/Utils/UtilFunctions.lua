@@ -4,11 +4,11 @@
 ---@diagnostic disable-next-line: assign-type-mismatch
 UtilityFunctions = class 'UtilityFunctions'
 
----@type Logger
-local m_Logger = Logger("UtilityFunctions", false)
+---@type VEMLogger
+local m_VEMLogger = VEMLogger("UtilityFunctions", false)
 
 function UtilityFunctions:__init()
-	m_Logger:Write('Initializing UtilityFunctions')
+	m_VEMLogger:Write('Initializing UtilityFunctions')
 	self:RegisterVars()
 	self:RegisterEvents()
 end
@@ -61,7 +61,7 @@ end
 function UtilityFunctions:InitEngineType(p_Class, p_Guid)
 	-- Check if exists
 	if not _G[p_Class] then
-		m_Logger:Error("Provided Frostbite type does not exist")
+		m_VEMLogger:Error("Provided Frostbite type does not exist")
 	end
 
 	-- Create the instance
@@ -136,7 +136,7 @@ function UtilityFunctions:ParseValue(p_Type, p_Value)
 		---@diagnostic disable-next-line: param-type-mismatch
 		return Vec4(tonumber(s_Vec[1]), tonumber(s_Vec[2]), tonumber(s_Vec[3]), tonumber(s_Vec[4]))
 	else
-		m_Logger:Write("Unhandled type: " .. p_Type)
+		m_VEMLogger:Write("Unhandled type: " .. p_Type)
 		return nil
 	end
 end

@@ -3,18 +3,18 @@
 ---@diagnostic disable-next-line: assign-type-mismatch
 TimeServer = class "TimeServer"
 
----@type Logger
-local m_Logger = Logger("TimeServer", true)
+---@type VEMLogger
+local m_VEMLogger = VEMLogger("TimeServer", true)
 
 function TimeServer:__init()
-	m_Logger:Write('Initializing Time-Server')
+	m_VEMLogger:Write('Initializing Time-Server')
 	self:RegisterVars()
 	self:RegisterEvents()
 end
 
 function TimeServer:RegisterVars()
 	-- Initialise variables
-	m_Logger:Write('Registered Vars')
+	m_VEMLogger:Write('Registered Vars')
 	---@type number
 	self.m_ServerDayTime = 0.0
 	---@type number
@@ -28,13 +28,13 @@ function TimeServer:RegisterVars()
 	---@type number
 	self.m_ServerTickrate = SharedUtils:GetTickrate()
 	---@type number
-	self.m_SyncTickrate = CONFIG.SERVER_SYNC_CLIENT_EVERY_TICKS / self.m_ServerTickrate --[Hz]
+	self.m_SyncTickrate = VEM_CONFIG.SERVER_SYNC_CLIENT_EVERY_TICKS / self.m_ServerTickrate --[Hz]
 	---@type boolean
 	self.m_SystemRunning = false
 end
 
 function TimeServer:RegisterEvents()
-	m_Logger:Write('Registered Events')
+	m_VEMLogger:Write('Registered Events')
 
 	---@type Event
 	Events:Subscribe('Engine:Update', self, self._OnEngineUpdate)
@@ -70,7 +70,7 @@ function TimeServer:_OnEnable(p_StartingTime, p_LengthOfDayInMinutes)
 		self.m_IsStatic = true
 	end
 
-	m_Logger:Write('Received new time (Starting Time, Length of Day): ' ..
+	m_VEMLogger:Write('Received new time (Starting Time, Length of Day): ' ..
 		p_StartingTime .. 'h, ' .. self.m_TotalDayLength .. 'sec')
 
 	NetEvents:Broadcast('VEManager:AddTimeToClient', self.m_ServerDayTime, self.m_IsStatic, self.m_TotalDayLength)
@@ -97,7 +97,7 @@ function TimeServer:_OnEngineUpdate(p_DeltaTime, p_SimulationDeltaTime)
 		self:_Broadcast(self.m_ServerDayTime, self.m_TotalServerTime)
 
 		if self.m_ServerDayTime >= self.m_TotalDayLength then
-			m_Logger:Write('A new day...')
+			m_VEMLogger:Write('A new day...')
 			self.m_ServerDayTime = 0
 		end
 	end
@@ -106,7 +106,7 @@ end
 ---@param p_Player Player
 function TimeServer:_OnPlayerSync(p_Player)
 	if self.m_SystemRunning == true or self.m_IsStatic == true then
-		m_Logger:Write('Syncing Player with Server')
+		m_VEMLogger:Write('Syncing Player with Server')
 		NetEvents:SendTo('VEManager:AddTimeToClient', p_Player, self.m_ServerDayTime, self.m_IsStatic,
 			self.m_TotalDayLength)
 	end
@@ -121,7 +121,7 @@ end
 function TimeServer:_OnPauseUnpause()
 	-- Pause or Continue time
 	self.m_SystemRunning = not self.m_SystemRunning
-	m_Logger:Write('Time system running: ' .. tostring(self.m_SystemRunning))
+	m_VEMLogger:Write('Time system running: ' .. tostring(self.m_SystemRunning))
 	NetEvents:Broadcast('ClientTime:Pause', self.m_SystemRunning)
 end
 
@@ -146,25 +146,25 @@ function TimeServer:ChatCommands(p_PlayerName, p_RecipientMask, p_Message)
 			duration = 0.5
 		end
 
-		m_Logger:Write('Time Event called by ' .. p_PlayerName)
+		m_VEMLogger:Write('Time Event called by ' .. p_PlayerName)
 		self:_OnEnable(hour, duration)
 	elseif p_Message == '!setnight' then
-		m_Logger:Write('Time Event called by ' .. p_PlayerName)
+		m_VEMLogger:Write('Time Event called by ' .. p_PlayerName)
 		self:_OnEnable(0, nil)
 	elseif p_Message == '!setmorning' then
-		m_Logger:Write('Time Event called by ' .. p_PlayerName)
+		m_VEMLogger:Write('Time Event called by ' .. p_PlayerName)
 		self:_OnEnable(9, nil)
 	elseif p_Message == '!setnoon' then
-		m_Logger:Write('Time Event called by ' .. p_PlayerName)
+		m_VEMLogger:Write('Time Event called by ' .. p_PlayerName)
 		self:_OnEnable(12, nil)
 	elseif p_Message == '!setafternoon' then
-		m_Logger:Write('Time Event called by ' .. p_PlayerName)
+		m_VEMLogger:Write('Time Event called by ' .. p_PlayerName)
 		self:_OnEnable(15, nil)
 	elseif p_Message == '!pausetime' or p_message == '!resumetime' then
-		m_Logger:Write('Time Pause called by ' .. p_PlayerName)
+		m_VEMLogger:Write('Time Pause called by ' .. p_PlayerName)
 		self:_OnPauseUnpause()
 	elseif p_Message == '!disabletime' then
-		m_Logger:Write('Time Disable called by ' .. p_PlayerName)
+		m_VEMLogger:Write('Time Disable called by ' .. p_PlayerName)
 		self:_OnDisable()
 	end
 end

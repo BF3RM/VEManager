@@ -1,4 +1,4 @@
-CONFIG = {
+VEM_CONFIG = {
     -- OTHER --
     PATCH_EXPLOSIONS_COLOR_CORRECTION = true, -- Disables color correction from explosions (explosions may cause a discontinue preset effect)
 
@@ -10,8 +10,8 @@ CONFIG = {
 
     -- PRINT --
     PRINT_DN_TIME_AND_VISIBILITIES = true, -- Print current time every hour along with the visibilities of the 4 presets
-    LOGGER_ENABLED = true,                 -- Enables the use of the Logger Class [DEV]
-    LOGGER_PRINT_ALL = false,              -- Prints All Logger Prints
+    VEMLogger_ENABLED = false,             -- Enables the use of the VEMLogger Class [DEV]
+    VEMLogger_PRINT_ALL = false,           -- Prints All VEMLogger Prints
 
     -- SERVER --
     SERVER_SYNC_CLIENT_EVERY_TICKS = 2, -- Sync clients with the correct time ever X ticks

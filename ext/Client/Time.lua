@@ -3,14 +3,14 @@
 ---@diagnostic disable-next-line: assign-type-mismatch
 Time = class 'Time'
 
----@type Logger
-local m_Logger = Logger("Time", true)
+---@type VEMLogger
+local m_VEMLogger = VEMLogger("Time", true)
 
 ---@type VisualEnvironmentHandler
 local m_VisualEnvironmentHandler = require("VisualEnvironmentHandler")
 
 function Time:__init()
-	m_Logger:Write('Initializing Time Module')
+	m_VEMLogger:Write('Initializing Time Module')
 
 	self:RegisterVars()
 	self:RegisterEvents()
@@ -18,7 +18,7 @@ end
 
 function Time:RegisterVars()
 	-- Initialize variables
-	m_Logger:Write('[Client Time Module] Registered Vars')
+	m_VEMLogger:Write('[Client Time Module] Registered Vars')
 
 	self._SystemRunning = false
 	self._ClientTime = 0
@@ -37,8 +37,8 @@ function Time:RegisterVars()
 
 	self._CurrentPreset = 1
 
-	self._Sunrise = CONFIG.DN_SUN_TIMINGS[1] / 24
-	self._Sunset = CONFIG.DN_SUN_TIMINGS[2] / 24
+	self._Sunrise = VEM_CONFIG.DN_SUN_TIMINGS[1] / 24
+	self._Sunset = VEM_CONFIG.DN_SUN_TIMINGS[2] / 24
 end
 
 function Time:RegisterEvents()
@@ -59,11 +59,11 @@ function Time:OnLevelDestroy()
 	-- With this we get rid of carrying old presets when the map changes.
 	self:_ResetForcedValues()
 	self:RegisterVars()
-	m_Logger:Write("Reset Time System")
+	m_VEMLogger:Write("Reset Time System")
 end
 
 function Time:_Sync()
-	m_Logger:Write('Sync Time')
+	m_VEMLogger:Write('Sync Time')
 	NetEvents:Send('TimeServer:PlayerSync')
 end
 
@@ -119,21 +119,21 @@ function Time:_UpdateSunPosition(p_ClientTime)
 end
 
 function Time:_SetCloudSpeed()
-	if CONFIG.DN_CHANGE_CLOUDS_SPEED_BASED_ON_DAY_LENGTH then
+	if VEM_CONFIG.DN_CHANGE_CLOUDS_SPEED_BASED_ON_DAY_LENGTH then
 		self._CloudSpeed = 1 / (self._TotalDayLength / 60 * 0.5)
-		m_Logger:Write('Set Cloud Speed = ' .. tostring(self._CloudSpeed))
+		m_VEMLogger:Write('Set Cloud Speed = ' .. tostring(self._CloudSpeed))
 	end
 end
 
 function Time:_ResetForcedValues()
 	if #self._SortedDynamicPresetsTable < 1 then
-		m_Logger:Write("No modified presets to revert.")
+		m_VEMLogger:Write("No modified presets to revert.")
 		return
 	end
-	m_Logger:Write("Reverting dynamic presets to default values:")
+	m_VEMLogger:Write("Reverting dynamic presets to default values:")
 
 	for l_Index, l_Preset in ipairs(self._SortedDynamicPresetsTable) do
-		m_Logger:Write(" - " .. tostring(l_Preset['presetID']) .. " (" .. tostring(l_Index) .. ")")
+		m_VEMLogger:Write(" - " .. tostring(l_Preset['presetID']) .. " (" .. tostring(l_Index) .. ")")
 
 		if not m_VisualEnvironmentHandler:CheckIfExists(l_Preset['presetID']) then return end
 		local s_Object = m_VisualEnvironmentHandler:GetVisualEnvironmentObject(l_Preset['presetID'])
@@ -206,13 +206,13 @@ function Time:_OnAddTime(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 
 
 	local dynamicTypes = { 'Dynamic', 'DefaultDynamic' }
-	m_Logger:Write("Searching for dynamic presets:")
+	m_VEMLogger:Write("Searching for dynamic presets:")
 
 	local s_VisualEnvironmentObjects = m_VisualEnvironmentHandler:GetVisualEnvironmentObjects()
 
 	-- Create the list of day-night cycle presets from (default) dynamic presets
 	-- for _, l_Type in ipairs(s_Types) do
-	-- 	m_Logger:Write("Found for Type: " .. l_Type)
+	-- 	m_VEMLogger:Write("Found for Type: " .. l_Type)
 	-- Get all dynamic presets
 	-- (if no Dynamic presets, DefaultDynamic presets will be loaded)
 	if #self._SortedDynamicPresetsTable < 2 then
@@ -224,19 +224,19 @@ function Time:_OnAddTime(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 
 				-- if l_Object.type == l_Type and s_SunRotationY ~= nil then					
 				if s_SunRotationY ~= nil then
-					m_Logger:Write(" - " .. tostring(presetID) .. " (Sun: " .. tostring(s_SunRotationY) .. ")")
+					m_VEMLogger:Write(" - " .. tostring(presetID) .. " (Sun: " .. tostring(s_SunRotationY) .. ")")
 
 					-- We get the index of a possible match for the given sunRotationY already stored
 					local indexMatch = table.Any(self._SortedDynamicPresetsTable, "sunRotationY", s_SunRotationY)
 					if indexMatch then
 						-- We replace the already saved preset if the incoming preset is Dynamic and has the same sunRotationY value.
-						m_Logger:Write("There is already a preset for sunY: - " ..
+						m_VEMLogger:Write("There is already a preset for sunY: - " ..
 							tostring(self._SortedDynamicPresetsTable[indexMatch].sunRotationY))
-						m_Logger:Write("The stored preset: - " ..
+						m_VEMLogger:Write("The stored preset: - " ..
 							tostring(self._SortedDynamicPresetsTable[indexMatch].presetID))
-						m_Logger:Write("The new VEObject Type: - " .. tostring(veObject.type))
+						m_VEMLogger:Write("The new VEObject Type: - " .. tostring(veObject.type))
 						if veObject.type == "Dynamic" then
-							m_Logger:Write(
+							m_VEMLogger:Write(
 								"Replacing an already saved preset with a Dynamic preset for the same sunRotationY value")
 							self._SortedDynamicPresetsTable[indexMatch] = {
 								presetID = presetID,
@@ -246,7 +246,7 @@ function Time:_OnAddTime(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 						end
 					elseif table.Contains(dynamicTypes, veObject.type) then
 						-- We save the new VE preset if its a Dynamic or DefaultDynamic
-						m_Logger:Write("Saving a new preset!")
+						m_VEMLogger:Write("Saving a new preset!")
 						table.insert(self._SortedDynamicPresetsTable,
 							{ presetID = presetID, sunRotationY = s_SunRotationY })
 					end
@@ -255,14 +255,14 @@ function Time:_OnAddTime(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 		end
 	end
 
-	m_Logger:WriteTable(self._SortedDynamicPresetsTable)
+	m_VEMLogger:WriteTable(self._SortedDynamicPresetsTable)
 
 	-- Sort presets in the table based on position in the day-night cycle
 	table.sort(self._SortedDynamicPresetsTable,
 		function(a, b) return tonumber(a['sunRotationY']) < tonumber(b['sunRotationY']) end)
 
 	-- Set priorities & patch presets
-	m_Logger:Write("Sorted dynamic presets:")
+	m_VEMLogger:Write("Sorted dynamic presets:")
 	for l_Index, l_Preset in ipairs(self._SortedDynamicPresetsTable) do
 		if not m_VisualEnvironmentHandler:CheckIfExists(l_Preset['presetID']) then return end
 
@@ -312,15 +312,15 @@ function Time:_OnAddTime(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 				s_Class.cloudLayer2Speed = -0.0010000000474975
 			end
 		end
-		m_Logger:Write(" - " ..
+		m_VEMLogger:Write(" - " ..
 			tostring(l_Preset['presetID']) .. " (sun: " .. tostring(l_Preset['sunRotationY']) .. " deg)")
 	end
 
 	-- Save dayLength in Class (minutes -> seconds)
 	self._TotalDayLength = p_LengthOfDayInSeconds
-	m_Logger:Write('[Time-Client]: Length of Day: ' .. self._TotalDayLength .. ' Seconds')
+	m_VEMLogger:Write('[Time-Client]: Length of Day: ' .. self._TotalDayLength .. ' Seconds')
 	self._ClientTime = p_StartingTime
-	m_Logger:Write('[Time-Client]: Starting at Time: ' ..
+	m_VEMLogger:Write('[Time-Client]: Starting at Time: ' ..
 		p_StartingTime / 3600 / (self._TotalDayLength / 86000) .. ' Hours (' .. p_StartingTime .. ' Seconds)')
 
 	-- Update sun & clouds
@@ -349,7 +349,7 @@ function Time:_OnAddTime(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 
 	if p_IsStatic ~= true then
 		self._SystemRunning = true
-		m_Logger:Write("Day-Night Cycle Activated")
+		m_VEMLogger:Write("Day-Night Cycle Activated")
 	end
 end
 
@@ -359,7 +359,7 @@ function Time:_Run()
 	end
 
 	if not self._ClientTime then
-		m_Logger:Warning("Nil ClientTime: " .. tostring(self._ClientTime))
+		m_VEMLogger:Warning("Nil ClientTime: " .. tostring(self._ClientTime))
 		return
 	end
 
@@ -398,8 +398,8 @@ function Time:_Run()
 		s_NextPresetSunPosY = self._SortedDynamicPresetsTable[s_NextPreset]['sunRotationY']
 	end
 
-	--m_Logger:Write("Current preset: " .. tostring(self.m_CurrentPreset))
-	--m_Logger:Write("Next preset: " .. tostring(s_NextPreset))
+	--m_VEMLogger:Write("Current preset: " .. tostring(self.m_CurrentPreset))
+	--m_VEMLogger:Write("Next preset: " .. tostring(s_NextPreset))
 
 	-- Calculate visibility factor
 	local s_VisibilityFactor = nil
@@ -429,8 +429,8 @@ function Time:_Run()
 		s_CurrentPresetVisibilityFactor = 1 - s_VisibilityFactor
 	end
 
-	--m_Logger:Write("Sun/Moon: " .. tostring(s_SunMoonPos) .. " ( " .. self.m_CurrentPreset .. " -> " .. s_NextPreset .. " ), visibility: " .. tostring(s_VisibilityFactor))
-	--m_Logger:Write("Visibility Factor: " .. tostring(s_VisibilityFactor))
+	--m_VEMLogger:Write("Sun/Moon: " .. tostring(s_SunMoonPos) .. " ( " .. self.m_CurrentPreset .. " -> " .. s_NextPreset .. " ), visibility: " .. tostring(s_VisibilityFactor))
+	--m_VEMLogger:Write("Visibility Factor: " .. tostring(s_VisibilityFactor))
 
 	for l_Index, l_Preset in ipairs(self._SortedDynamicPresetsTable) do
 		local s_Factor = 0
@@ -454,11 +454,11 @@ function Time:_Run()
 	end
 
 	-- Log visibilities
-	if s_PrintEnabled and CONFIG.PRINT_DN_TIME_AND_VISIBILITIES then
+	if s_PrintEnabled and VEM_CONFIG.PRINT_DN_TIME_AND_VISIBILITIES then
 		local s_NextPresetID = self._SortedDynamicPresetsTable[s_NextPreset]['presetID']
 		local s_CurrentPresetID = self._SortedDynamicPresetsTable[self._CurrentPreset]['presetID']
 
-		m_Logger:Write("[" ..
+		m_VEMLogger:Write("[" ..
 			tostring(s_Hour) ..
 			"h - sun:" ..
 			tostring(s_SunMoonPos) ..

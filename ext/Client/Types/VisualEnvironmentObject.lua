@@ -6,8 +6,8 @@
 ---@diagnostic disable-next-line: assign-type-mismatch
 VisualEnvironmentObject = class "VisualEnvironmentObject"
 
----@type Logger
-local m_Logger = Logger("VisualEnvironmentObject", true)
+---@type VEMLogger
+local m_VEMLogger = VEMLogger("VisualEnvironmentObject", true)
 
 ---@type VisualEnvironmentHandler
 local m_VisualEnvironmentHandler = require("VisualEnvironmentHandler")
@@ -30,7 +30,7 @@ function VisualEnvironmentObject:__init(p_Preset)
 		p_Preset.Priority = tonumber(p_Preset.Priority)
 	end
 
-	m_Logger:Write("(" .. p_Preset.Name .. ", " .. p_Preset.Priority .. ", " .. p_Preset.Type .. ")")
+	m_VEMLogger:Write("(" .. p_Preset.Name .. ", " .. p_Preset.Priority .. ", " .. p_Preset.Type .. ")")
 
 	-- spawning from blueprint alone doesn´t work somehow, would have been nice tho since we can store the name there
 	local s_VE = UtilityFunctions:InitEngineType("VisualEnvironmentEntityData")

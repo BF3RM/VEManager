@@ -8,13 +8,13 @@ https://youtube.com/playlist?list=PLqlU85EO4crIPxk10YXiKDXE67lU-dM4m
 
 If you have questions contact IllustrisJack#5355 on Discord.
 
-## Config Options (Shared/Config.lua):
-	A number of features can be switched on/off from the config file located at Shared/Config.lua
+## Config Options (Shared/VEM_CONFIG.lua):
+	A number of features can be switched on/off from the config file located at Shared/VEM_CONFIG.lua
 
 	DEV_ENABLE_CHAT_COMMANDS = (true/false)							Enables the use of these chat command
  	DEV_ENABLE_TEST_KEYS = (true/false)								Enables the use of test keys / shortcuts
 
-	For more options, have a look in Shared/Config.lua.
+	For more options, have a look in Shared/VEM_CONFIG.lua.
 
 ### DEVELOPER CHAT COMMANDS
 +   The following commands can be used: (provided that DEV_ENABLE_CHAT_COMMANDS is set to true)

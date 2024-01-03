@@ -37,7 +37,7 @@ return json.decode([[
     },
     "Enlighten": {
         "Realm": "0",
-        "Enable": "true"
+        "Enable": "false"
     },
     "Fog": {
         "Realm": "0",

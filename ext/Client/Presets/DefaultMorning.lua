@@ -37,7 +37,7 @@ return json.decode([[
     },
     "Enlighten": {
         "Realm": "0",
-        "Enable": "true"
+        "Enable": "false"
     },
     "Fog": {
         "Realm": "0",
@@ -65,7 +65,7 @@ return json.decode([[
         "SkyColor": "(0.4, 0.3, 0.3)",
         "GroundColor": "(0.4, 0.3, 0.3)",
         "SunRotationX": "0",
-        "SunRotationY": "30"
+        "SunRotationY": "10"
     },
     "Sky": {
         "Realm": "0",
@@ -100,11 +100,11 @@ return json.decode([[
         "CustomEnvmapAmbient": "1"
     },
     "SunFlare": {
-        "Element1Size": "0.35:0.35:",
-        "Element2Size": "0.1:0.1:",
-        "Element3Size": "0.1:0.1:",
-        "Element4Size": "0.1:0.1:",
-        "Element5Size": "0.1:0.1:"
+        "Element1Size": "0.10:0.10:",
+        "Element2Size": "0.10:0.10:",
+        "Element3Size": "0.10:0.10:",
+        "Element4Size": "0.10:0.10:",
+        "Element5Size": "0.10:0.10:"
     },
     "Tonemap": {
         "Realm": "0",

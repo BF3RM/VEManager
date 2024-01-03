@@ -3,19 +3,19 @@
 ---@diagnostic disable-next-line: assign-type-mismatch
 VEManagerServer = class 'VEManagerServer'
 
----@type Logger
-local m_Logger = Logger("Server", false)
+---@type VEMLogger
+local m_VEMLogger = VEMLogger("Server", false)
 
 ---@type TimeServer
 local m_TimeServer = require 'TimeServer'
 
 function VEManagerServer:__init()
-    m_Logger:Write('Initializing VEManagerServer')
+    m_VEMLogger:Write('Initializing VEManagerServer')
     self:RegisterEvents()
 end
 
 function VEManagerServer:RegisterEvents()
-    if CONFIG.DEV_ENABLE_CHAT_COMMANDS then
+    if VEM_CONFIG.DEV_ENABLE_CHAT_COMMANDS then
         Events:Subscribe('Player:Chat', self, self.VEMChatCommands)
     end
 end
@@ -32,7 +32,7 @@ function VEManagerServer:VEMChatCommands(p_Player, p_RecipientMask, p_Message)
     if p_Player == nil then
         s_IsAdmin = true
     else
-        for _, l_Admin in pairs(CONFIG.ADMINS) do
+        for _, l_Admin in pairs(VEM_CONFIG.ADMINS) do
             if l_Admin == p_Player.name then
                 s_IsAdmin = true
                 break
@@ -41,7 +41,7 @@ function VEManagerServer:VEMChatCommands(p_Player, p_RecipientMask, p_Message)
     end
 
     if not s_IsAdmin then
-        m_Logger:Write(s_PlayerName .. ' wants to apply a preset but he is not an Admin')
+        m_VEMLogger:Write(s_PlayerName .. ' wants to apply a preset but he is not an Admin')
         return
     end
 
@@ -49,16 +49,16 @@ function VEManagerServer:VEMChatCommands(p_Player, p_RecipientMask, p_Message)
     if p_Message == '!vanilla' then
         -- TODO: enable original preset or disable all custom presets
         NetEvents:Broadcast('VEManager:EnablePreset', 'Vanilla')
-        m_Logger:Write(s_PlayerName .. ' applied vanilla preset')
+        m_VEMLogger:Write(s_PlayerName .. ' applied vanilla preset')
         return
     elseif p_Message == '!cinetools' then
         NetEvents:Broadcast('VEManager:EnablePreset', 'CinematicTools')
-        m_Logger:Write(s_PlayerName .. ' applied the cinematic tools preset')
+        m_VEMLogger:Write(s_PlayerName .. ' applied the cinematic tools preset')
         return
     elseif p_Message:match('^!preset') then
         --local presetID = p_Message:match('^!preset (%d+)')
         local presetID = p_Message:gsub("!preset ", ""):gsub("^%s*(.-)%s*$", "%1") -- The last gsub is trim
-        m_Logger:Write(s_PlayerName .. ' wants to apply the preset with ID: ' .. tostring(presetID))
+        m_VEMLogger:Write(s_PlayerName .. ' wants to apply the preset with ID: ' .. tostring(presetID))
 
         if presetID ~= nil then
             NetEvents:Broadcast('VEManager:EnablePreset', presetID)
