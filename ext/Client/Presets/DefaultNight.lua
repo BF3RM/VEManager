@@ -37,17 +37,7 @@ return json.decode([[
     },
     "Enlighten": {
         "Realm": "0",
-        "Enable": "true",
-        "BounceScale": "0.1",
-        "SunScale": "0",
-        "TerrainColor": "(0.0, 0.0, 0.0)",
-        "SkyBoxEnable": "true",
-        "SkyBoxSkyColor": "(0, 0, 0)",
-        "SkyBoxGroundColor": "(0, 0, 0)",
-        "SkyBoxSunLightColor": "(0, 0, 0)",
-        "SkyBoxSunLightColorSize": "0.0",
-        "SkyBoxBackLightColor": "(0, 0, 0)",
-        "SkyBoxBackLightColorSize": "0"
+        "Enable": "false"
     },
     "Fog": {
         "Realm": "0",
@@ -71,19 +61,19 @@ return json.decode([[
     "OutdoorLight": {
         "Realm": "0",
         "Enable": "true",
-        "SunColor": "(1, 1, 1)",
+        "SunColor": "(0.3, 0.3, 0.3)",
         "SkyColor": "(0.015, 0.015, 0.015)",
         "GroundColor": "(0.0005, 0.0005, 0.0005)",
         "SunSpecularScale": "0",
         "SunRotationX": "0",
-        "SunRotationY": "170"
+        "SunRotationY":"180.0"
     },
     "Sky": {
         "Realm": "0",
         "Enable": "true",
-        "BrightnessScale": "0.005",
+        "BrightnessScale": "0.004",
         "SunSize": "0.005",
-        "SunScale": "6",
+        "SunScale": "0.300",
         "CloudLayerSunColor": "(0, 0, 0)",
         "CloudLayer1Altitude": "500000.0",
         "CloudLayer1TileFactor": "0.25",

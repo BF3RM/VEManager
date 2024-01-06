@@ -3,8 +3,8 @@
 ---@diagnostic disable-next-line: assign-type-mismatch
 VisualEnvironmentHandler = class 'VisualEnvironmentHandler'
 
----@type Logger
-local m_Logger = Logger("VisualEnvironmentHandler", false)
+---@type VEMLogger
+local m_VEMLogger = VEMLogger("VisualEnvironmentHandler", false)
 
 ---@type EasingTransitions
 local m_Easing = require "__shared/Utils/Easing"
@@ -12,7 +12,7 @@ local m_Easing = require "__shared/Utils/Easing"
 local m_RuntimeEntityHandler = require("RuntimeEntityHandler")
 
 function VisualEnvironmentHandler:__init()
-	m_Logger:Write('Initializing VisualEnvironmentHandler')
+	m_VEMLogger:Write('Initializing VisualEnvironmentHandler')
 	self:RegisterVars()
 end
 
@@ -72,9 +72,9 @@ function VisualEnvironmentHandler:CheckIfExists(p_ID)
 	end
 
 	if p_ID == nil then
-		m_Logger:Error("\nThe VE object ID provided is nil.")
+		m_VEMLogger:Error("\nThe VE object ID provided is nil.")
 	elseif self._VisualEnvironmentObjects[p_ID] == nil then
-		m_Logger:Error("\nThere isn't a VE object with this id or it hasn't been parsed yet. Id: " .. tostring(p_ID))
+		m_VEMLogger:Error("\nThere isn't a VE object with this id or it hasn't been parsed yet. Id: " .. tostring(p_ID))
 	end
 
 	return true
@@ -102,10 +102,10 @@ function VisualEnvironmentHandler:InitializeVE(p_ID, p_Visibility)
 	---@param l_Object VisualEnvironmentObject
 	for l_Index, l_Object in pairs(self._VisualEnvironmentObjects) do
 		if l_Index == p_ID then
-			m_Logger:Write("Spawning VE: ")
+			m_VEMLogger:Write("Spawning VE: ")
 
 			if l_Object.entity then
-				m_Logger:Warning("- " .. tostring(l_Index) .. ", already exists.")
+				m_VEMLogger:Warning("- " .. tostring(l_Index) .. ", already exists.")
 				self:SetVisibility(p_ID, 1.0)
 				return false, true
 			end
@@ -117,7 +117,7 @@ function VisualEnvironmentHandler:InitializeVE(p_ID, p_Visibility)
 
 			-- check if entity creation was successful
 			if not l_Object.entity then
-				m_Logger:Warning("- " .. tostring(l_Index) .. ", could not be spawned.")
+				m_VEMLogger:Warning("- " .. tostring(l_Index) .. ", could not be spawned.")
 				return false, false
 			end
 
@@ -138,7 +138,8 @@ function VisualEnvironmentHandler:InitializeVE(p_ID, p_Visibility)
 				m_RuntimeEntityHandler:SetVisibility(l_Object, false)
 			end
 
-			m_Logger:Write("- " .. l_Index .. " | Priority: " .. l_Object.ve.priority .. " | Visibility: " .. p_Visibility)
+			m_VEMLogger:Write("- " ..
+				l_Index .. " | Priority: " .. l_Object.ve.priority .. " | Visibility: " .. p_Visibility)
 			return true, false
 		end
 	end
@@ -148,17 +149,17 @@ end
 ---@param p_ID string
 ---@return boolean wasSuccessful
 function VisualEnvironmentHandler:DestroyVE(p_ID)
-	m_Logger:Write("Attempting to destroy VE preset with id " .. p_ID .. "...")
+	m_VEMLogger:Write("Attempting to destroy VE preset with id " .. p_ID .. "...")
 	---@type VisualEnvironmentObject
 	local s_Object = self._VisualEnvironmentObjects[p_ID]
 
 	if s_Object == nil then
-		m_Logger:Warning("Tried to destroy a preset that does not exist")
+		m_VEMLogger:Warning("Tried to destroy a preset that does not exist")
 		return false
 	end
 
 	if not s_Object.entity then
-		m_Logger:Write("Preset entity does not exist. Do you really want to destroy at this point?.")
+		m_VEMLogger:Write("Preset entity does not exist. Do you really want to destroy at this point?.")
 		return true
 	end
 
@@ -176,7 +177,7 @@ function VisualEnvironmentHandler:DestroyVE(p_ID)
 		m_RuntimeEntityHandler:SetVisibility(s_Object, true)
 	end
 
-	m_Logger:Write("-> Destroyed!")
+	m_VEMLogger:Write("-> Destroyed!")
 	return true
 end
 
@@ -357,7 +358,9 @@ function VisualEnvironmentHandler:UpdateLerp(p_DeltaTime)
 				self._Lerping[l_ID] = nil
 			end
 		elseif s_CompletionPercentage < 0 then
-			m_Logger:Warning('Lerping of preset ' .. tostring(l_ID) .. ' has its completed percentage of ' .. tostring(s_CompletionPercentage) .. ', should never happen')
+			m_VEMLogger:Warning('Lerping of preset ' ..
+				tostring(l_ID) ..
+				' has its completed percentage of ' .. tostring(s_CompletionPercentage) .. ', should never happen')
 			self:SetVisibility(l_ID, l_LerpingTable.endValue)
 			self._Lerping[l_ID] = nil
 		else
@@ -372,7 +375,7 @@ end
 ---@param p_Value any
 function VisualEnvironmentHandler:SetSingleValue(p_ID, p_Class, p_Property, p_Value)
 	if not p_Class or not p_Property or not p_Value then
-		m_Logger:Write("Passed invalid parameters")
+		m_VEMLogger:Write("Passed invalid parameters")
 		return
 	end
 	---@type VisualEnvironmentObject
@@ -389,7 +392,6 @@ function VisualEnvironmentHandler:ApplyTexture(p_ID, p_Guid, p_Path)
 	local s_Object = self._VisualEnvironmentObjects[p_ID]
 
 	for _, l_Class in pairs(s_Object.ve.components) do
-
 		if l_Class.typeInfo.name == "SkyComponentData" then
 			local s_Class = SkyComponentData(l_Class)
 			s_Class:MakeWritable()
@@ -399,7 +401,7 @@ function VisualEnvironmentHandler:ApplyTexture(p_ID, p_Guid, p_Path)
 			if s_Instance then
 				s_Class[p_Path] = TextureAsset(s_Instance)
 			else
-				m_Logger:Warning('[ApplyTexture] Could not find instance with guid ' .. tostring(p_Guid))
+				m_VEMLogger:Warning('[ApplyTexture] Could not find instance with guid ' .. tostring(p_Guid))
 			end
 		end
 	end

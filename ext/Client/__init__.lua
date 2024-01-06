@@ -3,8 +3,8 @@
 ---@diagnostic disable-next-line: assign-type-mismatch
 VEManagerClient = class 'VEManagerClient'
 
----@type Logger
-local m_Logger = Logger("VEManagerClient", true)
+---@type VEMLogger
+local m_VEMLogger = VEMLogger("VEManagerClient", true)
 
 --#region Imports
 require "Types/VisualEnvironmentObject"
@@ -19,7 +19,7 @@ local m_Time = require("Time")
 --#endregion
 
 function VEManagerClient:__init()
-	m_Logger:Write('Initializing VEManagerClient')
+	m_VEMLogger:Write('Initializing VEManagerClient')
 	self:RegisterVars()
 	self:RegisterEvents()
 end
@@ -32,7 +32,9 @@ function VEManagerClient:RegisterVars()
 		DefaultMorning = require("Presets/DefaultMorning"),
 		DefaultNoon = require("Presets/DefaultNoon"),
 		DefaultEvening = require("Presets/DefaultEvening"),
+		Vanilla = require("Presets/Vanilla"),
 	}
+	self.m_vanillaPreset = nil
 end
 
 function VEManagerClient:RegisterEvents()
@@ -55,6 +57,8 @@ function VEManagerClient:RegisterEvents()
 	Events:Subscribe('VEManager:ReplaceVE', self, self._OnReplaceVE)
 	Events:Subscribe('VEManager:Reinitialize', self, self._OnReinitialize)
 	Events:Subscribe('VEManager:ApplyTexture', self, self._OnApplyTexture)
+
+	NetEvents:Subscribe('VEManager:EnablePreset', self, self._OnEnablePreset)
 end
 
 --#region VU Event Functions
@@ -89,13 +93,14 @@ function VEManagerClient:_OnUpdateManager(p_DeltaTime, p_UpdatePass)
 		m_VisualEnvironmentHandler:UpdateLerp(p_DeltaTime)
 	end
 end
+
 --#endregion
 
 ---@param p_ID string
 ---@param p_Preset string
 function VEManagerClient:_RegisterPreset(p_ID, p_Preset)
 	self._RawPresets[p_ID] = json.decode(p_Preset)
-	m_Logger:Write("Registered Preset: " .. p_ID)
+	m_VEMLogger:Write("Registered Preset: " .. p_ID)
 end
 
 ---@param p_ID string
@@ -105,14 +110,15 @@ function VEManagerClient:_OnEnablePreset(p_ID)
 	-- reset all running priority 1 lerps as EnablePreset() is a function to apply the main visual environment
 	m_VisualEnvironmentHandler:ResetPriorityOneLerps()
 
-	m_Logger:Write("Enabling preset: " .. tostring(p_ID))
+	m_VEMLogger:Write("Enabling preset: " .. tostring(p_ID))
 
 	local s_Initialized, s_AlreadyExists = m_VisualEnvironmentHandler:InitializeVE(p_ID, 1.0)
 
 	if not s_Initialized and not s_AlreadyExists then
-		m_Logger:Error("Failed to create VE Entity from preset " .. tostring(p_ID))
+		m_VEMLogger:Error("Failed to create VE Entity from preset " .. tostring(p_ID))
 	elseif not s_Initialized and s_AlreadyExists then
-		m_Logger:Warning("Didnt create VE Entity, since it already exists. This shouldnt happen. Making " .. tostring(p_ID) .. " visible nevertheless")
+		m_VEMLogger:Warning("Didnt create VE Entity, since it already exists. This shouldnt happen. Making " ..
+			tostring(p_ID) .. " visible nevertheless")
 	end
 end
 
@@ -120,10 +126,10 @@ end
 function VEManagerClient:_OnDisablePreset(p_ID)
 	if not m_VisualEnvironmentHandler:CheckIfExists(p_ID) then return end
 
-	m_Logger:Write("Disabling preset: " .. tostring(p_ID))
+	m_VEMLogger:Write("Disabling preset: " .. tostring(p_ID))
 
 	if not m_VisualEnvironmentHandler:DestroyVE(p_ID) then
-		m_Logger:Error("Failed to destroy VE of preset " .. tostring(p_ID))
+		m_VEMLogger:Error("Failed to destroy VE of preset " .. tostring(p_ID))
 	end
 end
 
@@ -207,9 +213,13 @@ function VEManagerClient:_OnReplaceVE(p_ID, p_Replacement)
 	local s_Preset = json.decode(p_Replacement)
 
 	if not s_Preset then
-		m_Logger:Warning('Error when parsing the replacement preset. Id: ' .. tostring(p_ID))
+		m_VEMLogger:Warning('Error when parsing the replacement preset. Id: ' .. tostring(p_ID))
 	end
 	self._RawPresets[p_ID] = s_Preset
+	m_VisualEnvironmentHandler:DestroyVE(p_ID)
+	-- We need to trigger the recreation the the VEObject again and replace it by loading it. So we call:
+	self:_LoadPresets()
+	m_VisualEnvironmentHandler:InitializeVE(p_ID, 1)
 end
 
 function VEManagerClient:_OnReinitialize()
@@ -222,7 +232,8 @@ end
 function VEManagerClient:_OnApplyTexture(p_ID, p_Guid, p_Path)
 	if not m_VisualEnvironmentHandler:CheckIfExists(p_ID) then return end
 
-	m_VisualEnvironmentHandler:__init()
+	-- m_VisualEnvironmentHandler:__init()
+	m_VisualEnvironmentHandler:ApplyTexture(p_ID, p_Guid, p_Path)
 end
 
 ---@return table<string, string>
@@ -230,16 +241,51 @@ function VEManagerClient:GetRawPresets()
 	return self._RawPresets
 end
 
-function VEManagerClient:_LoadPresets()
-	m_Logger:Write("Loading presets... (Name, Type, Priority)")
+---@param p_Class string
+---@param p_Field FieldInformation
+function VEManagerClient:GetDefaultValue(p_Class, p_Field)
+	if p_Field.typeInfo.enum then
+		if p_Field.typeInfo.name == "Realm" then
+			return Realm.Realm_Client
+		else
+			m_VEMLogger:Write("\t- Found unhandled enum, " .. p_Field.typeInfo.name)
+			return
+		end
+	end
 
-	local s_VanillaState
+	local s_States = VisualEnvironmentManager:GetStates()
+
+	for i, l_State in ipairs(s_States) do
+		--m_VEMLogger:Write(">>>>>> state:" .. l_State.entityName)
+
+		if l_State.entityName == "Levels/Web_Loading/Lighting/Web_Loading_VE" then
+			goto continue
+		elseif l_State.entityName ~= 'EffectEntity' then
+			local s_Class = l_State[UtilityFunctions:FirstToLower(p_Class)] --colorCorrection
+
+			if s_Class == nil then
+				goto continue
+			end
+
+			--m_VEMLogger:Write("Sending default value: " .. tostring(p_Class) .. " | " .. tostring(p_Field.typeInfo.name) .. " | " .. tostring(s_Class[firstToLower(p_Field.typeInfo.name)]) .. " (" .. tostring(type(s_Class[firstToLower(p_Field.typeInfo.name)])) .. ")")
+			--m_VEMLogger:Write(tostring(s_Class[firstToLower(p_Field.name)]) .. ' | ' .. tostring(p_Field.typeInfo.name))
+			return s_Class[UtilityFunctions:FirstToLower(p_Field.name)] --colorCorrection Contrast
+		end
+
+		::continue::
+	end
+end
+
+function VEManagerClient:_LoadPresets()
+	m_VEMLogger:Write("Loading presets... (Name, Type, Priority)")
+
+
 	for _, l_State in ipairs(VisualEnvironmentManager:GetStates()) do
 		if l_State.entityName ~= "EffectEntity" and l_State.entityName ~= "Levels/Web_Loading/Lighting/Web_Loading_VE" then
 			-- SET VANILLA VE TO PRIORITY 0
 			l_State.priority = 0
 			l_State.visibility = 0
-			s_VanillaState = l_State
+			self.m_vanillaPreset = l_State
 		end
 	end
 
@@ -253,7 +299,6 @@ function VEManagerClient:_LoadPresets()
 
 		for _, l_Class in ipairs(s_VEObject.supportedClasses) do
 			if l_Preset[l_Class] ~= nil then
-
 				-- Create class and add it to the VE entity.
 				local s_Class = UtilityFunctions:InitEngineType(l_Class .. "ComponentData")
 				s_Class.excluded = false
@@ -273,23 +318,23 @@ function VEManagerClient:_LoadPresets()
 
 					-- Get type
 					local s_Type = l_Field.typeInfo.name --Boolean, Int32, Vec3 etc.
-					-- pm_Logger:Write("Field: " .. tostring(s_FieldName) .. " | " .. " Type: " .. tostring(s_Type))
+					-- pm_VEMLogger:Write("Field: " .. tostring(s_FieldName) .. " | " .. " Type: " .. tostring(s_Type))
 
 					-- Initialize value
 					local s_Value = nil
 
 					-- If the preset contains that field
 					if l_Preset[l_Class][s_FieldName] then
-
 						if UtilityFunctions:IsBasicType(s_Type) then
 							s_Value = UtilityFunctions:ParseValue(s_Type, l_Preset[l_Class][s_FieldName])
 						elseif l_Field.typeInfo.enum then
 							s_Value = tonumber(l_Preset[l_Class][s_FieldName])
 						elseif s_Type == "TextureAsset" then
 							s_Value = UtilityFunctions:GetTexture(l_Preset[l_Class][s_FieldName])
-
 							if not s_Value then
-								m_Logger:Write("\t- TextureAsset has not been saved (" .. l_Preset[l_Class][s_FieldName] .. " | " .. tostring(l_Class) .. " | " .. tostring(s_FieldName) .. ")")
+								m_VEMLogger:Write("\t- TextureAsset has not been saved (" ..
+									l_Preset[l_Class][s_FieldName] ..
+									" | " .. tostring(l_Class) .. " | " .. tostring(s_FieldName) .. ")")
 							end
 						elseif l_Field.typeInfo.array then
 							error("\t- Found unexpected array") -- TODO: Instead of error (that breaks the code), a continue should be used (unfortunately with goto), or set an "errorFound" true/false parameter to true and skip the component addition
@@ -309,38 +354,22 @@ function VEManagerClient:_LoadPresets()
 					if s_Value == nil then
 						---@param p_Class string
 						---@param p_Field FieldInformation
-						local function _GetFieldDefaultValue(p_Class, p_Field)
-							if p_Field.typeInfo.enum then
 
-								if p_Field.typeInfo.name == "Realm" then
-									return Realm.Realm_Client
-								else
-									m_Logger:Write("\t- Found unhandled enum, " .. p_Field.typeInfo.name)
-									return
-								end
-							end
-
-							local s_VanillaClass = s_VanillaState[UtilityFunctions:FirstToLower(p_Class)]
-							local s_ReturnValue
-
-							if s_VanillaClass then
-								s_ReturnValue = s_VanillaClass[UtilityFunctions:FirstToLower(p_Field.name)]
-							end
-							--m_Logger:Write("Sending default value: " .. tostring(p_Class) .. " | " .. tostring(p_Field.typeInfo.name) .. " | " .. tostring(p_Class[UtilityFunctions:FirstToLower(p_Field.typeInfo.name)]) .. " (" .. tostring(type(s_Class[UtilityFunctions:FirstToLower(p_Field.typeInfo.name)])) .. ")")
-							--m_Logger:Write(tostring(s_Class[firstToLower(p_Field.name)]) .. ' | ' .. tostring(p_Field.typeInfo.name))
-							return s_ReturnValue
-						end
 						-- Try to get original value
-						-- m_Logger:Write("Setting default value for field " .. s_FieldName .. " of class " .. l_Class .. " | " ..tostring(s_Value))
-						s_Value = _GetFieldDefaultValue(l_Class, l_Field)
+						-- m_VEMLogger:Write("Setting default value for field " .. s_FieldName .. " of class " .. l_Class .. " | " ..tostring(s_Value))
+						s_Value = self:GetDefaultValue(l_Class, l_Field)
 
 						if s_Value == nil then
-							m_Logger:Write("\t- Failed to fetch original value: " .. tostring(l_Class) .. " | " .. tostring(s_FieldName))
+							m_VEMLogger:Write("\t- Failed to fetch original value: " ..
+								tostring(l_Class) .. " | " .. tostring(s_FieldName))
 
 							if s_FieldName == "FilmGrain" then -- fix FilmGrain texture
-								m_Logger:Write("\t\t- Fixing value for field " .. s_FieldName .. " of class " .. l_Class .. " | " .. tostring(s_Value))
+								m_VEMLogger:Write("\t\t- Fixing value for field " ..
+									s_FieldName .. " of class " .. l_Class .. " | " .. tostring(s_Value))
 								---@diagnostic disable-next-line: param-type-mismatch
-								s_Class[UtilityFunctions:FirstToLower(s_FieldName)] = TextureAsset(ResourceManager:FindInstanceByGuid(Guid('44AF771F-23D2-11E0-9C90-B6CDFDA832F1'), Guid('1FD2F223-0137-2A0F-BC43-D974C2BD07B4')))
+								s_Class[UtilityFunctions:FirstToLower(s_FieldName)] = TextureAsset(ResourceManager
+									:FindInstanceByGuid(Guid('44AF771F-23D2-11E0-9C90-B6CDFDA832F1'),
+										Guid('1FD2F223-0137-2A0F-BC43-D974C2BD07B4')))
 							end
 						else
 							-- Applying original value
@@ -348,13 +377,11 @@ function VEManagerClient:_LoadPresets()
 								s_Class[UtilityFunctions:FirstToLower(s_FieldName)] = s_Value
 							elseif l_Field.typeInfo.enum then
 								s_Class[UtilityFunctions:FirstToLower(s_FieldName)] = tonumber(s_Value)
-
 							elseif s_Type == "TextureAsset" then
 								---@diagnostic disable-next-line: param-type-mismatch
 								s_Class[UtilityFunctions:FirstToLower(s_FieldName)] = TextureAsset(s_Value)
-
 							elseif l_Field.typeInfo.array then
-								m_Logger:Write("\t- Found unexpected array, ignoring")
+								m_VEMLogger:Write("\t- Found unexpected array, ignoring")
 							else
 								-- Its a DataContainer
 								s_Class[UtilityFunctions:FirstToLower(s_FieldName)] = _G[s_Type](s_Value)
@@ -371,8 +398,10 @@ function VEManagerClient:_LoadPresets()
 		self._RawPresets[l_ID] = nil
 	end
 	Events:Dispatch("VEManager:PresetsLoaded")
+	NetEvents:Send("VEManager:PresetsLoaded")
 	NetEvents:Send("VEManager:PlayerReady")
-	m_Logger:Write("Presets loaded")
+	m_VEMLogger:Write("Presets loaded")
+	self._OnEnablePreset(self, 'Vanilla')
 end
 
 return VEManagerClient()

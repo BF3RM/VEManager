@@ -4,11 +4,11 @@
 ---@diagnostic disable-next-line: assign-type-mismatch
 UtilityFunctions = class 'UtilityFunctions'
 
----@type Logger
-local m_Logger = Logger("UtilityFunctions", false)
+---@type VEMLogger
+local m_VEMLogger = VEMLogger("UtilityFunctions", false)
 
 function UtilityFunctions:__init()
-	m_Logger:Write('Initializing UtilityFunctions')
+	m_VEMLogger:Write('Initializing UtilityFunctions')
 	self:RegisterVars()
 	self:RegisterEvents()
 end
@@ -59,10 +59,10 @@ end
 ---@param p_Class string
 ---@param p_Guid Guid|nil
 function UtilityFunctions:InitEngineType(p_Class, p_Guid)
-    -- Check if exists
-    if not _G[p_Class] then
-        m_Logger:Error("Provided Frostbite type does not exist")
-    end
+	-- Check if exists
+	if not _G[p_Class] then
+		m_VEMLogger:Error("Provided Frostbite type does not exist")
+	end
 
 	-- Create the instance
 	local s_Entity = _G[p_Class]()
@@ -110,7 +110,6 @@ function UtilityFunctions:ParseValue(p_Type, p_Value)
 		end
 	elseif p_Type == "CString" then
 		return tostring(p_Value)
-
 	elseif p_Type == "Float8" or
 		p_Type == "Float16" or
 		p_Type == "Float32" or
@@ -124,24 +123,20 @@ function UtilityFunctions:ParseValue(p_Type, p_Value)
 		p_Type == "Uint32" or
 		p_Type == "Uint64" then
 		return tonumber(p_Value)
-
 	elseif p_Type == "Vec2" then -- Vec2
 		local s_Vec = _HandleVector(p_Value)
 		---@diagnostic disable-next-line: param-type-mismatch
 		return Vec2(tonumber(s_Vec[1]), tonumber(s_Vec[2]))
-
 	elseif p_Type == "Vec3" then -- Vec3
 		local s_Vec = _HandleVector(p_Value)
 		---@diagnostic disable-next-line: param-type-mismatch
 		return Vec3(tonumber(s_Vec[1]), tonumber(s_Vec[2]), tonumber(s_Vec[3]))
-
 	elseif p_Type == "Vec4" then -- Vec4
 		local s_Vec = _HandleVector(p_Value)
 		---@diagnostic disable-next-line: param-type-mismatch
 		return Vec4(tonumber(s_Vec[1]), tonumber(s_Vec[2]), tonumber(s_Vec[3]), tonumber(s_Vec[4]))
-
 	else
-		m_Logger:Write("Unhandled type: " .. p_Type)
+		m_VEMLogger:Write("Unhandled type: " .. p_Type)
 		return nil
 	end
 end
@@ -163,6 +158,44 @@ function UtilityFunctions:FirstToLower(p_String)
 	return (p_String:gsub("^%L", string.lower))
 end
 
+-- Injecting Some utility functions for tables.
+
+---@param t table
+---@param x 'object'
+function table.Contains(t, x)
+	local found = false
+	for _, v in pairs(t) do
+		if v == x then
+			found = true
+		end
+	end
+	return found
+end
+
+---@param t table
+---@param object 'object'
+---@return number?
+function table.IndexOf(t, object)
+	if type(t) ~= "table" then error("table expected, got " .. type(t), 2) end
+
+	for i, v in pairs(t) do
+		if object == v then
+			return i
+		end
+	end
+end
+
+---@param t table
+---@param propertyString string
+---@param propertyValue any
+---@return number? -- returns the index of the first match or nil
+function table.Any(t, propertyString, propertyValue)
+	if type(t) ~= "table" then error("table expected, got " .. type(t), 2) end
+	for i, v in pairs(t) do
+		if v[propertyString] == propertyValue then
+			return i
+		end
+	end
+end
+
 return UtilityFunctions()
-
-
