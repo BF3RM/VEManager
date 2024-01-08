@@ -31,6 +31,7 @@ function TimeServer:RegisterVars()
 	self.m_SyncTickrate = VEM_CONFIG.SERVER_SYNC_CLIENT_EVERY_TICKS / self.m_ServerTickrate --[Hz]
 	---@type boolean
 	self.m_SystemRunning = false
+	self.m_OnlyDynamicPresets = false
 end
 
 function TimeServer:RegisterEvents()
@@ -52,10 +53,14 @@ end
 
 ---@param p_StartingTime number
 ---@param p_LengthOfDayInMinutes number
-function TimeServer:_OnEnable(p_StartingTime, p_LengthOfDayInMinutes)
+function TimeServer:_OnEnable(p_StartingTime, p_LengthOfDayInMinutes, p_OnlyDynamicPresets)
 	if self.m_SystemRunning then
 		-- reset
 		self:RegisterVars()
+	end
+
+	if p_OnlyDynamicPresets then
+		self.m_OnlyDynamicPresets = p_OnlyDynamicPresets
 	end
 
 	-- set length of day
@@ -73,7 +78,8 @@ function TimeServer:_OnEnable(p_StartingTime, p_LengthOfDayInMinutes)
 	m_VEMLogger:Write('Received new time (Starting Time, Length of Day): ' ..
 		p_StartingTime .. 'h, ' .. self.m_TotalDayLength .. 'sec')
 
-	NetEvents:Broadcast('VEManager:AddTimeToClient', self.m_ServerDayTime, self.m_IsStatic, self.m_TotalDayLength)
+	NetEvents:Broadcast('VEManager:AddTimeToClient', self.m_ServerDayTime, self.m_IsStatic, self.m_TotalDayLength,
+		self.m_OnlyDynamicPresets)
 	self.m_SystemRunning = true
 end
 
@@ -108,7 +114,7 @@ function TimeServer:_OnPlayerSync(p_Player)
 	if self.m_SystemRunning == true or self.m_IsStatic == true then
 		m_VEMLogger:Write('Syncing Player with Server')
 		NetEvents:SendTo('VEManager:AddTimeToClient', p_Player, self.m_ServerDayTime, self.m_IsStatic,
-			self.m_TotalDayLength)
+			self.m_TotalDayLength, self.m_OnlyDynamicPresets)
 	end
 end
 
@@ -145,6 +151,7 @@ function TimeServer:ChatCommands(p_PlayerName, p_RecipientMask, p_Message)
 		if duration == nil then
 			duration = 0.5
 		end
+
 
 		m_VEMLogger:Write('Time Event called by ' .. p_PlayerName)
 		self:_OnEnable(hour, duration)

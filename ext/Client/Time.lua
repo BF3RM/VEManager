@@ -39,6 +39,8 @@ function Time:RegisterVars()
 
 	self._Sunrise = VEM_CONFIG.DN_SUN_TIMINGS[1] / 24
 	self._Sunset = VEM_CONFIG.DN_SUN_TIMINGS[2] / 24
+
+	self._DynamicTypes = { 'Dynamic', 'DefaultDynamic' }
 end
 
 function Time:RegisterEvents()
@@ -197,15 +199,13 @@ end
 ---@param p_StartingTime number
 ---@param p_IsStatic boolean
 ---@param p_LengthOfDayInSeconds number
-function Time:_OnAddTime(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
+function Time:_OnAddTime(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds, p_OnlyDynamicPresets)
 	if self._SystemRunning or self._FirstRun then
 		self:RegisterVars()
 	end
 	-- We hide the Vanilla preset
 	m_VisualEnvironmentHandler:SetVisibility('Vanilla', 0)
 
-
-	local dynamicTypes = { 'Dynamic', 'DefaultDynamic' }
 	m_VEMLogger:Write("Searching for dynamic presets:")
 
 	local s_VisualEnvironmentObjects = m_VisualEnvironmentHandler:GetVisualEnvironmentObjects()
@@ -244,7 +244,7 @@ function Time:_OnAddTime(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds)
 									s_SunRotationY
 							}
 						end
-					elseif table.Contains(dynamicTypes, veObject.type) then
+					elseif table.Contains(p_OnlyDynamicPresets and { "Dynamic" } or self._DynamicTypes, veObject.type) then
 						-- We save the new VE preset if its a Dynamic or DefaultDynamic
 						m_VEMLogger:Write("Saving a new preset!")
 						table.insert(self._SortedDynamicPresetsTable,
