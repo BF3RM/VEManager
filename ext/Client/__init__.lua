@@ -397,11 +397,12 @@ function VEManagerClient:_LoadPresets()
 		m_VisualEnvironmentHandler:RegisterVisualEnvironmentObject(l_ID, s_VEObject)
 		self._RawPresets[l_ID] = nil
 	end
+	-- Enabling Vanilla by default :)
+	self._OnEnablePreset(self, 'Vanilla')
 	Events:Dispatch("VEManager:PresetsLoaded")
 	NetEvents:Send("VEManager:PresetsLoaded")
 	NetEvents:Send("VEManager:PlayerReady")
 	m_VEMLogger:Write("Presets loaded")
-	self._OnEnablePreset(self, 'Vanilla')
 end
 
 return VEManagerClient()

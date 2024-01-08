@@ -142,7 +142,7 @@ end
 ---@param p_Message string
 function TimeServer:ChatCommands(p_PlayerName, p_RecipientMask, p_Message)
 	if p_Message:match('^!settime') then
-		local hour, duration, onlyDynamicPresets = p_Message:match('^!settime (%d+%.*%d*) (%d+%.*%d*) (%a)')
+		local hour, duration = p_Message:match('^!settime (%d+%.*%d*) (%d+%.*%d*)')
 
 		if hour == nil then
 			hour = 9
@@ -152,12 +152,9 @@ function TimeServer:ChatCommands(p_PlayerName, p_RecipientMask, p_Message)
 			duration = 0.5
 		end
 
-		if onlyDynamicPresets == "true" then
-			onlyDynamicPresets = true
-		end
 
 		m_VEMLogger:Write('Time Event called by ' .. p_PlayerName)
-		self:_OnEnable(hour, duration, onlyDynamicPresets)
+		self:_OnEnable(hour, duration)
 	elseif p_Message == '!setnight' then
 		m_VEMLogger:Write('Time Event called by ' .. p_PlayerName)
 		self:_OnEnable(0, nil)

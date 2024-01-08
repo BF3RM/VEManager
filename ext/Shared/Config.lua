@@ -10,7 +10,7 @@ VEM_CONFIG = {
 
     -- PRINT --
     PRINT_DN_TIME_AND_VISIBILITIES = true, -- Print current time every hour along with the visibilities of the 4 presets
-    VEMLogger_ENABLED = false,             -- Enables the use of the VEMLogger Class [DEV]
+    VEMLogger_ENABLED = true,              -- Enables the use of the VEMLogger Class [DEV]
     VEMLogger_PRINT_ALL = false,           -- Prints All VEMLogger Prints
 
     -- SERVER --
