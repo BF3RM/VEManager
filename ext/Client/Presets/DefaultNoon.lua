@@ -63,8 +63,8 @@ return json.decode([[
         "Enable": "true",
         "SkyColor": "(0.7, 0.7, 0.7)",
         "GroundColor": "(0.7, 0.7, 0.7)",
-        "SunRotationX": "0",
-        "SunRotationY": "90"
+        "SunRotationX": "150.0",
+        "SunRotationY": "90.0"
     },
     "Sky": {
         "Realm": "0",

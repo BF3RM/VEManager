@@ -86,7 +86,7 @@ end
 function Time:_UpdateSunPosition(p_ClientTime)
 	if self._SunPosY and self._SunPosX then
 		local s_DayFactor = p_ClientTime / self._TotalDayLength
-		local s_SunPosX = 275
+		local s_SunPosX = self._SortedDynamicPresetsTable[self._CurrentPreset]['sunRotationX']
 		local s_SunPosY = 0
 
 		if s_DayFactor <= self._Sunrise then -- Moon
@@ -220,6 +220,7 @@ function Time:_OnAddTime(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds, p_O
 		for presetID, veObject in pairs(s_VisualEnvironmentObjects) do
 			if veObject.rawPreset.Sky ~= nil and veObject.rawPreset.OutdoorLight ~= nil then
 				local s_SunRotationY = tonumber(veObject.rawPreset.OutdoorLight.SunRotationY)
+				local s_SunRotationX = tonumber(veObject.rawPreset.OutdoorLight.SunRotationX)
 				-- local s_SkyBrightness = tonumber(veObject.rawPreset.Sky.BrightnessScale)  -- we are no longer using this it seems?
 
 				-- if l_Object.type == l_Type and s_SunRotationY ~= nil then					
@@ -240,15 +241,15 @@ function Time:_OnAddTime(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds, p_O
 								"Replacing an already saved preset with a Dynamic preset for the same sunRotationY value")
 							self._SortedDynamicPresetsTable[indexMatch] = {
 								presetID = presetID,
-								sunRotationY =
-									s_SunRotationY
+								sunRotationY = s_SunRotationY,
+								sunRotationX = s_SunRotationX
 							}
 						end
 					elseif table.Contains(p_OnlyDynamicPresets and { "Dynamic" } or self._DynamicTypes, veObject.type) then
 						-- We save the new VE preset if its a Dynamic or DefaultDynamic
 						m_VEMLogger:Write("Saving a new preset!")
 						table.insert(self._SortedDynamicPresetsTable,
-							{ presetID = presetID, sunRotationY = s_SunRotationY })
+							{ presetID = presetID, sunRotationY = s_SunRotationY, sunRotationX = s_SunRotationX })
 					end
 				end
 			end
@@ -284,7 +285,7 @@ function Time:_OnAddTime(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds, p_O
 				-- Save values
 				self._SavedValuesForReset[l_Index][l_Class.typeInfo.name] = {}
 				self._SavedValuesForReset[l_Index][l_Class.typeInfo.name].sunRotationX = s_Class.sunRotationX
-				self._SavedValuesForReset[l_Index][l_Class.typeInfo.name].sunRotationY = s_Class.sunRotationX
+				self._SavedValuesForReset[l_Index][l_Class.typeInfo.name].sunRotationY = s_Class.sunRotationY
 				-- Replace values
 				s_Class.sunRotationX = 0.0
 				s_Class.sunRotationY = 0.0
@@ -304,24 +305,37 @@ function Time:_OnAddTime(p_StartingTime, p_IsStatic, p_LengthOfDayInSeconds, p_O
 					.cloudLayer2Rotation
 				self._SavedValuesForReset[l_Index][l_Class.typeInfo.name].cloudLayer2Speed = s_Class.cloudLayer2Speed
 				-- Replace values
-				s_Class.sunSize = 0.01
-				s_Class.sunScale = 1.5
+				-- s_Class.sunSize = 0.01
+				-- s_Class.sunScale = 1.5
 				s_Class.cloudLayer2Altitude = 5000000.0
 				s_Class.cloudLayer2TileFactor = 0.60000002384186
 				s_Class.cloudLayer2Rotation = 237.07299804688
 				s_Class.cloudLayer2Speed = -0.0010000000474975
+
+				local levelName = SharedUtils:GetLevelName()
+				m_VEMLogger:Write('The level name: ' .. levelName)
+
+				if string.find(levelName, 'XP3_Valley') then
+					m_VEMLogger:Write('The level is XP3 Valley!, removing the fucking moon')
+					s_Class.panoramicUVMinX = 100
+					s_Class.panoramicUVMaxX = 100
+					s_Class.panoramicUVMinY = 100
+					s_Class.panoramicUVMaxY = 0
+				end
 			end
 		end
 		m_VEMLogger:Write(" - " ..
 			tostring(l_Preset['presetID']) .. " (sun: " .. tostring(l_Preset['sunRotationY']) .. " deg)")
 	end
 
+
+
 	-- Save dayLength in Class (minutes -> seconds)
 	self._TotalDayLength = p_LengthOfDayInSeconds
 	m_VEMLogger:Write('[Time-Client]: Length of Day: ' .. self._TotalDayLength .. ' Seconds')
 	self._ClientTime = p_StartingTime
 	m_VEMLogger:Write('[Time-Client]: Starting at Time: ' ..
-		p_StartingTime / 3600 / (self._TotalDayLength / 86000) .. ' Hours (' .. p_StartingTime .. ' Seconds)')
+		p_StartingTime / 36100 / (self._TotalDayLength / 86000) .. ' Hours (' .. p_StartingTime .. ' Seconds)')
 
 	-- Update sun & clouds
 	self:_UpdateSunPosition(self._ClientTime)
