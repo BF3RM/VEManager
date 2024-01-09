@@ -64,8 +64,8 @@ return json.decode([[
         "SunColor": "(1, 0.16, 0.06)",
         "SkyColor": "(0.4, 0.3, 0.3)",
         "GroundColor": "(0.4, 0.3, 0.3)",
-        "SunRotationX": "0",
-        "SunRotationY": "10"
+        "SunRotationX": "150.0",
+        "SunRotationY": "10.0"
     },
     "Sky": {
         "Realm": "0",

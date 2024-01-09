@@ -29,6 +29,7 @@ function VEManagerClient:RegisterVars()
 	-- Default Dynamic day-night cycle Presets
 	self._RawPresets = {
 		DefaultNight = require("Presets/DefaultNight"),
+		DefaultLateNight = require("Presets/DefaultLateNight"),
 		DefaultMorning = require("Presets/DefaultMorning"),
 		DefaultNoon = require("Presets/DefaultNoon"),
 		DefaultEvening = require("Presets/DefaultEvening"),
