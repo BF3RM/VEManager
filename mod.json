@@ -9,7 +9,7 @@
 	],
 	"Description": "Handles VE",
 	"URL": "https://github.com/BF3RM/VEManager",
-	"Version": "0.5.2",
+	"Version": "0.5.3",
 	"HasWebUI": false,
 	"HasVeniceEXT": true
 }
