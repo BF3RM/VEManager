@@ -17,6 +17,6 @@ VEM_CONFIG = {
     SERVER_SYNC_CLIENT_EVERY_TICKS = 2, -- Sync clients with the correct time ever X ticks
 
     -- DEV --
-    ADMINS = { "GreatApo", "IllustrisJack", "FoolHen", "Beschutzer" }, -- Players that can use the VEM chat commands
+    ADMINS = { "GreatApo", "IllustrisJack", "FoolHen", "Beschutzer", "Dumpy" }, -- Players that can use the VEM chat commands
     DEV_ENABLE_CHAT_COMMANDS = true,                                   -- Enables the use of VEM Internal Chat Commands
 }
