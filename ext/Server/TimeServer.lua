@@ -56,7 +56,8 @@ end
 function TimeServer:_OnEnable(p_StartingTime, p_LengthOfDayInMinutes, p_OnlyDynamicPresets)
 	if self.m_SystemRunning then
 		-- reset
-		self:RegisterVars()
+		-- self:RegisterVars()
+		return
 	end
 
 	if p_OnlyDynamicPresets then
@@ -99,7 +100,6 @@ function TimeServer:_OnEngineUpdate(p_DeltaTime, p_SimulationDeltaTime)
 			return
 		end
 
-		m_VEMLogger:Write('Broadcasting time values !!!!!!!!!!!')
 		self.m_EngineUpdateTimer = 0
 		self:_Broadcast(self.m_ServerDayTime, self.m_TotalServerTime)
 
@@ -123,7 +123,6 @@ end
 ---@param p_ServerDayTime number
 ---@param p_TotalServerTime number
 function TimeServer:_Broadcast(p_ServerDayTime, p_TotalServerTime)
-	m_VEMLogger:Write('The engine updated !!!!!!!!!!!!')
 	NetEvents:BroadcastUnreliableOrdered('TimeServer:Sync', p_ServerDayTime, p_TotalServerTime)
 end
 

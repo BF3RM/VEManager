@@ -72,7 +72,6 @@ end
 ---@param p_ServerDayTime number
 ---@param p_TotalServerTime number
 function Time:_OnServerSync(p_ServerDayTime, p_TotalServerTime)
-	m_VEMLogger:Write('Server sync event !!!!!!!!!!!!')
 	if not p_ServerDayTime or not p_TotalServerTime then
 		return
 	elseif self._SystemRunning then
