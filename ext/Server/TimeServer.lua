@@ -52,9 +52,11 @@ function TimeServer:_OnLevelDestroy()
 end
 
 ---@param p_StartingTime number
----@param p_LengthOfDayInMinutes number
-function TimeServer:_OnEnable(p_StartingTime, p_LengthOfDayInMinutes, p_OnlyDynamicPresets)
-	if self.m_SystemRunning then
+---@param p_LengthOfDayInMinutes number|nil
+---@param p_OnlyDynamicPresets boolean
+---@param isChatCommand boolean
+function TimeServer:_OnEnable(p_StartingTime, p_LengthOfDayInMinutes, p_OnlyDynamicPresets, isChatCommand)
+	if self.m_SystemRunning and not isChatCommand then
 		-- reset
 		-- self:RegisterVars()
 		return
@@ -156,19 +158,19 @@ function TimeServer:ChatCommands(p_PlayerName, p_RecipientMask, p_Message)
 
 
 		m_VEMLogger:Write('Time Event called by ' .. p_PlayerName)
-		self:_OnEnable(hour, duration)
+		self:_OnEnable(hour, duration, nil, true)
 	elseif p_Message == '!setnight' then
 		m_VEMLogger:Write('Time Event called by ' .. p_PlayerName)
-		self:_OnEnable(0, nil)
+		self:_OnEnable(0, nil, nil, true)
 	elseif p_Message == '!setmorning' then
 		m_VEMLogger:Write('Time Event called by ' .. p_PlayerName)
-		self:_OnEnable(9, nil)
+		self:_OnEnable(9, nil, nil, true)
 	elseif p_Message == '!setnoon' then
 		m_VEMLogger:Write('Time Event called by ' .. p_PlayerName)
-		self:_OnEnable(12, nil)
+		self:_OnEnable(12, nil, nil, true)
 	elseif p_Message == '!setafternoon' then
 		m_VEMLogger:Write('Time Event called by ' .. p_PlayerName)
-		self:_OnEnable(15, nil)
+		self:_OnEnable(15, nil, nil, true)
 	elseif p_Message == '!pausetime' or p_message == '!resumetime' then
 		m_VEMLogger:Write('Time Pause called by ' .. p_PlayerName)
 		self:_OnPauseUnpause()
