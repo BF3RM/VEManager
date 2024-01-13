@@ -39,7 +39,7 @@ function VEManagerClient:RegisterVars()
 end
 
 function VEManagerClient:RegisterEvents()
-	Events:Subscribe('Partition:Loaded', self, self._OnPartitionLoaded)
+	--Events:Subscribe('Partition:Loaded', self, self._OnPartitionLoaded)
 	Events:Subscribe('Level:Loaded', self, self._OnLevelLoaded)
 	Events:Subscribe('Level:Destroy', self, self._OnLevelDestroy)
 	Events:Subscribe('UpdateManager:Update', self, self._OnUpdateManager)
