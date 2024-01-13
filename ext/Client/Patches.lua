@@ -142,9 +142,9 @@ function Patches:PatchComponents(p_Partition)
 	-- tostring(p_Partition.primaryInstance.typeInfo.elementType))
 	-- print('The partition primaryInstance typeinfo name : ' .. tostring(p_Partition.primaryInstance.typeInfo.name))
 
-	if not VEM_CONFIG.PATCH_DN_COMPONENTS then
-		return
-	end
+	-- if not VEM_CONFIG.PATCH_DN_COMPONENTS then
+	-- 	return
+	-- end
 
 	if p_Partition.primaryInstance:Is("MeshAsset") then
 		_PatchMeshAsset(p_Partition.primaryInstance)
@@ -168,8 +168,8 @@ function Patches:PatchComponents(p_Partition)
 				_PatchEffectEntityData(l_Instance)
 			end
 		end
-	elseif p_Partition.primaryInstance:Is("EmitterTemplateData") then
-		_PatchEmitterTemplateData(p_Partition.primaryInstance)
+		-- elseif p_Partition.primaryInstance:Is("EmitterTemplateData") then
+		-- 	_PatchEmitterTemplateData(p_Partition.primaryInstance)
 	end
 end
 

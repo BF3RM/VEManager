@@ -39,7 +39,9 @@ function VEManagerClient:RegisterVars()
 end
 
 function VEManagerClient:RegisterEvents()
-	Events:Subscribe('Partition:Loaded', self, self._OnPartitionLoaded)
+	if VEM_CONFIG.PATCH_DN_COMPONENTS then
+		Events:Subscribe('Partition:Loaded', self, self._OnPartitionLoaded)
+	end
 	Events:Subscribe('Level:Loaded', self, self._OnLevelLoaded)
 	Events:Subscribe('Level:Destroy', self, self._OnLevelDestroy)
 	Events:Subscribe('UpdateManager:Update', self, self._OnUpdateManager)
