@@ -99,6 +99,7 @@ function TimeServer:_OnEngineUpdate(p_DeltaTime, p_SimulationDeltaTime)
 			return
 		end
 
+		m_VEMLogger:Write('Broadcasting time values !!!!!!!!!!!')
 		self.m_EngineUpdateTimer = 0
 		self:_Broadcast(self.m_ServerDayTime, self.m_TotalServerTime)
 
@@ -111,6 +112,7 @@ end
 
 ---@param p_Player Player
 function TimeServer:_OnPlayerSync(p_Player)
+	m_VEMLogger:Write('The player ' .. p_Player.name .. ' wants to sync !!!!!!!!!!! ')
 	if self.m_SystemRunning == true or self.m_IsStatic == true then
 		m_VEMLogger:Write('Syncing Player with Server')
 		NetEvents:SendTo('VEManager:AddTimeToClient', p_Player, self.m_ServerDayTime, self.m_IsStatic,
@@ -121,6 +123,7 @@ end
 ---@param p_ServerDayTime number
 ---@param p_TotalServerTime number
 function TimeServer:_Broadcast(p_ServerDayTime, p_TotalServerTime)
+	m_VEMLogger:Write('The engine updated !!!!!!!!!!!!')
 	NetEvents:BroadcastUnreliableOrdered('TimeServer:Sync', p_ServerDayTime, p_TotalServerTime)
 end
 
