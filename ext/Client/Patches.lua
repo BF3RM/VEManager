@@ -12,8 +12,10 @@ function Patches:__init()
 	m_VEMLogger:Write("Initializing Patches")
 
 	-- Patch Menu Background
-	ResourceManager:RegisterInstanceLoadHandler(Guid("3A3E5533-4B2A-11E0-A20D-FE03F1AD0E2F"),
+	if VEM_CONFIG.PATCH_DN_COMPONENTS then
+		ResourceManager:RegisterInstanceLoadHandler(Guid("3A3E5533-4B2A-11E0-A20D-FE03F1AD0E2F"),
 		Guid("F26B7ECE-A71D-93AC-6C49-B6223BF424D6"), self, self._OnMenuBGLoaded)
+	end
 end
 
 ---@param p_Instance DataContainer
