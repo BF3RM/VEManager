@@ -23,7 +23,15 @@ return json.decode([[
         "Enable": "false"
     },
     "Fog": {
-
+		"Enable":"true",
+        "FogDistanceMultiplier":"1.0",
+        "FogGradientEnable":"true",
+        "Start":"-50.0",
+        "EndValue":"500.0",
+        "FogColorEnable":"true",
+        "FogColor":"(0.0020000000949949, 0.0020000000949949, 0.0020000000949949)",
+        "FogColorStart":"0.0",
+        "FogColorEnd":"1630.4348144531"
     },
     "OutdoorLight": {
         "Realm": "0",
@@ -74,15 +82,12 @@ return json.decode([[
         "Element5Size": "0.0:0.0:"
     },
     "Tonemap": {
-        "MiddleGray": "0.5",
-        "MinExposure": "0.0",
-        "MaxExposure": "1",
-        "ExposureAdjustTime": "0.5"
+
     },
     "Wind": {
 
     },
-    "Name": "DefaultNight",
+    "Name": "MP_011_Night",
     "Type": "DefaultDynamic",
     "Priority": "10",
     "Visibility": "1"

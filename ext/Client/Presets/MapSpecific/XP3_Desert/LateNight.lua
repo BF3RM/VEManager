@@ -1,16 +1,16 @@
 return json.decode([[
 {
-    "CharacterLighting":{
-        "CharacterLightEnable":"false",
-        "FirstPersonEnable":"false",
-        "LockToCameraDirection":"true",
-        "CameraUpRotation":"27.482999801636",
-        "CharacterLightingMode":"0",
-        "BlendFactor":"1.0",
-        "TopLight":"(1.0, 1.0, 1.0)",
-        "BottomLight":"(1.0, 1.0, 1.0)",
-        "TopLightDirX":"0.0",
-        "TopLightDirY":"0.0"
+    "CharacterLighting": {
+        "CharacterLightEnable": "true",
+        "FirstPersonEnable": "true",
+        "LockToCameraDirection": "true",
+        "CameraUpRotation": "27.482999801636",
+        "CharacterLightingMode": "1",
+        "BlendFactor": "0.02",
+        "TopLight": "1:1:1:",
+        "BottomLight": "1:1:1:",
+        "TopLightDirX": "0",
+        "TopLightDirY": "0.0"
     },
     "ColorCorrection": {
 
@@ -28,15 +28,16 @@ return json.decode([[
     "OutdoorLight": {
         "Realm": "0",
         "Enable": "true",
-        "SunColor": "(0.05, 0.05, 0.09)",
+        "SunColor": "(0.04, 0.04, 0.07)",
         "SkyColor": "(0.01, 0.01, 0.01)",
-        "GroundColor": "(0.04, 0.04, 0.04)",
+        "GroundColor": "(0.03, 0.03, 0.03)",
         "SunSpecularScale": "0",
-        "SunRotationX": "90.0",
-        "SunRotationY":"180.0",
+        "SunRotationX": "150.0",
+        "SunRotationY":"359.0",
         "SkyLightAngleFactor":"0.0",
         "SunSpecularScale":"0.0",
-        "SunShadowHeightScale":"0.0"
+        "SunShadowHeightScale":"0.0",
+        "CloudShadowEnable": "false"
     },
     "Sky": {
         "Realm": "0",
@@ -44,11 +45,8 @@ return json.decode([[
         "BrightnessScale": "0.004",
         "SunSize": "0.0005",
         "SunScale": "80",
+        "StaticEnvmapScale":"0.05",
         "CloudLayerSunColor": "(0, 0, 0)",
-        "CloudLayer1Altitude": "500000.0",
-        "CloudLayer1TileFactor": "0.25",
-        "CloudLayer1Rotation": "223.52900695801",
-        "CloudLayer1Speed": "-0.001",
         "CloudLayer1SunLightIntensity": "0.1",
         "CloudLayer1SunLightPower": "0.1",
         "CloudLayer1AmbientLightIntensity": "0.1",
@@ -82,7 +80,7 @@ return json.decode([[
     "Wind": {
 
     },
-    "Name": "DefaultNight",
+    "Name": "XP3_Desert_Late_Night",
     "Type": "DefaultDynamic",
     "Priority": "10",
     "Visibility": "1"

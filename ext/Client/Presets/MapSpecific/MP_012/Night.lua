@@ -22,8 +22,23 @@ return json.decode([[
         "Realm": "0",
         "Enable": "false"
     },
-    "Fog": {
-
+    "Fog":{
+        "Enable":"true",
+        "FogDistanceMultiplier":"1.0",
+        "FogGradientEnable":"true",
+        "Start":"-1000.0",
+        "EndValue":"1250.0",
+        "Curve":"(0.40000000596046, -0.76999998092651, 1.2999999523163, -0.0099999997764826)",
+        "FogColorEnable":"true",
+        "FogColor":"(0.00050000002374873, 0.00050000002374873, 0.0010000000474975)",
+        "FogColorStart":"0.0",
+        "FogColorEnd":"5000.0",
+        "FogColorCurve":"(6.0999999046326, -11.699999809265, 5.6199998855591, -0.18000000715256)",
+        "HeightFogEnable":"false",
+        "HeightFogFollowCamera":"0.0",
+        "HeightFogAltitude":"0.0",
+        "HeightFogDepth":"100.0",
+        "HeightFogVisibilityRange":"100.0"
     },
     "OutdoorLight": {
         "Realm": "0",
@@ -36,6 +51,7 @@ return json.decode([[
         "SunRotationY":"180.0",
         "SkyLightAngleFactor":"0.0",
         "SunSpecularScale":"0.0",
+        "SkyEnvmapShadowScale":"0.0",
         "SunShadowHeightScale":"0.0"
     },
     "Sky": {
@@ -44,6 +60,7 @@ return json.decode([[
         "BrightnessScale": "0.004",
         "SunSize": "0.0005",
         "SunScale": "80",
+        "StaticEnvmapScale":"0.0",
         "CloudLayerSunColor": "(0, 0, 0)",
         "CloudLayer1Altitude": "500000.0",
         "CloudLayer1TileFactor": "0.25",
@@ -74,15 +91,12 @@ return json.decode([[
         "Element5Size": "0.0:0.0:"
     },
     "Tonemap": {
-        "MiddleGray": "0.5",
-        "MinExposure": "0.0",
-        "MaxExposure": "1",
-        "ExposureAdjustTime": "0.5"
+
     },
     "Wind": {
 
     },
-    "Name": "DefaultNight",
+    "Name": "MP_012_Night",
     "Type": "DefaultDynamic",
     "Priority": "10",
     "Visibility": "1"

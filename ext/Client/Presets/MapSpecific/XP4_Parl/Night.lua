@@ -36,7 +36,8 @@ return json.decode([[
         "SunRotationY":"180.0",
         "SkyLightAngleFactor":"0.0",
         "SunSpecularScale":"0.0",
-        "SunShadowHeightScale":"0.0"
+        "SunShadowHeightScale":"0.0",
+        "SkyEnvmapShadowScale": "0.0"
     },
     "Sky": {
         "Realm": "0",
@@ -44,6 +45,7 @@ return json.decode([[
         "BrightnessScale": "0.004",
         "SunSize": "0.0005",
         "SunScale": "80",
+        "StaticEnvmapScale":"0.02",
         "CloudLayerSunColor": "(0, 0, 0)",
         "CloudLayer1Altitude": "500000.0",
         "CloudLayer1TileFactor": "0.25",
@@ -82,7 +84,7 @@ return json.decode([[
     "Wind": {
 
     },
-    "Name": "DefaultNight",
+    "Name": "XP4_Parl_Night",
     "Type": "DefaultDynamic",
     "Priority": "10",
     "Visibility": "1"

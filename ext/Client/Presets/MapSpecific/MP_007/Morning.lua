@@ -1,3 +1,4 @@
+-- This exist only to add those missing SunFlares for this map.
 return json.decode([[
 {
     "CharacterLighting": {
@@ -13,7 +14,13 @@ return json.decode([[
         "TopLightDirY": "0.0"
     },
     "ColorCorrection": {
-
+        "Realm": "0",
+        "Enable": "true",
+        "Brightness": "1:1:1:",
+        "Contrast": "1.0:1.0:1.02:",
+        "Saturation": "0.7275:0.7725:0.9225:",
+        "Hue": "0.0",
+        "ColorGradingEnable": "false"
     },
     "DynamicAO": {
 
@@ -28,14 +35,14 @@ return json.decode([[
     "OutdoorLight": {
         "Realm": "0",
         "Enable": "true",
-        "SunColor": "(2.8261, 0.9783, 0.4348)",
-        "SkyColor": "(0.2717, 0.1087, 0.1087)",
-        "GroundColor": "(0.1087, 0.0543, 0.0543)",
-        "SkyLightAngleFactor": "2",
-        "SunSpecularScale": "3",
+        "SkyLightAngleFactor": "4",
+        "SunSpecularScale": "5",
         "SunShadowHeightScale":"1.0",
+        "SunColor": "(5.0, 1.7, 1.0)",
+        "SkyColor": "(0.1, 0.1, 0.1)",
+        "GroundColor": "(0.0, 0.0, 0.0)",
         "SunRotationX": "150.0",
-        "SunRotationY": "150.0"
+        "SunRotationY": "10"
     },
     "Sky": {
         "Realm": "0",
@@ -43,11 +50,7 @@ return json.decode([[
         "BrightnessScale": "0.4",
         "SunSize": "0.01",
         "SunScale": "2",
-        "CloudLayerSunColor": "(1, 0.3, 0.051)",
-        "CloudLayer1Altitude": "500000.0",
-        "CloudLayer1TileFactor": "0.25",
-        "CloudLayer1Rotation": "223.52900695801",
-        "CloudLayer1Speed": "-0.001",
+        "CloudLayerSunColor": "(1, 0.16, 0.06)",
         "CloudLayer1SunLightIntensity": "0.5",
         "CloudLayer1SunLightPower": "0.5",
         "CloudLayer1AmbientLightIntensity": "0.5",
@@ -65,11 +68,11 @@ return json.decode([[
 		"CloudLayer2Texture": "levels/testrange_lighting/sky/sky_07_starlayer_d"
     },
     "SunFlare": {
-        "Element1Size": "0.05:0.05:",
-        "Element2Size": "0.05:0.05:",
-        "Element3Size": "0.05:0.05:",
-        "Element4Size": "0.05:0.05:",
-        "Element5Size": "0.05:0.05:"
+        "Element1Size": "0.10:0.10:",
+        "Element2Size": "0.10:0.10:",
+        "Element3Size": "0.10:0.10:",
+        "Element4Size": "0.10:0.10:",
+        "Element5Size": "0.10:0.10:"
     },
     "Tonemap": {
 
@@ -77,7 +80,7 @@ return json.decode([[
     "Wind": {
 
     },
-    "Name": "DefaultEvening",
+    "Name": "MP_007_Morning",
     "Type": "DefaultDynamic",
     "Priority": "10",
     "Visibility": "1"

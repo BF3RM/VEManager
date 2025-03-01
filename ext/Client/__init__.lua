@@ -72,6 +72,100 @@ end
 function VEManagerClient:_OnLevelLoaded(p_LevelName, p_GameModeName, p_IsDedicatedServer)
 	LEVEL_LOADED = true
 	m_Patches:OnLevelLoaded(p_LevelName, p_GameModeName, p_IsDedicatedServer)
+	-- MP_003 (Teheran Highway) Is already a Night map, so it requires a different preset.
+	if string.find(p_LevelName, 'MP_003') then
+		self._RawPresets.DefaultMorning = require("Presets/MapSpecific/MP_003/Morning")
+		self._RawPresets.DefaultNoon = require("Presets/MapSpecific/MP_003/Noon")
+		self._RawPresets.DefaultEvening = require("Presets/MapSpecific/MP_003/Evening")
+		self._RawPresets.DefaultNight = require("Presets/MapSpecific/MP_003/Night")
+		self._RawPresets.DefaultLateNight = require("Presets/MapSpecific/MP_003/LateNight")
+	end
+	if string.find(p_LevelName, 'MP_007') then
+		self._RawPresets.DefaultMorning = require("Presets/MapSpecific/MP_007/Morning")
+		self._RawPresets.DefaultNight = require("Presets/MapSpecific/MP_007/Night")
+		self._RawPresets.DefaultLateNight = require("Presets/MapSpecific/MP_007/LateNight")
+	end
+	if string.find(p_LevelName, 'MP_011') then
+		self._RawPresets.DefaultNight = require("Presets/MapSpecific/MP_011/Night")
+		self._RawPresets.DefaultLateNight = require("Presets/MapSpecific/MP_011/LateNight")
+	end
+	if string.find(p_LevelName, 'MP_012') then
+		self._RawPresets.DefaultNight = require("Presets/MapSpecific/MP_012/Night")
+		self._RawPresets.DefaultLateNight = require("Presets/MapSpecific/MP_012/LateNight")
+	end
+	if string.find(p_LevelName, 'MP_Subway') then
+		self._RawPresets.DefaultNight = require("Presets/MapSpecific/MP_Subway/Night")
+		self._RawPresets.DefaultLateNight = require("Presets/MapSpecific/MP_Subway/LateNight")
+	end
+	if string.find(p_LevelName, 'XP1_001') then
+		self._RawPresets.DefaultNight = require("Presets/MapSpecific/XP1_001/Night")
+		self._RawPresets.DefaultLateNight = require("Presets/MapSpecific/XP1_001/LateNight")
+	end
+	if string.find(p_LevelName, 'XP1_002') then
+		self._RawPresets.DefaultNight = require("Presets/MapSpecific/XP1_002/Night")
+		self._RawPresets.DefaultLateNight = require("Presets/MapSpecific/XP1_002/LateNight")
+	end
+	if string.find(p_LevelName, 'XP1_003') then
+		self._RawPresets.DefaultNoon = require("Presets/MapSpecific/XP1_003/Noon")
+		self._RawPresets.DefaultNight = require("Presets/MapSpecific/XP1_003/Night")
+		self._RawPresets.DefaultLateNight = require("Presets/MapSpecific/XP1_003/LateNight")
+	end
+	if string.find(p_LevelName, 'XP2_Office') then
+		self._RawPresets.DefaultMorning = require("Presets/MapSpecific/XP2_Office/Morning")
+		self._RawPresets.DefaultNoon = require("Presets/MapSpecific/XP2_Office/Noon")
+		self._RawPresets.DefaultEvening = require("Presets/MapSpecific/XP2_Office/Evening")
+		self._RawPresets.DefaultNight = require("Presets/MapSpecific/XP2_Office/Night")
+		self._RawPresets.DefaultLateNight = require("Presets/MapSpecific/XP2_Office/LateNight")
+	end
+	if string.find(p_LevelName, 'XP3_Valley') then
+		self._RawPresets.DefaultMorning = require("Presets/MapSpecific/XP3_Valley/Morning")
+		self._RawPresets.DefaultNoon = require("Presets/MapSpecific/XP3_Valley/Noon")
+		self._RawPresets.DefaultEvening = require("Presets/MapSpecific/XP3_Valley/Evening")
+		self._RawPresets.DefaultNight = require("Presets/MapSpecific/XP3_Valley/Night")
+		self._RawPresets.DefaultLateNight = require("Presets/MapSpecific/XP3_Valley/LateNight")
+	end
+	if string.find(p_LevelName, 'XP3_Desert') then
+		self._RawPresets.DefaultMorning = require("Presets/MapSpecific/XP3_Desert/Morning")
+		self._RawPresets.DefaultNoon = require("Presets/MapSpecific/XP3_Desert/Noon")
+		self._RawPresets.DefaultEvening = require("Presets/MapSpecific/XP3_Desert/Evening")
+		self._RawPresets.DefaultNight = require("Presets/MapSpecific/XP3_Desert/Night")
+		self._RawPresets.DefaultLateNight = require("Presets/MapSpecific/XP3_Desert/LateNight")
+	end
+	if string.find(p_LevelName, 'XP3_Shield') then
+		self._RawPresets.DefaultNight = require("Presets/MapSpecific/XP3_Shield/Night")
+		self._RawPresets.DefaultLateNight = require("Presets/MapSpecific/XP3_Shield/LateNight")
+	end
+	if string.find(p_LevelName, 'XP4_FD') then
+		self._RawPresets.DefaultNight = require("Presets/MapSpecific/XP4_FD/Night")
+		self._RawPresets.DefaultLateNight = require("Presets/MapSpecific/XP4_FD/LateNight")
+	end
+	if string.find(p_LevelName, 'XP4_Quake') then
+		-- self._RawPresets.DefaultMorning = require("Presets/MapSpecific/XP4_Quake/Morning")
+		-- self._RawPresets.DefaultNoon = require("Presets/MapSpecific/XP4_Quake/Noon")
+		-- self._RawPresets.DefaultEvening = require("Presets/MapSpecific/XP4_Quake/Evening")
+		self._RawPresets.DefaultNight = require("Presets/MapSpecific/XP4_Quake/Night")
+		self._RawPresets.DefaultLateNight = require("Presets/MapSpecific/XP4_Quake/LateNight")
+	end
+	if string.find(p_LevelName, 'XP4_Parl') then
+		self._RawPresets.DefaultNight = require("Presets/MapSpecific/XP4_Parl/Night")
+		self._RawPresets.DefaultLateNight = require("Presets/MapSpecific/XP4_Parl/LateNight")
+	end
+	if string.find(p_LevelName, 'XP5_001') then
+		self._RawPresets.DefaultNight = require("Presets/MapSpecific/XP5_001/Night")
+		self._RawPresets.DefaultLateNight = require("Presets/MapSpecific/XP5_001/LateNight")
+	end
+	if string.find(p_LevelName, 'XP5_002') then
+		self._RawPresets.DefaultNight = require("Presets/MapSpecific/XP5_002/Night")
+		self._RawPresets.DefaultLateNight = require("Presets/MapSpecific/XP5_002/LateNight")
+	end
+	if string.find(p_LevelName, 'XP5_003') then
+		self._RawPresets.DefaultNight = require("Presets/MapSpecific/XP5_003/Night")
+		self._RawPresets.DefaultLateNight = require("Presets/MapSpecific/XP5_003/LateNight")
+	end
+	if string.find(p_LevelName, 'XP5_004') then
+		self._RawPresets.DefaultNight = require("Presets/MapSpecific/XP5_004/Night")
+		self._RawPresets.DefaultLateNight = require("Presets/MapSpecific/XP5_004/LateNight")
+	end
 	self:_LoadPresets()
 end
 

@@ -24,6 +24,14 @@ return {
 		-- XP2_Skybar
 		['fx/dlc/xp2/ambient/levelspecific/mp_skybar/emitters/em_dlc_amb_mpskybar_bgsmog_smoke'] = true
 	},
+	-- Tried Messing with their enlightenType
+	-- rigidMeshs = {
+	-- 	-- MP_011
+	-- 	['levels/mp_011/objects/mp011_backdrop_01_mesh'] = true,
+	-- 	['levels/mp_011/objects/mp011_backdropesplanade_01_mesh'] = true,
+	-- 	['levels/mp_011/objects/mp011_backdropesplanade_02_mesh'] = true,
+	-- 	['levels/mp_011/water/meshes/mp_011_watersurface01_mesh'] = true,
+	-- },
 	meshes = {
 		-- MP_Subway
 		['levels/mp_subway/objects/backdrops/mp15_smokepillar_01_mesh'] = true,
@@ -45,10 +53,10 @@ return {
 		['levels/mp_007/props/mp007_waterwash_02_mesh'] = true,
 
 		-- MP_011
-		['levels/mp_011/objects/mp011_backdrop_01_mesh'] = true,
-		['levels/mp_011/objects/mp011_backdropesplanade_01_mesh'] = true,
-		['levels/mp_011/objects/mp011_backdropesplanade_02_mesh'] = true,
-		['levels/mp_011/water/meshes/mp_011_watersurface01_mesh'] = true,
+		-- ['levels/mp_011/objects/mp011_backdrop_01_mesh'] = true,
+		-- ['levels/mp_011/objects/mp011_backdropesplanade_01_mesh'] = true,
+		-- ['levels/mp_011/objects/mp011_backdropesplanade_02_mesh'] = true,
+		-- ['levels/mp_011/water/meshes/mp_011_watersurface01_mesh'] = true,
 
 		-- MP_012
 		['levels/mp_012/terrain/mp012_matte_4parts_1_mesh'] = true,
@@ -63,13 +71,13 @@ return {
 		['levels/mp_013/props/mp013_cloudlayer_mesh'] = true,
 
 		-- MP_017
-		['levels/mp_017/terrain/mp_017_waves_01_mesh'] = true,
+		-- ['levels/mp_017/terrain/mp_017_waves_01_mesh'] = true,
 
 		-- MP_018
 		['levels/mp_018/terrain/mp018_mattepainting_chunk01_mesh'] = true,
 		['levels/mp_018/terrain/mp018_mattepainting_chunk02_mesh'] = true,
 		['levels/mp_018/terrain/mp018_mattepainting_chunk03_mesh'] = true,
-		['levels/mp_018/terrain/mp018_wave_01_mesh'] = true,
+		-- ['levels/mp_018/terrain/mp018_wave_01_mesh'] = true,
 
 		-- XP1_001
 		['levels/xp1_001/objects/mattepainting_01_mesh'] = true,
@@ -79,12 +87,12 @@ return {
 
 
 		-- XP1_002
-		['levels/xp1_002/objects/xp1_002__wave_01_mesh'] = true,
+		-- ['levels/xp1_002/objects/xp1_002__wave_01_mesh'] = true,
 
 		-- XP1_004
 		['xp_raw/surrounding/smokepillars/smokepillar_01_mesh'] = true,
-		['levels/xp1_004/props/wake_wave_02/wake_wave_02_mesh'] = true,
-		['levels/xp1_004/props/wave_01/wave_01_mesh'] = true,
+		-- ['levels/xp1_004/props/wake_wave_02/wake_wave_02_mesh'] = true,
+		-- ['levels/xp1_004/props/wave_01/wave_01_mesh'] = true,
 
 		-- XP2_Palace
 		['xp2/objects/godrays_01/godrays_01_mesh'] = true,
@@ -101,14 +109,21 @@ return {
 		['levels/xp3_desert/props/xp3_bandar_backdropmatte_01_mesh'] = true,
 
 		-- XP4_Quake
-		['levels/sp_valley/terrain/cloud_moving_mesh'] = true
+		['levels/sp_valley/terrain/cloud_moving_mesh'] = true,
+		-- ['levels/xp4_earthquake/objects/waterpuddle_01_copy_mesh'] = true,
+		-- ['levels/xp4_earthquake/objects/watersplash_02_mesh'] = true,
+		-- ['levels/xp4_earthquake/objects/lakeedge/pondedge_01_mesh'] = true,
+		-- ['levels/xp4_earthquake/objects/lakeedge/pondedge_02_mesh'] = true,
+		-- ['levels/xp4_earthquake/objects/backdrop/backdropcity_01_mesh'] = true,
+		-- ['levels/xp4_earthquake/terrain/earthquakems_01_mesh'] = true,
+		-- ['levels/xp4_earthquake/objects/earthquakepiece_big_Mesh'] = true,
 	},
 	variations = {
 		-- MP_012
 		['levels/mp_012/objects/smokestacks/smokestack_01_02'] = true,
 
-		-- MP_018
-		['levels/xp1_001/objects/wave_01_xp001'] = true,
+		-- XP1_001 -- this was removing the waves for karkand
+		-- ['levels/xp1_001/objects/wave_01_xp001'] = true,
 
 		-- XP2_Skybar
 		['levels/xp2_skybar/objects/smokepillar_bg/smokepillar_01_xp2'] = true,
@@ -116,7 +131,15 @@ return {
 		-- XP3_Valley
 		['levels/xp3_valley/objects/mountainsidecloud_01_valley'] = true,
 		['levels/xp3_valley/objects/mountainsidecloud_02_valley'] = true,
-		['levels/xp3_valley/objects/mountainsidecloud_04_vvalley'] = true
+		['levels/xp3_valley/objects/mountainsidecloud_04_vvalley'] = true,
+
+		-- XP4_Quake
+		-- ['levels/xp4_earthquake/objectvariations/watershadow_mp013_02_variation'] = true,
+		-- ['levels/xp4_earthquake/objects/backdrop/skybarbackdropcombined_big_earthquake'] = true,
+		-- ['levels/xp4_earthquake/objects/waterpuddle_01_copy_nodrop2'] = true,
+		-- ['levels/xp4_earthquake/objects/waterpuddle_01_nodrip'] = true,
+		-- ['levels/xp4_earthquake/objects/backdrop/skyscraper3_variation'] = true
+
 	},
 	effects = {
 		-- MP_007
@@ -146,6 +169,7 @@ return {
 		-- XP5_002
 		['fx/ambient/levelspecific/sp_03/fx_amb_sp03_littlewindow_godrays'] = true
 	},
+
 	envmaps = {
 		['levels/mp_subway/lighting/ve_mp_subway_city_01'] = true,
 		['levels/mp_011/lighting/ve_mp_011_day01'] = true,
@@ -155,11 +179,65 @@ return {
 		['levels/xp5_004/lighting/ve_xp5_004_02'] = true
 	},
 
+	-- The Shaders related to this meshes are lazy loaded. Once loaded invalidating them doesn't seem to be working.
 	waterAssets = {
 		-- XP1_001
 		['levels/xp1_001/xpack1_001_terrain.water.mesh'] = true,
 
 		-- XP1_002
 		['levels/xp1_002/terrain_2/gulfterrain_03.water.mesh'] = true
-	}
+	},
+
+	waters = {
+		-- ['Levels/XP1_001/XP1_001'] = true,
+		-- ['Levels/XP1_002/XP1_002'] = true,
+		-- ['Levels/XP1_003/XP1_003'] = true,
+	},
+
+	textures = {
+		['levels/xp4_earthquake/objects/lakeedge/lakeenv'] = true,
+	},
+
+
+	-- Messing with the shaders doesn't seem to be doing anything visually...
+	-- waterShaders = {
+	-- 	-- XP1_001 Karkand
+	-- 	['levels/xp1_001/shaders/water'] = true,
+
+	-- 	-- XP1_002 Gulf of Oman
+	-- 	['levels/xp1_002/shaders/water'] = true,
+
+	-- 	-- XP1_003 Sharqi
+	-- 	['levels/xp1_003/shaders/water'] = true
+
+	-- }
 }
+
+-- Partition CAEA8375-0AFC-4367-D5AD-032158C1B13F
+-- LakeData A7C3B316-7939-2A5C-332D-E66FE2EFC1CE
+-- 	$::VisualVectorShapeData
+-- 		$::VectorShapeData
+-- 			$::BaseShapeData
+-- 				$::GameObjectData
+-- 					$::GameDataContainer
+-- 						$::DataContainer
+-- 					IsEventConnectionTarget 3
+-- 					IsPropertyConnectionTarget 3
+-- 					IndexInBlueprint 65535
+-- 			Points::array
+-- 				member(0)::Vec3
+-- 					x -28.61029624938965
+-- 					y 146.45040893554688
+-- 					z -837.198974609375
+-- 				member(1)::Vec3
+-- 					x -146.542236328125
+-- 					y 146.45040893554688
+-- 					z -233.81307983398438
+-- 			Normals *nullArray*
+-- 			Tension 0.0
+-- 			IsClosed True
+-- 			AllowRoll False
+-- 		ErrorTolerance 0.75
+-- 		Shader3d Levels/XP1_001/Shaders/Water/26B58BD9-8058-6A60-2013-D0E27942CFF3
+-- 		DrawOrderIndex 100
+-- 		TessellationTriangleSize 4.0

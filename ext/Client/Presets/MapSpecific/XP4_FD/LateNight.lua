@@ -1,16 +1,16 @@
 return json.decode([[
 {
-    "CharacterLighting":{
-        "CharacterLightEnable":"false",
-        "FirstPersonEnable":"false",
-        "LockToCameraDirection":"true",
-        "CameraUpRotation":"27.482999801636",
-        "CharacterLightingMode":"0",
-        "BlendFactor":"1.0",
-        "TopLight":"(1.0, 1.0, 1.0)",
-        "BottomLight":"(1.0, 1.0, 1.0)",
-        "TopLightDirX":"0.0",
-        "TopLightDirY":"0.0"
+    "CharacterLighting": {
+        "CharacterLightEnable": "true",
+        "FirstPersonEnable": "true",
+        "LockToCameraDirection": "true",
+        "CameraUpRotation": "27.482999801636",
+        "CharacterLightingMode": "1",
+        "BlendFactor": "0.02",
+        "TopLight": "1:1:1:",
+        "BottomLight": "1:1:1:",
+        "TopLightDirX": "0",
+        "TopLightDirY": "0.0"
     },
     "ColorCorrection": {
 
@@ -28,15 +28,16 @@ return json.decode([[
     "OutdoorLight": {
         "Realm": "0",
         "Enable": "true",
-        "SunColor": "(0.05, 0.05, 0.09)",
+        "SunColor": "(0.04, 0.04, 0.07)",
         "SkyColor": "(0.01, 0.01, 0.01)",
-        "GroundColor": "(0.04, 0.04, 0.04)",
+        "GroundColor": "(0.03, 0.03, 0.03)",
         "SunSpecularScale": "0",
-        "SunRotationX": "90.0",
-        "SunRotationY":"180.0",
+        "SunRotationX": "150.0",
+        "SunRotationY":"359.0",
         "SkyLightAngleFactor":"0.0",
         "SunSpecularScale":"0.0",
-        "SunShadowHeightScale":"0.0"
+        "SunShadowHeightScale":"0.0",
+        "SkyEnvmapShadowScale": "0.0"
     },
     "Sky": {
         "Realm": "0",
@@ -44,6 +45,7 @@ return json.decode([[
         "BrightnessScale": "0.004",
         "SunSize": "0.0005",
         "SunScale": "80",
+        "StaticEnvmapScale":"0.09",
         "CloudLayerSunColor": "(0, 0, 0)",
         "CloudLayer1Altitude": "500000.0",
         "CloudLayer1TileFactor": "0.25",
@@ -71,7 +73,13 @@ return json.decode([[
         "Element2Size": "0.0:0.0:",
         "Element3Size": "0.0:0.0:",
         "Element4Size": "0.0:0.0:",
-        "Element5Size": "0.0:0.0:"
+        "Element5Enable": "false",
+        "Element5RayDistance": "0.0",
+        "Element5Size": "(0.0, 0.0)",
+        "Element5SizeOccluderCurve": "(0.000000, 0.000000, 0.000000, 1.000000)",
+        "Element5SizeScreenPosCurve": "(0.000000, 0.000000, 0.000000, 0.820000)",
+        "Element5AlphaOccluderCurve": "(0.000000, 0.000000, -0.289483, 0.029082)",
+        "Element5AlphaScreenPosCurve": "(0.000000, 0.000000, -0.930245, 0.629199)"
     },
     "Tonemap": {
         "MiddleGray": "0.5",
@@ -82,7 +90,7 @@ return json.decode([[
     "Wind": {
 
     },
-    "Name": "DefaultNight",
+    "Name": "XP4_FD_Late_Night",
     "Type": "DefaultDynamic",
     "Priority": "10",
     "Visibility": "1"

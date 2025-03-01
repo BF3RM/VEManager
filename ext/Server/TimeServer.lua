@@ -44,11 +44,21 @@ function TimeServer:RegisterEvents()
 	Events:Subscribe('TimeServer:Pause', self, self._OnPauseUnpause)
 	Events:Subscribe('TimeServer:Disable', self, self._OnDisable)
 
+	NetEvents:Subscribe('VEManager:PresetsLoaded', self, self.__OnPresetsLoaded)
 	NetEvents:Subscribe('TimeServer:PlayerSync', self, self._OnPlayerSync)
 end
 
 function TimeServer:_OnLevelDestroy()
 	self:RegisterVars()
+end
+
+function TimeServer:__OnPresetsLoaded()
+	local levelName = SharedUtils:GetLevelName():match('/[^/]+'):sub(2)
+	if VEM_CONFIG.TIME.ENABLED and not self.m_SystemRunning then
+		self:_OnEnable(MAPS_CONFIG[levelName].START_HOUR or VEM_CONFIG.TIME.DEFAULT_START_HOUR,
+			MAPS_CONFIG[levelName].DAY_DURATION or VEM_CONFIG.TIME.DEFAULT_DAY_DURATION,
+			VEM_CONFIG.TIME.ONLY_DYNAMIC_PRESETS, false)
+	end
 end
 
 ---@param p_StartingTime number

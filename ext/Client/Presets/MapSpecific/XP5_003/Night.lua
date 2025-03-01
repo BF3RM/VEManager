@@ -44,6 +44,7 @@ return json.decode([[
         "BrightnessScale": "0.004",
         "SunSize": "0.0005",
         "SunScale": "80",
+        "StaticEnvmapScale":"0.05",
         "CloudLayerSunColor": "(0, 0, 0)",
         "CloudLayer1Altitude": "500000.0",
         "CloudLayer1TileFactor": "0.25",
@@ -82,7 +83,7 @@ return json.decode([[
     "Wind": {
 
     },
-    "Name": "DefaultNight",
+    "Name": "XP5_003_Night",
     "Type": "DefaultDynamic",
     "Priority": "10",
     "Visibility": "1"

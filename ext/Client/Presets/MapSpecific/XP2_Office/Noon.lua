@@ -1,3 +1,4 @@
+-- Teheran Highway (MP_003) is already a night map, therefore it needs some more editing for its noon preset.
 return json.decode([[
 {
     "CharacterLighting": {
@@ -28,22 +29,22 @@ return json.decode([[
     "OutdoorLight": {
         "Realm": "0",
         "Enable": "true",
-        "SunColor": "(2.8261, 0.9783, 0.4348)",
-        "SkyColor": "(0.2717, 0.1087, 0.1087)",
-        "GroundColor": "(0.1087, 0.0543, 0.0543)",
-        "SkyLightAngleFactor": "2",
-        "SunSpecularScale": "3",
+	    "SunColor": "(5, 3.5870, 3.0435)",
+        "SkyColor": "(0.3804, 0.2174, 0.2174)",
+        "GroundColor": "(0.0, 0.0, 0.0)",
+        "SkyLightAngleFactor": "4",
+        "SunSpecularScale": "5",
         "SunShadowHeightScale":"1.0",
         "SunRotationX": "150.0",
-        "SunRotationY": "150.0"
+        "SunRotationY": "90.0"
     },
     "Sky": {
         "Realm": "0",
         "Enable": "true",
-        "BrightnessScale": "0.4",
         "SunSize": "0.01",
-        "SunScale": "2",
-        "CloudLayerSunColor": "(1, 0.3, 0.051)",
+        "SunScale": "1.5",
+		"BrightnessScale":"5",
+        "StaticEnvmapScale":"0.0",
         "CloudLayer1Altitude": "500000.0",
         "CloudLayer1TileFactor": "0.25",
         "CloudLayer1Rotation": "223.52900695801",
@@ -65,11 +66,7 @@ return json.decode([[
 		"CloudLayer2Texture": "levels/testrange_lighting/sky/sky_07_starlayer_d"
     },
     "SunFlare": {
-        "Element1Size": "0.05:0.05:",
-        "Element2Size": "0.05:0.05:",
-        "Element3Size": "0.05:0.05:",
-        "Element4Size": "0.05:0.05:",
-        "Element5Size": "0.05:0.05:"
+
     },
     "Tonemap": {
 
@@ -77,9 +74,8 @@ return json.decode([[
     "Wind": {
 
     },
-    "Name": "DefaultEvening",
+    "Name": "XP2_Office_Noon",
     "Type": "DefaultDynamic",
     "Priority": "10",
     "Visibility": "1"
-}
-]])
+}]])

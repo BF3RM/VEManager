@@ -34,8 +34,9 @@ return json.decode([[
         "SunSpecularScale": "0",
         "SunRotationX": "90.0",
         "SunRotationY":"180.0",
-        "SkyLightAngleFactor":"0.0",
+        "SkyLightAngleFactor":"0.0089999996125698",
         "SunSpecularScale":"0.0",
+        "SkyEnvmapShadowScale":"0.25",
         "SunShadowHeightScale":"0.0"
     },
     "Sky": {
@@ -43,27 +44,7 @@ return json.decode([[
         "Enable": "true",
         "BrightnessScale": "0.004",
         "SunSize": "0.0005",
-        "SunScale": "80",
-        "CloudLayerSunColor": "(0, 0, 0)",
-        "CloudLayer1Altitude": "500000.0",
-        "CloudLayer1TileFactor": "0.25",
-        "CloudLayer1Rotation": "223.52900695801",
-        "CloudLayer1Speed": "-0.001",
-        "CloudLayer1SunLightIntensity": "0.1",
-        "CloudLayer1SunLightPower": "0.1",
-        "CloudLayer1AmbientLightIntensity": "0.1",
-        "CloudLayer1Color": "(0.1, 0.1, 0.1)",
-        "CloudLayer1AlphaMul": "0.5",
-        "CloudLayer2Altitude": "5000000.0",
-        "CloudLayer2TileFactor": "0.60000002384186",
-        "CloudLayer2Rotation": "237.07299804688",
-        "CloudLayer2Speed": "-0.0010000000474975",
-        "CloudLayer2SunLightIntensity": "1.0",
-        "CloudLayer2SunLightPower": "5.0",
-        "CloudLayer2AmbientLightIntensity": "1",
-        "CloudLayer2Color": "1:1:1:",
-        "CloudLayer2AlphaMul": "0.3",
-		"CloudLayer2Texture": "levels/testrange_lighting/sky/sky_07_starlayer_d"
+        "SunScale": "80"
     },
     "SunFlare": {
         "Enable":"false",
@@ -82,7 +63,7 @@ return json.decode([[
     "Wind": {
 
     },
-    "Name": "DefaultNight",
+    "Name": "XP3_Valley_Night",
     "Type": "DefaultDynamic",
     "Priority": "10",
     "Visibility": "1"

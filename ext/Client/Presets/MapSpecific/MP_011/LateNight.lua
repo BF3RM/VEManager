@@ -1,16 +1,16 @@
 return json.decode([[
 {
-    "CharacterLighting":{
-        "CharacterLightEnable":"false",
-        "FirstPersonEnable":"false",
-        "LockToCameraDirection":"true",
-        "CameraUpRotation":"27.482999801636",
-        "CharacterLightingMode":"0",
-        "BlendFactor":"1.0",
-        "TopLight":"(1.0, 1.0, 1.0)",
-        "BottomLight":"(1.0, 1.0, 1.0)",
-        "TopLightDirX":"0.0",
-        "TopLightDirY":"0.0"
+    "CharacterLighting": {
+        "CharacterLightEnable": "true",
+        "FirstPersonEnable": "true",
+        "LockToCameraDirection": "true",
+        "CameraUpRotation": "27.482999801636",
+        "CharacterLightingMode": "1",
+        "BlendFactor": "0.02",
+        "TopLight": "1:1:1:",
+        "BottomLight": "1:1:1:",
+        "TopLightDirX": "0",
+        "TopLightDirY": "0.0"
     },
     "ColorCorrection": {
 
@@ -23,17 +23,25 @@ return json.decode([[
         "Enable": "false"
     },
     "Fog": {
-
+		"Enable":"true",
+        "FogDistanceMultiplier":"1.0",
+        "FogGradientEnable":"true",
+        "Start":"-50.0",
+        "EndValue":"500.0",
+        "FogColorEnable":"true",
+        "FogColor":"(0.0020000000949949, 0.0020000000949949, 0.0020000000949949)",
+        "FogColorStart":"0.0",
+        "FogColorEnd":"1630.4348144531"
     },
     "OutdoorLight": {
         "Realm": "0",
         "Enable": "true",
-        "SunColor": "(0.05, 0.05, 0.09)",
+        "SunColor": "(0.04, 0.04, 0.07)",
         "SkyColor": "(0.01, 0.01, 0.01)",
-        "GroundColor": "(0.04, 0.04, 0.04)",
+        "GroundColor": "(0.03, 0.03, 0.03)",
         "SunSpecularScale": "0",
-        "SunRotationX": "90.0",
-        "SunRotationY":"180.0",
+        "SunRotationX": "150.0",
+        "SunRotationY":"359.0",
         "SkyLightAngleFactor":"0.0",
         "SunSpecularScale":"0.0",
         "SunShadowHeightScale":"0.0"
@@ -82,7 +90,7 @@ return json.decode([[
     "Wind": {
 
     },
-    "Name": "DefaultNight",
+    "Name": "MP_011_Night",
     "Type": "DefaultDynamic",
     "Priority": "10",
     "Visibility": "1"

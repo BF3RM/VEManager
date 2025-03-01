@@ -15,8 +15,163 @@ VEM_CONFIG = {
 
     -- SERVER --
     SERVER_SYNC_CLIENT_EVERY_TICKS = 2, -- Sync clients with the correct time ever X ticks
+    TIME = {
+        ENABLED = true,
+        DEFAULT_START_HOUR = 5,
+        DEFAULT_DAY_DURATION = 1,    -- For testing purposes.
+        ONLY_DYNAMIC_PRESETS = false -- If we only want to use Dynamic Presets and avoid de DefaultDynamics ( meaning: use some other presets being registered from another mod.)
+    },
 
     -- DEV --
     ADMINS = { "GreatApo", "IllustrisJack", "FoolHen", "Beschutzer", "Dumpy" }, -- Players that can use the VEM chat commands
     DEV_ENABLE_CHAT_COMMANDS = true,                                            -- Enables the use of VEM Internal Chat Commands
+}
+
+MAPS_CONFIG = {
+    -- Grand Bazaar
+    ['MP_001'] = {
+        START_HOUR = 5,
+        DAY_DURATION = 25,
+    },
+    -- Teheran Highway
+    ['MP_003'] = {
+        START_HOUR = 17,
+        DAY_DURATION = 25,
+    },
+    -- Caspian Border
+    ['MP_007'] = {
+        START_HOUR = 9,
+        DAY_DURATION = 25,
+    },
+    -- Seine Crossing
+    ['MP_011'] = {
+        START_HOUR = 14,
+        DAY_DURATION = 25,
+    },
+    -- Operation Firestorm
+    ['MP_012'] = {
+        START_HOUR = 20,
+        DAY_DURATION = 25,
+    },
+    -- Damavand Peak
+    ['MP_013'] = {
+        START_HOUR = 3,
+        DAY_DURATION = 25,
+    },
+    -- Noshahr Canals
+    ['MP_017'] = {
+        START_HOUR = 7,
+        DAY_DURATION = 25,
+    },
+    -- Kharg Island
+    ['MP_018'] = {
+        START_HOUR = 13,
+        DAY_DURATION = 25,
+    },
+    -- Operation Metro
+    ['MP_Subway'] = {
+        START_HOUR = 22,
+        DAY_DURATION = 25,
+    },
+    -- Strike at Karkand
+    ['XP1_001'] = {
+        START_HOUR = 6,
+        DAY_DURATION = 25,
+    },
+    -- Gulf of Oman
+    ['XP1_002'] = {
+        START_HOUR = 16,
+        DAY_DURATION = 25,
+    },
+    -- Sharqi Peninsula
+    ['XP1_003'] = {
+        START_HOUR = 19,
+        DAY_DURATION = 25,
+    },
+    -- Wake Island
+    ['XP1_004'] = {
+        START_HOUR = 11,
+        DAY_DURATION = 25,
+    },
+    -- Donya Fortress
+    ['XP2_Palace'] = {
+        START_HOUR = 4,
+        DAY_DURATION = 25,
+    },
+    -- Operation 925
+    ['XP2_Office'] = {
+        START_HOUR = 8,
+        DAY_DURATION = 25,
+    },
+    -- Scrapmetal
+    ['XP2_Factory'] = {
+        START_HOUR = 0,
+        DAY_DURATION = 25,
+    },
+    -- Ziba Tower
+    ['XP2_Skybar'] = {
+        START_HOUR = 23,
+        DAY_DURATION = 25,
+    },
+    -- Alborz Mountains
+    ['XP3_Alborz'] = {
+        START_HOUR = 15,
+        DAY_DURATION = 25,
+    },
+    -- Armored Shield
+    ['XP3_Shield'] = {
+        START_HOUR = 2,
+        DAY_DURATION = 25,
+    },
+    -- Bandar Desert
+    ['XP3_Desert'] = {
+        START_HOUR = 21,
+        DAY_DURATION = 25,
+    },
+    -- Death Valley
+    ['XP3_Valley'] = {
+        START_HOUR = 10,
+        DAY_DURATION = 25,
+    },
+    -- Azadi Palace
+    ['XP4_Parl'] = {
+        START_HOUR = 5,
+        DAY_DURATION = 25,
+    },
+    -- Epicenter
+    ['XP4_Quake'] = {
+        START_HOUR = 12,
+        DAY_DURATION = 25,
+    },
+    -- Markaz Monolith
+    ['XP4_FD'] = {
+        START_HOUR = 1,
+        DAY_DURATION = 25,
+    },
+    -- Talah Market
+    ['XP4_Rubble'] = {
+        START_HOUR = 18,
+        DAY_DURATION = 25,
+    },
+    -- Operation Riverside
+    ['XP5_001'] = {
+        START_HOUR = 9,
+        DAY_DURATION = 25,
+    },
+    -- Nebandan Flats
+    ['XP5_002'] = {
+        START_HOUR = 7,
+        DAY_DURATION = 25,
+    },
+    -- Kiasar Railroad
+    ['XP5_003'] = {
+        START_HOUR = 16,
+        DAY_DURATION = 25,
+    },
+    -- Sabalan Pipeline
+    ['XP5_004'] = {
+        START_HOUR = 11,
+        DAY_DURATION = 25,
+    }
+
 }

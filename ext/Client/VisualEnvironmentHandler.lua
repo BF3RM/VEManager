@@ -243,6 +243,7 @@ function VisualEnvironmentHandler:FadeTo(p_ID, p_VisibilityStart, p_VisibilityEn
 	---@type LerpProperties
 	local s_LerpProperties = {
 		enabled = true,
+		pulsing = false,
 		transitionFunctionName = p_TransitionType or "linear",
 		transitionFunction = s_TransitionFunction,
 		transitionTime = p_FadeTime,

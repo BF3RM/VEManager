@@ -1,16 +1,16 @@
 return json.decode([[
 {
-    "CharacterLighting":{
-        "CharacterLightEnable":"false",
-        "FirstPersonEnable":"false",
-        "LockToCameraDirection":"true",
-        "CameraUpRotation":"27.482999801636",
-        "CharacterLightingMode":"0",
-        "BlendFactor":"1.0",
-        "TopLight":"(1.0, 1.0, 1.0)",
-        "BottomLight":"(1.0, 1.0, 1.0)",
-        "TopLightDirX":"0.0",
-        "TopLightDirY":"0.0"
+    "CharacterLighting": {
+        "CharacterLightEnable": "true",
+        "FirstPersonEnable": "true",
+        "LockToCameraDirection": "true",
+        "CameraUpRotation": "27.482999801636",
+        "CharacterLightingMode": "1",
+        "BlendFactor": "0.02",
+        "TopLight": "1:1:1:",
+        "BottomLight": "1:1:1:",
+        "TopLightDirX": "0",
+        "TopLightDirY": "0.0"
     },
     "ColorCorrection": {
 
@@ -22,20 +22,36 @@ return json.decode([[
         "Realm": "0",
         "Enable": "false"
     },
-    "Fog": {
-
+    "Fog":{
+        "Enable":"true",
+        "FogDistanceMultiplier":"1.0",
+        "FogGradientEnable":"true",
+        "Start":"-1000.0",
+        "EndValue":"1250.0",
+        "Curve":"(0.40000000596046, -0.76999998092651, 1.2999999523163, -0.0099999997764826)",
+        "FogColorEnable":"true",
+        "FogColor":"(0.00050000002374873, 0.00050000002374873, 0.0010000000474975)",
+        "FogColorStart":"0.0",
+        "FogColorEnd":"5000.0",
+        "FogColorCurve":"(6.0999999046326, -11.699999809265, 5.6199998855591, -0.18000000715256)",
+        "HeightFogEnable":"false",
+        "HeightFogFollowCamera":"0.0",
+        "HeightFogAltitude":"0.0",
+        "HeightFogDepth":"100.0",
+        "HeightFogVisibilityRange":"100.0"
     },
     "OutdoorLight": {
         "Realm": "0",
         "Enable": "true",
-        "SunColor": "(0.05, 0.05, 0.09)",
+        "SunColor": "(0.04, 0.04, 0.07)",
         "SkyColor": "(0.01, 0.01, 0.01)",
-        "GroundColor": "(0.04, 0.04, 0.04)",
+        "GroundColor": "(0.03, 0.03, 0.03)",
         "SunSpecularScale": "0",
-        "SunRotationX": "90.0",
-        "SunRotationY":"180.0",
+        "SunRotationX": "150.0",
+        "SunRotationY":"359.0",
         "SkyLightAngleFactor":"0.0",
         "SunSpecularScale":"0.0",
+        "SkyEnvmapShadowScale":"0.0",
         "SunShadowHeightScale":"0.0"
     },
     "Sky": {
@@ -44,6 +60,7 @@ return json.decode([[
         "BrightnessScale": "0.004",
         "SunSize": "0.0005",
         "SunScale": "80",
+        "StaticEnvmapScale":"0.0",
         "CloudLayerSunColor": "(0, 0, 0)",
         "CloudLayer1Altitude": "500000.0",
         "CloudLayer1TileFactor": "0.25",
@@ -74,15 +91,12 @@ return json.decode([[
         "Element5Size": "0.0:0.0:"
     },
     "Tonemap": {
-        "MiddleGray": "0.5",
-        "MinExposure": "0.0",
-        "MaxExposure": "1",
-        "ExposureAdjustTime": "0.5"
+
     },
     "Wind": {
 
     },
-    "Name": "DefaultNight",
+    "Name": "MP_012_Late_Night",
     "Type": "DefaultDynamic",
     "Priority": "10",
     "Visibility": "1"

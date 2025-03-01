@@ -35,32 +35,14 @@ return json.decode([[
         "SunSpecularScale": "5",
         "SunShadowHeightScale":"1.0",
         "SunRotationX": "150.0",
-        "SunRotationY": "90.0"
+        "SunRotationY": "90.0",
+        "CloudShadowEnable": "false"
     },
     "Sky": {
         "Realm": "0",
         "Enable": "true",
         "SunSize": "0.01",
-        "SunScale": "1.5",
-        "CloudLayer1Altitude": "500000.0",
-        "CloudLayer1TileFactor": "0.25",
-        "CloudLayer1Rotation": "223.52900695801",
-        "CloudLayer1Speed": "-0.001",
-        "CloudLayer1SunLightIntensity": "0.5",
-        "CloudLayer1SunLightPower": "0.5",
-        "CloudLayer1AmbientLightIntensity": "0.5",
-        "CloudLayer1Color": "(0.3, 0.3, 0.3)",
-        "CloudLayer1AlphaMul": "0.8",
-        "CloudLayer2Altitude": "5000000.0",
-        "CloudLayer2TileFactor": "0.60000002384186",
-        "CloudLayer2Rotation": "237.07299804688",
-        "CloudLayer2Speed": "-0.0010000000474975",
-        "CloudLayer2SunLightIntensity": "0",
-        "CloudLayer2SunLightPower": "0",
-        "CloudLayer2AmbientLightIntensity": "0",
-        "CloudLayer2Color": "0:0:0:",
-        "CloudLayer2AlphaMul": "0.0",
-		"CloudLayer2Texture": "levels/testrange_lighting/sky/sky_07_starlayer_d"
+        "SunScale": "1.5"
     },
     "SunFlare": {
 
@@ -71,7 +53,7 @@ return json.decode([[
     "Wind": {
 
     },
-    "Name": "DefaultNoon",
+    "Name": "XP3_Desert_Noon",
     "Type": "DefaultDynamic",
     "Priority": "10",
     "Visibility": "1"

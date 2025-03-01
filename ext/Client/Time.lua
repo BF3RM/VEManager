@@ -459,7 +459,7 @@ function Time:_Run()
 		m_VisualEnvironmentHandler:SetVisibility(l_Preset['presetID'], s_Factor)
 
 		if s_Factor ~= 0 then -- hardcode for now
-			m_VisualEnvironmentHandler:SetSingleValue(l_Preset['presetID'], 'sky', 'cloudLayer1Speed', -0.0001)
+			m_VisualEnvironmentHandler:SetSingleValue(l_Preset['presetID'], 'sky', 'cloudLayer1Speed', self._CloudSpeed)
 		end
 	end
 
@@ -482,6 +482,7 @@ function Time:_Run()
 			MathUtils:Round(s_CurrentPresetVisibilityFactor * 100) ..
 			"%) -> " .. tostring(s_NextPresetID) .. " (" .. MathUtils:Round(s_NextPresetVisibilityFactor * 100) .. "%)")
 	end
+	Events:Dispatch('TimeServer:TimeInform', s_Hour)
 end
 
 return Time()

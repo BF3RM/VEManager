@@ -31,8 +31,8 @@ return json.decode([[
         "SunColor": "(2.8261, 0.9783, 0.4348)",
         "SkyColor": "(0.2717, 0.1087, 0.1087)",
         "GroundColor": "(0.1087, 0.0543, 0.0543)",
-        "SkyLightAngleFactor": "2",
-        "SunSpecularScale": "3",
+        "SkyLightAngleFactor": "4",
+        "SunSpecularScale": "5",
         "SunShadowHeightScale":"1.0",
         "SunRotationX": "150.0",
         "SunRotationY": "150.0"
@@ -43,6 +43,7 @@ return json.decode([[
         "BrightnessScale": "0.4",
         "SunSize": "0.01",
         "SunScale": "2",
+        "StaticEnvmapScale":"0.0",
         "CloudLayerSunColor": "(1, 0.3, 0.051)",
         "CloudLayer1Altitude": "500000.0",
         "CloudLayer1TileFactor": "0.25",
@@ -68,16 +69,16 @@ return json.decode([[
         "Element1Size": "0.05:0.05:",
         "Element2Size": "0.05:0.05:",
         "Element3Size": "0.05:0.05:",
-        "Element4Size": "0.05:0.05:",
-        "Element5Size": "0.05:0.05:"
+        "Element4Size": "0.00:0.00:",
+        "Element5Size": "0.00:0.00:"
     },
     "Tonemap": {
-
+        "ExposureAdjustTime": "0"
     },
     "Wind": {
 
     },
-    "Name": "DefaultEvening",
+    "Name": "XP4_Quake_Evening",
     "Type": "DefaultDynamic",
     "Priority": "10",
     "Visibility": "1"

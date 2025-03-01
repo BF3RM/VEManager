@@ -36,7 +36,8 @@ return json.decode([[
         "SunRotationY":"180.0",
         "SkyLightAngleFactor":"0.0",
         "SunSpecularScale":"0.0",
-        "SunShadowHeightScale":"0.0"
+        "SunShadowHeightScale":"0.0",
+        "SkyEnvmapShadowScale": "0.0"
     },
     "Sky": {
         "Realm": "0",
@@ -44,6 +45,7 @@ return json.decode([[
         "BrightnessScale": "0.004",
         "SunSize": "0.0005",
         "SunScale": "80",
+        "StaticEnvmapScale":"0.09",
         "CloudLayerSunColor": "(0, 0, 0)",
         "CloudLayer1Altitude": "500000.0",
         "CloudLayer1TileFactor": "0.25",
@@ -71,7 +73,13 @@ return json.decode([[
         "Element2Size": "0.0:0.0:",
         "Element3Size": "0.0:0.0:",
         "Element4Size": "0.0:0.0:",
-        "Element5Size": "0.0:0.0:"
+        "Element5Enable": "false",
+        "Element5RayDistance": "0.0",
+        "Element5Size": "(0.0, 0.0)",
+        "Element5SizeOccluderCurve": "(0.000000, 0.000000, 0.000000, 1.000000)",
+        "Element5SizeScreenPosCurve": "(0.000000, 0.000000, 0.000000, 0.820000)",
+        "Element5AlphaOccluderCurve": "(0.000000, 0.000000, -0.289483, 0.029082)",
+        "Element5AlphaScreenPosCurve": "(0.000000, 0.000000, -0.930245, 0.629199)"
     },
     "Tonemap": {
         "MiddleGray": "0.5",
@@ -82,7 +90,7 @@ return json.decode([[
     "Wind": {
 
     },
-    "Name": "DefaultNight",
+    "Name": "XP4_FD_Night",
     "Type": "DefaultDynamic",
     "Priority": "10",
     "Visibility": "1"

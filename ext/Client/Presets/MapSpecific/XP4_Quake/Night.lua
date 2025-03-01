@@ -20,7 +20,8 @@ return json.decode([[
     },
     "Enlighten": {
         "Realm": "0",
-        "Enable": "false"
+        "Enable": "false",
+        "SkyBoxEnable": "false"
     },
     "Fog": {
 
@@ -29,14 +30,15 @@ return json.decode([[
         "Realm": "0",
         "Enable": "true",
         "SunColor": "(0.05, 0.05, 0.09)",
-        "SkyColor": "(0.01, 0.01, 0.01)",
+        "SkyColor": "(0.5919, 0.4832, 0.4288)",
         "GroundColor": "(0.04, 0.04, 0.04)",
         "SunSpecularScale": "0",
         "SunRotationX": "90.0",
         "SunRotationY":"180.0",
         "SkyLightAngleFactor":"0.0",
         "SunSpecularScale":"0.0",
-        "SunShadowHeightScale":"0.0"
+        "SunShadowHeightScale":"0.0",
+        "SkyEnvmapShadowScale": "0.0"
     },
     "Sky": {
         "Realm": "0",
@@ -44,6 +46,7 @@ return json.decode([[
         "BrightnessScale": "0.004",
         "SunSize": "0.0005",
         "SunScale": "80",
+        "StaticEnvmapScale":"0.0",
         "CloudLayerSunColor": "(0, 0, 0)",
         "CloudLayer1Altitude": "500000.0",
         "CloudLayer1TileFactor": "0.25",
@@ -74,15 +77,16 @@ return json.decode([[
         "Element5Size": "0.0:0.0:"
     },
     "Tonemap": {
+        "TonemapMethod": "2",
         "MiddleGray": "0.5",
         "MinExposure": "0.0",
-        "MaxExposure": "1",
+        "MaxExposure": "0.07",
         "ExposureAdjustTime": "0.5"
     },
     "Wind": {
 
     },
-    "Name": "DefaultNight",
+    "Name": "XP4_Quake_Night",
     "Type": "DefaultDynamic",
     "Priority": "10",
     "Visibility": "1"
