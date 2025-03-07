@@ -12,8 +12,8 @@ function Patches:__init()
 	m_VEMLogger:Write("Initializing Patches")
 
 	-- Patch Menu Background
-	-- ResourceManager:RegisterInstanceLoadHandler(Guid("3A3E5533-4B2A-11E0-A20D-FE03F1AD0E2F"),
-	-- 	Guid("F26B7ECE-A71D-93AC-6C49-B6223BF424D6"), self, self._OnMenuBGLoaded)
+	ResourceManager:RegisterInstanceLoadHandler(Guid("3A3E5533-4B2A-11E0-A20D-FE03F1AD0E2F"),
+		Guid("F26B7ECE-A71D-93AC-6C49-B6223BF424D6"), self, self._OnMenuBGLoaded)
 end
 
 ---@param p_Instance DataContainer
@@ -173,15 +173,15 @@ function Patches:PatchComponents(p_Partition)
 	end
 end
 
--- ---@param p_Instance DataContainer
--- function Patches:_OnMenuBGLoaded(p_Instance)
--- 	-- Increase priority of menu bg
--- 	-- https://github.com/EmulatorNexus/Venice-EBX/blob/f06c290fa43c80e07985eda65ba74c59f4c01aa0/UI/Assets/MenuVisualEnvironment.txt#L140
--- 	local s_MenuBg = VisualEnvironmentEntityData(p_Instance)
--- 	s_MenuBg:MakeWritable()
--- 	s_MenuBg.priority = 100
+---@param p_Instance DataContainer
+function Patches:_OnMenuBGLoaded(p_Instance)
+	-- Increase priority of menu bg
+	-- https://github.com/EmulatorNexus/Venice-EBX/blob/f06c290fa43c80e07985eda65ba74c59f4c01aa0/UI/Assets/MenuVisualEnvironment.txt#L140
+	local s_MenuBg = VisualEnvironmentEntityData(p_Instance)
+	s_MenuBg:MakeWritable()
+	s_MenuBg.priority = 100
 
--- 	m_VEMLogger:Write("Menu background patched (priority increased)")
--- end
+	m_VEMLogger:Write("Menu background patched (priority increased)")
+end
 
 return Patches()
