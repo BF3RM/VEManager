@@ -124,6 +124,13 @@ function VEManagerClient:_OnLevelLoaded(p_LevelName, p_GameModeName, p_IsDedicat
 		self._RawPresets.DefaultNight = require("Presets/MapSpecific/XP3_Valley/Night")
 		self._RawPresets.DefaultLateNight = require("Presets/MapSpecific/XP3_Valley/LateNight")
 	end
+	if string.find(p_LevelName, 'XP3_Alborz') then
+		-- self._RawPresets.DefaultMorning = require("Presets/MapSpecific/XP3_Alborz/Morning")
+		-- self._RawPresets.DefaultNoon = require("Presets/MapSpecific/XP3_Alborz/Noon")
+		-- self._RawPresets.DefaultEvening = require("Presets/MapSpecific/XP3_Alborz/Evening")
+		self._RawPresets.DefaultNight = require("Presets/MapSpecific/XP3_Alborz/Night")
+		self._RawPresets.DefaultLateNight = require("Presets/MapSpecific/XP3_Alborz/LateNight")
+	end
 	if string.find(p_LevelName, 'XP3_Desert') then
 		self._RawPresets.DefaultMorning = require("Presets/MapSpecific/XP3_Desert/Morning")
 		self._RawPresets.DefaultNoon = require("Presets/MapSpecific/XP3_Desert/Noon")

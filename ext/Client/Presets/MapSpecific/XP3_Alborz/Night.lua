@@ -1,16 +1,16 @@
 return json.decode([[
 {
-    "CharacterLighting": {
-        "CharacterLightEnable": "true",
-        "FirstPersonEnable": "true",
-        "LockToCameraDirection": "true",
-        "CameraUpRotation": "27.482999801636",
-        "CharacterLightingMode": "1",
-        "BlendFactor": "0.02",
-        "TopLight": "1:1:1:",
-        "BottomLight": "1:1:1:",
-        "TopLightDirX": "0",
-        "TopLightDirY": "0.0"
+    "CharacterLighting":{
+        "CharacterLightEnable":"false",
+        "FirstPersonEnable":"false",
+        "LockToCameraDirection":"true",
+        "CameraUpRotation":"27.482999801636",
+        "CharacterLightingMode":"0",
+        "BlendFactor":"1.0",
+        "TopLight":"(1.0, 1.0, 1.0)",
+        "BottomLight":"(1.0, 1.0, 1.0)",
+        "TopLightDirX":"0.0",
+        "TopLightDirY":"0.0"
     },
     "ColorCorrection": {
 
@@ -28,12 +28,12 @@ return json.decode([[
     "OutdoorLight": {
         "Realm": "0",
         "Enable": "true",
-        "SunColor": "(0.04, 0.04, 0.07)",
+        "SunColor": "(0.05, 0.05, 0.09)",
         "SkyColor": "(0.01, 0.01, 0.01)",
-        "GroundColor": "(0.03, 0.03, 0.03)",
+        "GroundColor": "(0.04, 0.04, 0.04)",
         "SunSpecularScale": "0",
-        "SunRotationX": "150.0",
-        "SunRotationY":"359.0",
+        "SunRotationX": "90.0",
+        "SunRotationY":"180.0",
         "SkyLightAngleFactor":"0.0",
         "SkyEnvmapShadowScale":"0.0",
         "SunSpecularScale":"0.0",
@@ -84,7 +84,7 @@ return json.decode([[
     "Wind": {
 
     },
-    "Name": "XP5_003_Late_Night",
+    "Name": "XP3_Alborz_Night",
     "Type": "DefaultDynamic",
     "Priority": "10",
     "Visibility": "1"

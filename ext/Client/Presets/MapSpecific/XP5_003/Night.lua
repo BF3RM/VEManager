@@ -35,6 +35,7 @@ return json.decode([[
         "SunRotationX": "90.0",
         "SunRotationY":"180.0",
         "SkyLightAngleFactor":"0.0",
+        "SkyEnvmapShadowScale":"0.0",
         "SunSpecularScale":"0.0",
         "SunShadowHeightScale":"0.0"
     },
@@ -44,7 +45,7 @@ return json.decode([[
         "BrightnessScale": "0.004",
         "SunSize": "0.0005",
         "SunScale": "80",
-        "StaticEnvmapScale":"0.05",
+        "StaticEnvmapScale":"0.01",
         "CloudLayerSunColor": "(0, 0, 0)",
         "CloudLayer1Altitude": "500000.0",
         "CloudLayer1TileFactor": "0.25",

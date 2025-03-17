@@ -482,6 +482,7 @@ function Time:_Run()
 			MathUtils:Round(s_CurrentPresetVisibilityFactor * 100) ..
 			"%) -> " .. tostring(s_NextPresetID) .. " (" .. MathUtils:Round(s_NextPresetVisibilityFactor * 100) .. "%)")
 	end
+	-- This allows us to know exactly the hour of the day for other mods (for example for Darkness Unleashed)
 	Events:Dispatch('TimeServer:TimeInform', s_Hour)
 end
 

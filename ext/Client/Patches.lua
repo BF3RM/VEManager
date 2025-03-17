@@ -27,9 +27,12 @@ function Patches:__init()
 		-- 		partition.primaryInstance:ReplaceReferences(nil)
 		-- 	end
 		-- )
-		ResourceManager:RegisterInstanceLoadHandlerOnce(Guid('675975D5-F74E-11E1-BE7E-D621ACDFC7F6'),
-			Guid("4F45BDE8-25AA-1869-0078-DE697547B492"),
-			self, self._OnXP4LakeEnvLoaded)
+
+		-- This didn't work :(
+
+		-- ResourceManager:RegisterInstanceLoadHandlerOnce(Guid('675975D5-F74E-11E1-BE7E-D621ACDFC7F6'),
+		-- 	Guid("4F45BDE8-25AA-1869-0078-DE697547B492"),
+		-- 	self, self._OnXP4LakeEnvLoaded)
 		ResourceManager:RegisterInstanceLoadHandler(Guid("3A3E5533-4B2A-11E0-A20D-FE03F1AD0E2F"),
 			Guid("F26B7ECE-A71D-93AC-6C49-B6223BF424D6"), self, self._OnMenuBGLoaded)
 		-- ResourceManager:RegisterInstanceLoadHandler(XP1_001.MainPartitionGuid,
@@ -51,16 +54,16 @@ function Patches:__init()
 	-- end)
 end
 
----@param p_Instance DataContainer
-function Patches:_OnXP4LakeEnvLoaded(p_Instance)
-	print("############ Removing XP4 LakeEnv #####################")
-	-- local texture = TextureAsset(p_Instance)
-	Asset(p_Instance).name = ""
-	-- texture:MakeWritable()
-	-- texture.name = ""
-	-- p_Instance:ReplaceReferences(texture)
-	print("############ Removed XP4 LakeEnv #####################")
-end
+-- ---@param p_Instance DataContainer
+-- function Patches:_OnXP4LakeEnvLoaded(p_Instance)
+-- 	print("############ Removing XP4 LakeEnv #####################")
+-- 	-- local texture = TextureAsset(p_Instance)
+-- 	Asset(p_Instance).name = ""
+-- 	-- texture:MakeWritable()
+-- 	-- texture.name = ""
+-- 	-- p_Instance:ReplaceReferences(texture)
+-- 	print("############ Removed XP4 LakeEnv #####################")
+-- end
 
 ---@param p_Instance DataContainer
 local function _PatchMeshAsset(p_Instance)
@@ -70,8 +73,8 @@ local function _PatchMeshAsset(p_Instance)
 		for _, l_Material in pairs(s_Mesh.materials) do
 			l_Material:MakeWritable()
 			l_Material.shader.shader = nil
-			print('The instance: ' .. p_Instance.partition.name)
-			print('################# Patched Mesh :) #################')
+			-- print('The instance: ' .. p_Instance.partition.name)
+			-- print('################# Patched Mesh :) #################')
 		end
 	end
 	-- Messing with its enlightenType doesn't work either.
@@ -132,8 +135,8 @@ local function _PatchMeshMaterialVariation(p_Instance)
 		local s_Variation = MeshMaterialVariation(p_Instance)
 		s_Variation:MakeWritable()
 		s_Variation.shader.shader = nil
-		print('The instance: ' .. p_Instance.partition.name)
-		print('################# Patched ObjectVariation :) #################')
+		-- print('The instance: ' .. p_Instance.partition.name)
+		-- print('################# Patched ObjectVariation :) #################')
 	end
 end
 
@@ -245,11 +248,11 @@ function Patches:PatchComponents(p_Partition)
 		-- 	_PatchWaterAsset(p_Partition.primaryInstance)
 	elseif p_Partition.primaryInstance:Is("TextureAsset") then
 		if m_PatchDatatable.textures[p_Partition.primaryInstance.name] then
-			print("################ TEXTURE MATCH ###############")
+			-- print("################ TEXTURE MATCH ###############")
 			local texture = TextureAsset(p_Partition.primaryInstance)
 			texture:MakeWritable()
 			texture = nil
-			print("################ ITS NIL NOW ###############")
+			-- print("################ ITS NIL NOW ###############")
 		end
 	elseif p_Partition.primaryInstance:Is("ObjectVariation") then
 		-- print('The Partition Name: ' .. p_Partition.name)

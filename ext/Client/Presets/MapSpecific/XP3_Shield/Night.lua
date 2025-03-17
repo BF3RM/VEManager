@@ -83,7 +83,7 @@ return json.decode([[
     "Wind": {
 
     },
-    "Name": "XP5_001_Night",
+    "Name": "XP3_Shield_Night",
     "Type": "DefaultDynamic",
     "Priority": "10",
     "Visibility": "1"
