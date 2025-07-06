@@ -4,12 +4,12 @@ VEMLogger = class "VEMLogger"
 
 function VEMLogger:__init(p_ClassName, p_ActivateLogging)
 	if type(p_ClassName) ~= "string" then
-		-- error("VEMLogger: Wrong arguments creating object, className is not a string. ClassName: " ..
-		-- tostring(p_ClassName))
+		error("VEMLogger: Wrong arguments creating object, className is not a string. ClassName: " ..
+		tostring(p_ClassName))
 		return
 	elseif type(p_ActivateLogging) ~= "boolean" then
-		-- error("VEMLogger: Wrong arguments creating object, ActivateLogging is not a boolean. ActivateLogging: " ..
-		-- 	tostring(p_ActivateLogging))
+		error("VEMLogger: Wrong arguments creating object, ActivateLogging is not a boolean. ActivateLogging: " ..
+			tostring(p_ActivateLogging))
 		return
 	end
 
@@ -33,7 +33,7 @@ function VEMLogger:Write(p_Message)
 
 	::continue::
 
-	-- print("[" .. self.className .. "] " .. tostring(p_Message))
+	print("[" .. self.className .. "] " .. tostring(p_Message))
 end
 
 function VEMLogger:WriteTable(p_Table)
@@ -51,8 +51,8 @@ function VEMLogger:WriteTable(p_Table)
 
 	::continue::
 
-	-- print("[" .. self.className .. "] Table:")
-	-- print(p_Table)
+	print("[" .. self.className .. "] Table:")
+	print(p_Table)
 end
 
 function VEMLogger:Warning(p_Message)
@@ -60,7 +60,7 @@ function VEMLogger:Warning(p_Message)
 		return
 	end
 
-	-- print("[" .. self.className .. "] WARNING: " .. tostring(p_Message))
+	print("[" .. self.className .. "] WARNING: " .. tostring(p_Message))
 end
 
 function VEMLogger:Error(p_Message)
@@ -68,7 +68,7 @@ function VEMLogger:Error(p_Message)
 		return
 	end
 
-	-- error("[" .. self.className .. "] " .. tostring(p_Message))
+	error("[" .. self.className .. "] " .. tostring(p_Message))
 end
 
 return VEMLogger

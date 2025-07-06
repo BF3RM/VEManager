@@ -176,9 +176,7 @@ end
 ---@param object 'object'
 ---@return number?
 function table.IndexOf(t, object)
-	if type(t) ~= "table" then
-		--  error("table expected, got " .. type(t), 2) 
-	end
+	if type(t) ~= "table" then error("table expected, got " .. type(t), 2) end
 
 	for i, v in pairs(t) do
 		if object == v then
@@ -192,9 +190,7 @@ end
 ---@param propertyValue any
 ---@return number? -- returns the index of the first match or nil
 function table.Any(t, propertyString, propertyValue)
-	if type(t) ~= "table" then
-		--  error("table expected, got " .. type(t), 2)
-	end
+	if type(t) ~= "table" then error("table expected, got " .. type(t), 2) end
 	for i, v in pairs(t) do
 		if v[propertyString] == propertyValue then
 			return i
