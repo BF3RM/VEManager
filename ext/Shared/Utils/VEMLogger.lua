@@ -33,7 +33,7 @@ function VEMLogger:Write(p_Message)
 
 	::continue::
 
-	print("[" .. self.className .. "] " .. tostring(p_Message))
+	-- print("[" .. self.className .. "] " .. tostring(p_Message))
 end
 
 function VEMLogger:WriteTable(p_Table)
@@ -51,8 +51,8 @@ function VEMLogger:WriteTable(p_Table)
 
 	::continue::
 
-	print("[" .. self.className .. "] Table:")
-	print(p_Table)
+	-- print("[" .. self.className .. "] Table:")
+	-- print(p_Table)
 end
 
 function VEMLogger:Warning(p_Message)
@@ -60,7 +60,7 @@ function VEMLogger:Warning(p_Message)
 		return
 	end
 
-	print("[" .. self.className .. "] WARNING: " .. tostring(p_Message))
+	-- print("[" .. self.className .. "] WARNING: " .. tostring(p_Message))
 end
 
 function VEMLogger:Error(p_Message)
