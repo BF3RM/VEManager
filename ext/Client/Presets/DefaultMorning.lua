@@ -1,5 +1,8 @@
 return json.decode([[
 {
+    "CameraParams": {
+
+    },
     "CharacterLighting": {
 
     },
@@ -7,6 +10,21 @@ return json.decode([[
 
     },
     "DynamicAO": {
+
+    },
+    "DynamicEnvmap": {
+
+    },
+    "MotionBlur":{
+
+    },
+    "PlanarReflection":{
+
+    },
+    "ScreenEffect":{
+
+    },
+    "ShaderParams":{
 
     },
     "Enlighten": {
@@ -34,7 +52,6 @@ return json.decode([[
         "BrightnessScale": "0.4",
         "SunSize": "0.01",
         "SunScale": "2",
-        "CloudLayerSunColor": "(1, 0.16, 0.06)",
         "CloudLayer1Altitude": "500000.0",
         "CloudLayer1TileFactor": "0.25",
         "CloudLayer1Rotation": "223.52900695801",
@@ -42,7 +59,6 @@ return json.decode([[
         "CloudLayer1SunLightIntensity": "0.5",
         "CloudLayer1SunLightPower": "0.5",
         "CloudLayer1AmbientLightIntensity": "0.5",
-        "CloudLayer1Color": "(0.3, 0.3, 0.3)",
         "CloudLayer1AlphaMul": "0.8",
         "CloudLayer2Altitude": "5000000.0",
         "CloudLayer2TileFactor": "0.60000002384186",
@@ -56,11 +72,7 @@ return json.decode([[
 		"CloudLayer2Texture": "levels/testrange_lighting/sky/sky_07_starlayer_d"
     },
     "SunFlare": {
-        "Element1Size": "0.05:0.05:",
-        "Element2Size": "0.05:0.05:",
-        "Element3Size": "0.05:0.05:",
-        "Element4Size": "0.05:0.05:",
-        "Element5Size": "0.05:0.05:"
+
     },
     "Tonemap": {
 

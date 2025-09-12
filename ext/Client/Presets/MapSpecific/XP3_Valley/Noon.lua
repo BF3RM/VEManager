@@ -1,16 +1,7 @@
 return json.decode([[
 {
     "CharacterLighting": {
-        "CharacterLightEnable": "true",
-        "FirstPersonEnable": "true",
-        "LockToCameraDirection": "true",
-        "CameraUpRotation": "27.482999801636",
-        "CharacterLightingMode": "1",
-        "BlendFactor": "0.02",
-        "TopLight": "1:1:1:",
-        "BottomLight": "1:1:1:",
-        "TopLightDirX": "0",
-        "TopLightDirY": "0.0"
+
     },
     "ColorCorrection": {
 
@@ -28,17 +19,21 @@ return json.decode([[
     "OutdoorLight": {
         "Realm": "0",
         "Enable": "true",
-        "SunSize": "0.01",
-        "SunScale": "1.5",
-		"BrightnessScale":"5",
-        "CloudLayer1Color": "0:0:0"
+        "SunColor": "(6, 5.5870, 5.0435)",
+        "SkyColor": "(0.6804, 0.4174, 0.4174)",
+        "GroundColor": "(0.0, 0.0, 0.0)",
+        "SunSpecularScale":"5.0",
+        "SkyLightAngleFactor": "4",
+        "SunShadowHeightScale":"1.0"
     },
     "Sky": {
         "Realm": "0",
         "Enable": "true",
-        "SunSize": "0.01",
-        "SunScale": "1.5",
-		"BrightnessScale":"5"
+        "SunSize": "0.05",
+        "SunScale": "5",
+		"BrightnessScale":"10",
+        "CloudLayer1Color": "1:1:1"
+
     },
     "SunFlare": {
 

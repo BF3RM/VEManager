@@ -1,8 +1,5 @@
 return json.decode([[
 {
-    "CameraParams": {
-
-    },
     "CharacterLighting": {
 
     },
@@ -10,9 +7,6 @@ return json.decode([[
 
     },
     "DynamicAO": {
-
-    },
-    "Dof": {
 
     },
     "DynamicEnvmap": {
@@ -40,12 +34,12 @@ return json.decode([[
     "OutdoorLight": {
         "Realm": "0",
         "Enable": "true",
-        "SunColor": "(0.04, 0.04, 0.07)",
+        "SunColor": "(0.05, 0.05, 0.09)",
         "SkyColor": "(0.01, 0.01, 0.01)",
-        "GroundColor": "(0.03, 0.03, 0.03)",
+        "GroundColor": "(0.04, 0.04, 0.04)",
         "SunSpecularScale": "0",
-        "SunRotationX": "150.0",
-        "SunRotationY":"359.0",
+        "SunRotationX": "90.0",
+        "SunRotationY":"180.0",
         "SkyLightAngleFactor":"0.0",
         "SunSpecularScale":"0.0",
         "SunShadowHeightScale":"0.0"
@@ -56,7 +50,6 @@ return json.decode([[
         "BrightnessScale": "0.004",
         "SunSize": "0.0005",
         "SunScale": "80",
-        "StaticEnvmapScale":"0.05",
         "CloudLayerSunColor": "(0, 0, 0)",
         "CloudLayer1Altitude": "500000.0",
         "CloudLayer1TileFactor": "0.25",
@@ -95,7 +88,7 @@ return json.decode([[
     "Wind": {
 
     },
-    "Name": "XP5_002_LateNight",
+    "Name": "MP_001_Night",
     "Type": "DefaultDynamic",
     "Priority": "10",
     "Visibility": "1"

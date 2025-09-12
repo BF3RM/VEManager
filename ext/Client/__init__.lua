@@ -73,6 +73,13 @@ function VEManagerClient:_OnLevelLoaded(p_LevelName, p_GameModeName, p_IsDedicat
 	LEVEL_LOADED = true
 	m_Patches:OnLevelLoaded(p_LevelName, p_GameModeName, p_IsDedicatedServer)
 	-- MP_003 (Teheran Highway) Is already a Night map, so it requires a different preset.
+	if string.find(p_LevelName, 'MP_001') then
+		self._RawPresets.DefaultMorning = require("Presets/MapSpecific/MP_001/Morning")
+		self._RawPresets.DefaultNoon = require("Presets/MapSpecific/MP_001/Noon")
+		self._RawPresets.DefaultEvening = require("Presets/MapSpecific/MP_001/Evening")
+		self._RawPresets.DefaultNight = require("Presets/MapSpecific/MP_001/Night")
+		self._RawPresets.DefaultLateNight = require("Presets/MapSpecific/MP_001/LateNight")
+	end
 	if string.find(p_LevelName, 'MP_003') then
 		self._RawPresets.DefaultMorning = require("Presets/MapSpecific/MP_003/Morning")
 		self._RawPresets.DefaultNoon = require("Presets/MapSpecific/MP_003/Noon")

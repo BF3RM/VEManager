@@ -9,6 +9,21 @@ return json.decode([[
     "DynamicAO": {
 
     },
+    "DynamicEnvmap": {
+
+    },
+    "MotionBlur":{
+
+    },
+    "PlanarReflection":{
+
+    },
+    "ScreenEffect":{
+
+    },
+    "ShaderParams":{
+
+    },
     "Enlighten": {
         "Realm": "0",
         "Enable": "false"
@@ -19,21 +34,21 @@ return json.decode([[
     "OutdoorLight": {
         "Realm": "0",
         "Enable": "true",
-        "SunColor": "(5, 3.5870, 3.0435)",
-        "SkyColor": "(0.3804, 0.2174, 0.2174)",
+        "SunColor": "(5.0, 1.7, 1.0)",
+        "SkyColor": "(0.1, 0.1, 0.1)",
         "GroundColor": "(0.0, 0.0, 0.0)",
-        "SkyLightAngleFactor": "1",
-        "SunSpecularScale": "5",
+        "SkyLightAngleFactor": "2",
+        "SunSpecularScale": "4",
         "SunShadowHeightScale":"1.0",
         "SunRotationX": "150.0",
-        "SunRotationY": "90.0"
+        "SunRotationY": "10.0"
     },
     "Sky": {
         "Realm": "0",
         "Enable": "true",
+        "BrightnessScale": "0.4",
         "SunSize": "0.01",
-        "SunScale": "1.5",
-        "StaticEnvmapScale":"0.0",
+        "SunScale": "2",
         "CloudLayer1Altitude": "500000.0",
         "CloudLayer1TileFactor": "0.25",
         "CloudLayer1Rotation": "223.52900695801",
@@ -41,7 +56,6 @@ return json.decode([[
         "CloudLayer1SunLightIntensity": "0.5",
         "CloudLayer1SunLightPower": "0.5",
         "CloudLayer1AmbientLightIntensity": "0.5",
-        "CloudLayer1Color": "(0.3, 0.3, 0.3)",
         "CloudLayer1AlphaMul": "0.8",
         "CloudLayer2Altitude": "5000000.0",
         "CloudLayer2TileFactor": "0.60000002384186",
@@ -63,23 +77,7 @@ return json.decode([[
     "Wind": {
 
     },
-    "ShaderParams": {
-        "Name": "RimLightGradient",
-        "Value": "(2.0, 2.0, 2.0, 2.0)"
-    },
-    "ShaderParams": {
-        "Name": "RimLightDirection",
-        "Value": "(0.0, -2.0, -0.5, 0.0)"
-    },
-     "ShaderParams": {
-        "Name": "RimLightExponent",
-        "Value": "(2.0, 2.0, 2.0, 2.0)"
-    },
-         "ShaderParams": {
-        "Name": "RimLightColor",
-        "Value": "(2.0, 2.0, 2.0, 2.0)"
-    },
-    "Name": "XP4_Quake_Noon",
+    "Name": "MP_001_Morning",
     "Type": "DefaultDynamic",
     "Priority": "10",
     "Visibility": "1"

@@ -20,7 +20,7 @@ return json.decode([[
         "Realm": "0",
         "Enable": "true",
         "SunColor": "(5.0, 1.7, 1.0)",
-        "SkyColor": "(0.1, 0.1, 0.1)",
+        "SkyColor": "(0.3, 0.3, 0.3)",
         "GroundColor": "(0.0, 0.0, 0.0)",
         "SkyLightAngleFactor": "2",
         "SunSpecularScale": "5",
@@ -31,10 +31,10 @@ return json.decode([[
     "Sky": {
         "Realm": "0",
         "Enable": "true",
-        "BrightnessScale": "2",
+        "BrightnessScale": "8",
         "SunSize": "0.01",
         "SunScale": "2",
-        "CloudLayer1Color": "0:0:0"
+        "CloudLayer1Color": "1:1:1"
     },
     "SunFlare": {
         "Element1Size": "0.10:0.10:",

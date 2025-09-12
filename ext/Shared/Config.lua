@@ -75,7 +75,7 @@ MAPS_CONFIG = {
     },
     -- Strike at Karkand
     ['XP1_001'] = {
-        START_HOUR = 6,
+        START_HOUR = 5,
         DAY_DURATION = 28,
     },
     -- Gulf of Oman

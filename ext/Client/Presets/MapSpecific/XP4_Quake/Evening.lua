@@ -1,16 +1,7 @@
 return json.decode([[
 {
     "CharacterLighting": {
-        "CharacterLightEnable": "true",
-        "FirstPersonEnable": "true",
-        "LockToCameraDirection": "true",
-        "CameraUpRotation": "27.482999801636",
-        "CharacterLightingMode": "1",
-        "BlendFactor": "0.02",
-        "TopLight": "1:1:1:",
-        "BottomLight": "1:1:1:",
-        "TopLightDirX": "0",
-        "TopLightDirY": "0.0"
+
     },
     "ColorCorrection": {
 
@@ -73,10 +64,26 @@ return json.decode([[
         "Element5Size": "0.00:0.00:"
     },
     "Tonemap": {
-        "ExposureAdjustTime": "0"
+
     },
     "Wind": {
 
+    },
+    "ShaderParams": {
+        "Name": "RimLightGradient",
+        "Value": "(2.0, 2.0, 2.0, 2.0)"
+    },
+    "ShaderParams": {
+        "Name": "RimLightDirection",
+        "Value": "(0.0, -2.0, -0.5, 0.0)"
+    },
+     "ShaderParams": {
+        "Name": "RimLightExponent",
+        "Value": "(2.0, 2.0, 2.0, 2.0)"
+    },
+         "ShaderParams": {
+        "Name": "RimLightColor",
+        "Value": "(2.0, 2.0, 2.0, 2.0)"
     },
     "Name": "XP4_Quake_Evening",
     "Type": "DefaultDynamic",

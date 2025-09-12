@@ -43,7 +43,7 @@ return json.decode([[
         "Enable": "true",
         "SunSize": "0.01",
         "SunScale": "1.5",
-		"BrightnessScale":"5",
+		"BrightnessScale":"8",
         "CloudLayer1Color": "0:0:0"
     },
     "SunFlare": {

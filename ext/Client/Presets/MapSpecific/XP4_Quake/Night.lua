@@ -1,16 +1,7 @@
 return json.decode([[
 {
     "CharacterLighting":{
-        "CharacterLightEnable":"false",
-        "FirstPersonEnable":"false",
-        "LockToCameraDirection":"true",
-        "CameraUpRotation":"27.482999801636",
-        "CharacterLightingMode":"0",
-        "BlendFactor":"1.0",
-        "TopLight":"(1.0, 1.0, 1.0)",
-        "BottomLight":"(1.0, 1.0, 1.0)",
-        "TopLightDirX":"0.0",
-        "TopLightDirY":"0.0"
+
     },
     "ColorCorrection": {
 
@@ -20,8 +11,7 @@ return json.decode([[
     },
     "Enlighten": {
         "Realm": "0",
-        "Enable": "false",
-        "SkyBoxEnable": "false"
+        "Enable": "false"
     },
     "Fog": {
 
@@ -85,6 +75,22 @@ return json.decode([[
     },
     "Wind": {
 
+    },
+    "ShaderParams": {
+        "Name": "RimLightGradient",
+        "Value": "(2.0, 2.0, 2.0, 2.0)"
+    },
+    "ShaderParams": {
+        "Name": "RimLightDirection",
+        "Value": "(0.0, -2.0, -0.5, 0.0)"
+    },
+     "ShaderParams": {
+        "Name": "RimLightExponent",
+        "Value": "(2.0, 2.0, 2.0, 2.0)"
+    },
+    "ShaderParams": {
+        "Name": "RimLightColor",
+        "Value": "(2.0, 2.0, 2.0, 2.0)"
     },
     "Name": "XP4_Quake_Night",
     "Type": "DefaultDynamic",

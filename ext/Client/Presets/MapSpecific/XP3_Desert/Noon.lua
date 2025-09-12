@@ -42,7 +42,8 @@ return json.decode([[
         "Realm": "0",
         "Enable": "true",
         "SunSize": "0.01",
-        "SunScale": "1.5"
+        "SunScale": "1.5",
+        "BrightnessScale": "5"
     },
     "SunFlare": {
 

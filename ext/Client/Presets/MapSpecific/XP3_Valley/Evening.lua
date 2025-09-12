@@ -40,10 +40,10 @@ return json.decode([[
     "Sky": {
         "Realm": "0",
         "Enable": "true",
-        "BrightnessScale": "0.4",
+        "BrightnessScale": "7",
         "SunSize": "0.01",
         "SunScale": "2",
-        "CloudLayer1Color": "(0.0, 0.0, 0.0)"
+        "CloudLayer1Color": "1:1:1"
     },
     "SunFlare": {
         "Element1Size": "0.05:0.05:",

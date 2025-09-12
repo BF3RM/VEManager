@@ -1,21 +1,30 @@
 return json.decode([[
 {
-    "CharacterLighting":{
-        "CharacterLightEnable":"false",
-        "FirstPersonEnable":"false",
-        "LockToCameraDirection":"true",
-        "CameraUpRotation":"27.482999801636",
-        "CharacterLightingMode":"0",
-        "BlendFactor":"1.0",
-        "TopLight":"(1.0, 1.0, 1.0)",
-        "BottomLight":"(1.0, 1.0, 1.0)",
-        "TopLightDirX":"0.0",
-        "TopLightDirY":"0.0"
+    "CameraParams": {
+
+    },
+    "CharacterLighting": {
+
     },
     "ColorCorrection": {
 
     },
     "DynamicAO": {
+
+    },
+    "DynamicEnvmap": {
+
+    },
+    "MotionBlur":{
+
+    },
+    "PlanarReflection":{
+
+    },
+    "ScreenEffect":{
+
+    },
+    "ShaderParams":{
 
     },
     "Enlighten": {

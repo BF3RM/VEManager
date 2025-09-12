@@ -9,6 +9,21 @@ return json.decode([[
     "DynamicAO": {
 
     },
+    "DynamicEnvmap": {
+
+    },
+    "MotionBlur":{
+
+    },
+    "PlanarReflection":{
+
+    },
+    "ScreenEffect":{
+
+    },
+    "ShaderParams":{
+
+    },
     "Enlighten": {
         "Realm": "0",
         "Enable": "false"
@@ -33,7 +48,6 @@ return json.decode([[
         "Enable": "true",
         "SunSize": "0.01",
         "SunScale": "1.5",
-        "StaticEnvmapScale":"0.0",
         "CloudLayer1Altitude": "500000.0",
         "CloudLayer1TileFactor": "0.25",
         "CloudLayer1Rotation": "223.52900695801",
@@ -63,23 +77,7 @@ return json.decode([[
     "Wind": {
 
     },
-    "ShaderParams": {
-        "Name": "RimLightGradient",
-        "Value": "(2.0, 2.0, 2.0, 2.0)"
-    },
-    "ShaderParams": {
-        "Name": "RimLightDirection",
-        "Value": "(0.0, -2.0, -0.5, 0.0)"
-    },
-     "ShaderParams": {
-        "Name": "RimLightExponent",
-        "Value": "(2.0, 2.0, 2.0, 2.0)"
-    },
-         "ShaderParams": {
-        "Name": "RimLightColor",
-        "Value": "(2.0, 2.0, 2.0, 2.0)"
-    },
-    "Name": "XP4_Quake_Noon",
+    "Name": "MP_001_Noon",
     "Type": "DefaultDynamic",
     "Priority": "10",
     "Visibility": "1"

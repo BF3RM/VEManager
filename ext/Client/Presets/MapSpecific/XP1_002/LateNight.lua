@@ -39,8 +39,8 @@ return json.decode([[
 		"SunRotationX": "150.0",
 		"SunRotationY":"359.0",
 		"SunColor": "(0.3745, 0.2658, 0.2658)",
-        "SkyColor": "(0.01, 0.01, 0.01)",
-        "GroundColor": "(0.03, 0.03, 0.03)",
+        "SkyColor": "(0.38, 0.38, 0.38)",
+        "GroundColor": "(0.1, 0.1, 0.1)",
 		"SkyLightAngleFactor":"0.0",
 		"SunSpecularScale":"0.0",
 		"SkyEnvmapShadowScale":"0.25",
@@ -85,7 +85,7 @@ return json.decode([[
         "TonemapMethod": "2",
         "MiddleGray": "0.5",
         "MinExposure": "0.0",
-        "MaxExposure": "0.1",
+        "MaxExposure": "0.18",
         "ExposureAdjustTime": "0.5"
 	},
 	"Vignette":{

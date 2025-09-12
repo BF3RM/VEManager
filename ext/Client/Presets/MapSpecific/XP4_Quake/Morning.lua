@@ -64,10 +64,26 @@ return json.decode([[
         "Element5Size": "0.0:0.0:"
     },
     "Tonemap": {
-        "ExposureAdjustTime": "0"
+
     },
     "Wind": {
 
+    },
+    "ShaderParams": {
+        "Name": "RimLightGradient",
+        "Value": "(2.0, 2.0, 2.0, 2.0)"
+    },
+    "ShaderParams": {
+        "Name": "RimLightDirection",
+        "Value": "(0.0, -2.0, -0.5, 0.0)"
+    },
+     "ShaderParams": {
+        "Name": "RimLightExponent",
+        "Value": "(2.0, 2.0, 2.0, 2.0)"
+    },
+         "ShaderParams": {
+        "Name": "RimLightColor",
+        "Value": "(2.0, 2.0, 2.0, 2.0)"
     },
     "Name": "XP4_Quake_Morning",
     "Type": "DefaultDynamic",

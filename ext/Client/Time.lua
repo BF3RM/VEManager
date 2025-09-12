@@ -58,6 +58,9 @@ function Time:_OnPresetsLoaded()
 end
 
 function Time:OnLevelDestroy()
+	if self._SyncEvent then
+		self._SyncEvent:Unsubscribe()
+	end
 	-- With this we get rid of carrying old presets when the map changes.
 	self:_ResetForcedValues()
 	self:RegisterVars()

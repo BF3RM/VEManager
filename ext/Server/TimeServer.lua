@@ -124,8 +124,8 @@ end
 
 ---@param p_Player Player
 function TimeServer:_OnPlayerSync(p_Player)
-	m_VEMLogger:Write('The player ' .. p_Player.name .. ' wants to sync !!!!!!!!!!! ')
 	if self.m_SystemRunning == true or self.m_IsStatic == true then
+		-- m_VEMLogger:Write('The player ' .. p_Player.name .. ' wants to sync !!!!!!!!!!! ')
 		m_VEMLogger:Write('Syncing Player with Server')
 		NetEvents:SendTo('VEManager:AddTimeToClient', p_Player, self.m_ServerDayTime, self.m_IsStatic,
 			self.m_TotalDayLength, self.m_OnlyDynamicPresets)
