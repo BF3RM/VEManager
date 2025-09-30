@@ -280,7 +280,6 @@ end
 function VEManagerClient:_LoadPresets()
 	m_VEMLogger:Write("Loading presets... (Name, Type, Priority)")
 
-
 	for _, l_State in ipairs(VisualEnvironmentManager:GetStates()) do
 		if l_State.entityName ~= "EffectEntity" and l_State.entityName ~= "Levels/Web_Loading/Lighting/Web_Loading_VE" then
 			-- SET VANILLA VE TO PRIORITY 0
@@ -338,11 +337,22 @@ function VEManagerClient:_LoadPresets()
 									" | " .. tostring(l_Class) .. " | " .. tostring(s_FieldName) .. ")")
 							end
 						elseif l_Field.typeInfo.array then
-							error("\t- Found unexpected array") -- TODO: Instead of error (that breaks the code), a continue should be used (unfortunately with goto), or set an "errorFound" true/false parameter to true and skip the component addition
-							return
+							local s_RawValue = l_Preset[l_Class][s_FieldName]
+							s_Value = s_RawValue
+							if s_FieldName == "ShaderParams" and type(s_RawValue) == "string" then
+								s_Value = json.decode(s_RawValue)
+							elseif type(s_RawValue) ~= "table" then
+								m_VEMLogger:Write("\t- Unexpected array format for " .. s_FieldName .. " in " .. l_Class)
+								s_Value = nil
+							end
 						else
-							error("\t- Found unexpected DataContainer: " .. s_Type) -- TODO: Instead of error (that breaks the code), a continue should be used (unfortunately with goto), or set an "errorFound" true/false parameter to true and skip the component addition
-							return
+							-- Handle DataContainer from preset (assume raw table structure)
+							s_Value = l_Preset[l_Class][s_FieldName]
+							if type(s_Value) ~= "table" then
+								m_VEMLogger:Write("\t- Unexpected DataContainer format for " ..
+									s_Type .. " (" .. s_FieldName .. " in " .. l_Class .. ")")
+								s_Value = nil
+							end
 						end
 
 						-- Set value
@@ -358,9 +368,9 @@ function VEManagerClient:_LoadPresets()
 
 						-- Try to get original value
 						-- m_VEMLogger:Write("Setting default value for field " .. s_FieldName .. " of class " .. l_Class .. " | " ..tostring(s_Value))
-						s_Value = self:GetDefaultValue(l_Class, l_Field)
+						local s_DefaultValue = self:GetDefaultValue(l_Class, l_Field)
 
-						if s_Value == nil then
+						if s_DefaultValue == nil then
 							m_VEMLogger:Write("\t- Failed to fetch original value: " ..
 								tostring(l_Class) .. " | " .. tostring(s_FieldName))
 
@@ -374,18 +384,25 @@ function VEManagerClient:_LoadPresets()
 							end
 						else
 							-- Applying original value
+							local s_FieldLower = UtilityFunctions:FirstToLower(s_FieldName)
 							if UtilityFunctions:IsBasicType(s_Type) then
-								s_Class[UtilityFunctions:FirstToLower(s_FieldName)] = s_Value
+								s_Class[s_FieldLower] = s_DefaultValue
 							elseif l_Field.typeInfo.enum then
-								s_Class[UtilityFunctions:FirstToLower(s_FieldName)] = tonumber(s_Value)
+								s_Class[s_FieldLower] = tonumber(s_DefaultValue)
 							elseif s_Type == "TextureAsset" then
 								---@diagnostic disable-next-line: param-type-mismatch
-								s_Class[UtilityFunctions:FirstToLower(s_FieldName)] = TextureAsset(s_Value)
+								s_Class[s_FieldLower] = TextureAsset(s_DefaultValue)
 							elseif l_Field.typeInfo.array then
-								m_VEMLogger:Write("\t- Found unexpected array, ignoring")
+								-- Handle arrays in defaults (set to default or empty table if nil)
+								if s_DefaultValue then
+									s_Class[s_FieldLower] = s_DefaultValue
+								else
+									s_Class[s_FieldLower] = {}
+									m_VEMLogger:Write("\t- Setting empty array for " .. s_FieldName .. " in " .. l_Class)
+								end
 							else
 								-- Its a DataContainer
-								s_Class[UtilityFunctions:FirstToLower(s_FieldName)] = _G[s_Type](s_Value)
+								s_Class[s_FieldLower] = _G[s_Type](s_DefaultValue)
 							end
 						end
 					end
