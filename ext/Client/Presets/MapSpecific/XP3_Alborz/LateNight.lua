@@ -1,16 +1,7 @@
 return json.decode([[
 {
     "CharacterLighting": {
-        "CharacterLightEnable": "true",
-        "FirstPersonEnable": "true",
-        "LockToCameraDirection": "true",
-        "CameraUpRotation": "27.482999801636",
-        "CharacterLightingMode": "1",
-        "BlendFactor": "0.02",
-        "TopLight": "1:1:1:",
-        "BottomLight": "1:1:1:",
-        "TopLightDirX": "0",
-        "TopLightDirY": "0.0"
+
     },
     "ColorCorrection": {
 
