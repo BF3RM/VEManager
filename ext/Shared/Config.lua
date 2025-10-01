@@ -9,9 +9,9 @@ VEM_CONFIG = {
     PATCH_DN_COMPONENTS = true,                                    -- Applies the needed Patches for Day-Night (removes bright meshes/textures meant for day)
 
     -- PRINT --
-    PRINT_DN_TIME_AND_VISIBILITIES = true, -- Print current time every hour along with the visibilities of the 4 presets
-    VEMLogger_ENABLED = true,              -- Enables the use of the VEMLogger Class [DEV]
-    VEMLogger_PRINT_ALL = false,           -- Prints All VEMLogger Prints
+    PRINT_DN_TIME_AND_VISIBILITIES = false, -- Print current time every hour along with the visibilities of the 4 presets
+    VEMLogger_ENABLED = false,              -- Enables the use of the VEMLogger Class [DEV]
+    VEMLogger_PRINT_ALL = false,            -- Prints All VEMLogger Prints
 
     -- SERVER --
     SERVER_SYNC_CLIENT_EVERY_TICKS = 2, -- Sync clients with the correct time ever X ticks
@@ -173,5 +173,4 @@ MAPS_CONFIG = {
         START_HOUR = 11,
         DAY_DURATION = 28,
     }
-
 }
