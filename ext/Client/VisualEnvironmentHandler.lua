@@ -201,18 +201,24 @@ function VisualEnvironmentHandler:SetVisibility(p_ID, p_Visibility)
 	local s_Object = self._VisualEnvironmentObjects[p_ID]
 
 	if not s_Object.entity then
-		self:InitializeVE(p_ID, p_Visibility)
-	elseif p_Visibility <= 0.0 then
-		self:DestroyVE(p_ID)
-	else
-		s_Object.ve.visibility = p_Visibility
-		local s_State = VisualEnvironmentEntity(s_Object.entity).state
-
-		if s_State then
-			s_State.visibility = p_Visibility
-			VisualEnvironmentManager:SetDirty(true)
+		if p_Visibility <= 0.0 then
+			return -- Don´t initialize a preset that will be destroyed right away
 		else
-			self:Reload(p_ID)
+			self:InitializeVE(p_ID, p_Visibility)
+		end
+	elseif s_Object.entity then
+		if p_Visibility <= 0.0 then
+			self:DestroyVE(p_ID)
+		else
+			s_Object.ve.visibility = p_Visibility
+			local s_State = VisualEnvironmentEntity(s_Object.entity).state
+
+			if s_State then
+				s_State.visibility = p_Visibility
+				VisualEnvironmentManager:SetDirty(true)
+			else
+				self:Reload(p_ID)
+			end
 		end
 	end
 
