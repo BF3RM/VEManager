@@ -6,8 +6,6 @@ It's used to create and manage VE presets. Presets can either be created with [V
 ## Youtube Tutorial Series
 https://youtube.com/playlist?list=PLqlU85EO4crIPxk10YXiKDXE67lU-dM4m
 
-If you have questions contact IllustrisJack#5355 on Discord.
-
 ## Config Options (Shared/VEM_CONFIG.lua):
 	A number of features can be switched on/off from the config file located at Shared/VEM_CONFIG.lua
 
