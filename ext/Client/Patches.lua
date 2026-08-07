@@ -6,15 +6,64 @@ Patches = class('Patches')
 local m_PatchDatatable = require('EmitterMeshPatchDatatable')
 
 ---@type VEMLogger
-local m_VEMLogger = VEMLogger("Patches", false)
+local m_VEMLogger = VEMLogger("Patches", true)
+
+local XP1_001 = {
+	MainPartitionGuid = Guid("FAF35F00-5263-40A3-AB4D-67384BC2AD6D")
+}
+local XP1_002 = {
+	MainPartitionGuid = Guid("D658DDB6-0B1E-4555-ABB8-5BC931C48F16")
+}
+
 
 function Patches:__init()
 	m_VEMLogger:Write("Initializing Patches")
 
 	-- Patch Menu Background
-	ResourceManager:RegisterInstanceLoadHandler(Guid("3A3E5533-4B2A-11E0-A20D-FE03F1AD0E2F"),
-		Guid("F26B7ECE-A71D-93AC-6C49-B6223BF424D6"), self, self._OnMenuBGLoaded)
+	if VEM_CONFIG.PATCH_DN_COMPONENTS then
+		-- ResourceManager:RegisterPartitionLoadHandlerOnce(Guid('675975D5-F74E-11E1-BE7E-D621ACDFC7F6'),
+		-- 	self, function(partition)
+		-- 		partition.primaryInstance:MakeWritable()
+		-- 		partition.primaryInstance:ReplaceReferences(nil)
+		-- 	end
+		-- )
+
+		-- This didn't work :(
+
+		-- ResourceManager:RegisterInstanceLoadHandlerOnce(Guid('675975D5-F74E-11E1-BE7E-D621ACDFC7F6'),
+		-- 	Guid("4F45BDE8-25AA-1869-0078-DE697547B492"),
+		-- 	self, self._OnXP4LakeEnvLoaded)
+		ResourceManager:RegisterInstanceLoadHandler(Guid("3A3E5533-4B2A-11E0-A20D-FE03F1AD0E2F"),
+			Guid("F26B7ECE-A71D-93AC-6C49-B6223BF424D6"), self, self._OnMenuBGLoaded)
+		-- ResourceManager:RegisterInstanceLoadHandler(XP1_001.MainPartitionGuid,
+		-- 	Guid("BBA12DEB-BC7A-E7F7-5E0D-43DFAF4AFFF4"), self, self._OnKarkandOmandWaterLoaded)
+		-- ResourceManager:RegisterInstanceLoadHandler(XP1_002.MainPartitionGuid,
+		-- 	Guid("CAEA8375-0AFC-4367-D5AD-032158C1B13F"), self, self._OnKarkandOmandWaterLoaded)
+	end
+	-- This will REMOVE the water entierly  (recommend to just remove the waves too,
+	-- but I don't really like how it looks, specially for Gulf...
+	-- I mean there is a fucking boat in it)
+	-- Events:Subscribe('Level:LoadResources', function(level)
+	-- 	local visual = ResourceManager:GetSettings("VisualTerrainSettings")
+	-- 	if visual ~= nil then
+	-- 		visual = VisualTerrainSettings(visual)
+	-- 		if m_PatchDatatable.waters[level] then
+	-- 			visual.drawWaterEnable = false
+	-- 		end
+	-- 	end
+	-- end)
 end
+
+-- ---@param p_Instance DataContainer
+-- function Patches:_OnXP4LakeEnvLoaded(p_Instance)
+-- 	print("############ Removing XP4 LakeEnv #####################")
+-- 	-- local texture = TextureAsset(p_Instance)
+-- 	Asset(p_Instance).name = ""
+-- 	-- texture:MakeWritable()
+-- 	-- texture.name = ""
+-- 	-- p_Instance:ReplaceReferences(texture)
+-- 	print("############ Removed XP4 LakeEnv #####################")
+-- end
 
 ---@param p_Instance DataContainer
 local function _PatchMeshAsset(p_Instance)
@@ -24,7 +73,59 @@ local function _PatchMeshAsset(p_Instance)
 		for _, l_Material in pairs(s_Mesh.materials) do
 			l_Material:MakeWritable()
 			l_Material.shader.shader = nil
+			-- print('The instance: ' .. p_Instance.partition.name)
+			-- print('################# Patched Mesh :) #################')
 		end
+	end
+	-- Messing with its enlightenType doesn't work either.
+	-- if m_PatchDatatable.rigidMeshs[p_Instance.partition.name] then
+	-- 	print("#####1################### Checking those backdrops #############################")
+	-- 	local s_Mesh = MeshAsset(p_Instance)
+	-- 	s_Mesh:MakeWritable()
+	-- 	s_Mesh.enlightenType = 0 -- 0 = Dynamic
+	-- end
+end
+
+---@param p_Instance DataContainer
+local function _PatchWaterAsset(p_Instance)
+	if m_PatchDatatable.waterAssets[p_Instance.partition.name] then
+		for _, instance in pairs(p_Instance.partition.instances) do
+			if instance:Is('LakeData') then
+				-- if instance.isLazyLoaded then
+				-- 	instance:RegisterLoadHandlerOnce(function(loadedInstance)
+				-- 		print('Instance has loaded!')
+				-- 		local lakeData = LakeData(loadedInstance)
+				-- 		lakeData:MakeWritable()
+				-- 		if lakeData.shader3d.isLazyLoaded then
+				-- 			lakeData.shader3d:RegisterLoadHandlerOnce(function(loadedInstance)
+				-- 				print('Instance has loaded!')
+				-- 				local shader = ShaderGraph(loadedInstance)
+				-- 				shader:MakeWritable()
+				-- 				shader.gammaCorrectionEnable = false
+				-- 			end)
+				-- 		else
+				-- 			lakeData.shader3d.gammaCorrectionEnable = false
+				-- 		end
+				-- 	end
+				-- 	)
+				-- else
+				-- We know now that LakeData aren't lazy loaded ...
+				local lakeData = LakeData(instance)
+				lakeData:MakeWritable()
+				if lakeData.shader3d.isLazyLoaded then
+					lakeData.shader3d:RegisterLoadHandlerOnce(function(loadedInstance)
+						print('Instance has loaded!')
+						local shader = ShaderGraph(loadedInstance)
+						shader:MakeWritable()
+						shader = nil
+					end)
+				else
+					lakeData.shader3d.gammaCorrectionEnable = false
+				end
+			end
+		end
+		-- end
+		m_VEMLogger:Write("Water Assets patched")
 	end
 end
 
@@ -34,6 +135,8 @@ local function _PatchMeshMaterialVariation(p_Instance)
 		local s_Variation = MeshMaterialVariation(p_Instance)
 		s_Variation:MakeWritable()
 		s_Variation.shader.shader = nil
+		-- print('The instance: ' .. p_Instance.partition.name)
+		-- print('################# Patched ObjectVariation :) #################')
 	end
 end
 
@@ -137,18 +240,23 @@ end
 
 ---@param p_Partition DatabasePartition
 function Patches:PatchComponents(p_Partition)
-	-- print('The partition: ' .. tostring(p_Partition))
-	-- print('The partition primaryInstance typeinfo elementType: ' ..
-	-- tostring(p_Partition.primaryInstance.typeInfo.elementType))
-	-- print('The partition primaryInstance typeinfo name : ' .. tostring(p_Partition.primaryInstance.typeInfo.name))
-
-	if not VEM_CONFIG.PATCH_DN_COMPONENTS then
-		return
-	end
-
 	if p_Partition.primaryInstance:Is("MeshAsset") then
+		-- print('The Partition Name: ' .. p_Partition.name)
+		-- print('Its primary Instance name' .. p_Partition.primaryInstance.partition.name)
 		_PatchMeshAsset(p_Partition.primaryInstance)
+		-- elseif p_Partition.primaryInstance:Is("WaterAsset") then
+		-- 	_PatchWaterAsset(p_Partition.primaryInstance)
+	elseif p_Partition.primaryInstance:Is("TextureAsset") then
+		if m_PatchDatatable.textures[p_Partition.primaryInstance.name] then
+			-- print("################ TEXTURE MATCH ###############")
+			local texture = TextureAsset(p_Partition.primaryInstance)
+			texture:MakeWritable()
+			texture = nil
+			-- print("################ ITS NIL NOW ###############")
+		end
 	elseif p_Partition.primaryInstance:Is("ObjectVariation") then
+		-- print('The Partition Name: ' .. p_Partition.name)
+		-- print('Its primary Instance name' .. p_Partition.primaryInstance.partition.name)
 		for _, l_Instance in ipairs(p_Partition.instances) do
 			if l_Instance:Is('MeshMaterialVariation') then -- ObjectVariation is the primary instance
 				_PatchMeshMaterialVariation(l_Instance)
@@ -170,6 +278,8 @@ function Patches:PatchComponents(p_Partition)
 		end
 	elseif p_Partition.primaryInstance:Is("EmitterTemplateData") then
 		_PatchEmitterTemplateData(p_Partition.primaryInstance)
+		-- elseif p_Partition.primaryInstance:Is("ShaderGraph") then
+		-- 	waterShaders
 	end
 end
 
@@ -183,5 +293,14 @@ function Patches:_OnMenuBGLoaded(p_Instance)
 
 	m_VEMLogger:Write("Menu background patched (priority increased)")
 end
+
+-- function Patches:_OnKarkandOmandWaterLoaded(waterAssets)
+-- 	for _, lakesAndWater in pairs(waterAssets.partition.instances) do
+-- 		lakesAndWater:MakeWritable()
+-- 		lakesAndWater.shader.shader = nil
+-- 	end
+
+-- 	m_VEMLogger:Write("Karkand/Oman water patched")
+-- end
 
 return Patches()

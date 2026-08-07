@@ -1,5 +1,8 @@
 return json.decode([[
 {
+    "CameraParams": {
+
+    },
     "CharacterLighting": {
 
     },
@@ -7,6 +10,21 @@ return json.decode([[
 
     },
     "DynamicAO": {
+
+    },
+    "DynamicEnvmap": {
+
+    },
+    "MotionBlur":{
+
+    },
+    "PlanarReflection":{
+
+    },
+    "ScreenEffect":{
+
+    },
+    "ShaderParams":{
 
     },
     "Enlighten": {

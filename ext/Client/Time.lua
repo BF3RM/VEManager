@@ -58,6 +58,9 @@ function Time:_OnPresetsLoaded()
 end
 
 function Time:OnLevelDestroy()
+	if self._SyncEvent then
+		self._SyncEvent:Unsubscribe()
+	end
 	-- With this we get rid of carrying old presets when the map changes.
 	self:_ResetForcedValues()
 	self:RegisterVars()
@@ -459,7 +462,7 @@ function Time:_Run()
 		m_VisualEnvironmentHandler:SetVisibility(l_Preset['presetID'], s_Factor)
 
 		if s_Factor ~= 0 then -- hardcode for now
-			m_VisualEnvironmentHandler:SetSingleValue(l_Preset['presetID'], 'sky', 'cloudLayer1Speed', -0.0001)
+			m_VisualEnvironmentHandler:SetSingleValue(l_Preset['presetID'], 'sky', 'cloudLayer1Speed', self._CloudSpeed)
 		end
 	end
 
@@ -482,6 +485,8 @@ function Time:_Run()
 			MathUtils:Round(s_CurrentPresetVisibilityFactor * 100) ..
 			"%) -> " .. tostring(s_NextPresetID) .. " (" .. MathUtils:Round(s_NextPresetVisibilityFactor * 100) .. "%)")
 	end
+	-- This allows us to know exactly the hour of the day for other mods (for example for Darkness Unleashed)
+	Events:Dispatch('TimeServer:TimeInform', s_Hour)
 end
 
 return Time()

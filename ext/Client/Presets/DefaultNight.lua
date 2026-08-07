@@ -1,61 +1,38 @@
 return json.decode([[
 {
-    "CharacterLighting":{
-        "CharacterLightEnable":"false",
-        "FirstPersonEnable":"false",
-        "LockToCameraDirection":"true",
-        "CameraUpRotation":"27.482999801636",
-        "CharacterLightingMode":"0",
-        "BlendFactor":"1.0",
-        "TopLight":"(1.0, 1.0, 1.0)",
-        "BottomLight":"(1.0, 1.0, 1.0)",
-        "TopLightDirX":"0.0",
-        "TopLightDirY":"0.0"
+    "CameraParams": {
+
+    },
+    "CharacterLighting": {
+
     },
     "ColorCorrection": {
-        "Realm": "0",
-        "Enable": "true",
-        "Brightness": "1:1:1:",
-        "Contrast": "1.0:1.0:1.02:",
-        "Saturation": "0.7275:0.7725:0.9225:",
-        "Hue": "0.0",
-        "ColorGradingEnable": "false"
+
     },
     "DynamicAO": {
-        "Realm": "0",
-        "Enable": "true",
-        "SsaoFade": "1.0",
-        "SsaoRadius": "1.0",
-        "SsaoMaxDistanceInner": "1.0",
-        "SsaoMaxDistanceOuter": "1.0",
-        "HbaoRadius": "1.0",
-        "HbaoAngleBias": "1.0",
-        "HbaoAttenuation": "1.0",
-        "HbaoContrast": "1.0",
-        "HbaoMaxFootprintRadius": "1",
-        "HbaoPowerExponent": "1.0"
+
+    },
+    "DynamicEnvmap": {
+
+    },
+    "MotionBlur":{
+
+    },
+    "PlanarReflection":{
+
+    },
+    "ScreenEffect":{
+
+    },
+    "ShaderParams":{
+
     },
     "Enlighten": {
         "Realm": "0",
         "Enable": "false"
     },
     "Fog": {
-    	"Enable":"true",
-       	"FogDistanceMultiplier":"1.0",
-       	"FogGradientEnable":"true",
-       	"Start":"-100.0",
-       	"EndValue":"500.0",
-       	"Curve":"(0.40000000596046, -0.76999998092651, 1.2999999523163, -0.0099999997764826)",
-       	"FogColorEnable":"true",
-       	"FogColor":"(0.0020000000949949, 0.0020000000949949, 0.0020000000949949)",
-       	"FogColorStart":"0.0",
-       	"FogColorEnd":"1630.4348144531",
-       	"FogColorCurve":"(6.0999999046326, -11.699999809265, 5.6199998855591, -0.18000000715256)",
-       	"HeightFogEnable":"false",
-       	"HeightFogFollowCamera":"0.0",
-       	"HeightFogAltitude":"0.0",
-       	"HeightFogDepth":"100.0",
-       	"HeightFogVisibilityRange":"100.0"
+
     },
     "OutdoorLight": {
         "Realm": "0",
@@ -66,9 +43,8 @@ return json.decode([[
         "SunSpecularScale": "0",
         "SunRotationX": "90.0",
         "SunRotationY":"180.0",
-        "SkyLightAngleFactor":"0.0089999996125698",
+        "SkyLightAngleFactor":"0.0",
         "SunSpecularScale":"0.0",
-        "SkyEnvmapShadowScale":"0.25",
         "SunShadowHeightScale":"0.0"
     },
     "Sky": {
@@ -96,12 +72,7 @@ return json.decode([[
         "CloudLayer2AmbientLightIntensity": "1",
         "CloudLayer2Color": "1:1:1:",
         "CloudLayer2AlphaMul": "0.3",
-		"CloudLayer2Texture": "levels/testrange_lighting/sky/sky_07_starlayer_d",
-        "StaticEnvmapScale": "0",
-        "SkyVisibilityExponent": "1.0",
-        "SkyEnvmap8BitTexScale": "5",
-        "CustomEnvmapScale": "1",
-        "CustomEnvmapAmbient": "1"
+		"CloudLayer2Texture": "levels/testrange_lighting/sky/sky_07_starlayer_d"
     },
     "SunFlare": {
         "Enable":"false",
@@ -112,21 +83,13 @@ return json.decode([[
         "Element5Size": "0.0:0.0:"
     },
     "Tonemap": {
-        "Realm": "0",
-        "TonemapMethod": "2",
-        "MiddleGray": "0.25",
-        "MinExposure": "0.8",
-        "MaxExposure": "3.5",
-        "ExposureAdjustTime": "0.5",
-        "BloomScale": "0.05:0.05:0.05:",
-        "ChromostereopsisEnable": "false",
-        "ChromostereopsisScale": "1.0",
-        "ChromostereopsisOffset": "1.0"
+        "MiddleGray": "0.5",
+        "MinExposure": "0.0",
+        "MaxExposure": "1",
+        "ExposureAdjustTime": "0.5"
     },
     "Wind": {
-        "Realm": "0",
-        "WindDirection": "211.25799560547",
-        "WindStrength": "1.7"
+
     },
     "Name": "DefaultNight",
     "Type": "DefaultDynamic",
